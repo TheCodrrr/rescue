@@ -46,18 +46,19 @@ const complaintSchema = new mongoose.Schema({
     },
     voted_users: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'user',
+        vote: { type: String, enum: ["upvote", "downvote"] }
     }],
     priority: {
         type: Number,
         min: 0,
-        max: 10
+        max: 10,
+        default: 5
     },
-    escalation_level: {
-        type: Number,
-        default: 1
+    escalation_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "escalation",
     },
-    last_escalation_date: Date,
     officer_notes: String,
     assigned_officer_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -66,7 +67,13 @@ const complaintSchema = new mongoose.Schema({
     },
     feedback_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'feedback'
+        ref: 'feedback',
+        default: null
+    },
+    assignedDepartment: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "department",
+        default: null,
     }
 }, { timestamps: true });
 

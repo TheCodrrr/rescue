@@ -1,10 +1,6 @@
 import mongoose, { Schema } from "mongoose"
 
-const escalationSchema = new Schema({
-    complaint_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "complaint",
-    },
+const escalationEventSchema = new Schema({
     from_level: {
         type: Number,
         default: 1,
@@ -27,6 +23,16 @@ const escalationSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
     }
+})
+
+const escalationSchema = new Schema({
+    complaint: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "complaint",
+        required: true,
+        unique: true,
+    },
+    history: [escalationEventSchema],
 })
 
 export const Escalation = mongoose.model("escalation", escalationSchema);
