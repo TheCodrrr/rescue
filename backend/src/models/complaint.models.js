@@ -53,7 +53,7 @@ const complaintSchema = new mongoose.Schema({
         type: Number,
         min: 0,
         max: 10,
-        default: 5
+        default: 0,
     },
     escalation_id: {
         type: mongoose.Schema.Types.ObjectId,

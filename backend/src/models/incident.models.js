@@ -1,18 +1,24 @@
 import mongoose, { Schema } from "mongoose"
 
 const incidentSchema = new Schema({
-    reporter_id: {
+    reportedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
+        ref: "user",
+        required: true,
     },
     assigned_officer_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user"
     },
-    evidence_ids: [{
+    evidence: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "evidence",
     }],
+    description: {
+        type: String,
+        trim: true,
+        required: true,
+    },
     latitude: Number,
     longitude: Number,
     address: {
@@ -31,6 +37,13 @@ const incidentSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    verifiedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        required: function() {
+            return this.verified;
+        }
+    },
     upvote: {
         type: Number,
         default: 0,
@@ -41,9 +54,19 @@ const incidentSchema = new Schema({
         default: 0,
         min: 0,
     },
-    category_id: {
+    votedUsers: [{
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+        vote: { type: String, enum: ["upvote", "downvote"] }
+    }],
+    status: {
+        type: String,
+        enum: ["pending", "in_progress", "resolved", "rejected"],
+        default: "pending"
+    },
+    category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "category",
+        required: true,
     },
     priority: {
         type: Number,
