@@ -1,6 +1,6 @@
-import { Guidance } from "../models/guidance.models";
-import { asyncHandler } from "../../utils/asyncHandler";
-import { ApiError } from "../../utils/ApiError";
+import { Guidance } from "../models/guidance.models.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
 
 const addGuidance = asyncHandler(async (req, res) => {
     const { source_link_url, category_id } = req.body;

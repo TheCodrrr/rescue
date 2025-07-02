@@ -1,6 +1,6 @@
-import { Evidence } from "../models/evidence.models";
-import { asyncHandler } from "../../utils/asyncHandler";
-import { ApiError } from "../../utils/ApiError";
+import { Evidence } from "../models/evidence.models.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
 
 const submitEvidence = asyncHandler(async (req, res) => {
     const { category_id, evidence_type, evidence_url } = req.body;

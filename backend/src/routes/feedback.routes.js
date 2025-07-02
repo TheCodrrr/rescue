@@ -5,6 +5,10 @@ import {
   updateFeedback,
   deleteFeedback,
 } from "../controllers/feedback.controllers.js";
+import { Router } from "express";
+import { verifyJWT } from "../middlewares/auth.middlewares.js";
+
+const router = Router();
 
 router.post("/", verifyJWT, createFeedback);
 router.route("/:feedbackId")
@@ -12,3 +16,5 @@ router.route("/:feedbackId")
     .patch(verifyJWT, updateFeedback)
     .delete(verifyJWT, deleteFeedback);
 router.get("/complaint/:complaintId", getFeedbackByComplaint);
+
+export default router;

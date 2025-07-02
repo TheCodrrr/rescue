@@ -1,5 +1,8 @@
-import { createDepartment, getAllDepartments, getDepartmentById, updateDepartment, deleteDepartment, getDepartmentsByCategory } from "../controllers/department.controllers";
-import { verifyJWT } from "../middlewares/auth.middlewares";
+import { createDepartment, getAllDepartments, getDepartmentById, updateDepartment, deleteDepartment, getDepartmentsByCategory } from "../controllers/department.controllers.js";
+import { verifyJWT } from "../middlewares/auth.middlewares.js";
+import { Router } from "express";
+
+const router = Router();
 
 router.route("/")
     .post(verifyJWT, createDepartment)
@@ -12,3 +15,6 @@ router.route("/:departmentId")
 
 router.route("/category/:categoryId")
     .get(getDepartmentsByCategory);
+
+
+export default router;

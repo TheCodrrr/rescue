@@ -1,6 +1,6 @@
-import { asyncHandler } from "../../utils/asyncHandler";
-import { ApiError } from "../../utils/ApiError";
-import { Complaint } from "../models/complaint.model.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { Complaint } from "../models/complaint.models.js";
 import { Category } from "../models/category.models.js";
 import { Department } from "../models/department.models.js";
 

@@ -1,6 +1,6 @@
-import { Incident } from "../models/incident.models";
-import { ApiError } from "../../utils/ApiError";
-import { asyncHandler } from "../../utils/asyncHandler";
+import { Incident } from "../models/incident.models.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 import mongoose from "mongoose";
 
 const reportIncident = asyncHandler(async (req, res) => {

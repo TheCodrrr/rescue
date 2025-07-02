@@ -1,6 +1,6 @@
 import express from "express";
 import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, updateComplaintStatus, upvoteComplaint } from "../controllers/complaint.controllers.js";
-import { verifyJWT } from "../middlewares/auth.middlewares";
+import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
 const router = express.Router();
 

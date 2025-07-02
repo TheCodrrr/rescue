@@ -1,4 +1,4 @@
-import { submitEvidence, getAllEvidence, getEvidenceByCategory, getEvidenceByUser, deleteEvidence } from "../controllers/evidence.controllers";
+import { submitEvidence, getAllEvidence, getEvidenceByCategory, getEvidenceByUser, deleteEvidence } from "../controllers/evidence.controllers.js";
 
 router.route("/")
     .post(verifyJWT, submitEvidence)
@@ -7,3 +7,5 @@ router.route("/")
 router.get("/category/:categoryId", getEvidenceByCategory);
 router.get("/user/:userId", getEvidenceByUser);
 router.delete("/:evidenceId", verifyJWT, deleteEvidence);
+
+export default router;
