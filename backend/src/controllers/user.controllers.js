@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -15,7 +16,9 @@ const generateAccessAndRefreshToken = async (userId) => {
         }
     
         const accessToken = user.generateAccessToken();
+        // console.log("Access Token generated: ", accessToken);
         const refreshToken = user.generateRefreshToken();
+        // console.log("Refresh Token generated: ", refreshToken);
     
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
@@ -39,7 +42,7 @@ const registerUser = asyncHandler( async(req, res) => {
     const existedUser = await User.findOne({ email });
 
     if (existedUser) {
-        throw new ApiError(409, "User with username or email already exists")
+        throw new ApiError(409, "User with this email already exists!")
     }
     
     // console.log("FILES RECEIVED BY MULTER: ", req.files);
@@ -56,12 +59,17 @@ const registerUser = asyncHandler( async(req, res) => {
     
 
     try {
+        // console.log("This are the user details: ");
+        // console.log(name, email, password, profileImage);
+
         const user = await User.create({
             name,
             profileImage: profileImage?.url || "../public/temp/profile.png",
             email,
             password
         })
+        // console.log("This is the user created: ");
+        // console.log(user);
 
         const createdUser = await User.findById(user._id)
                                     .select("-password -refreshToken")
@@ -79,13 +87,13 @@ const registerUser = asyncHandler( async(req, res) => {
 
         if (profileImage) await deleteFromCloudinary(profileImage.public_id);
 
-        throw new ApiError(500, "Something went wrong while registering a user and the iamges were deleted.")
+        throw new ApiError(500, "Something went wrong while registering a user and the images were deleted.")
     }
 
 } )
 
 const loginUser = asyncHandler( async (req, res) => {
-    const {email, name, password} = req.body;
+    const {email, password} = req.body;
 
     if (!email) throw new ApiError(400, "Email is required");
 
@@ -239,119 +247,6 @@ const updateUserProfileImage = asyncHandler( async (req, res) => {
 
     res.status(200).json( new ApiResponse(200, user, "Avatar updated successfully"))
 })
-
-// const getUserChannelProfile = asyncHandler( async (req, res) => {
-//     const {username} = req.params;
-
-//     if (!username?.trim()) throw new ApiError(400, "Username is required");
-
-//     const channel = await User.aggregate([
-//         {
-//             $match: {
-//                 username: username?.toLowerCase(),
-//             },
-//         },
-//         {
-//             $lookup: {
-//                 from: "subscriptions",
-//                 localField: "_id",
-//                 foreignField: "channel",
-//                 as: "subscribers"
-//             },
-//         },
-//         {
-//             $lookup: {
-//                 from: "tweets",
-//                 localField: "_id",
-//                 foreignField: "subscriber",
-//                 as: "subscribedTo"
-//             }
-//         },
-//         {
-//             $addFields: {
-//                 subscribersCount: {
-//                     $size: "$subscribers"
-//                 },
-//                 channelsSubscribedToCount: {
-//                     $size: "$subscribedTo"
-//                 },
-//                 isSubscribed: {
-//                     $cond: {
-//                         if: {$in: [req.user?._id, "$subscribers.subscriber"]},
-//                         then: true,
-//                         else: false,
-//                     }
-//                 }
-//             }
-//         },
-//         {
-//             // Project only necessary data
-//             $project: {
-//                 fullName: 1,
-//                 username: 1,
-//                 avatar: 1,
-//                 subscribersCount: 1,
-//                 channelsSubscribedToCount: 1,
-//                 isSubscribed: 1,
-//                 coverImage: 1,
-//                 email: 1,
-//             }
-//         }
-//     ])
-
-//     if (!channel?.length) throw new ApiError(404, "Channel not found");
-
-//     return res.status(200).json( new ApiResponse(
-//         200,
-//         channel[0],
-//         "Channel profile fetched successfully"
-//     ))
-// })
-// const getWatchHistory = asyncHandler( async (req, res) => {
-//     const user = await User.aggregate([
-//         {
-//             $match: {
-//                 _id: new mongoose.Types.ObjectId(req.user?._id),
-//             }
-//         },
-//         {
-//             $lookup: {
-//                 from: "videos",
-//                 localField: "watchHistory",
-//                 foreignField: "_id",
-//                 as: "watchHistory",
-//                 pipeline: [
-//                     {
-//                         $lookup: {
-//                             from: "users",
-//                             localField: "owner",
-//                             foreignField: "_id",
-//                             as: "owner",
-//                             pipeline: [
-//                                 {
-//                                     $project: {
-//                                         fullname: 1,
-//                                         username: 1,
-//                                         avatar: 1,
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     },
-//                     {
-//                         $addFields: {
-//                             owner: {
-//                                 $first: "$owner"
-//                             }
-//                         }
-//                     }
-//                 ]
-//             }
-//         }
-//     ])
-
-//     return res.status(200).json( new ApiResponse(200, user[0]?.watchHistory, "Watch history fetched successfully"))
-// })
 
 export {
     registerUser,
