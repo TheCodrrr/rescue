@@ -15,9 +15,10 @@ const complaintSchema = new mongoose.Schema({
         enum: ['pending', 'in_progress', 'resolved', 'rejected'],
         default: 'pending'
     },
-    category_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'category'
+    category: {
+        type: String,
+        enum: ['rail', 'fire', 'cyber', 'police', 'court'],
+        required: true,
     },
     latitude: Number,
     longitude: Number,
@@ -44,7 +45,7 @@ const complaintSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    voted_users: [{
+    votedUsers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         vote: { type: String, enum: ["upvote", "downvote"] }

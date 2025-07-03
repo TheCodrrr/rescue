@@ -30,16 +30,22 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler( async(req, res) => {
-    const {email, name, password} = req.body;
+    // These are the 4 mandatory fields to create a new user
+    const {email, name, password, phone} = req.body;
 
     // validation
     if (
-        [name, email, password].some((field) => field?.trim() === "")
+        [name, email, password, phone].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required")
     }
 
-    const existedUser = await User.findOne({ email });
+    const existedUser = await User.findOne({
+        $or: [
+            { email },
+            { phone: phone || null },
+        ],
+    });
 
     if (existedUser) {
         throw new ApiError(409, "User with this email already exists!")
@@ -66,7 +72,8 @@ const registerUser = asyncHandler( async(req, res) => {
             name,
             profileImage: profileImage?.url || "../public/temp/profile.png",
             email,
-            password
+            password,
+            phone,
         })
         // console.log("This is the user created: ");
         // console.log(user);
@@ -84,6 +91,7 @@ const registerUser = asyncHandler( async(req, res) => {
                 .json( new ApiResponse(200, createdUser, "User registered successfully") )
     } catch (error) {
         console.log("User creation failed.")
+        console.error(error);
 
         if (profileImage) await deleteFromCloudinary(profileImage.public_id);
 

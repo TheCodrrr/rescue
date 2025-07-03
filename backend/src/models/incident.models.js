@@ -64,8 +64,8 @@ const incidentSchema = new Schema({
         default: "pending"
     },
     category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "category",
+        type: String,
+        enum: ["rail", "fire", "cyber", "police", "court"],
         required: true,
     },
     priority: {

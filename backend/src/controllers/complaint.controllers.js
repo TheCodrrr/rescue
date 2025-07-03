@@ -1,33 +1,30 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
-import { Category } from "../models/category.models.js";
-import { Department } from "../models/department.models.js";
+import mongoose from "mongoose";
+// import { Department } from "../models/department.models.js";
 
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const { title, description, categoryId, location, address, evidenceIds = [] } = req.body;
+  const { title, description, category, location, address, evidenceIds = [] } = req.body;
 
-  if (!title || !description || !categoryId || !location || !address) {
-    throw new ApiError(400, "All required fields (title, description, categoryId, location, address) must be provided");
+  if (!title || !description || !category || !location || !address) {
+    throw new ApiError(400, "All required fields (title, description, category, location, address) must be provided");
   }
 
-  const category = await Category.findById(categoryId);
-
   if (!category) {
-    throw new ApiError(400, "Invalid categoryId: category does not exist");
+    throw new ApiError(400, "Invalid category: category does not exist");
   }
 
   const complaint = await Complaint.create({
     title,
     description,
-    category: categoryId,
+    category,
     latitude: location.latitude,
     longitude: location.longitude,
-    evidence: evidenceIds,
     address,
-    evidence_ids: evidenceIds,
+    evidence_ids: evidenceIds || [],
     user_id: userId
   })
 
@@ -47,9 +44,8 @@ const getComplaintById = asyncHandler(async (req, res) => {
 
     const complaint = await Complaint.findById(complaintId)
         .populate("user_id", "name email")
-        .populate("category_id", "name category_count")
         .populate("evidence_ids")
-        .populate("voted_users", "name email profile_image")
+        .populate("votedUsers", "name email profile_image")
         .populate("assigned_officer_id", "name email profile_image")
         .populate("feedback_id", "complaint_id rating comment createdAt updatedAt");
 
@@ -70,14 +66,20 @@ const getComplaintById = asyncHandler(async (req, res) => {
 const getComplaintByUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
+    console.log(req.user);
+
     const complaints = await Complaint.find({ user_id: userId })
         .sort({ createdAt: -1 })
         .populate("user_id", "name email")
-        .populate("category_id", "name category_count")
         .populate("evidence_ids")
-        .populate("voted_users", "name email profile_image")
+        .populate("votedUsers", "name email profile_image")
         .populate("assigned_officer_id", "name email profile_image")
         .populate("feedback_id", "complaint_id rating comment createdAt updatedAt");
+
+    console.log("User ID:", userId);
+    if (!complaints || complaints.length === 0) {
+        throw new ApiError(404, "No complaints found for this user");
+    }
 
     res.status(200).json({
         success: true,
@@ -191,7 +193,7 @@ const upvoteComplaint = asyncHandler(async (req, res) => {
     }
     else {
         complaint.upvote += 1;
-        complaint.voted_users.push({ user: userId, vote: "upvote" });
+        complaint.votedUsers.push({ user: userId, vote: "upvote" });
     }
 
     await complaint.save();
@@ -225,13 +227,13 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You have already downvoted this complaint.");
         } else if (existingVote.vote === "upvote") {
         // Remove upvote & add downvote
-        complaint.upvotes -= 1;
+        complaint.upvote -= 1;
         existingVote.vote = "downvote";
-        complaint.downvotes += 1;
+        complaint.downvote += 1;
         }
     } else {
         // First time voting: add downvote
-        complaint.downvotes += 1;
+        complaint.downvote += 1;
         complaint.votedUsers.push({ user: userId, vote: "downvote" });
     }
 
