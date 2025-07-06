@@ -16,6 +16,8 @@ const reportIncident = asyncHandler(async (req, res) => {
         priority,
     } = req.body;
 
+    console.log(description, category, latitude, longitude, address, evidence, priority);
+
     if (!description || !category) {
         throw new ApiError(400, "All required fields must be provided");
     }

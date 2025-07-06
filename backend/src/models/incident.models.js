@@ -28,6 +28,7 @@ const incidentSchema = new Schema({
     status: {
         type: String,
         enum: ["pending", "in_progress", "resolved", "rejected"],
+        default: 'pending'
     },
     incident_timestamp: {
         type: Date,
