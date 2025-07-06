@@ -46,9 +46,14 @@ const complaintSchema = new mongoose.Schema({
         default: 0
     },
     votedUsers: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        vote: { type: String, enum: ["upvote", "downvote"] }
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+        },
+        vote: {
+            type: String,
+            enum: ["upvote", "downvote"],
+        }
     }],
     priority: {
         type: Number,

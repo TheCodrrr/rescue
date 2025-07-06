@@ -8,7 +8,10 @@ router.route("/create").post(verifyJWT, createComplaint);
 router.route("/my-complaints/").get(verifyJWT, getComplaintByUser);
 router.route("/:complaintId").get(verifyJWT, getComplaintById);
 router.route("/:complaintId/status").patch(verifyJWT, updateComplaintStatus);
+
+// To be completed after department routes are implemented
 router.route("/:complaintId/assign").patch(verifyJWT, assignComplaintToDepartment);
+
 router.route("/:complaintId").delete(verifyJWT, deleteComplaint);
 router.route("/:complaintId/upvote").patch(verifyJWT, upvoteComplaint);
 router.route("/:complaintId/downvote").patch(verifyJWT, downvoteComplaint);
