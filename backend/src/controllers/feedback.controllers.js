@@ -2,6 +2,7 @@ import { Feedback } from "../models/feedback.models.js";
 import { Complaint } from "../models/complaint.models.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
+import mongoose from "mongoose";
 
 const createFeedback = asyncHandler(async (req, res) => {
   const { complaint_id, rating, comment } = req.body;
