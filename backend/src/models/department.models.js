@@ -1,9 +1,10 @@
 import mongoose, { Schema } from "mongoose"
 
 const departmentSchema = new Schema({
-    category_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "category"
+    category: {
+        type: String,
+        enum: ['rail', 'fire', 'cyber', 'police', 'court'],
+        required: true,
     },
     name: {
         type: String,
