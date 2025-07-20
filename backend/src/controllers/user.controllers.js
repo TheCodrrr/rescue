@@ -48,7 +48,7 @@ const registerUser = asyncHandler( async(req, res) => {
     });
 
     if (existedUser) {
-        throw new ApiError(409, "User with this email already exists!")
+        throw new ApiError(409, "User with this email or phone already exists!")
     }
     
     // console.log("FILES RECEIVED BY MULTER: ", req.files);

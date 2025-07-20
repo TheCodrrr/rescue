@@ -13,6 +13,8 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
 
         const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
 
+        // console.log("User found:", user.role);
+
         if (!user) throw new ApiError(401, "Unauthorized");
 
         req.user = user;

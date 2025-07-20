@@ -5,7 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 
 const createEscalationHistory = asyncHandler(async (req, res) => {
   const { complaintId } = req.params;
-
+  // console.log("Creating escalation history for complaint:", complaintId);
   
   const complaint = await Complaint.findById(complaintId);
   if (!complaint) {
@@ -24,7 +24,7 @@ const createEscalationHistory = asyncHandler(async (req, res) => {
     history: [],
   });
 
-  
+
   complaint.escalation_id = escalation._id;
   await complaint.save();
 
@@ -36,6 +36,7 @@ const createEscalationHistory = asyncHandler(async (req, res) => {
 });
 
 const addEscalationEvent = asyncHandler(async (req, res) => {
+  console.log("Adding escalation event for complaint:", req.user);
     const { complaintId } = req.params;
     const { from_level, to_level, reason } = req.body;
     const escalated_by = req.user._id;
@@ -43,7 +44,7 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
     const fromLevelValue = from_level ?? complaint.level;
     const toLevelValue = to_level ?? fromLevelValue + 1;
 
-    if (!req.user.isAdmin && !req.user.isOfficer) {
+    if (!["admin", "officer"].includes(req.user.role)) {
       throw new ApiError(403, "You do not have permission to escalate this complaint.");
     }
     
