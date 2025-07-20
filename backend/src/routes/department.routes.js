@@ -13,7 +13,7 @@ router.route("/:departmentId")
     .patch(verifyJWT, updateDepartment)
     .delete(verifyJWT, deleteDepartment);
 
-router.route("/category/:categoryId")
+router.route("/category/:category")
     .get(getDepartmentsByCategory);
 
 

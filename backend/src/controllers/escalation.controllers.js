@@ -12,7 +12,7 @@ const createEscalationHistory = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Complaint not found.");
   }
 
-  
+    
   const existingEscalation = await Escalation.findOne({ complaint: complaintId });
   if (existingEscalation) {
     throw new ApiError(400, "Escalation history already exists for this complaint.");

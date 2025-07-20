@@ -1,16 +1,23 @@
 import { Department } from "../models/department.models.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
+import mongoose from "mongoose";
+
+const allowedCategories = ['fire', 'police', 'rail', 'cyber', 'court'];
 
 const createDepartment = asyncHandler(async (req, res) => {
-    const { category_id, name, contact_email, contact_phone, jurisdiction_area } = req.body;
+    const { category, name, contact_email, contact_phone, jurisdiction_area } = req.body;
 
-    if (!category_id || !name || !contact_email) {
+    if (!allowedCategories.includes(category)) {
+        throw new ApiError(400, "Invalid category value");
+    }
+    
+    if (!category || !name || !contact_email) {
         throw new ApiError(400, "All required fields must be provided");
     }
 
     const newDept = await Department.create({
-        category_id,
+        category,
         name,
         contact_email,
         contact_phone,
@@ -26,7 +33,7 @@ const createDepartment = asyncHandler(async (req, res) => {
 
 const getAllDepartments = asyncHandler(async (req, res) => {
     const departments = await Department.find()
-        .populate("category_id", "name")
+        .populate("name")
         .sort({ name: 1 });
 
     if (!departments || departments.length === 0) {
@@ -47,7 +54,7 @@ const getDepartmentById = asyncHandler(async (req, res) => {
     }
 
     const department = await Department.findById(departmentId)
-        .populate("category_id", "name");
+        .populate("name");
 
     if (!department) {
         throw new ApiError(404, "Department not found");
@@ -101,13 +108,13 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 })
 
 const getDepartmentsByCategory = asyncHandler(async (req, res) => {
-    const { categoryId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        throw new ApiError(400, "Invalid category ID format");
+    const { category } = req.params;
+    if (!allowedCategories.includes(category)) {
+        throw new ApiError(400, "Invalid category value");
     }
 
-    const departments = await Department.find({ category_id: categoryId })
-        .populate("category_id", "name")
+    const departments = await Department.find({ category })
+        .populate("name")
         .sort({ name: 1 });
 
     if (!departments || departments.length === 0) {

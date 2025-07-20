@@ -6,9 +6,9 @@ const evidenceSchema = new Schema({
         ref: "user",
         required: true,
     },
-    category_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "category",
+    category: {
+        type: String,
+        enum: ['rail', 'fire', 'cyber', 'police', 'court'],
         required: true,
     },
     evidence_type: {
