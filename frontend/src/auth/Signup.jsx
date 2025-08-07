@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X } from "lucide-react";
-import axiosInstance from "../api/axios";
+import axiosInstance from "../api/axios.js";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Signup() {
@@ -11,6 +11,10 @@ export default function Signup() {
         phone: "",
         profileImage: null
     });
+    const [sendData, setSendData] = useState({
+        email: "",
+        password: "",
+    })
     
     const [showPassword, setShowPassword] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
@@ -25,7 +29,7 @@ export default function Signup() {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
+        const file = e?.target?.files[0] || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png';
         if (file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
@@ -110,12 +114,59 @@ export default function Signup() {
                 formDataToSend.append('profileImage', formData.profileImage);
             }
 
-            const response = await axiosInstance.post('/auth/signup', formDataToSend, {
+            const response = await axiosInstance.post('/users/register', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
+            console.log("Signup response = ", response);
+
+            try {
+                // const formData = 
+                const res = await axiosInstance.post('/users/login', formData);
+                if (res.status === 200) {
+                    if (res.data.data && res.data.data.accessToken) {
+                        document.cookie = `token=${res.data.data.accessToken}; path=/; max-age=3600`; // Set token in cookie
+                    }
+                    // console.log("Login response = ", res);
+                    dispatch(loginSuccess({
+                        user: res.data.data.user,
+                        token: res.data.data.accessToken
+                    }));
+
+                    toast.success('Login successful!');
+                    navigate("/");
+                    // Reset form
+                    setFormData({
+                        email: "",
+                        password: ""
+                    });
+                }
+                else {
+                    toast.error('Login failed. Please try again.');
+                    return;
+                }
+
+
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                if (error.response?.data?.message) {
+                    toast.error(error.response.data.message);
+                } else if (error.response?.status === 401) {
+                    toast.error('Invalid email or password.');
+                } else if (error.response?.status === 404) {
+                    toast.error('User not found. Please check your email.');
+                } else {
+                    toast.error('Something went wrong. Please try again.');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+
+            console.log(JSON.stringify(response));
             toast.success('Account created successfully!');
             console.log('Signup successful:', response.data);
             

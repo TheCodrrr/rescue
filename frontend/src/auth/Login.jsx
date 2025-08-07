@@ -2,8 +2,14 @@ import React, { useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, LogIn } from "lucide-react";
 import axiosInstance from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "./redux/authSlice";
+
 
 export default function Login() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         email: "",
         password: ""
@@ -39,16 +45,31 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            const response = await axiosInstance.post('/auth/login', formData);
+            const res = await axiosInstance.post('/users/login', formData);
+            if (res.status === 200) {
+                if (res.data.data && res.data.data.accessToken) {
+                    document.cookie = `token=${res.data.data.accessToken}; path=/; max-age=3600`; // Set token in cookie
+                }
+                // console.log("Login response = ", res);
+                dispatch(loginSuccess({
+                    user: res.data.data.user,
+                    token: res.data.data.accessToken
+                }));
 
-            toast.success('Login successful!');
-            console.log('Login successful:', response.data);
-            
-            // Reset form
-            setFormData({
-                email: "",
-                password: ""
-            });
+                toast.success('Login successful!');
+                navigate("/");
+                // Reset form
+                setFormData({
+                    email: "",
+                    password: ""
+                });
+            }
+            else {
+                toast.error('Login failed. Please try again.');
+                return;
+            }
+
+
             
         } catch (error) {
             console.error('Login error:', error);
