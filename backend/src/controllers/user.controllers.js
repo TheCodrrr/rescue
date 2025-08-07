@@ -219,21 +219,43 @@ const getCurrentUser = asyncHandler( async (req, res) => {
     return res.status(200).json( new ApiResponse(200, req.user, "Current user details"))
 })
 const updateAccountDetails = asyncHandler( async (req, res) => {
-    const {name, email} = req.body;
-    if (!name || !email) throw new ApiError(400, "Fullname and email are required.");
+    const {name, email, phone, latitude, longitude, address} = req.body;
+    if (!name || !email || !phone) throw new ApiError(400, "Fullname and email are required.");
 
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                name,
-                email: email
-            }
-        },
-        {new: true}
-    ).select("-password -refreshToken");
+    const user = await User.findById(req.user?._id);
 
-    return res.status(200).json( new ApiResponse(200, user, "Account details updated successfully"))
+    if (!user) throw new ApiError(404, "User not found.");
+
+    user.name = name;
+
+    if (email !== user.email) {
+        user.email = email;
+        user.isEmailVerified = false; // Reset verification status if email is changed
+    }
+
+    if (phone !== user.phone) {
+        user.phone = phone;
+        user.isPhoneVerified = false;
+    }
+
+    if (latitude !== undefined) {
+        user.latitude = latitude;
+    }
+    if (longitude !== undefined) {
+        user.longitude = longitude;
+    }
+
+    if (address !== undefined) {
+        user.address = address;
+    }
+
+    await user.save();
+
+    const updatedUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    );
+
+    return res.status(200).json( new ApiResponse(200, updatedUser, "Account details updated successfully"))
 })
 const updateUserProfileImage = asyncHandler( async (req, res) => {
     const profileLocalPath = req.file?.path;

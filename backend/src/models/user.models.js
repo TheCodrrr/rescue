@@ -17,6 +17,14 @@ const userSchema = new Schema(
             lowercase: true,
             trim: true
         },
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        isPhoneVerified: {
+            type: Boolean,
+            default: false,
+        },
         phone: {
             type: String,
             unique: true,
