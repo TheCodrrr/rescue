@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { loginSuccess } from "./redux/authSlice";
 import axiosInstance from "../api/axios.js";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -14,11 +17,14 @@ export default function Signup() {
     const [sendData, setSendData] = useState({
         email: "",
         password: "",
-    })
+    });
     
     const [showPassword, setShowPassword] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -121,64 +127,68 @@ export default function Signup() {
             });
 
             console.log("Signup response = ", response);
-
-            try {
-                // const formData = 
-                const res = await axiosInstance.post('/users/login', formData);
-                if (res.status === 200) {
-                    if (res.data.data && res.data.data.accessToken) {
-                        document.cookie = `token=${res.data.data.accessToken}; path=/; max-age=3600`; // Set token in cookie
-                    }
-                    // console.log("Login response = ", res);
-                    dispatch(loginSuccess({
-                        user: res.data.data.user,
-                        token: res.data.data.accessToken
-                    }));
-
-                    toast.success('Login successful!');
-                    navigate("/");
-                    // Reset form
-                    setFormData({
-                        email: "",
-                        password: ""
-                    });
-                }
-                else {
-                    toast.error('Login failed. Please try again.');
-                    return;
-                }
-
-
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                
-                if (error.response?.data?.message) {
-                    toast.error(error.response.data.message);
-                } else if (error.response?.status === 401) {
-                    toast.error('Invalid email or password.');
-                } else if (error.response?.status === 404) {
-                    toast.error('User not found. Please check your email.');
-                } else {
-                    toast.error('Something went wrong. Please try again.');
-                }
-            } finally {
-                setIsLoading(false);
-            }
-
-            console.log(JSON.stringify(response));
             toast.success('Account created successfully!');
             console.log('Signup successful:', response.data);
-            
-            // Reset form
-            setFormData({
-                name: "",
-                email: "",
-                password: "",
-                phone: "",
-                profileImage: null
-            });
-            setImagePreview(null);
+
+            // After successful signup, try to log the user in automatically
+            try {
+                const loginData = {
+                    email: formData.email,
+                    password: formData.password
+                };
+                
+                const loginResponse = await axiosInstance.post('/users/login', loginData);
+                
+                if (loginResponse.status === 200) {
+                    if (loginResponse.data.data && loginResponse.data.data.accessToken) {
+                        // Store token in localStorage
+                        localStorage.setItem('token', loginResponse.data.data.accessToken);
+                        localStorage.setItem('isLoggedIn', 'true');
+                        
+                        // Update Redux state
+                        dispatch(loginSuccess({
+                            user: loginResponse.data.data.user,
+                            token: loginResponse.data.data.accessToken
+                        }));
+
+                        toast.success('Login successful! Redirecting...');
+                        
+                        // Reset form
+                        setFormData({
+                            name: "",
+                            email: "",
+                            password: "",
+                            phone: "",
+                            profileImage: null
+                        });
+                        setImagePreview(null);
+                        
+                        // Navigate to home after a brief delay
+                        setTimeout(() => {
+                            navigate("/");
+                        }, 1500);
+                    } else {
+                        // Registration successful but auto-login failed
+                        toast.success('Account created! Please login to continue.');
+                        setTimeout(() => {
+                            navigate("/login");
+                        }, 2000);
+                    }
+                } else {
+                    // Registration successful but auto-login failed
+                    toast.success('Account created! Please login to continue.');
+                    setTimeout(() => {
+                        navigate("/login");
+                    }, 2000);
+                }
+            } catch (loginError) {
+                console.error('Auto-login after signup failed:', loginError);
+                // Don't show error, just redirect to login
+                toast.success('Account created! Please login to continue.');
+                setTimeout(() => {
+                    navigate("/login");
+                }, 2000);
+            }
             
         } catch (error) {
             console.error('Signup error:', error);
