@@ -4,6 +4,9 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import path from "path";
+import fs from "fs";
+import sharp from "sharp";
 // import bcrypt from "bcryptjs";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -61,8 +64,36 @@ const registerUser = asyncHandler( async(req, res) => {
         throw new ApiError(400, "Avatar image is mandatory!")
     }
 
-    const profileImage = await uploadOnCloudinary(profileLocalPath);
-    
+    const optimizedPath = path.join("public", "temp", `${Date.now()}-optimized.webp`);
+
+    await sharp(profileLocalPath)
+        .resize(300, 300, {
+            fit: "cover",
+            position: "center",
+        })
+        .webp({ quality: 80 })
+        .toFile(optimizedPath);
+
+    try {
+        await fs.promises.unlink(profileLocalPath); // Delete the original file
+    } catch (error) {
+        console.error("Error deleting original profile image:", error);
+    }
+
+    const profileImage = await uploadOnCloudinary(optimizedPath);
+
+    try {
+        await fs.promises.unlink(optimizedPath); // Delete the optimized file
+    } catch (error) {
+        console.error("Error deleting optimized profile image:", error);
+    }
+
+    let imageUrl = profileImage?.secure_url || profileImage?.url || "../public/temp/profile.png";
+
+    imageUrl = imageUrl.replace(
+        '/upload/',
+        '/upload/f_auto,q_auto,w_300,h_300,c_fill/'
+    );
 
     try {
         // console.log("This are the user details: ");
@@ -70,7 +101,7 @@ const registerUser = asyncHandler( async(req, res) => {
 
         const user = await User.create({
             name,
-            profileImage: profileImage?.url || "../public/temp/profile.png",
+            profileImage: imageUrl,
             email,
             password,
             phone,
@@ -95,6 +126,7 @@ const registerUser = asyncHandler( async(req, res) => {
 
         if (profileImage) await deleteFromCloudinary(profileImage.public_id);
 
+        console.log(error);
         throw new ApiError(500, "Something went wrong while registering a user and the images were deleted.")
     }
 
