@@ -158,6 +158,38 @@ export const uploadProfileImage = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to delete user account
+export const deleteUser = createAsyncThunk(
+  'auth/deleteUser',
+  async (_, thunkAPI) => {
+    try {
+      console.log("Making API call to delete user account...");
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      console.log("Token found, making request to delete user account");
+      const res = await axiosInstance.delete('/users/delete');
+      console.log("Delete user API response:", res.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error("Delete user API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to delete user account';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -238,6 +270,23 @@ const authSlice = createSlice({
       })
       .addCase(uploadProfileImage.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteUser.pending, (state) => {
+        // Don't set loading to true to avoid UI interference
+        state.error = null;
+      })
+      .addCase(deleteUser.fulfilled, (state) => {
+        // Clear all user data and logout
+        state.user = null;
+        state.isAuthenticated = false;
+        state.token = null;
+        state.error = null;
+        // Clear localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('isLoggedIn');
+      })
+      .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

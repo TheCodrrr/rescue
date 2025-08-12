@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loadUser, logout, updateUser, uploadProfileImage } from "./auth/redux/authSlice";
+import { loadUser, logout, updateUser, uploadProfileImage, deleteUser } from "./auth/redux/authSlice";
 import { 
     User, 
     Settings, 
@@ -20,7 +20,9 @@ import {
     Clock,
     Save,
     X,
-    Search
+    Search,
+    Trash2,
+    AlertTriangle
 } from "lucide-react";
 
 function UserProfile() {
@@ -37,9 +39,13 @@ function UserProfile() {
     const [locationLoading, setLocationLoading] = useState(false);
     const [geocodingLoading, setGeocodingLoading] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
+    const [profileUpdating, setProfileUpdating] = useState(false);
     const [updateError, setUpdateError] = useState('');
     const [updateSuccess, setUpdateSuccess] = useState('');
     const [imageRefreshKey, setImageRefreshKey] = useState(0); // Add this to force image refresh
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -290,6 +296,7 @@ function UserProfile() {
 
     const handleSaveProfile = async () => {
         try {
+            setProfileUpdating(true);
             setUpdateError('');
             setUpdateSuccess('');
             
@@ -324,6 +331,8 @@ function UserProfile() {
         } catch (error) {
             console.error('Update profile error:', error);
             setUpdateError(error || 'Failed to update profile. Please try again.');
+        } finally {
+            setProfileUpdating(false);
         }
     };
 
@@ -403,6 +412,40 @@ function UserProfile() {
             fileInput.click();
         }
     };
+
+    // Handle delete user account
+    const handleDeleteAccount = () => {
+        setShowDeleteModal(true);
+        setUpdateError('');
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            setIsDeleting(true);
+            setUpdateError('');
+            
+            await dispatch(deleteUser()).unwrap();
+            
+            // Success - show success modal first
+            setShowDeleteModal(false);
+            setShowSuccessModal(true);
+            
+            // After showing success, navigate away after a delay
+            setTimeout(() => {
+                navigate('/');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Delete account error:', error);
+            setUpdateError(error || 'Failed to delete account. Please try again.');
+            setIsDeleting(false);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
+        setUpdateError('');
+    };
     
     // Use real user data from Redux or fallback to defaults
     const userData = user ? {
@@ -441,8 +484,8 @@ function UserProfile() {
     console.log("Profile image URL being used:", userData.profileImage);
     console.log("Raw user profileImage:", user?.profileImage);
 
-    // Show loading state
-    if (loading) {
+    // Show loading state only if we don't have user data and are loading
+    if (loading && !user) {
         return (
             <div className="user-profile-container">
                 <div className="loading-container">
@@ -489,7 +532,7 @@ function UserProfile() {
                         <button 
                             className="avatar-edit-btn"
                             onClick={handleAvatarClick}
-                            disabled={loading || imageUploading}
+                            disabled={imageUploading}
                             title="Change profile picture"
                         >
                             {imageUploading ? (
@@ -517,7 +560,7 @@ function UserProfile() {
                             <button 
                                 className="edit-profile-btn" 
                                 onClick={handleEditProfile}
-                                disabled={loading}
+                                disabled={isEditing}
                             >
                                 <Edit3 className="edit-icon" />
                                 Edit Profile
@@ -549,15 +592,15 @@ function UserProfile() {
                             <button 
                                 className="save-btn" 
                                 onClick={handleSaveProfile}
-                                disabled={loading}
+                                disabled={profileUpdating}
                             >
                                 <Save className="w-4 h-4" />
-                                Save
+                                {profileUpdating ? 'Saving...' : 'Save'}
                             </button>
                             <button 
                                 className="cancel-btn" 
                                 onClick={handleCancelEdit}
-                                disabled={loading}
+                                disabled={profileUpdating}
                             >
                                 <X className="w-4 h-4" />
                                 Cancel
@@ -597,7 +640,7 @@ function UserProfile() {
                                         onChange={handleFormChange}
                                         className="contact-input"
                                         placeholder="Enter your full name"
-                                        disabled={loading}
+                                        disabled={false}
                                     />
                                 ) : (
                                     <p className="contact-value">{userData.name}</p>
@@ -617,7 +660,7 @@ function UserProfile() {
                                         onChange={handleFormChange}
                                         className="contact-input"
                                         placeholder="Enter your email"
-                                        disabled={loading}
+                                        disabled={false}
                                     />
                                 ) : (
                                     <p className="contact-value">{userData.email}</p>
@@ -637,7 +680,7 @@ function UserProfile() {
                                         onChange={handleFormChange}
                                         className="contact-input"
                                         placeholder="Enter your phone number"
-                                        disabled={loading}
+                                        disabled={false}
                                     />
                                 ) : (
                                     <p className="contact-value">{userData.phone}</p>
@@ -661,14 +704,14 @@ function UserProfile() {
                                                 onChange={handleFormChange}
                                                 className="contact-input"
                                                 placeholder="Enter your address (we'll find coordinates) or use location button"
-                                                disabled={loading}
+                                                disabled={false}
                                             />
                                             <div className="address-buttons">
                                                 <button
                                                     type="button"
                                                     onClick={handleGeocodeAddress}
                                                     className="geocode-btn"
-                                                    disabled={loading || geocodingLoading || !editForm.address || editForm.address.trim().length < 5}
+                                                    disabled={geocodingLoading || !editForm.address || editForm.address.trim().length < 5}
                                                     title="Find coordinates for this address"
                                                 >
                                                     {geocodingLoading ? (
@@ -681,7 +724,7 @@ function UserProfile() {
                                                     type="button"
                                                     onClick={getCurrentLocation}
                                                     className="location-btn"
-                                                    disabled={loading || locationLoading || geocodingLoading}
+                                                    disabled={locationLoading || geocodingLoading}
                                                     title="Get current location"
                                                 >
                                                     {locationLoading ? (
@@ -749,6 +792,130 @@ function UserProfile() {
                             <p className="clearance-level">{userData.clearanceLevel}</p>
                             <p className="clearance-description">Access to critical emergency systems</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="profile-card danger-zone" style={{'--delay': '0.7s'}}>
+                <div className="section-header">
+                    <AlertTriangle className="section-icon danger-icon" />
+                    <h2 className="section-title">Danger Zone</h2>
+                </div>
+                
+                <div className="danger-content">
+                    <div className="danger-warning">
+                        <Trash2 className="danger-warning-icon" />
+                        <div className="danger-text">
+                            <h3 className="danger-title">Delete Account</h3>
+                            <p className="danger-description">
+                                Permanently delete your account and all associated data. This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        className="delete-account-btn" 
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
+                    >
+                        <Trash2 className="delete-icon" />
+                        Delete My Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Delete Account Confirmation Modal
+    const DeleteConfirmationModal = () => (
+        <div className="modal-overlay" onClick={handleCancelDelete}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <div className="modal-icon-container danger">
+                        <AlertTriangle className="modal-icon" />
+                    </div>
+                    <h2 className="modal-title">Delete Account</h2>
+                    <p className="modal-subtitle">This action cannot be undone</p>
+                </div>
+                
+                <div className="modal-content">
+                    <div className="warning-box">
+                        <div className="warning-content">
+                            <Trash2 className="warning-icon" />
+                            <div>
+                                <p className="warning-title">Permanent Account Deletion</p>
+                                <p className="warning-text">
+                                    This will permanently delete your account and all associated data including:
+                                </p>
+                                <ul className="warning-list">
+                                    <li>• Personal information and profile data</li>
+                                    <li>• Account history and activity logs</li>
+                                    <li>• All saved preferences and settings</li>
+                                    <li>• Profile picture and uploaded files</li>
+                                </ul>
+                                <p className="warning-text" style={{marginTop: '16px', fontWeight: '600'}}>
+                                    Are you sure you want to proceed with deleting your account?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {updateError && (
+                        <div className="modal-error">
+                            <AlertTriangle className="error-icon" />
+                            <span>{updateError}</span>
+                        </div>
+                    )}
+                </div>
+                
+                <div className="modal-actions">
+                    <button
+                        onClick={handleCancelDelete}
+                        className="modal-btn cancel"
+                        disabled={isDeleting}
+                    >
+                        <X className="btn-icon" />
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleConfirmDelete}
+                        className="modal-btn delete enabled"
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? (
+                            <>
+                                <div className="btn-spinner"></div>
+                                Deleting...
+                            </>
+                        ) : (
+                            <>
+                                <Trash2 className="btn-icon" />
+                                Delete Account
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Success Modal for Account Deletion
+    const SuccessModal = () => (
+        <div className="modal-overlay">
+            <div className="modal-container success-modal">
+                <div className="modal-header">
+                    <div className="modal-icon-container success">
+                        <div className="success-icon">✓</div>
+                    </div>
+                    <h2 className="modal-title">Account Deleted Successfully</h2>
+                    <p className="modal-subtitle">Your account has been permanently deleted</p>
+                </div>
+                
+                <div className="modal-content">
+                    <div className="success-message">
+                        <p>Thank you for using our service. All your data has been securely removed from our systems.</p>
+                        <p className="redirect-message">Redirecting to home page...</p>
                     </div>
                 </div>
             </div>
@@ -879,6 +1046,12 @@ function UserProfile() {
                     {renderContent()}
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && <DeleteConfirmationModal />}
+            
+            {/* Success Modal */}
+            {showSuccessModal && <SuccessModal />}
         </div>
     );
 }
