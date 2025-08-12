@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loadUser, logout, updateUser } from "./auth/redux/authSlice";
+import { loadUser, logout, updateUser, uploadProfileImage } from "./auth/redux/authSlice";
 import { 
     User, 
     Settings, 
@@ -36,8 +36,10 @@ function UserProfile() {
     });
     const [locationLoading, setLocationLoading] = useState(false);
     const [geocodingLoading, setGeocodingLoading] = useState(false);
+    const [imageUploading, setImageUploading] = useState(false);
     const [updateError, setUpdateError] = useState('');
     const [updateSuccess, setUpdateSuccess] = useState('');
+    const [imageRefreshKey, setImageRefreshKey] = useState(0); // Add this to force image refresh
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -324,6 +326,83 @@ function UserProfile() {
             setUpdateError(error || 'Failed to update profile. Please try again.');
         }
     };
+
+    // Handle profile image upload
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        console.log("Selected file:", file);
+        console.log("File details:", {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        });
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            setUpdateError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            setUpdateError('Image file must be smaller than 5MB');
+            return;
+        }
+
+        try {
+            setImageUploading(true);
+            setUpdateError('');
+            
+            console.log("Current user before upload:", user);
+            console.log("Current profile image before upload:", user?.profileImage);
+            
+            const result = await dispatch(uploadProfileImage(file)).unwrap();
+            console.log("Upload result:", result);
+            console.log("New profile image URL:", result?.profileImage);
+            
+            // Force reload user data to ensure we get the latest profile image
+            setTimeout(async () => {
+                try {
+                    console.log("Reloading user data to get fresh profile image...");
+                    const freshUserData = await dispatch(loadUser()).unwrap();
+                    console.log("Fresh user data loaded:", freshUserData);
+                    console.log("Fresh profile image URL:", freshUserData?.profileImage);
+                    
+                    // Force component re-render to show new image
+                    setImageRefreshKey(prev => prev + 1);
+                    
+                } catch (error) {
+                    console.error("Failed to reload user data:", error);
+                }
+            }, 1000);
+            
+            setUpdateSuccess('Profile image updated successfully!');
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+                setUpdateSuccess('');
+            }, 3000);
+        } catch (error) {
+            console.error('Image upload error:', error);
+            setUpdateError(error || 'Failed to upload image. Please try again.');
+        } finally {
+            setImageUploading(false);
+            // Reset file input
+            event.target.value = '';
+        }
+    };
+
+    // Trigger file input click
+    const handleAvatarClick = () => {
+        const fileInput = document.getElementById('profile-image-input');
+        if (fileInput) {
+            fileInput.click();
+        }
+    };
     
     // Use real user data from Redux or fallback to defaults
     const userData = user ? {
@@ -336,7 +415,9 @@ function UserProfile() {
             year: 'numeric', 
             month: 'long' 
         }) : "Unknown",
-        profileImage: user.profileImage || "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
+        profileImage: user.profileImage ? 
+            `${user.profileImage}${user.profileImage.includes('?') ? '&' : '?'}v=${imageRefreshKey}&t=${Date.now()}` : 
+            "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
         department: user.department || "Emergency Response Team",
         badgeNumber: user.badgeNumber || `${user.role?.toUpperCase() || 'USER'}-${new Date(user.createdAt || Date.now()).getFullYear()}-${user._id?.slice(-3) || '001'}`,
         clearanceLevel: user.clearanceLevel || `Level ${user.role === 'admin' ? '5 - Maximum' : user.role === 'authority' ? '4 - High Priority' : '3 - Standard Access'}`,
@@ -354,6 +435,11 @@ function UserProfile() {
         clearanceLevel: "Loading...",
         coordinates: null
     };
+
+    // Debug logging for profile image
+    console.log("Current user data:", user);
+    console.log("Profile image URL being used:", userData.profileImage);
+    console.log("Raw user profileImage:", user?.profileImage);
 
     // Show loading state
     if (loading) {
@@ -389,13 +475,37 @@ function UserProfile() {
                     {/* Profile Picture */}
                     <div className="profile-avatar-container">
                         <img
+                            key={`main-avatar-${imageRefreshKey}`}
                             src={userData.profileImage}
                             alt={userData.name}
                             className="user-profile-main-avatar"
+                            onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
+                            onError={(e) => {
+                                console.error("Profile image failed to load:", userData.profileImage, e);
+                                // Fallback to default image on error
+                                e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
+                            }}
                         />
-                        <button className="avatar-edit-btn">
-                            <Camera className="camera-icon" />
+                        <button 
+                            className="avatar-edit-btn"
+                            onClick={handleAvatarClick}
+                            disabled={loading || imageUploading}
+                            title="Change profile picture"
+                        >
+                            {imageUploading ? (
+                                <div className="location-spinner"></div>
+                            ) : (
+                                <Camera className="camera-icon" />
+                            )}
                         </button>
+                        {/* Hidden file input */}
+                        <input
+                            id="profile-image-input"
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            onChange={handleImageUpload}
+                            style={{ display: 'none' }}
+                        />
                     </div>
 
                     {/* Profile Info */}
@@ -465,6 +575,11 @@ function UserProfile() {
                 {updateSuccess && (
                     <div className="update-message success">
                         {updateSuccess}
+                    </div>
+                )}
+                {imageUploading && (
+                    <div className="update-message info">
+                        📸 Uploading profile image...
                     </div>
                 )}
                 
@@ -701,9 +816,16 @@ function UserProfile() {
                     <div className="user-quick-info">
                         <div className="user-info-content">
                             <img
+                                key={`sidebar-avatar-${imageRefreshKey}`}
                                 src={userData.profileImage}
                                 alt={userData.name}
                                 className="user-quick-avatar"
+                                onLoad={() => console.log("Sidebar avatar loaded:", userData.profileImage)}
+                                onError={(e) => {
+                                    console.error("Sidebar avatar failed to load:", userData.profileImage, e);
+                                    // Fallback to default image on error
+                                    e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
+                                }}
                             />
                             <div>
                                 <p className="user-quick-name">{userData.name}</p>

@@ -103,6 +103,61 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to upload profile image
+export const uploadProfileImage = createAsyncThunk(
+  'auth/uploadProfileImage',
+  async (imageFile, thunkAPI) => {
+    try {
+      console.log("Making API call to upload profile image...", imageFile.name);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('profileImage', imageFile);
+
+      console.log("Token found, making request to upload profile image");
+      console.log("Token being used:", token);
+      console.log("FormData contents:", formData.get('profileImage'));
+      
+      const res = await axiosInstance.patch('/users/update-profile-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log("Upload profile image API response:", res.data);
+      console.log("Full response object:", res);
+      
+      // Extract updated user data from the correct path based on your API response structure
+      const userData = res.data.data;
+      console.log("Updated user data with new profile image:", userData);
+      console.log("Old profile image URL:", userData.profileImage);
+      console.log("New profile image should be:", userData.profileImage);
+      
+      // Verify that we actually got a new profile image URL
+      if (!userData.profileImage) {
+        console.warn("Warning: No profileImage found in response data");
+      }
+      
+      return userData;
+    } catch (error) {
+      console.error("Upload profile image API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to upload profile image';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -169,6 +224,19 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(uploadProfileImage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // Update user data in Redux with new profile image
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
