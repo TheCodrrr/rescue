@@ -6,7 +6,8 @@ import {
     changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
-    updateUserProfileImage
+    updateUserProfileImage,
+    deleteUser
 } from "../controllers/user.controllers.js";
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middlewares.js";
@@ -37,5 +38,6 @@ router.route("/update").patch(verifyJWT, updateAccountDetails);
 router.patch("/update-profile-image", verifyJWT, upload.single("profileImage"), updateUserProfileImage);
 
 router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/delete").delete(verifyJWT, deleteUser); // Assuming logout also deletes the session
 
 export default router

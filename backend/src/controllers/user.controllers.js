@@ -310,6 +310,36 @@ const updateUserProfileImage = asyncHandler( async (req, res) => {
     res.status(200).json( new ApiResponse(200, user, "Avatar updated successfully"))
 })
 
+const deleteUser = asyncHandler( async(req, res) => {
+    const userId = req.user?._id;
+
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) throw new ApiError(404, "User not found.");
+    if (user.profileImage) {
+        try {
+            const publicId = user.profileImage.split("/").pop().split(".")[0];
+            await deleteFromCloudinary(publicId);
+        } catch (error) {
+            console.error("Error deleting user profile image:", error);
+            
+        }
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    }
+
+    return res
+            .status(200)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .json( new ApiResponse(200, {}, "User deleted successfully"))
+})
+
 export {
     registerUser,
     loginUser,
@@ -318,5 +348,6 @@ export {
     changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
-    updateUserProfileImage
+    updateUserProfileImage,
+    deleteUser
 }
