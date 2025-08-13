@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './auth/redux/authSlice';
 import UserProfile from './UserProfile'
+import Complaint from './Complaint'
 
 function App() {
   const dispatch = useDispatch();
@@ -25,6 +26,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/complain" element={<Complaint />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
