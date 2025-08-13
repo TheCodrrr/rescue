@@ -28,18 +28,23 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
         
         // Basic validation
         if (!formData.email || !formData.password) {
-            toast.error('Please fill in all required fields');
-            return;
+            toast.error('Please fill in all required fields', {
+                duration: 4000,
+            });
+            return false;
         }
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
-            toast.error('Please enter a valid email address');
-            return;
+            toast.error('Please enter a valid email address', {
+                duration: 4000,
+            });
+            return false;
         }
 
         setIsLoading(true);
@@ -57,7 +62,12 @@ export default function Login() {
                 }));
 
                 toast.success('Login successful!');
-                navigate("/");
+                
+                // Small delay before navigation to ensure toast is visible
+                setTimeout(() => {
+                    navigate("/");
+                }, 1000);
+                
                 // Reset form
                 setFormData({
                     email: "",
@@ -65,27 +75,35 @@ export default function Login() {
                 });
             }
             else {
-                toast.error('Login failed. Please try again.');
-                return;
+                toast.error('Login failed. Please try again.', {
+                    duration: 5000,
+                });
             }
-
-
-            
         } catch (error) {
             console.error('Login error:', error);
             
             if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
+                toast.error(error.response.data.message, {
+                    duration: 6000,
+                });
             } else if (error.response?.status === 401) {
-                toast.error('Invalid email or password.');
+                toast.error('Invalid email or password.', {
+                    duration: 6000,
+                });
             } else if (error.response?.status === 404) {
-                toast.error('User not found. Please check your email.');
+                toast.error('User not found. Please check your email.', {
+                    duration: 6000,
+                });
             } else {
-                toast.error('Something went wrong. Please try again.');
+                toast.error('Something went wrong. Please try again.', {
+                    duration: 6000,
+                });
             }
         } finally {
             setIsLoading(false);
         }
+        
+        return false;
     };
 
     return (
@@ -97,7 +115,30 @@ export default function Login() {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-300/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
             </div>
             
-            <Toaster position="top-right" />
+            <Toaster 
+                position="top-right" 
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: 'rgba(0, 0, 0, 0.8)',
+                        color: '#fff',
+                        fontSize: '14px',
+                        zIndex: 9999,
+                    },
+                    error: {
+                        duration: 6000,
+                        style: {
+                            background: 'rgba(239, 68, 68, 0.9)',
+                        },
+                    },
+                    success: {
+                        duration: 3000,
+                        style: {
+                            background: 'rgba(34, 197, 94, 0.9)',
+                        },
+                    },
+                }}
+            />
             
             <div className="max-w-4xl w-full relative z-10">
                 {/* Main Glass Container */}
@@ -157,7 +198,12 @@ export default function Login() {
 
                                 {/* Glass Form Container */}
                                 <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
-                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                    <form 
+                                        onSubmit={handleSubmit} 
+                                        className="space-y-4" 
+                                        noValidate
+                                        action="javascript:void(0)"
+                                    >
                                         {/* Email Field */}
                                         <div>
                                             <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2 drop-shadow-sm">
@@ -227,6 +273,12 @@ export default function Login() {
                                             <button
                                                 type="submit"
                                                 disabled={isLoading}
+                                                onClick={(e) => {
+                                                    if (isLoading) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                    }
+                                                }}
                                                 className={`group relative w-full py-4 px-6 bg-gradient-to-r from-blue-600/70 via-indigo-600/70 to-purple-600/70 backdrop-blur-xl text-white font-bold text-base rounded-xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all duration-500 transform hover:scale-[1.03] active:scale-[0.97] border-2 border-blue-400/60 hover:border-blue-300/80 overflow-hidden ${
                                                     isLoading ? 'opacity-70 cursor-not-allowed hover:scale-100 active:scale-100' : 'hover:from-blue-700/80 hover:via-indigo-700/80 hover:to-purple-700/80'
                                                 }`}
