@@ -1,0 +1,525 @@
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 1rem 0;
+    background: rgba(30, 58, 138, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideDown 1s ease-out;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-scrolled {
+    padding: 0.5rem 0;
+    background: rgba(30, 58, 138, 0.25);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+}
+
+/* Remove all scrolled-specific overrides to maintain consistency */
+
+.navbar-container {
+    min-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Authentication & Profile Section */
+.navbar-auth {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(59, 130, 246, 0.2);
+    margin-left: 0.8rem;
+}
+
+/* Lodge Logo */
+.navbar-brand {
+    z-index: 1001;
+}
+
+.lodge-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.lodge-logo:hover {
+    transform: scale(1.05);
+}
+
+.lodge-icon {
+    width: 2rem;
+    height: 2rem;
+    color: #ffffff;
+    animation: float 3s ease-in-out infinite;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.lodge-text {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 80%, #e0f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGlow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Desktop Navigation */
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.8rem;
+    margin-left: 3.5rem;
+}
+
+.navbar-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.6rem;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-link:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 50px rgba(59, 130, 246, 0.3);
+    color: #e0f2fe;
+}
+
+.navbar-link-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    color: currentColor;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.navbar-link:hover .navbar-link-icon {
+    transform: rotate(15deg) scale(1.3);
+    color: #e0f2fe;
+    filter: drop-shadow(0 0 8px rgba(224, 242, 254, 0.6));
+}
+
+.navbar-link-text {
+    position: relative;
+    z-index: 1;
+}
+
+.navbar-link-hover-effect {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+    transition: left 0.6s ease;
+    border-radius: 50px;
+}
+
+.navbar-link:hover .navbar-link-hover-effect {
+    left: 100%;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-button {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.hamburger span {
+    width: 2rem;
+    height: 0.2rem;
+    background: linear-gradient(135deg, #ffffff, #e0f2fe);
+    border-radius: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hamburger-active span:nth-child(1) {
+    transform: rotate(45deg) translate(0.5rem, 0.5rem);
+}
+
+.hamburger-active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-active span:nth-child(3) {
+    transform: rotate(-45deg) translate(0.5rem, -0.5rem);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(30, 58, 138, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+}
+
+.mobile-menu-active {
+    transform: translateX(0);
+}
+
+.mobile-menu-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.mobile-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 2.5rem;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s ease;
+    animation: slideInFromLeft 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-50px) scale(0.9);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu-link:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05) translateX(0);
+    color: #e0f2fe;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-menu-link-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: currentColor;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-link:hover .mobile-menu-link-icon {
+    transform: rotate(15deg) scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+}
+
+/* Authentication Buttons */
+.auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.6rem;
+    height: 2.8rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    animation: slideInFromRight 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(30px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.auth-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.auth-btn:hover::before {
+    left: 100%;
+}
+
+.login-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    animation-delay: 0.6s;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.login-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+    color: #e0f2fe;
+}
+
+.signup-btn {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 2px solid transparent;
+    color: white;
+    animation-delay: 0.7s;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.signup-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+}
+
+.signout-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    color: #ffffff;
+    animation-delay: 0.6s;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.signout-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border: 2px solid rgba(239, 68, 68, 0.6);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    color: #fef2f2;
+}
+
+.auth-btn-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.auth-btn:hover .auth-btn-icon {
+    transform: rotate(5deg) scale(1.1);
+}
+
+/* Profile Button */
+.profile-btn {
+    position: relative;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInFromRight 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateX(30px);
+    animation-delay: 0.8s;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-btn:hover {
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+}
+
+.profile-avatar {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: block;
+    margin: auto;
+}
+
+.profile-btn:hover .profile-avatar {
+    transform: scale(1.05);
+}
+
+.profile-status-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 0.8rem;
+    height: 0.8rem;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideInFromLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes slideInFromRight {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes textGlow {
+    from {
+        filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4));
+        text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    to {
+        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
+        text-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-menu {
+        display: none;
+    }
+
+    .navbar-auth {
+        display: none;
+    }
+
+    .mobile-menu-button {
+        display: flex;
+    }
+
+    .navbar-container {
+        padding: 0 1rem;
+        min-width: auto;
+    }
+
+    .lodge-text {
+        font-size: 1.5rem;
+    }
+
+    .lodge-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-container {
+        padding: 0 0.5rem;
+    }
+
+    .lodge-text {
+        font-size: 1.2rem;
+    }
+
+    .lodge-icon {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .lodge-logo {
+        gap: 0.5rem;
+    }
+}
