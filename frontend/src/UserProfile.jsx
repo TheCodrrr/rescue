@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loadUser, logout, updateUser, uploadProfileImage, deleteUser } from "./auth/redux/authSlice";
+import { loadUser, logout, updateUser, uploadProfileImage, deleteUser, changePassword } from "./auth/redux/authSlice";
 import { 
     User, 
     Settings, 
@@ -22,8 +22,126 @@ import {
     X,
     Search,
     Trash2,
-    AlertTriangle
+    AlertTriangle,
+    Key
 } from "lucide-react";
+
+// Password Change Modal Component - moved outside to prevent re-renders
+const PasswordChangeModal = React.memo(({ 
+    passwordForm, 
+    handlePasswordFormChange, 
+    passwordError, 
+    passwordSuccess, 
+    passwordUpdating,
+    handleCancelPasswordChange,
+    handlePasswordSubmit 
+}) => (
+    <div className="modal-overlay" onClick={handleCancelPasswordChange}>
+        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+                <div className="modal-icon-container password">
+                    <Key className="modal-icon" />
+                </div>
+                <h2 className="modal-title">Change Password</h2>
+                <p className="modal-subtitle">Update your account password</p>
+            </div>
+            
+            <div className="modal-content">
+                <div className="password-form">
+                    <div className="form-group">
+                        <label htmlFor="oldPassword" className="form-label">
+                            Current Password
+                        </label>
+                        <input
+                            id="oldPassword"
+                            type="password"
+                            name="oldPassword"
+                            value={passwordForm.oldPassword}
+                            onChange={handlePasswordFormChange}
+                            className="form-input"
+                            placeholder="Enter your current password"
+                            disabled={passwordUpdating}
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label htmlFor="newPassword" className="form-label">
+                            New Password
+                        </label>
+                        <input
+                            id="newPassword"
+                            type="password"
+                            name="newPassword"
+                            value={passwordForm.newPassword}
+                            onChange={handlePasswordFormChange}
+                            className="form-input"
+                            placeholder="Enter new password (min 6 characters)"
+                            disabled={passwordUpdating}
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label htmlFor="confirmPassword" className="form-label">
+                            Confirm New Password
+                        </label>
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            name="confirmPassword"
+                            value={passwordForm.confirmPassword}
+                            onChange={handlePasswordFormChange}
+                            className="form-input"
+                            placeholder="Confirm your new password"
+                            disabled={passwordUpdating}
+                        />
+                    </div>
+                </div>
+                
+                {passwordError && (
+                    <div className="modal-error">
+                        <AlertTriangle className="error-icon" />
+                        <span>{passwordError}</span>
+                    </div>
+                )}
+                
+                {passwordSuccess && (
+                    <div className="modal-success">
+                        <div className="success-icon">✓</div>
+                        <span>{passwordSuccess}</span>
+                    </div>
+                )}
+            </div>
+            
+            <div className="modal-actions">
+                <button
+                    onClick={handleCancelPasswordChange}
+                    className="modal-btn cancel"
+                    disabled={passwordUpdating}
+                >
+                    <X className="btn-icon" />
+                    Cancel
+                </button>
+                <button
+                    onClick={handlePasswordSubmit}
+                    className="modal-btn primary"
+                    disabled={passwordUpdating || !passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
+                >
+                    {passwordUpdating ? (
+                        <>
+                            <div className="btn-spinner"></div>
+                            Updating...
+                        </>
+                    ) : (
+                        <>
+                            <Key className="btn-icon" />
+                            Change Password
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+    </div>
+));
 
 function UserProfile() {
     const [activeSection, setActiveSection] = useState('profile');
@@ -46,12 +164,21 @@ function UserProfile() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [passwordUpdating, setPasswordUpdating] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
     const hasLoadedUser = useRef(false);
     
-    // Load user data when component mounts
+    // Load user data when component mounts - runs only once
     useEffect(() => {
         console.log("UserProfile component mounted");
         const token = localStorage.getItem("token");
@@ -60,8 +187,8 @@ function UserProfile() {
         console.log("isAuthenticated:", isAuthenticated);
         console.log("Has loaded user:", hasLoadedUser.current);
         
-        // If we have a token, always load user data to ensure fresh data
-        if (token && !loading && !hasLoadedUser.current) {
+        // Only run if we haven't loaded user yet and have a token
+        if (token && !hasLoadedUser.current) {
             console.log("Loading/refreshing user data for profile page...");
             hasLoadedUser.current = true;
             dispatch(loadUser())
@@ -80,7 +207,16 @@ function UserProfile() {
             hasLoadedUser.current = false; // Reset
             navigate('/login');
         }
-    }, [dispatch, user, isAuthenticated, loading, navigate]);
+    }, []); // Empty dependency array - run only once on mount
+
+    // Handle authentication redirects
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token && !isAuthenticated && !loading) {
+            console.log("No authentication, redirecting to login");
+            navigate('/login');
+        }
+    }, [isAuthenticated, loading, navigate]);
 
     // Cleanup function
     useEffect(() => {
@@ -336,7 +472,7 @@ function UserProfile() {
         }
     };
 
-    // Handle profile image upload
+    // Handle profile image upload;lk;;[[[;[lm;' bn\bnl; ]]]]
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -446,6 +582,96 @@ function UserProfile() {
         setShowDeleteModal(false);
         setUpdateError('');
     };
+
+    // Handle change password
+    const handleChangePassword = () => {
+        setShowPasswordModal(true);
+        setPasswordForm({
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+        setPasswordError('');
+        setPasswordSuccess('');
+    };
+
+    const handlePasswordFormChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        
+        // Clear errors when user starts typing
+        if (passwordError) {
+            setPasswordError('');
+        }
+    };
+
+    const handlePasswordSubmit = async () => {
+        const { oldPassword, newPassword, confirmPassword } = passwordForm;
+        
+        // Validation
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            setPasswordError('All password fields are required');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError('New password and confirm password do not match');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setPasswordError('New password must be at least 6 characters long');
+            return;
+        }
+
+        if (oldPassword === newPassword) {
+            setPasswordError('New password must be different from current password');
+            return;
+        }
+
+        try {
+            setPasswordUpdating(true);
+            setPasswordError('');
+            
+            await dispatch(changePassword({ 
+                oldPassword, 
+                newPassword 
+            })).unwrap();
+            
+            setPasswordSuccess('Password changed successfully!');
+            
+            // Clear form and close modal after success
+            setTimeout(() => {
+                setShowPasswordModal(false);
+                setPasswordForm({
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
+                setPasswordSuccess('');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Change password error:', error);
+            setPasswordError(error || 'Failed to change password. Please try again.');
+        } finally {
+            setPasswordUpdating(false);
+        }
+    };
+
+    const handleCancelPasswordChange = () => {
+        setShowPasswordModal(false);
+        setPasswordForm({
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+        setPasswordError('');
+        setPasswordSuccess('');
+    };
     
     // Use real user data from Redux or fallback to defaults
     const userData = user ? {
@@ -484,8 +710,8 @@ function UserProfile() {
     console.log("Profile image URL being used:", userData.profileImage);
     console.log("Raw user profileImage:", user?.profileImage);
 
-    // Show loading state only if we don't have user data and are loading
-    if (loading && !user) {
+    // Show loading state only during initial load (no user data and specific loading condition)
+    if (!user && loading && !hasLoadedUser.current && localStorage.getItem("token")) {
         return (
             <div className="user-profile-container">
                 <div className="loading-container">
@@ -780,7 +1006,7 @@ function UserProfile() {
             <div className="profile-card" style={{'--delay': '0.5s'}}>
                 <div className="section-header">
                     <Shield className="section-icon" style={{color: '#86efac'}} />
-                    <h2 className="section-title">Security Clearance</h2>
+                    <h2 className="section-title">Security & Access</h2>
                 </div>
                 
                 <div className="security-clearance">
@@ -792,6 +1018,24 @@ function UserProfile() {
                             <p className="clearance-level">{userData.clearanceLevel}</p>
                             <p className="clearance-description">Access to critical emergency systems</p>
                         </div>
+                    </div>
+                    
+                    <div className="password-section">
+                        <div className="password-info">
+                            <Key className="password-icon" style={{color: '#fbbf24'}} />
+                            <div>
+                                <h4 className="password-title">Password Security</h4>
+                                <p className="password-description">Keep your account secure by updating your password regularly</p>
+                            </div>
+                        </div>
+                        <button 
+                            className="change-password-btn" 
+                            onClick={handleChangePassword}
+                            disabled={passwordUpdating}
+                        >
+                            <Key className="key-icon" />
+                            Change Password
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1052,6 +1296,17 @@ function UserProfile() {
             
             {/* Success Modal */}
             {showSuccessModal && <SuccessModal />}
+            
+            {/* Password Change Modal */}
+            {showPasswordModal && <PasswordChangeModal 
+                passwordForm={passwordForm}
+                handlePasswordFormChange={handlePasswordFormChange}
+                passwordError={passwordError}
+                passwordSuccess={passwordSuccess}
+                passwordUpdating={passwordUpdating}
+                handleCancelPasswordChange={handleCancelPasswordChange}
+                handlePasswordSubmit={handlePasswordSubmit}
+            />}
         </div>
     );
 }

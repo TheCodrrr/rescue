@@ -33,12 +33,20 @@ axiosInstance.interceptors.response.use(
         console.error("API Response error:", error.config?.url, error.response?.status);
         
         if (error.response?.status === 401) {
-            console.log("Unauthorized request - clearing token and redirecting to login");
-            // Token is invalid/expired, clear localStorage
-            localStorage.removeItem('token');
-            localStorage.removeItem('isLoggedIn');
-            // Optionally redirect to login page
-            window.location.href = '/login';
+            // Only redirect if we're not on the login page and it's not a login request
+            const isLoginRequest = error.config?.url?.includes('/login');
+            const isOnLoginPage = window.location.pathname === '/login';
+            
+            if (!isLoginRequest && !isOnLoginPage) {
+                console.log("Unauthorized request - clearing token and redirecting to login");
+                // Token is invalid/expired, clear localStorage
+                localStorage.removeItem('token');
+                localStorage.removeItem('isLoggedIn');
+                // Redirect to login page
+                window.location.href = '/login';
+            } else {
+                console.log("Login attempt failed - not redirecting");
+            }
         }
         return Promise.reject(error);
     }

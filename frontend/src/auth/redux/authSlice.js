@@ -190,6 +190,44 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to change user password
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ oldPassword, newPassword }, thunkAPI) => {
+    try {
+      console.log("Making API call to change password...");
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      const passwordData = {
+        oldPassword,
+        newPassword
+      };
+
+      console.log("Token found, making request to change password");
+      console.log("Password data being sent:", passwordData);
+      const res = await axiosInstance.patch('/users/change-password', passwordData);
+      console.log("Change password API response:", res.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error("Change password API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to change password';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -287,6 +325,17 @@ const authSlice = createSlice({
         localStorage.removeItem('isLoggedIn');
       })
       .addCase(deleteUser.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(changePassword.pending, (state) => {
+        // Don't set loading to true to avoid UI interference
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        // Password changed successfully - no user data changes needed
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
