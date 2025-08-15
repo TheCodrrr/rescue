@@ -151,6 +151,116 @@ export const getAllComplaints = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to upvote a complaint
+export const upvoteComplaint = createAsyncThunk(
+  'complaints/upvote',
+  async (complaintId, thunkAPI) => {
+    try {
+      console.log("Making API call to upvote complaint...", complaintId);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('Authentication required');
+      }
+
+      console.log("Token found, making request to upvote complaint");
+      const response = await axiosInstance.patch(`/complaints/${complaintId}/upvote`);
+      console.log("Upvote complaint API response:", response.data);
+      
+      // Try multiple ways to extract the data
+      let responseData;
+      if (response.data.data) {
+        responseData = response.data.data;
+      } else if (response.data.complaint) {
+        responseData = response.data.complaint;
+      } else {
+        responseData = response.data;
+      }
+      
+      console.log("Parsed upvote response data:", responseData);
+      
+      // Try all possible field names - check singular first since that's the correct format
+      const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
+      const downvotes = responseData.downvote ?? responseData.downvotes ?? 0;
+      
+      const payload = {
+        complaintId,
+        upvotes: Number(upvotes),
+        downvotes: Number(downvotes)
+      };
+      
+      console.log("Final payload with extracted votes:", payload);
+      return payload;
+    } catch (error) {
+      console.error("Upvote complaint API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to upvote complaint';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to downvote a complaint
+export const downvoteComplaint = createAsyncThunk(
+  'complaints/downvote',
+  async (complaintId, thunkAPI) => {
+    try {
+      console.log("Making API call to downvote complaint...", complaintId);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('Authentication required');
+      }
+
+      console.log("Token found, making request to downvote complaint");
+      const response = await axiosInstance.patch(`/complaints/${complaintId}/downvote`);
+      console.log("Downvote complaint API response:", response.data);
+      
+      // Try multiple ways to extract the data
+      let responseData;
+      if (response.data.data) {
+        responseData = response.data.data;
+      } else if (response.data.complaint) {
+        responseData = response.data.complaint;
+      } else {
+        responseData = response.data;
+      }
+      
+      console.log("Parsed downvote response data:", responseData);
+      
+      // Try all possible field names - check singular first since that's the correct format
+      const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
+      const downvotes = responseData.downvote ?? responseData.downvotes ?? 0;
+      
+      const payload = {
+        complaintId,
+        upvotes: Number(upvotes),
+        downvotes: Number(downvotes)
+      };
+      
+      console.log("Final payload with extracted votes:", payload);
+      return payload;
+    } catch (error) {
+      console.error("Downvote complaint API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to downvote complaint';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const complaintSlice = createSlice({
   name: "complaints",
   initialState,
@@ -225,6 +335,72 @@ const complaintSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.complaints = [];
+      })
+      // Upvote complaint cases
+      .addCase(upvoteComplaint.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(upvoteComplaint.fulfilled, (state, action) => {
+        console.log("Upvote fulfilled with payload:", action.payload);
+        const { complaintId, upvotes, downvotes } = action.payload;
+        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
+        console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
+        
+        // Try different ways to match the complaint ID
+        const complaint = state.complaints.find(c => 
+          c._id === complaintId || 
+          c._id?.toString() === complaintId?.toString() ||
+          c.id === complaintId ||
+          c.id?.toString() === complaintId?.toString()
+        );
+        
+        console.log("Found complaint for upvote:", complaint);
+        
+        if (complaint) {
+          console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          complaint.upvote = upvotes;
+          complaint.downvote = downvotes;
+          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+        } else {
+          console.error("Could not find complaint with ID:", complaintId);
+        }
+        state.error = null;
+      })
+      .addCase(upvoteComplaint.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Downvote complaint cases
+      .addCase(downvoteComplaint.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(downvoteComplaint.fulfilled, (state, action) => {
+        console.log("Downvote fulfilled with payload:", action.payload);
+        const { complaintId, upvotes, downvotes } = action.payload;
+        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
+        console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
+        
+        // Try different ways to match the complaint ID
+        const complaint = state.complaints.find(c => 
+          c._id === complaintId || 
+          c._id?.toString() === complaintId?.toString() ||
+          c.id === complaintId ||
+          c.id?.toString() === complaintId?.toString()
+        );
+        
+        console.log("Found complaint for downvote:", complaint);
+        
+        if (complaint) {
+          console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          complaint.upvote = upvotes;
+          complaint.downvote = downvotes;
+          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+        } else {
+          console.error("Could not find complaint with ID:", complaintId);
+        }
+        state.error = null;
+      })
+      .addCase(downvoteComplaint.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

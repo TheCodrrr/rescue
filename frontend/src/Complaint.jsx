@@ -5,13 +5,26 @@ import "./Complaint.css";
 import "./Toast.css";
 import "leaflet/dist/leaflet.css";
 import Navbar from "./Navbar";
-import { submitComplaint, clearSuccess, clearError } from "./auth/redux/complaintSlice";
+import Footer from "./Footer";
+import { submitComplaint, getUserComplaints, upvoteComplaint, downvoteComplaint, clearSuccess, clearError } from "./auth/redux/complaintSlice";
 
 export default function Complaint() {
     const dispatch = useDispatch();
-    const { isSubmitting, success, error } = useSelector((state) => state.complaints);
+    const { isSubmitting, success, error, complaints, isLoading } = useSelector((state) => state.complaints);
     const { isAuthenticated } = useSelector((state) => state.auth);
     
+    // Get initial tab from URL params or default to 'register'
+    const getInitialTab = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get('tab');
+        return (tabFromUrl === 'view' || tabFromUrl === 'register') ? tabFromUrl : 'register';
+    };
+    
+    const [activeTab, setActiveTab] = useState(getInitialTab);
+    const [expandedComments, setExpandedComments] = useState({}); // Track expanded comments
+    const [votingInProgress, setVotingInProgress] = useState({}); // Track voting progress
+    const [searchQuery, setSearchQuery] = useState(''); // Search query for complaints
+    const [selectedCategory, setSelectedCategory] = useState('all'); // Selected category filter
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -221,6 +234,30 @@ export default function Complaint() {
             });
     }, []);
 
+    // Load user complaints when switching to view tab
+    useEffect(() => {
+        if (activeTab === 'view' && isAuthenticated) {
+            dispatch(getUserComplaints());
+        }
+    }, [activeTab, isAuthenticated, dispatch]);
+
+    // Handle browser back/forward navigation
+    useEffect(() => {
+        const handlePopState = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabFromUrl = urlParams.get('tab');
+            if ((tabFromUrl === 'view' || tabFromUrl === 'register') && tabFromUrl !== activeTab) {
+                setActiveTab(tabFromUrl);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [activeTab]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -375,6 +412,190 @@ export default function Complaint() {
         }, 1000);
     };
 
+    const getStatusBadgeClass = (status) => {
+        const statusClasses = {
+            'pending': 'status-pending',
+            'in-progress': 'status-in-progress',
+            'resolved': 'status-resolved',
+            'rejected': 'status-rejected'
+        };
+        return statusClasses[status] || 'status-pending';
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const getCategoryIcon = (category) => {
+        const categoryData = categories.find(cat => cat.value === category);
+        return categoryData ? categoryData.icon : '📝';
+    };
+
+    const getCategoryColor = (category) => {
+        const categoryData = categories.find(cat => cat.value === category);
+        return categoryData ? categoryData.color : '#6b7280';
+    };
+
+    const handleUpvote = async (complaintId) => {
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to vote', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+        
+        // Set voting in progress
+        setVotingInProgress(prev => ({ ...prev, [`${complaintId}-upvote`]: true }));
+        
+        try {
+            const result = await dispatch(upvoteComplaint(complaintId));
+            if (upvoteComplaint.fulfilled.match(result)) {
+                toast.success('👍 Upvoted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+            } else {
+                toast.error('❌ Failed to upvote. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        } catch (error) {
+            toast.error('❌ Error while voting. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            // Clear voting in progress
+            setVotingInProgress(prev => ({ ...prev, [`${complaintId}-upvote`]: false }));
+        }
+    };
+
+    const handleDownvote = async (complaintId) => {
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to vote', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+        
+        // Set voting in progress
+        setVotingInProgress(prev => ({ ...prev, [`${complaintId}-downvote`]: true }));
+        
+        try {
+            const result = await dispatch(downvoteComplaint(complaintId));
+            if (downvoteComplaint.fulfilled.match(result)) {
+                toast.success('👎 Downvoted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(239, 68, 68, 0.3)',
+                    },
+                });
+            } else {
+                toast.error('❌ Failed to downvote. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        } catch (error) {
+            toast.error('❌ Error while voting. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            // Clear voting in progress
+            setVotingInProgress(prev => ({ ...prev, [`${complaintId}-downvote`]: false }));
+        }
+    };
+
+    const renderStars = (rating) => {
+        const stars = [];
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        
+        for (let i = 0; i < 5; i++) {
+            if (i < fullStars) {
+                stars.push(<span key={i} className="star filled">★</span>);
+            } else if (i === fullStars && hasHalfStar) {
+                stars.push(<span key={i} className="star half">★</span>);
+            } else {
+                stars.push(<span key={i} className="star empty">☆</span>);
+            }
+        }
+        return stars;
+    };
+
+    const toggleComments = (complaintId) => {
+        setExpandedComments(prev => ({
+            ...prev,
+            [complaintId]: !prev[complaintId]
+        }));
+    };
+
+    // Function to highlight matching text
+    const highlightText = (text, searchQuery) => {
+        if (!searchQuery.trim()) return text;
+        
+        const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        const parts = text.split(regex);
+        
+        return parts.map((part, index) => {
+            if (regex.test(part)) {
+                return <span key={index} className="search-highlight">{part}</span>;
+            }
+            return part;
+        });
+    };
+
+    // Handle tab change and update URL
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        // Update URL without causing page reload
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        window.history.pushState({}, '', url);
+    };
+
+    // Filter complaints based on search query and category
+    const filteredComplaints = complaints.filter(complaint => {
+        // Category filter
+        const categoryMatch = selectedCategory === 'all' || complaint.category === selectedCategory;
+        
+        // Search filter - search in title and description
+        const searchMatch = searchQuery === '' || 
+            complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
+            
+        return categoryMatch && searchMatch;
+    });
+
     return (
         <>
             <Navbar />
@@ -426,11 +647,41 @@ export default function Complaint() {
             <div className="complaint-page">
                 <div className="complaint-container">
                     <div className="complaint-header">
-                        <h1 className="complaint-title">Report an Incident</h1>
-                        <p className="complaint-subtitle">Help us help you by providing detailed information about the incident</p>
+                        <h1 className="complaint-title">Complaint Management</h1>
+                        <p className="complaint-subtitle">Submit new complaints or view your existing ones</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="complaint-form">
+                    {/* Tab Navigation */}
+                    <div className="tab-navigation">
+                        <button 
+                            className={`tab-button ${activeTab === 'register' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('register')}
+                        >
+                            <svg className="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Register Complaint
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'view' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('view')}
+                        >
+                            <svg className="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            My Complaints
+                        </button>
+                    </div>
+
+                    {/* Register Complaint Section */}
+                    {activeTab === 'register' && (
+                        <div className="tab-content">
+                            <div className="section-header">
+                                <h2 className="section-title">Report an Incident</h2>
+                                <p className="section-subtitle">Help us help you by providing detailed information about the incident</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="complaint-form">
                         {/* Title Field */}
                         <div className="form-group">
                             <label htmlFor="title" className="form-label">
@@ -680,8 +931,270 @@ export default function Complaint() {
                             </button>
                         </div>
                     </form>
+                        </div>
+                    )}
+
+                    {/* View Complaints Section */}
+                    {activeTab === 'view' && (
+                        <div className="tab-content">
+                            <div className="section-header">
+                                <h2 className="section-title">My Complaints</h2>
+                                <p className="section-subtitle">Track the status of your submitted complaints</p>
+                            </div>
+
+                            <div className="complaints-list">
+                                {/* Search and Filter Section */}
+                                {!isLoading && !error && isAuthenticated && complaints.length > 0 && (
+                                    <div className="search-filter-section">
+                                        <div className="search-bar-container">
+                                            <div className="search-input-wrapper">
+                                                <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                                <input
+                                                    type="text"
+                                                    className="search-input"
+                                                    placeholder="Search complaints by title or description..."
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                />
+                                                {searchQuery && (
+                                                    <button 
+                                                        className="clear-search-btn"
+                                                        onClick={() => setSearchQuery('')}
+                                                    >
+                                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="category-filter-wrapper">
+                                                <select
+                                                    className="category-filter"
+                                                    value={selectedCategory}
+                                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                                >
+                                                    <option value="all">All Categories</option>
+                                                    <option value="rail">🚂 Rail Incidents</option>
+                                                    <option value="fire">🔥 Fire Emergency</option>
+                                                    <option value="cyber">💻 Cyber Crime</option>
+                                                    <option value="police">👮 Police</option>
+                                                    <option value="court">⚖️ Court</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Results Summary */}
+                                        <div className="results-summary">
+                                            <span className="results-count">
+                                                Showing {filteredComplaints.length} of {complaints.length} complaints
+                                            </span>
+                                            {(searchQuery || selectedCategory !== 'all') && (
+                                                <button 
+                                                    className="clear-filters-btn"
+                                                    onClick={() => {
+                                                        setSearchQuery('');
+                                                        setSelectedCategory('all');
+                                                    }}
+                                                >
+                                                    Clear Filters
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isLoading ? (
+                                    <div className="loading-state">
+                                        <div className="loading-spinner"></div>
+                                        <p>Loading your complaints...</p>
+                                    </div>
+                                ) : error ? (
+                                    <div className="error-state">
+                                        <div className="error-icon">❌</div>
+                                        <h3>Error Loading Complaints</h3>
+                                        <p>{error}</p>
+                                        <button 
+                                            className="retry-btn"
+                                            onClick={() => dispatch(getUserComplaints())}
+                                        >
+                                            Retry
+                                        </button>
+                                    </div>
+                                ) : !isAuthenticated ? (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">🔐</div>
+                                        <h3>Authentication Required</h3>
+                                        <p>Please log in to view your complaints</p>
+                                    </div>
+                                ) : complaints.length === 0 ? (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">📝</div>
+                                        <h3>No Complaints Found</h3>
+                                        <p>You haven't submitted any complaints yet. Switch to the "Register Complaint" tab to submit your first complaint.</p>
+                                        <button 
+                                            className="switch-tab-btn"
+                                            onClick={() => handleTabChange('register')}
+                                        >
+                                            Register New Complaint
+                                        </button>
+                                    </div>
+                                ) : filteredComplaints.length === 0 ? (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">🔍</div>
+                                        <h3>No Complaints Found</h3>
+                                        <p>
+                                            {searchQuery && selectedCategory !== 'all' 
+                                                ? `No complaints found matching "${searchQuery}" in ${categories.find(cat => cat.value === selectedCategory)?.label || selectedCategory} category.`
+                                                : searchQuery 
+                                                ? `No complaints found matching "${searchQuery}".`
+                                                : `No complaints found in ${categories.find(cat => cat.value === selectedCategory)?.label || selectedCategory} category.`
+                                            }
+                                        </p>
+                                        <button 
+                                            className="clear-filters-btn"
+                                            onClick={() => {
+                                                setSearchQuery('');
+                                                setSelectedCategory('all');
+                                            }}
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="complaints-grid">
+                                        {filteredComplaints.map((complaint, index) => (
+                                            <div key={complaint._id || index} className="complaint-card">
+                                                <div className="complaint-card-header">
+                                                    <div className="complaint-category">
+                                                        <span 
+                                                            className="category-icon-display"
+                                                            style={{ color: getCategoryColor(complaint.category) }}
+                                                        >
+                                                            {getCategoryIcon(complaint.category)}
+                                                        </span>
+                                                        <span className="category-name">
+                                                            {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
+                                                        </span>
+                                                    </div>
+                                                    <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
+                                                        {complaint.status}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="complaint-card-body">
+                                                    <h4 className="complaint-title-display">
+                                                        {searchQuery ? highlightText(complaint.title, searchQuery) : complaint.title}
+                                                    </h4>
+                                                    <p className="complaint-description-display">
+                                                        {searchQuery ? highlightText(complaint.description, searchQuery) : complaint.description}
+                                                    </p>
+                                                    
+                                                    {complaint.address && (
+                                                        <div className="complaint-location">
+                                                            <svg className="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            </svg>
+                                                            <span>{complaint.address}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Voting Section */}
+                                                    <div className="complaint-voting">
+                                                        <button 
+                                                            className={`vote-btn upvote-btn ${votingInProgress[`${complaint._id}-upvote`] ? 'voting' : ''}`}
+                                                            onClick={() => handleUpvote(complaint._id)}
+                                                            disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
+                                                        >
+                                                            {votingInProgress[`${complaint._id}-upvote`] ? (
+                                                                <div className="vote-spinner"></div>
+                                                            ) : (
+                                                                <svg className="vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                                                                </svg>
+                                                            )}
+                                                            <span className="vote-count">
+                                                                {complaint.upvote || 0}
+                                                            </span>
+                                                        </button>
+                                                        
+                                                        <button 
+                                                            className={`vote-btn downvote-btn ${votingInProgress[`${complaint._id}-downvote`] ? 'voting' : ''}`}
+                                                            onClick={() => handleDownvote(complaint._id)}
+                                                            disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
+                                                        >
+                                                            {votingInProgress[`${complaint._id}-downvote`] ? (
+                                                                <div className="vote-spinner"></div>
+                                                            ) : (
+                                                                <svg className="vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+                                                                </svg>
+                                                            )}
+                                                            <span className="vote-count">
+                                                                {complaint.downvote || 0}
+                                                            </span>
+                                                        </button>
+
+                                                        {/* Comments Button */}
+                                                        {complaint.feedback_id && (
+                                                            <button 
+                                                                className="comments-btn"
+                                                                onClick={() => toggleComments(complaint._id)}
+                                                            >
+                                                                <svg className="comment-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                                                                </svg>
+                                                                <span>{expandedComments[complaint._id] ? 'Hide Feedback' : 'Show Feedback'}</span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Feedback Section */}
+                                                    {complaint.feedback_id && expandedComments[complaint._id] && (
+                                                        <div className="complaint-feedback">
+                                                            <div className="feedback-header">
+                                                                <h5 className="feedback-title">Feedback</h5>
+                                                                <div className="feedback-rating">
+                                                                    {renderStars(complaint.rating || 0)}
+                                                                    <span className="rating-value">({complaint.rating || 0}/5)</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {complaint.comment && (
+                                                                <div className="feedback-comment">
+                                                                    <p>"{complaint.comment}"</p>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            <div className="feedback-meta">
+                                                                <span className="feedback-date">
+                                                                    Feedback given: {formatDate(complaint.updatedAt || complaint.createdAt)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <div className="complaint-meta">
+                                                        <div className="complaint-date">
+                                                            <svg className="date-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                            <span>Submitted: {formatDate(complaint.createdAt || complaint.timestamp)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
+            <Footer />
         </>
     );
 }

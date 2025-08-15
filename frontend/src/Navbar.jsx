@@ -49,7 +49,7 @@ export default function Navbar() {
     // Add Complain link only for authenticated users
     const displayNavLinks = isAuthenticated ? [
         navLinks[0], // Home
-        { name: 'Complain', href: '/complain', icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { name: 'Complaint', href: '/complain', icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
         ...navLinks.slice(1) // Trending, Help, Authority
     ] : navLinks;
 

@@ -350,15 +350,15 @@ export default function Home() {
                                 <div className="btn-glow"></div>
                             </button>
                         </div>
-                    <div className="hero-background">
-                        <div className="floating-elements">
-                            <div className="floating-element element-1"></div>
-                            <div className="floating-element element-2"></div>
-                            <div className="floating-element element-3"></div>
-                            <div className="floating-element element-4"></div>
+                        <div className="hero-background">
+                            <div className="floating-elements">
+                                <div className="floating-element element-1"></div>
+                                <div className="floating-element element-2"></div>
+                                <div className="floating-element element-3"></div>
+                                <div className="floating-element element-4"></div>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
                 {/* Live Incidents Map Section */}
                 <section className="map-section">
