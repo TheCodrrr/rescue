@@ -6,7 +6,15 @@ import "./Toast.css";
 import "leaflet/dist/leaflet.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { submitComplaint, getUserComplaints, upvoteComplaint, downvoteComplaint, clearSuccess, clearError } from "./auth/redux/complaintSlice";
+import { 
+    submitComplaint, 
+    clearSuccess, 
+    clearError, 
+    getUserComplaints,
+    upvoteComplaint,
+    downvoteComplaint,
+    updateComplaintStatus
+} from './auth/redux/complaintSlice';
 
 export default function Complaint() {
     const dispatch = useDispatch();
@@ -23,6 +31,10 @@ export default function Complaint() {
     const [activeTab, setActiveTab] = useState(getInitialTab);
     const [expandedComments, setExpandedComments] = useState({}); // Track expanded comments
     const [votingInProgress, setVotingInProgress] = useState({}); // Track voting progress
+    const [statusUpdateInProgress, setStatusUpdateInProgress] = useState({}); // Track status updates
+    const [statusModalOpen, setStatusModalOpen] = useState(false); // Track status modal
+    const [selectedComplaintForStatus, setSelectedComplaintForStatus] = useState(null); // Selected complaint for status update
+    const [scrollPosition, setScrollPosition] = useState(0); // Track scroll position for modal
     const [searchQuery, setSearchQuery] = useState(''); // Search query for complaints
     const [selectedCategory, setSelectedCategory] = useState('all'); // Selected category filter
     const [formData, setFormData] = useState({
@@ -258,6 +270,37 @@ export default function Complaint() {
         };
     }, [activeTab]);
 
+    // Handle scroll lock/unlock for status modal
+    useEffect(() => {
+        return () => {
+            // Cleanup: always restore scroll when component unmounts
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.paddingRight = '';
+            document.documentElement.style.overflow = '';
+            document.body.classList.remove('modal-open');
+            document.documentElement.classList.remove('modal-open');
+        };
+    }, []);
+
+    // Handle ESC key to close modal
+    useEffect(() => {
+        const handleEscKey = (event) => {
+            if (event.key === 'Escape' && statusModalOpen) {
+                closeStatusModal();
+            }
+        };
+
+        if (statusModalOpen) {
+            document.addEventListener('keydown', handleEscKey);
+            return () => {
+                document.removeEventListener('keydown', handleEscKey);
+            };
+        }
+    }, [statusModalOpen]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -416,10 +459,33 @@ export default function Complaint() {
         const statusClasses = {
             'pending': 'status-pending',
             'in-progress': 'status-in-progress',
+            'in_progress': 'status-in-progress', // Handle backend format
             'resolved': 'status-resolved',
             'rejected': 'status-rejected'
         };
         return statusClasses[status] || 'status-pending';
+    };
+
+    // Map frontend status values to backend format
+    const mapStatusToBackend = (frontendStatus) => {
+        const statusMapping = {
+            'pending': 'pending',
+            'in-progress': 'in_progress',
+            'resolved': 'resolved',
+            'rejected': 'rejected'
+        };
+        return statusMapping[frontendStatus] || frontendStatus;
+    };
+
+    // Map backend status values to frontend format
+    const mapStatusToFrontend = (backendStatus) => {
+        const statusMapping = {
+            'pending': 'pending',
+            'in_progress': 'in-progress',
+            'resolved': 'resolved',
+            'rejected': 'rejected'
+        };
+        return statusMapping[backendStatus] || backendStatus;
     };
 
     const formatDate = (dateString) => {
@@ -533,6 +599,94 @@ export default function Complaint() {
             // Clear voting in progress
             setVotingInProgress(prev => ({ ...prev, [`${complaintId}-downvote`]: false }));
         }
+    };
+
+    const handleStatusUpdate = async (complaintId, newStatus) => {
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to update status', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+        
+        // Set status update in progress
+        setStatusUpdateInProgress(prev => ({ ...prev, [complaintId]: true }));
+        
+        try {
+            // Map frontend status to backend format
+            const backendStatus = mapStatusToBackend(newStatus);
+            const result = await dispatch(updateComplaintStatus({ complaintId, status: backendStatus }));
+            if (updateComplaintStatus.fulfilled.match(result)) {
+                toast.success(`Status updated to ${newStatus.replace('-', ' ')}!`, {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+                // Close modal properly using the closeStatusModal function
+                closeStatusModal();
+            } else {
+                toast.error('❌ Failed to update status. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        } catch (error) {
+            toast.error('❌ Error while updating status. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            // Clear status update in progress
+            setStatusUpdateInProgress(prev => ({ ...prev, [complaintId]: false }));
+        }
+    };
+
+    const openStatusModal = (complaint) => {
+        // Save current scroll position
+        const currentScrollY = window.scrollY;
+        setScrollPosition(currentScrollY);
+        
+        setSelectedComplaintForStatus(complaint);
+        setStatusModalOpen(true);
+        
+        // Apply scroll lock with position fixed approach - most reliable method
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${currentScrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        document.documentElement.classList.add('modal-open');
+    };
+
+    const closeStatusModal = () => {
+        setStatusModalOpen(false);
+        setSelectedComplaintForStatus(null);
+        
+        // Restore scroll position and remove scroll lock
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
+        document.documentElement.classList.remove('modal-open');
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollPosition);
     };
 
     const renderStars = (rating) => {
@@ -1079,7 +1233,7 @@ export default function Complaint() {
                                                         </span>
                                                     </div>
                                                     <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
-                                                        {complaint.status}
+                                                        {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
                                                     </span>
                                                 </div>
                                                 
@@ -1151,6 +1305,29 @@ export default function Complaint() {
                                                         )}
                                                     </div>
 
+                                                    {/* Status Update Section */}
+                                                    <div className="complaint-status-update">
+                                                        <button
+                                                            className="status-update-btn"
+                                                            onClick={() => openStatusModal(complaint)}
+                                                            disabled={statusUpdateInProgress[complaint._id]}
+                                                        >
+                                                            {statusUpdateInProgress[complaint._id] ? (
+                                                                <>
+                                                                    <div className="btn-spinner"></div>
+                                                                    <span>Updating...</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <svg className="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                                    </svg>
+                                                                    <span>Update Status</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
+
                                                     {/* Feedback Section */}
                                                     {complaint.feedback_id && expandedComments[complaint._id] && (
                                                         <div className="complaint-feedback">
@@ -1194,6 +1371,75 @@ export default function Complaint() {
                     )}
                 </div>
             </div>
+
+            {/* Status Update Modal */}
+            {statusModalOpen && selectedComplaintForStatus && (
+                <div className="modal-overlay" onClick={closeStatusModal}>
+                    <div className="status-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3 className="modal-title">Update Complaint Status</h3>
+                            <button className="modal-close-btn" onClick={closeStatusModal}>
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div className="modal-content">
+                            <div className="complaint-info">
+                                <h4 className="complaint-title-modal">{selectedComplaintForStatus.title}</h4>
+                                <div className="current-status">
+                                    Current Status: 
+                                    <span className={`status-badge ${getStatusBadgeClass(selectedComplaintForStatus.status)}`}>
+                                        {mapStatusToFrontend(selectedComplaintForStatus.status)?.replace('-', ' ').toUpperCase() || 'PENDING'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="status-options">
+                                <h5 className="status-options-title">Select New Status:</h5>
+                                <div className="status-buttons-grid">
+                                    {['pending', 'in-progress', 'resolved', 'rejected']
+                                        .filter(status => {
+                                            // Convert current status to frontend format for comparison
+                                            const currentFrontendStatus = mapStatusToFrontend(selectedComplaintForStatus.status);
+                                            return status !== currentFrontendStatus;
+                                        })
+                                        .map(status => (
+                                            <button
+                                                key={status}
+                                                className={`status-option-btn status-${status}`}
+                                                onClick={() => handleStatusUpdate(selectedComplaintForStatus._id, status)}
+                                                disabled={statusUpdateInProgress[selectedComplaintForStatus._id]}
+                                            >
+                                                <div className="status-option-content">
+                                                    <div className={`status-icon-circle status-${status}`}>
+                                                        {status === 'pending' && '⏳'}
+                                                        {status === 'in-progress' && '🔄'}
+                                                        {status === 'resolved' && '✅'}
+                                                        {status === 'rejected' && '❌'}
+                                                    </div>
+                                                    <span className="status-option-label">
+                                                        {status.replace('-', ' ').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                            
+                            {statusUpdateInProgress[selectedComplaintForStatus._id] && (
+                                <div className="modal-loading">
+                                    <div className="modal-spinner"></div>
+                                    <span>Updating status...</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <Footer />
         </>
     );

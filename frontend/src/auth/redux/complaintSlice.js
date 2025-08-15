@@ -261,6 +261,57 @@ export const downvoteComplaint = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to update complaint status
+export const updateComplaintStatus = createAsyncThunk(
+  'complaints/updateStatus',
+  async ({ complaintId, status }, thunkAPI) => {
+    try {
+      console.log("Making API call to update complaint status...", { complaintId, status });
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('Authentication required');
+      }
+
+      console.log("Token found, making request to update complaint status");
+      const response = await axiosInstance.patch(`/complaints/${complaintId}/status`, { status });
+      console.log("Update complaint status API response:", response.data);
+      
+      // Try multiple ways to extract the data
+      let responseData;
+      if (response.data.data) {
+        responseData = response.data.data;
+      } else if (response.data.complaint) {
+        responseData = response.data.complaint;
+      } else {
+        responseData = response.data;
+      }
+      
+      console.log("Parsed update status response data:", responseData);
+      
+      const payload = {
+        complaintId,
+        status: responseData.status || status,
+        updatedAt: responseData.updatedAt || new Date().toISOString()
+      };
+      
+      console.log("Final payload for status update:", payload);
+      return payload;
+    } catch (error) {
+      console.error("Update complaint status API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to update complaint status';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const complaintSlice = createSlice({
   name: "complaints",
   initialState,
@@ -400,6 +451,38 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(downvoteComplaint.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Update complaint status cases
+      .addCase(updateComplaintStatus.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(updateComplaintStatus.fulfilled, (state, action) => {
+        console.log("Update status fulfilled with payload:", action.payload);
+        const { complaintId, status, updatedAt } = action.payload;
+        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
+        
+        // Try different ways to match the complaint ID
+        const complaint = state.complaints.find(c => 
+          c._id === complaintId || 
+          c._id?.toString() === complaintId?.toString() ||
+          c.id === complaintId ||
+          c.id?.toString() === complaintId?.toString()
+        );
+        
+        console.log("Found complaint for status update:", complaint);
+        
+        if (complaint) {
+          console.log("Before update - status:", complaint.status);
+          complaint.status = status;
+          complaint.updatedAt = updatedAt;
+          console.log("After update - status:", complaint.status);
+        } else {
+          console.error("Could not find complaint with ID:", complaintId);
+        }
+        state.error = null;
+      })
+      .addCase(updateComplaintStatus.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
