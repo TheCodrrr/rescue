@@ -1,0 +1,85 @@
+/* Toast Notifications Custom Styles */
+.toast-container {
+    z-index: 9999;
+}
+
+/* Custom toast styles with glassmorphism */
+.custom-toast {
+    background: rgba(30, 58, 138, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    border-radius: 16px !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-family: inherit !important;
+    font-size: 16px !important;
+    padding: 16px 20px !important;
+    max-width: 400px !important;
+    animation: slideInDown 0.3s ease-out !important;
+}
+
+.custom-toast-success {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3) !important;
+}
+
+.custom-toast-error {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3) !important;
+}
+
+.custom-toast-loading {
+    background: rgba(59, 130, 246, 0.2) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3) !important;
+}
+
+.custom-toast-warning {
+    background: rgba(245, 158, 11, 0.2) !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Toast icon styles */
+.custom-toast .toast-icon {
+    margin-right: 12px !important;
+    font-size: 20px !important;
+}
+
+/* Toast animation */
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Toast exit animation */
+@keyframes slideOutUp {
+    from {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* Responsive toast styles */
+@media (max-width: 480px) {
+    .custom-toast {
+        max-width: 90vw !important;
+        font-size: 15px !important;
+        padding: 14px 18px !important;
+        margin: 0 20px !important;
+    }
+}

@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, LogIn } from "lucide-react";
 import axiosInstance from "../api/axios";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "./redux/authSlice";
 
 
 export default function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         email: "",
@@ -65,7 +66,9 @@ export default function Login() {
                 
                 // Small delay before navigation to ensure toast is visible
                 setTimeout(() => {
-                    navigate("/");
+                    // Navigate to the intended destination or home page
+                    const redirectTo = location.state?.from?.pathname || "/";
+                    navigate(redirectTo, { replace: true });
                 }, 1000);
                 
                 // Reset form

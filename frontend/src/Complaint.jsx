@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import toast, { Toaster } from 'react-hot-toast';
 import "./Complaint.css";
+import "./Toast.css";
 import "leaflet/dist/leaflet.css";
 import Navbar from "./Navbar";
+import { submitComplaint, clearSuccess, clearError } from "./auth/redux/complaintSlice";
 
 export default function Complaint() {
+    const dispatch = useDispatch();
+    const { isSubmitting, success, error } = useSelector((state) => state.complaints);
+    const { isAuthenticated } = useSelector((state) => state.auth);
+    
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -18,7 +26,6 @@ export default function Complaint() {
     const [locationMethod, setLocationMethod] = useState('map'); // 'map', 'manual', 'current'
     const [manualLocationMethod, setManualLocationMethod] = useState('type'); // 'type', 'current'
     const [mapReady, setMapReady] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [userCurrentLocation, setUserCurrentLocation] = useState(null);
     const mapRef = useRef(null);
     const markerRef = useRef(null);
@@ -139,6 +146,70 @@ export default function Complaint() {
         };
     }, [locationMethod, userCurrentLocation]);
 
+    // Handle success and error states
+    useEffect(() => {
+        if (success) {
+            toast.success('🎉 Complaint submitted successfully!', {
+                duration: 4000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-success',
+                style: {
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
+                },
+            });
+            
+            // Reset form
+            setFormData({
+                title: '',
+                description: '',
+                category: '',
+                location: {
+                    latitude: null,
+                    longitude: null
+                },
+                address: ''
+            });
+            
+            // Reset location method to default
+            setLocationMethod('map');
+            setManualLocationMethod('type');
+            
+            // Clear map marker if it exists
+            if (markerRef.current && mapRef.current) {
+                mapRef.current.removeLayer(markerRef.current);
+                markerRef.current = null;
+            }
+            
+            // Clear success state
+            dispatch(clearSuccess());
+        }
+        
+        if (error) {
+            toast.error(`❌ ${error}`, {
+                duration: 5000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-error',
+                style: {
+                    background: 'rgba(239, 68, 68, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(239, 68, 68, 0.3)',
+                },
+            });
+            // Clear error state after showing it
+            dispatch(clearError());
+        }
+    }, [success, error, dispatch]);
+
     // Get user's current location on component mount
     useEffect(() => {
         getCurrentLocation()
@@ -177,6 +248,21 @@ export default function Complaint() {
                 location: location
             }));
             
+            toast.success('📍 Location detected successfully!', {
+                duration: 3000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-success',
+                style: {
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)',
+                },
+            });
+            
             // Try to get address
             try {
                 const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.latitude}&lon=${location.longitude}`);
@@ -191,54 +277,151 @@ export default function Complaint() {
                 console.error('Error getting address:', error);
             }
         } catch (error) {
-            alert('Error getting current location: ' + error.message);
+            toast.error(`🌍 Error getting location: ${error.message}`, {
+                duration: 4000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-error',
+                style: {
+                    background: 'rgba(239, 68, 68, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(239, 68, 68, 0.3)',
+                },
+            });
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to submit a complaint', {
+                duration: 4000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-warning',
+                style: {
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
+                },
+                icon: '🔐',
+            });
+            return;
+        }
+        
         // Validate form
         if (!formData.title || !formData.description || !formData.category || 
             !formData.location.latitude || !formData.location.longitude) {
-            alert('Please fill in all required fields');
+            toast.error('📝 Please fill in all required fields', {
+                duration: 4000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-warning',
+                style: {
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
+                },
+                icon: '⚠️',
+            });
             return;
         }
 
-        setIsSubmitting(true);
+        // Show submitting toast
+        toast.loading('📤 Submitting your complaint...', {
+            id: 'submitting',
+            position: 'top-center',
+            className: 'custom-toast custom-toast-loading',
+            style: {
+                background: 'rgba(59, 130, 246, 0.2)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(59, 130, 246, 0.4)',
+                color: '#fff',
+                fontWeight: '600',
+                borderRadius: '16px',
+                boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)',
+            },
+        });
+
+        // Dispatch the submitComplaint action
+        const complaintData = {
+            title: formData.title,
+            description: formData.description,
+            category: formData.category,
+            location: {
+                latitude: formData.location.latitude,
+                longitude: formData.location.longitude,
+                address: formData.address || null
+            }
+        };
+
+        console.log('Dispatching submitComplaint with data:', complaintData);
+        dispatch(submitComplaint(complaintData));
         
-        try {
-            // Here you would submit to your API
-            console.log('Submitting complaint:', formData);
-            
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            alert('Complaint submitted successfully!');
-            
-            // Reset form
-            setFormData({
-                title: '',
-                description: '',
-                category: '',
-                location: {
-                    latitude: null,
-                    longitude: null
-                },
-                address: ''
-            });
-            
-        } catch (error) {
-            console.error('Error submitting complaint:', error);
-            alert('Error submitting complaint. Please try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
+        // Dismiss the loading toast after a short delay
+        setTimeout(() => {
+            toast.dismiss('submitting');
+        }, 1000);
     };
 
     return (
         <>
             <Navbar />
+            <Toaster 
+                position="top-center"
+                reverseOrder={false}
+                gutter={8}
+                containerClassName="toast-container"
+                containerStyle={{ zIndex: 9999 }}
+                toastOptions={{
+                    className: 'custom-toast',
+                    duration: 4000,
+                    style: {
+                        background: 'rgba(30, 58, 138, 0.15)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#fff',
+                        fontFamily: 'inherit',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                        maxWidth: '400px',
+                        padding: '16px 20px',
+                    },
+                    success: {
+                        duration: 4000,
+                        iconTheme: {
+                            primary: '#10b981',
+                            secondary: '#fff',
+                        },
+                    },
+                    error: {
+                        duration: 5000,
+                        iconTheme: {
+                            primary: '#ef4444',
+                            secondary: '#fff',
+                        },
+                    },
+                    loading: {
+                        iconTheme: {
+                            primary: '#3b82f6',
+                            secondary: '#fff',
+                        },
+                    },
+                }}
+            />
             
             <div className="complaint-page">
                 <div className="complaint-container">
@@ -471,19 +654,27 @@ export default function Complaint() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="submit-btn"
+                                className={`submit-btn animated-button ${isSubmitting ? 'submitting' : ''}`}
                             >
                                 {isSubmitting ? (
                                     <>
                                         <div className="submit-spinner"></div>
-                                        Submitting...
+                                        <span className="submit-btn-text">Submitting...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                        </svg>
-                                        Submit Complaint
+                                            <svg viewBox="0 0 24 24" className="arr-2" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+                                                ></path>
+                                            </svg>
+                                            <span className="text">Submit</span>
+                                            <span className="circle"></span>
+                                            <svg viewBox="0 0 24 24" className="arr-1" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"
+                                                ></path>
+                                            </svg>
                                     </>
                                 )}
                             </button>

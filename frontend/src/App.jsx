@@ -3,6 +3,7 @@ import Login from './auth/Login'
 import Signup from './auth/Signup'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import NotFound from './NotFound'
+import ProtectedRoute from './ProtectedRoute'
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,11 +28,19 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/complain" element={<Complaint />} />
+          <Route path="/complain" element={
+            <ProtectedRoute>
+              <Complaint />
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/user" element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
-          <Route path="/user" element={<UserProfile />} />
         </Routes>
       </Router>
     </>
