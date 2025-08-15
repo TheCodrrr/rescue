@@ -80,15 +80,97 @@
     }
 }
 
+@keyframes backgroundShift {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes grain {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-100px, -100px);
+    }
+}
+
+@keyframes borderGlow {
+    0% {
+        opacity: 0.6;
+        box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+    }
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+    }
+}
+
+@keyframes sidebarGlow {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes headerGlow {
+    0% {
+        opacity: 0.4;
+        transform: scaleX(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
 /* UserProfile Container */
 .user-profile-container {
     min-height: 100vh;
     height: 100vh;
-    background: linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #7c3aed 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
     font-family: 'Inter', sans-serif;
     position: relative;
     overflow: hidden;
     display: flex;
+}
+
+/* Add special background effects to make it look important */
+.user-profile-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: backgroundShift 15s ease-in-out infinite alternate;
+}
+
+/* Add animated grain texture for premium feel */
+.user-profile-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    animation: grain 20s linear infinite;
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* Loading Container */
@@ -176,6 +258,29 @@
     border-right: 1px solid rgba(255, 255, 255, 0.15);
     z-index: 100;
     animation: slideInLeft 0.8s ease-out;
+    /* Add premium effects */
+    box-shadow: 
+        0 0 40px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Add subtle glow animation to sidebar */
+.profile-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(96, 165, 250, 0.3) 30%,
+        rgba(59, 130, 246, 0.5) 50%,
+        rgba(96, 165, 250, 0.3) 70%,
+        transparent 100%
+    );
+    animation: sidebarGlow 4s ease-in-out infinite alternate;
 }
 
 .sidebar-content {
@@ -197,13 +302,14 @@
 .logo-icon {
     width: 2.5rem;
     height: 2.5rem;
-    background: linear-gradient(135deg, #3b82f6, #7c3aed);
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }
 
 .logo-icon::before {
@@ -339,7 +445,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: linear-gradient(to bottom, #3b82f6, #7c3aed);
+    background: linear-gradient(to bottom, #3b82f6, #60a5fa);
     border-radius: 0 2px 2px 0;
 }
 
@@ -387,11 +493,35 @@
     margin-left: 320px;
     padding: 0;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
     top: 0;
+    /* Add premium styling */
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Add premium border glow effect */
+.profile-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(96, 165, 250, 0.6) 20%,
+        rgba(59, 130, 246, 0.8) 50%,
+        rgba(96, 165, 250, 0.6) 80%,
+        transparent 100%
+    );
+    animation: borderGlow 3s ease-in-out infinite alternate;
+    z-index: -1;
 }
 
 /* Back Button */
@@ -419,7 +549,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -496,6 +626,38 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+    /* Add premium styling */
+    padding: 2rem;
+    margin: 1rem 2rem 2rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 8px 32px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Add premium glow effect to header */
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(96, 165, 250, 0.6) 30%,
+        rgba(59, 130, 246, 0.8) 50%,
+        rgba(96, 165, 250, 0.6) 70%,
+        transparent 100%
+    );
+    animation: headerGlow 3s ease-in-out infinite alternate;
 }
 
 @media (min-width: 768px) {
