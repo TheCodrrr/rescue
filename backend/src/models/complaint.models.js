@@ -57,7 +57,7 @@ const complaintSchema = new mongoose.Schema({
     }],
     priority: {
         type: Number,
-        min: 1, 
+        min: 1,
         max: 10,
         default: 1,
     },
