@@ -312,6 +312,41 @@ export const updateComplaintStatus = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to delete a complaint
+export const deleteComplaint = createAsyncThunk(
+  'complaints/delete',
+  async (complaintId, thunkAPI) => {
+    try {
+      console.log("Making API call to delete complaint...", complaintId);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in localStorage");
+        return thunkAPI.rejectWithValue('Authentication required');
+      }
+
+      console.log("Token found, making request to delete complaint");
+      const response = await axiosInstance.delete(`/complaints/${complaintId}`);
+      console.log("Delete complaint API response:", response.data);
+      
+      return {
+        complaintId,
+        message: response.data.message || 'Complaint deleted successfully!'
+      };
+    } catch (error) {
+      console.error("Delete complaint API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to delete complaint';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const complaintSlice = createSlice({
   name: "complaints",
   initialState,
@@ -483,6 +518,28 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(updateComplaintStatus.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Delete complaint cases
+      .addCase(deleteComplaint.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(deleteComplaint.fulfilled, (state, action) => {
+        console.log("Delete complaint fulfilled with payload:", action.payload);
+        const { complaintId } = action.payload;
+        
+        // Remove the complaint from the state
+        state.complaints = state.complaints.filter(complaint => 
+          complaint._id !== complaintId && 
+          complaint._id?.toString() !== complaintId?.toString() &&
+          complaint.id !== complaintId &&
+          complaint.id?.toString() !== complaintId?.toString()
+        );
+        
+        console.log("Complaint deleted from state. Remaining complaints:", state.complaints.length);
+        state.error = null;
+      })
+      .addCase(deleteComplaint.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

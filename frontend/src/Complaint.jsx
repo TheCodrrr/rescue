@@ -13,7 +13,8 @@ import {
     getUserComplaints,
     upvoteComplaint,
     downvoteComplaint,
-    updateComplaintStatus
+    updateComplaintStatus,
+    deleteComplaint
 } from './auth/redux/complaintSlice';
 
 export default function Complaint() {
@@ -35,6 +36,9 @@ export default function Complaint() {
     const [statusModalOpen, setStatusModalOpen] = useState(false); // Track status modal
     const [selectedComplaintForStatus, setSelectedComplaintForStatus] = useState(null); // Selected complaint for status update
     const [scrollPosition, setScrollPosition] = useState(0); // Track scroll position for modal
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Track delete confirmation modal
+    const [selectedComplaintForDelete, setSelectedComplaintForDelete] = useState(null); // Selected complaint for deletion
+    const [deleteInProgress, setDeleteInProgress] = useState({}); // Track delete operations
     const [searchQuery, setSearchQuery] = useState(''); // Search query for complaints
     const [selectedCategory, setSelectedCategory] = useState('all'); // Selected category filter
     const [formData, setFormData] = useState({
@@ -285,21 +289,25 @@ export default function Complaint() {
         };
     }, []);
 
-    // Handle ESC key to close modal
+    // Handle ESC key to close modals
     useEffect(() => {
         const handleEscKey = (event) => {
-            if (event.key === 'Escape' && statusModalOpen) {
-                closeStatusModal();
+            if (event.key === 'Escape') {
+                if (statusModalOpen) {
+                    closeStatusModal();
+                } else if (deleteModalOpen) {
+                    closeDeleteModal();
+                }
             }
         };
 
-        if (statusModalOpen) {
+        if (statusModalOpen || deleteModalOpen) {
             document.addEventListener('keydown', handleEscKey);
             return () => {
                 document.removeEventListener('keydown', handleEscKey);
             };
         }
-    }, [statusModalOpen]);
+    }, [statusModalOpen, deleteModalOpen]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -687,6 +695,94 @@ export default function Complaint() {
         
         // Restore scroll position
         window.scrollTo(0, scrollPosition);
+    };
+
+    // Delete modal handlers
+    const openDeleteModal = (complaint) => {
+        // Save current scroll position
+        const currentScrollY = window.scrollY;
+        setScrollPosition(currentScrollY);
+        
+        setSelectedComplaintForDelete(complaint);
+        setDeleteModalOpen(true);
+        
+        // Apply scroll lock
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${currentScrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        document.documentElement.classList.add('modal-open');
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteModalOpen(false);
+        setSelectedComplaintForDelete(null);
+        
+        // Restore scroll position and remove scroll lock
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
+        document.documentElement.classList.remove('modal-open');
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollPosition);
+    };
+
+    // Delete complaint handler
+    const handleDeleteComplaint = async (complaintId) => {
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to delete complaint', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+        
+        // Set delete in progress
+        setDeleteInProgress(prev => ({ ...prev, [complaintId]: true }));
+        
+        try {
+            const result = await dispatch(deleteComplaint(complaintId));
+            if (deleteComplaint.fulfilled.match(result)) {
+                toast.success('Complaint deleted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+                // Close modal properly using the closeDeleteModal function
+                closeDeleteModal();
+            } else {
+                toast.error('❌ Failed to delete complaint. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        } catch (error) {
+            toast.error('❌ Error while deleting complaint. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            // Clear delete in progress
+            setDeleteInProgress(prev => ({ ...prev, [complaintId]: false }));
+        }
     };
 
     const renderStars = (rating) => {
@@ -1232,9 +1328,25 @@ export default function Complaint() {
                                                             {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
                                                         </span>
                                                     </div>
-                                                    <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
-                                                        {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
-                                                    </span>
+                                                    <div className="card-header-right">
+                                                        <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
+                                                            {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
+                                                        </span>
+                                                        <button
+                                                            className="delete-btn-icon"
+                                                            onClick={() => openDeleteModal(complaint)}
+                                                            disabled={deleteInProgress[complaint._id]}
+                                                            title="Delete Complaint"
+                                                        >
+                                                            {deleteInProgress[complaint._id] ? (
+                                                                <div className="btn-spinner-small"></div>
+                                                            ) : (
+                                                                <svg className="delete-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div className="complaint-card-body">
@@ -1435,6 +1547,66 @@ export default function Complaint() {
                                     <span>Updating status...</span>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteModalOpen && selectedComplaintForDelete && (
+                <div className="delete-modal-overlay" onClick={closeDeleteModal}>
+                    <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="delete-modal-header">
+                            <h3 className="delete-modal-title">Delete Complaint</h3>
+                            <button className="delete-modal-close-btn" onClick={closeDeleteModal}>
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div className="delete-modal-content">
+                            <div className="delete-modal-icon">
+                                <svg className="delete-warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            
+                            <div className="delete-confirmation-content">
+                                <h4 className="delete-complaint-title">{selectedComplaintForDelete.title}</h4>
+                                <p className="delete-warning-text">
+                                    Are you sure you want to delete this complaint? This action cannot be undone.
+                                </p>
+                                
+                                <div className="delete-actions">
+                                    <button
+                                        className="cancel-delete-btn"
+                                        onClick={closeDeleteModal}
+                                        disabled={deleteInProgress[selectedComplaintForDelete._id]}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className="confirm-delete-btn"
+                                        onClick={() => handleDeleteComplaint(selectedComplaintForDelete._id)}
+                                        disabled={deleteInProgress[selectedComplaintForDelete._id]}
+                                    >
+                                        {deleteInProgress[selectedComplaintForDelete._id] ? (
+                                            <>
+                                                <div className="btn-spinner"></div>
+                                                <span>Deleting...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="delete-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                <span>Delete Complaint</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
