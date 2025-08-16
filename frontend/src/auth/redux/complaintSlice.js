@@ -350,7 +350,7 @@ export const deleteComplaint = createAsyncThunk(
 // Add comment to complaint
 export const addComment = createAsyncThunk(
   'complaints/addComment',
-  async ({ complaintId, content }, thunkAPI) => {
+  async ({ complaintId, content, rating = 5 }, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
       
@@ -358,13 +358,30 @@ export const addComment = createAsyncThunk(
         return thunkAPI.rejectWithValue('Authentication required. Please log in to add a comment.');
       }
 
-      console.log(`Adding comment to complaint ${complaintId}`);
+      // Get user ID from auth state
+      const state = thunkAPI.getState();
+      const user = state.auth.user;
       
-      const response = await axiosInstance.post(`/complaints/${complaintId}/comments`, {
-        content
-      });
+      if (!user) {
+        return thunkAPI.rejectWithValue('User information not available. Please log in again.');
+      }
+
+      const userId = user._id || user.id;
+
+      console.log(`Adding comment to complaint ${complaintId} by user ${userId}`);
       
-      console.log("Add comment API response:", response.data);
+      const requestBody = {
+        complaint_id: complaintId,
+        user_id: userId,
+        rating: rating,
+        comment: content
+      };
+
+      console.log("Comment request body:", requestBody);
+      
+      const response = await axiosInstance.post(`/feedbacks/`, requestBody);
+      
+      console.log("Add comment API response:", response);
       
       return {
         complaintId,
@@ -377,6 +394,43 @@ export const addComment = createAsyncThunk(
                           error.response?.data?.error || 
                           error.message || 
                           'Failed to add comment';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Fetch comments for a complaint
+export const fetchComments = createAsyncThunk(
+  'complaints/fetchComments',
+  async (complaintId, thunkAPI) => {
+    try {
+      console.log(`Fetching comments for complaint ${complaintId}`);
+      
+      const response = await axiosInstance.get(`/feedbacks/complaint/${complaintId}`);
+      
+      console.log("Fetch comments API response:", response.data);
+      console.log("Complete response:", JSON.stringify(response.data, null, 2));
+      
+      // The response.data.data contains an array of comments directly
+      const commentsArray = response.data.data || [];
+      
+      console.log("Extracted comments array:", commentsArray);
+      console.log("Number of comments found:", commentsArray.length);
+      
+      return {
+        complaintId,
+        comments: commentsArray,
+        complaintData: response.data
+      };
+    } catch (error) {
+      console.error("Fetch comments error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to fetch comments';
       
       return thunkAPI.rejectWithValue(errorMessage);
     }
@@ -603,6 +657,36 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(addComment.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Fetch comments cases
+      .addCase(fetchComments.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchComments.fulfilled, (state, action) => {
+        console.log("Fetch comments fulfilled with payload:", action.payload);
+        const { complaintId, comments } = action.payload;
+        
+        // Find the complaint and update its comments
+        const complaintIndex = state.complaints.findIndex(complaint => 
+          complaint._id === complaintId || 
+          complaint._id?.toString() === complaintId?.toString() ||
+          complaint.id === complaintId ||
+          complaint.id?.toString() === complaintId?.toString()
+        );
+        
+        if (complaintIndex !== -1) {
+          // Update the comments for this complaint
+          state.complaints[complaintIndex].comments = comments;
+          console.log(`Updated comments for complaint ${complaintId}:`, comments);
+        } else {
+          console.log(`Complaint not found in state for ID: ${complaintId}`);
+        }
+        
+        state.error = null;
+      })
+      .addCase(fetchComments.rejected, (state, action) => {
+        console.error("Fetch comments failed:", action.payload);
         state.error = action.payload;
       });
   },

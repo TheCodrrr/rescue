@@ -15,7 +15,8 @@ import {
     downvoteComplaint,
     updateComplaintStatus,
     deleteComplaint,
-    addComment
+    addComment,
+    fetchComments
 } from './auth/redux/complaintSlice';
 
 export default function Complaint() {
@@ -46,6 +47,7 @@ export default function Complaint() {
     const [selectedComplaintForComments, setSelectedComplaintForComments] = useState(null); // Selected complaint for comments
     const [newComment, setNewComment] = useState(''); // New comment input
     const [commentInProgress, setCommentInProgress] = useState(false); // Track comment submission
+    const [commentRating, setCommentRating] = useState(5); // Rating for comment (1-5 stars)
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -825,6 +827,10 @@ export default function Complaint() {
         setSelectedComplaintForComments(complaint);
         setCommentModalOpen(true);
         setNewComment('');
+        setCommentRating(5); // Reset rating to 5 stars
+        
+        // Fetch comments for this complaint
+        dispatch(fetchComments(complaint._id));
         
         // Apply scroll lock
         const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -842,6 +848,7 @@ export default function Complaint() {
         setCommentModalOpen(false);
         setSelectedComplaintForComments(null);
         setNewComment('');
+        setCommentRating(5); // Reset rating
         
         // Restore scroll position and remove scroll lock
         document.body.style.overflow = '';
@@ -880,23 +887,22 @@ export default function Complaint() {
         try {
             const result = await dispatch(addComment({
                 complaintId: selectedComplaintForComments._id,
-                content: newComment.trim()
+                content: newComment.trim(),
+                rating: commentRating
             }));
 
             if (addComment.fulfilled.match(result)) {
-                // Update the local complaint data to reflect the new comment
-                const newCommentData = result.payload.comment;
-                setSelectedComplaintForComments(prev => ({
-                    ...prev,
-                    comments: [...(prev.comments || []), newCommentData]
-                }));
-
-                // Clear the input
+                // Clear the input first
                 setNewComment('');
+                setCommentRating(5); // Reset rating
                 
-                toast.success('💬 Comment added successfully!', {
+                // Fetch updated comments from server
+                await dispatch(fetchComments(selectedComplaintForComments._id));
+                
+                toast.success('Comment added successfully!', {
                     duration: 3000,
                     position: 'top-center',
+                    icon: '💬',
                 });
             } else {
                 // Handle the error case
@@ -1738,7 +1744,14 @@ export default function Complaint() {
                 <div className="modal-overlay comment-modal-overlay">
                     <div className="comment-modal">
                         <div className="modal-header">
-                            <h3 className="modal-title">Comments</h3>
+                            <div className="header-content">
+                                <div className="complaint-info-inline">
+                                    <h4 className="complaint-title-modal">{selectedComplaintForComments.title}</h4>
+                                    <span className="complaint-category-badge">
+                                        {getCategoryIcon(selectedComplaintForComments.category)} {selectedComplaintForComments.category}
+                                    </span>
+                                </div>
+                            </div>
                             <button 
                                 className="modal-close-btn"
                                 onClick={closeCommentModal}
@@ -1750,77 +1763,125 @@ export default function Complaint() {
                         </div>
                         
                         <div className="comment-modal-content">
-                            <div className="complaint-info">
-                                <h4 className="complaint-title-modal">{selectedComplaintForComments.title}</h4>
-                                <p className="complaint-category-modal">
-                                    {getCategoryIcon(selectedComplaintForComments.category)} {selectedComplaintForComments.category}
-                                </p>
-                            </div>
+                            <h3 className="comments-section-title">Comments</h3>
 
                             <div className="comments-section">
                                 <div className="comments-list">
-                                    {selectedComplaintForComments.comments && selectedComplaintForComments.comments.length > 0 ? (
-                                        selectedComplaintForComments.comments.map((comment, index) => (
-                                            <div key={comment.id || index} className="comment-item">
-                                                <div className="comment-header">
-                                                    <div className="comment-author">
-                                                        <svg className="user-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
-                                                        <span className="author-name">{comment.author}</span>
+                                    {(() => {
+                                        // Get the updated complaint from Redux store
+                                        const updatedComplaint = complaints.find(c => 
+                                            c._id === selectedComplaintForComments._id || 
+                                            c.id === selectedComplaintForComments._id
+                                        );
+                                        const commentsToShow = updatedComplaint?.comments || selectedComplaintForComments.comments || [];
+                                        
+                                        return commentsToShow.length > 0 ? (
+                                            commentsToShow.map((comment, index) => (
+                                                <div key={comment._id || comment.id || index} className="comment-item">
+                                                    <div className="comment-header">
+                                                        <div className="comment-author">
+                                                            {comment.user_id?.profileImage ? (
+                                                                <img 
+                                                                    className="user-profile-image" 
+                                                                    src={comment.user_id.profileImage} 
+                                                                    alt={comment.user_id?.name || 'User'}
+                                                                    onError={(e) => {
+                                                                        e.target.style.display = 'none';
+                                                                        e.target.nextElementSibling.style.display = 'block';
+                                                                    }}
+                                                                />
+                                                            ) : null}
+                                                            <svg 
+                                                                className="user-icon" 
+                                                                fill="none" 
+                                                                stroke="currentColor" 
+                                                                viewBox="0 0 24 24"
+                                                                style={{display: comment.user_id?.profileImage ? 'none' : 'block'}}
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                            </svg>
+                                                            <span className="author-name">
+                                                                {comment.user_id?.name || comment.author || 'Anonymous'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="comment-date">
+                                                            {formatDate(comment.createdAt || comment.created_at)}
+                                                        </span>
                                                     </div>
-                                                    <span className="comment-date">
-                                                        {formatDate(comment.createdAt)}
-                                                    </span>
+                                                    <div className="comment-body">
+                                                        <div className="comment-content">
+                                                            {comment.comment || comment.content}
+                                                        </div>
+                                                        {comment.rating && (
+                                                            <div className="comment-rating">
+                                                                {renderStars(comment.rating)}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="comment-content">
-                                                    {comment.content}
-                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-comments">
+                                                <svg className="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                                                </svg>
+                                                <p>No comments yet. Be the first to comment!</p>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="no-comments">
-                                            <svg className="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
-                                            </svg>
-                                            <p>No comments yet. Be the first to comment!</p>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
                                 </div>
 
                                 <div className="add-comment-section">
-                                    <div className="comment-input-wrapper">
-                                        <textarea
-                                            className="comment-input"
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
-                                            placeholder="Write a comment..."
-                                            rows={3}
-                                            maxLength={500}
-                                        />
-                                        <div className="comment-input-footer">
-                                            <span className="character-count">
-                                                {newComment.length}/500
-                                            </span>
-                                            <button
-                                                className="submit-comment-btn"
-                                                onClick={handleCommentSubmit}
-                                                disabled={commentInProgress || !newComment.trim()}
-                                            >
-                                                {commentInProgress ? (
-                                                    <>
-                                                        <div className="comment-spinner"></div>
-                                                        <span>Posting...</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg className="send-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                                        </svg>
-                                                        <span>Comment</span>
-                                                    </>
-                                                )}
-                                            </button>
+                                    <div className="comment-input-container">
+                                        <div className="input-with-rating">
+                                            <div className="comment-input-wrapper">
+                                                <textarea
+                                                    className="comment-input"
+                                                    value={newComment}
+                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                    placeholder="Write a comment..."
+                                                    rows={3}
+                                                    maxLength={500}
+                                                />
+                                                <span className="character-count-overlay">
+                                                    {newComment.length}/500
+                                                </span>
+                                            </div>
+                                            <div className="rating-section-inline">
+                                                <div className="rating-left">
+                                                    <label className="rating-label">Rate:</label>
+                                                    <div className="star-rating">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <span
+                                                                key={star}
+                                                                className={`star ${star <= commentRating ? 'filled' : ''}`}
+                                                                onClick={() => setCommentRating(star)}
+                                                            >
+                                                                ★
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    className="submit-comment-btn-rating"
+                                                    onClick={handleCommentSubmit}
+                                                    disabled={commentInProgress || !newComment.trim()}
+                                                >
+                                                    {commentInProgress ? (
+                                                        <>
+                                                            <div className="comment-spinner-small"></div>
+                                                            <span>Posting...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="send-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                            </svg>
+                                                            <span>Comment</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
