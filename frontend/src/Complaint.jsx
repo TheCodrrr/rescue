@@ -16,13 +16,15 @@ import {
     updateComplaintStatus,
     deleteComplaint,
     addComment,
-    fetchComments
+    fetchComments,
+    updateComment,
+    removeComment
 } from './auth/redux/complaintSlice';
 
 export default function Complaint() {
     const dispatch = useDispatch();
     const { isSubmitting, success, error, complaints, isLoading } = useSelector((state) => state.complaints);
-    const { isAuthenticated } = useSelector((state) => state.auth);
+    const { isAuthenticated, user } = useSelector((state) => state.auth);
     
     // Get initial tab from URL params or default to 'register'
     const getInitialTab = () => {
@@ -48,6 +50,12 @@ export default function Complaint() {
     const [newComment, setNewComment] = useState(''); // New comment input
     const [commentInProgress, setCommentInProgress] = useState(false); // Track comment submission
     const [commentRating, setCommentRating] = useState(5); // Rating for comment (1-5 stars)
+    const [editingComment, setEditingComment] = useState(null); // Track which comment is being edited
+    const [editedCommentText, setEditedCommentText] = useState(''); // Edited comment text
+    const [editedCommentRating, setEditedCommentRating] = useState(5); // Edited comment rating
+    const [editInProgress, setEditInProgress] = useState(false); // Track edit submission
+    const [deletingComment, setDeletingComment] = useState(null); // Track which comment is being deleted
+    const [updatingComment, setUpdatingComment] = useState(null); // Track which comment is being updated
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -263,6 +271,20 @@ export default function Complaint() {
             dispatch(getUserComplaints());
         }
     }, [activeTab, isAuthenticated, dispatch]);
+
+    // Fetch comment counts for all complaints after they are loaded
+    useEffect(() => {
+        if (complaints && complaints.length > 0 && activeTab === 'view') {
+            // Fetch comments for each complaint to get accurate counts
+            // Only fetch if comments haven't been loaded yet
+            complaints.forEach(complaint => {
+                if (complaint._id && (!complaint.comments || complaint.comments.length === undefined)) {
+                    console.log(`Fetching comments for complaint ${complaint._id} to get accurate count`);
+                    dispatch(fetchComments(complaint._id));
+                }
+            });
+        }
+    }, [complaints, activeTab, dispatch]);
 
     // Handle browser back/forward navigation
     useEffect(() => {
@@ -849,6 +871,9 @@ export default function Complaint() {
         setSelectedComplaintForComments(null);
         setNewComment('');
         setCommentRating(5); // Reset rating
+        setDeletingComment(null); // Reset delete animation
+        setUpdatingComment(null); // Reset update animation
+        cancelEditingComment(); // Reset edit state
         
         // Restore scroll position and remove scroll lock
         document.body.style.overflow = '';
@@ -921,6 +946,111 @@ export default function Complaint() {
         } finally {
             setCommentInProgress(false);
         }
+    };
+
+    // Start editing a comment
+    const startEditingComment = (comment) => {
+        setEditingComment(comment._id || comment.id);
+        setEditedCommentText(comment.comment || comment.content);
+        setEditedCommentRating(comment.rating || 5);
+    };
+
+    // Cancel editing a comment
+    const cancelEditingComment = () => {
+        setEditingComment(null);
+        setEditedCommentText('');
+        setEditedCommentRating(5);
+    };
+
+    // Save edited comment
+    const saveEditedComment = async (commentId) => {
+        if (!editedCommentText.trim()) {
+            toast.error('Comment cannot be empty', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        setEditInProgress(true);
+        setUpdatingComment(commentId); // Start update animation
+        
+        try {
+            // You'll need to implement updateComment in your Redux slice
+            const result = await dispatch(updateComment({
+                commentId,
+                comment: editedCommentText.trim(),
+                rating: editedCommentRating
+            }));
+
+            if (result.type === 'comments/updateComment/fulfilled') {
+                // Wait for animation before refreshing
+                setTimeout(async () => {
+                    await dispatch(fetchComments(selectedComplaintForComments._id));
+                    setUpdatingComment(null); // Reset animation state
+                    
+                    toast.success('Comment updated successfully!', {
+                        duration: 3000,
+                        position: 'top-center',
+                        icon: '✏️',
+                    });
+                }, 500); // 500ms animation duration for update
+                
+                cancelEditingComment();
+            } else {
+                setUpdatingComment(null); // Reset animation state
+                toast.error('Failed to update comment', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        } catch (error) {
+            setUpdatingComment(null); // Reset animation state
+            toast.error('Failed to update comment. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            setEditInProgress(false);
+        }
+    };
+
+    // Delete a comment
+    const deleteComment = async (commentId) => {
+        // Start delete animation
+        setDeletingComment(commentId);
+        
+        // Wait for animation to complete before making API call
+        setTimeout(async () => {
+            try {
+                const result = await dispatch(removeComment(commentId));
+
+                if (result.type === 'comments/removeComment/fulfilled') {
+                    // Refresh comments after animation
+                    await dispatch(fetchComments(selectedComplaintForComments._id));
+                    
+                    toast.success('Comment deleted successfully!', {
+                        duration: 3000,
+                        position: 'top-center',
+                        icon: '🗑️',
+                    });
+                } else {
+                    // Reset animation state if API fails
+                    setDeletingComment(null);
+                    toast.error('Failed to delete comment', {
+                        duration: 3000,
+                        position: 'top-center',
+                    });
+                }
+            } catch (error) {
+                // Reset animation state if error occurs
+                setDeletingComment(null);
+                toast.error('Failed to delete comment. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+        }, 300); // 300ms animation duration
     };
 
     // Function to highlight matching text
@@ -1776,8 +1906,17 @@ export default function Complaint() {
                                         const commentsToShow = updatedComplaint?.comments || selectedComplaintForComments.comments || [];
                                         
                                         return commentsToShow.length > 0 ? (
-                                            commentsToShow.map((comment, index) => (
-                                                <div key={comment._id || comment.id || index} className="comment-item">
+                                            commentsToShow.map((comment, index) => {
+                                                const isEditing = editingComment === (comment._id || comment.id);
+                                                const isOwner = comment.user_id?._id === user?.id || comment.user_id?.id === user?.id;
+                                                const isDeleting = deletingComment === (comment._id || comment.id);
+                                                const isUpdating = updatingComment === (comment._id || comment.id);
+                                                
+                                                return (
+                                                <div 
+                                                    key={comment._id || comment.id || index} 
+                                                    className={`comment-item ${isDeleting ? 'deleting' : ''} ${isUpdating ? 'updating' : ''}`}
+                                                >
                                                     <div className="comment-header">
                                                         <div className="comment-author">
                                                             {comment.user_id?.profileImage ? (
@@ -1804,22 +1943,102 @@ export default function Complaint() {
                                                                 {comment.user_id?.name || comment.author || 'Anonymous'}
                                                             </span>
                                                         </div>
-                                                        <span className="comment-date">
-                                                            {formatDate(comment.createdAt || comment.created_at)}
-                                                        </span>
+                                                        <div className="comment-actions">
+                                                            <span className="comment-date">
+                                                                {formatDate(comment.createdAt || comment.created_at)}
+                                                            </span>
+                                                            {isOwner && (
+                                                                <div className="comment-action-buttons">
+                                                                    {!isEditing ? (
+                                                                        <>
+                                                                            <button 
+                                                                                className="comment-action-btn edit-btn"
+                                                                                onClick={() => startEditingComment(comment)}
+                                                                                title="Edit comment"
+                                                                            >
+                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                            <button 
+                                                                                className="comment-action-btn delete-btn"
+                                                                                onClick={() => deleteComment(comment._id || comment.id)}
+                                                                                title="Delete comment"
+                                                                            >
+                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <button 
+                                                                                className="comment-action-btn save-btn"
+                                                                                onClick={() => saveEditedComment(comment._id || comment.id)}
+                                                                                disabled={editInProgress}
+                                                                                title="Save changes"
+                                                                            >
+                                                                                {editInProgress ? (
+                                                                                    <div className="comment-spinner-small"></div>
+                                                                                ) : (
+                                                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                                    </svg>
+                                                                                )}
+                                                                            </button>
+                                                                            <button 
+                                                                                className="comment-action-btn cancel-btn"
+                                                                                onClick={cancelEditingComment}
+                                                                                disabled={editInProgress}
+                                                                                title="Cancel editing"
+                                                                            >
+                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <div className="comment-body">
                                                         <div className="comment-content">
-                                                            {comment.comment || comment.content}
+                                                            {isEditing ? (
+                                                                <textarea
+                                                                    className="edit-comment-input"
+                                                                    value={editedCommentText}
+                                                                    onChange={(e) => setEditedCommentText(e.target.value)}
+                                                                    placeholder="Edit your comment..."
+                                                                    maxLength={500}
+                                                                />
+                                                            ) : (
+                                                                comment.comment || comment.content
+                                                            )}
                                                         </div>
                                                         {comment.rating && (
                                                             <div className="comment-rating">
-                                                                {renderStars(comment.rating)}
+                                                                {isEditing ? (
+                                                                    <div className="edit-rating">
+                                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                                            <span
+                                                                                key={star}
+                                                                                className={`star editable ${star <= editedCommentRating ? 'filled' : ''}`}
+                                                                                onClick={() => setEditedCommentRating(star)}
+                                                                            >
+                                                                                ★
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    renderStars(comment.rating)
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>
                                                 </div>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <div className="no-comments">
                                                 <svg className="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

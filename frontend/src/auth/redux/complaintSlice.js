@@ -437,6 +437,67 @@ export const fetchComments = createAsyncThunk(
   }
 );
 
+// Update a comment
+export const updateComment = createAsyncThunk(
+  'comments/updateComment',
+  async ({ commentId, comment, rating }, thunkAPI) => {
+    try {
+      console.log(`Updating comment ${commentId}`, { comment, rating });
+      
+      const response = await axiosInstance.patch(`/feedbacks/${commentId}`, {
+        comment,
+        rating
+      });
+      
+      console.log("Update comment API response:", response.data);
+      
+      return {
+        commentId,
+        updatedComment: response.data.data || response.data
+      };
+    } catch (error) {
+      console.error("Update comment error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to update comment';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Delete a comment
+export const removeComment = createAsyncThunk(
+  'comments/removeComment',
+  async (commentId, thunkAPI) => {
+    try {
+      console.log(`Deleting comment ${commentId}`);
+      
+      const response = await axiosInstance.delete(`/feedbacks/${commentId}`);
+      
+      console.log("Delete comment API response:", response.data);
+      
+      return {
+        commentId,
+        message: response.data.message || 'Comment deleted successfully'
+      };
+    } catch (error) {
+      console.error("Delete comment error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to delete comment';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const complaintSlice = createSlice({
   name: "complaints",
   initialState,
@@ -687,6 +748,38 @@ const complaintSlice = createSlice({
       })
       .addCase(fetchComments.rejected, (state, action) => {
         console.error("Fetch comments failed:", action.payload);
+        state.error = action.payload;
+      })
+      // Update comment cases
+      .addCase(updateComment.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateComment.fulfilled, (state, action) => {
+        console.log("Update comment fulfilled with payload:", action.payload);
+        state.isLoading = false;
+        state.error = null;
+        // Note: We'll refresh comments after update, so no need to update state here
+      })
+      .addCase(updateComment.rejected, (state, action) => {
+        console.error("Update comment failed:", action.payload);
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Remove comment cases
+      .addCase(removeComment.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(removeComment.fulfilled, (state, action) => {
+        console.log("Remove comment fulfilled with payload:", action.payload);
+        state.isLoading = false;
+        state.error = null;
+        // Note: We'll refresh comments after deletion, so no need to update state here
+      })
+      .addCase(removeComment.rejected, (state, action) => {
+        console.error("Remove comment failed:", action.payload);
+        state.isLoading = false;
         state.error = action.payload;
       });
   },
