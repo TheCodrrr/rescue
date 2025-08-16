@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Feedback } from './feedback.models.js';
 
 const complaintSchema = new mongoose.Schema({
     user_id: {
@@ -82,5 +83,15 @@ const complaintSchema = new mongoose.Schema({
         default: null,
     }
 }, { timestamps: true });
+
+complaintSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+    try {
+        await Feedback.deleteMany({ complaint_id: this._id });
+        console.log("Deleted related feedbacks");
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
 
 export const Complaint = mongoose.model('complaint', complaintSchema);
