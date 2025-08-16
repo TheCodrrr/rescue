@@ -71,11 +71,11 @@ const complaintSchema = new mongoose.Schema({
         ref: 'user',
         default: null
     },
-    feedback_id: {
+    feedback_ids: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'feedback',
         default: null
-    },
+    }],
     assignedDepartment: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "department",

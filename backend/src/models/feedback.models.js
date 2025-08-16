@@ -1,9 +1,15 @@
 import mongoose, { Schema } from "mongoose"
 
 const feedbackSchema = new mongoose.Schema({
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true,
+    },
     complaint_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "complaint",
+        required: true
     },
     rating: {
         type: Number,
@@ -13,6 +19,7 @@ const feedbackSchema = new mongoose.Schema({
     },
     comment: {
         type: String,
+        required: true,
     }
 }, { timestamps: true })
 

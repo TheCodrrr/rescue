@@ -47,7 +47,7 @@ const getComplaintById = asyncHandler(async (req, res) => {
         .populate("evidence_ids")
         .populate("votedUsers", "name email profile_image")
         .populate("assigned_officer_id", "name email profile_image")
-        .populate("feedback_id", "complaint_id rating comment createdAt updatedAt");
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt");
 
     if (!complaint) {
         throw new ApiError(404, "Complaint not found");
@@ -74,7 +74,7 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         .populate("evidence_ids")
         .populate("votedUsers", "name email profile_image")
         .populate("assigned_officer_id", "name email profile_image")
-        .populate("feedback_id", "complaint_id rating comment createdAt updatedAt");
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt");
 
     console.log("User ID:", userId);
     if (!complaints || complaints.length === 0) {
