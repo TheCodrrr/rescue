@@ -1515,10 +1515,18 @@
 }
 
 /* Default hover for other vote buttons that don't have specific hover styles */
-.complaint-voting .vote-btn:hover:not(.upvote-btn):not(.downvote-btn):not(:disabled):not(.voting) {
+.complaint-voting .vote-btn:hover:not(.upvote-btn):not(.downvote-btn):not(.comment-btn):not(:disabled):not(.voting) {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
+}
+
+.complaint-voting .comment-btn:hover:not(:disabled) {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .vote-icon {
@@ -2445,6 +2453,310 @@ html.modal-open {
 .confirm-delete-btn .delete-icon {
     width: 1rem;
     height: 1rem;
+}
+
+/* Comment Modal Styles */
+.comment-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    overflow-y: auto;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.comment-modal {
+    background: rgba(30, 58, 138, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.comment-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-modal .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.comment-modal-content {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.complaint-info {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.complaint-title-modal {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+}
+
+.complaint-category-modal {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.comments-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.comments-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.comment-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.comment-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #60a5fa;
+}
+
+.author-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.comment-date {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.comment-content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.no-comments {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.no-comments-icon {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-comments p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.add-comment-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+}
+
+.comment-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: all 0.3s ease;
+}
+
+.comment-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: rgba(96, 165, 250, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.comment-input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.character-count {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.submit-comment-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: none;
+    border-radius: 0.8rem;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.submit-comment-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.submit-comment-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    background: #6b7280;
+}
+
+.send-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.comment-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Design for Comment Modal */
+@media (max-width: 640px) {
+    .comment-modal {
+        margin: 0.5rem;
+        max-height: 95vh;
+        border-radius: 1rem;
+    }
+
+    .comment-modal .modal-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .comment-modal .modal-title {
+        font-size: 1.25rem;
+    }
+
+    .comment-modal-content {
+        padding: 1.5rem;
+    }
+
+    .comments-list {
+        max-height: 250px;
+    }
+
+    .comment-input {
+        min-height: 70px;
+        font-size: 0.9rem;
+    }
+
+    .submit-comment-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+    }
 }
 
 /* Card Header Right Section */

@@ -347,6 +347,42 @@ export const deleteComplaint = createAsyncThunk(
   }
 );
 
+// Add comment to complaint
+export const addComment = createAsyncThunk(
+  'complaints/addComment',
+  async ({ complaintId, content }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required. Please log in to add a comment.');
+      }
+
+      console.log(`Adding comment to complaint ${complaintId}`);
+      
+      const response = await axiosInstance.post(`/complaints/${complaintId}/comments`, {
+        content
+      });
+      
+      console.log("Add comment API response:", response.data);
+      
+      return {
+        complaintId,
+        comment: response.data.data || response.data
+      };
+    } catch (error) {
+      console.error("Add comment error:", error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to add comment';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const complaintSlice = createSlice({
   name: "complaints",
   initialState,
@@ -540,6 +576,33 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(deleteComplaint.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Add comment cases
+      .addCase(addComment.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(addComment.fulfilled, (state, action) => {
+        const { complaintId, comment } = action.payload;
+        
+        // Find and update the complaint with the new comment
+        const complaintIndex = state.complaints.findIndex(
+          complaint => 
+            complaint._id?.toString() === complaintId?.toString() ||
+            complaint.id === complaintId ||
+            complaint.id?.toString() === complaintId?.toString()
+        );
+        
+        if (complaintIndex !== -1) {
+          if (!state.complaints[complaintIndex].comments) {
+            state.complaints[complaintIndex].comments = [];
+          }
+          state.complaints[complaintIndex].comments.push(comment);
+        }
+        
+        state.error = null;
+      })
+      .addCase(addComment.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

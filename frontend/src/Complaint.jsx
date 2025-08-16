@@ -14,7 +14,8 @@ import {
     upvoteComplaint,
     downvoteComplaint,
     updateComplaintStatus,
-    deleteComplaint
+    deleteComplaint,
+    addComment
 } from './auth/redux/complaintSlice';
 
 export default function Complaint() {
@@ -41,6 +42,10 @@ export default function Complaint() {
     const [deleteInProgress, setDeleteInProgress] = useState({}); // Track delete operations
     const [searchQuery, setSearchQuery] = useState(''); // Search query for complaints
     const [selectedCategory, setSelectedCategory] = useState('all'); // Selected category filter
+    const [commentModalOpen, setCommentModalOpen] = useState(false); // Track comment modal
+    const [selectedComplaintForComments, setSelectedComplaintForComments] = useState(null); // Selected complaint for comments
+    const [newComment, setNewComment] = useState(''); // New comment input
+    const [commentInProgress, setCommentInProgress] = useState(false); // Track comment submission
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -297,17 +302,19 @@ export default function Complaint() {
                     closeStatusModal();
                 } else if (deleteModalOpen) {
                     closeDeleteModal();
+                } else if (commentModalOpen) {
+                    closeCommentModal();
                 }
             }
         };
 
-        if (statusModalOpen || deleteModalOpen) {
+        if (statusModalOpen || deleteModalOpen || commentModalOpen) {
             document.addEventListener('keydown', handleEscKey);
             return () => {
                 document.removeEventListener('keydown', handleEscKey);
             };
         }
-    }, [statusModalOpen, deleteModalOpen]);
+    }, [statusModalOpen, deleteModalOpen, commentModalOpen]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -807,6 +814,107 @@ export default function Complaint() {
             ...prev,
             [complaintId]: !prev[complaintId]
         }));
+    };
+
+    // Comment modal handlers
+    const openCommentModal = (complaint) => {
+        // Save current scroll position
+        const currentScrollY = window.scrollY;
+        setScrollPosition(currentScrollY);
+        
+        setSelectedComplaintForComments(complaint);
+        setCommentModalOpen(true);
+        setNewComment('');
+        
+        // Apply scroll lock
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${currentScrollY}px`;
+        document.body.style.width = '100%';
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        document.documentElement.classList.add('modal-open');
+    };
+
+    const closeCommentModal = () => {
+        setCommentModalOpen(false);
+        setSelectedComplaintForComments(null);
+        setNewComment('');
+        
+        // Restore scroll position and remove scroll lock
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.paddingRight = '';
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-open');
+        document.documentElement.classList.remove('modal-open');
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollPosition);
+    };
+
+    // Handle comment submission
+    const handleCommentSubmit = async () => {
+        if (!newComment.trim()) {
+            toast.error('Please enter a comment', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        if (!isAuthenticated) {
+            toast.error('🔐 Please log in to comment', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        setCommentInProgress(true);
+        
+        try {
+            const result = await dispatch(addComment({
+                complaintId: selectedComplaintForComments._id,
+                content: newComment.trim()
+            }));
+
+            if (addComment.fulfilled.match(result)) {
+                // Update the local complaint data to reflect the new comment
+                const newCommentData = result.payload.comment;
+                setSelectedComplaintForComments(prev => ({
+                    ...prev,
+                    comments: [...(prev.comments || []), newCommentData]
+                }));
+
+                // Clear the input
+                setNewComment('');
+                
+                toast.success('💬 Comment added successfully!', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            } else {
+                // Handle the error case
+                const errorMessage = result.payload || 'Failed to add comment';
+                toast.error(`❌ ${errorMessage}`, {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
+
+        } catch (error) {
+            toast.error('❌ Failed to add comment. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            setCommentInProgress(false);
+        }
     };
 
     // Function to highlight matching text
@@ -1404,6 +1512,19 @@ export default function Complaint() {
                                                         </button>
 
                                                         {/* Comments Button */}
+                                                        <button 
+                                                            className="vote-btn comment-btn"
+                                                            onClick={() => openCommentModal(complaint)}
+                                                        >
+                                                            <svg className="vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                                                            </svg>
+                                                            <span className="vote-count">
+                                                                {(complaint.comments && complaint.comments.length) || 0}
+                                                            </span>
+                                                        </button>
+
+                                                        {/* Old Comments Button - Keep for backward compatibility */}
                                                         {complaint.feedback_id && (
                                                             <button 
                                                                 className="comments-btn"
@@ -1605,6 +1726,103 @@ export default function Complaint() {
                                             </>
                                         )}
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Comment Modal */}
+            {commentModalOpen && selectedComplaintForComments && (
+                <div className="modal-overlay comment-modal-overlay">
+                    <div className="comment-modal">
+                        <div className="modal-header">
+                            <h3 className="modal-title">Comments</h3>
+                            <button 
+                                className="modal-close-btn"
+                                onClick={closeCommentModal}
+                            >
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div className="comment-modal-content">
+                            <div className="complaint-info">
+                                <h4 className="complaint-title-modal">{selectedComplaintForComments.title}</h4>
+                                <p className="complaint-category-modal">
+                                    {getCategoryIcon(selectedComplaintForComments.category)} {selectedComplaintForComments.category}
+                                </p>
+                            </div>
+
+                            <div className="comments-section">
+                                <div className="comments-list">
+                                    {selectedComplaintForComments.comments && selectedComplaintForComments.comments.length > 0 ? (
+                                        selectedComplaintForComments.comments.map((comment, index) => (
+                                            <div key={comment.id || index} className="comment-item">
+                                                <div className="comment-header">
+                                                    <div className="comment-author">
+                                                        <svg className="user-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                        <span className="author-name">{comment.author}</span>
+                                                    </div>
+                                                    <span className="comment-date">
+                                                        {formatDate(comment.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <div className="comment-content">
+                                                    {comment.content}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="no-comments">
+                                            <svg className="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                                            </svg>
+                                            <p>No comments yet. Be the first to comment!</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="add-comment-section">
+                                    <div className="comment-input-wrapper">
+                                        <textarea
+                                            className="comment-input"
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            placeholder="Write a comment..."
+                                            rows={3}
+                                            maxLength={500}
+                                        />
+                                        <div className="comment-input-footer">
+                                            <span className="character-count">
+                                                {newComment.length}/500
+                                            </span>
+                                            <button
+                                                className="submit-comment-btn"
+                                                onClick={handleCommentSubmit}
+                                                disabled={commentInProgress || !newComment.trim()}
+                                            >
+                                                {commentInProgress ? (
+                                                    <>
+                                                        <div className="comment-spinner"></div>
+                                                        <span>Posting...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="send-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                        </svg>
+                                                        <span>Comment</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
