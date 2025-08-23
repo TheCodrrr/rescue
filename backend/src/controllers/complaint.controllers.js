@@ -2,19 +2,30 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
 import mongoose from "mongoose";
+import { ensureTrainExists } from "../services/rail.service.js";
 // import { Department } from "../models/department.models.js";
 
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const { title, description, category, location, address, evidenceIds = [] } = req.body;
+  const { title, description, category, location, address, evidenceIds = [], category_data_url } = req.body;
 
-  if (!title || !description || !category || !location || !address) {
-    throw new ApiError(400, "All required fields (title, description, category, location, address) must be provided");
+  if (!title || !description || !category || !location || !address || !category_data_url) {
+    throw new ApiError(400, "All required fields (title, description, category, location, address, category_data_url) must be provided");
   }
 
   if (!category) {
     throw new ApiError(400, "Invalid category: category does not exist");
+  }
+
+  let trainMatched = null; 
+  if (category === "rail") {
+    console.log("difhfbksdjnbnsdjnbsdjnbskdjnbkdjgbnksdjbnsdkjgbnsdjgbnsdgj")
+    console.log("fjghkjlndfjvnsgnlsgnbldgbn")
+    trainMatched = await ensureTrainExists(category_data_url);
+    if (!trainMatched) {
+      throw new ApiError(400, "Invalid train: train does not exist");
+    }
   }
 
   const complaint = await Complaint.create({
@@ -25,7 +36,8 @@ const createComplaint = asyncHandler(async (req, res) => {
     longitude: location.longitude,
     address,
     evidence_ids: evidenceIds || [],
-    user_id: userId
+    user_id: userId,
+    category_data_url,
   })
 
   res.status(201).json({

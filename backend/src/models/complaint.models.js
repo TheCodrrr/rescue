@@ -21,6 +21,10 @@ const complaintSchema = new mongoose.Schema({
         enum: ['rail', 'fire', 'cyber', 'police', 'court'],
         required: true,
     },
+    category_data_url: {
+        type: String,
+        required: true,
+    },
     latitude: Number,
     longitude: Number,
     address: String,
