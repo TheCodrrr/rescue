@@ -21,7 +21,16 @@ import escalationRouter from "./routes/escalation.routes.js";
 import departmentRouter from "./routes/department.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
 import evidenceRouter from "./routes/evidence.routes.js";
+import { initRailSchema } from "./services/rail.service.js";
 
+(async function initializeServices() {
+    try {
+        await initRailSchema();
+        console.log("Rail schema initialized successfully.");
+    } catch (error) {
+        console.error("Error initializing rail schema:", error);
+    }
+})();
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/complaints", complaintRouter);
