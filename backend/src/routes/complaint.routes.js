@@ -1,8 +1,23 @@
 import express from "express";
 import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, updateComplaintStatus, upvoteComplaint } from "../controllers/complaint.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
+import { pool } from "../config/postgres.js";
 
 const router = express.Router();
+
+router.route("/test-db").get(async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({
+      success: true,
+      message: "PostgreSQL connected successfully!",
+      server_time: result.rows[0].now,
+    });
+  } catch (err) {
+    console.error("DB Connection Error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 router.route("/create").post(verifyJWT, createComplaint);
 router.route("/my-complaints/").get(verifyJWT, getComplaintByUser);
