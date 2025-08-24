@@ -2,7 +2,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
 import mongoose from "mongoose";
-import { ensureTrainExists } from "../services/rail.service.js";
+import { ensureTrainExists, getTrainByNumber } from "../services/rail.service.js";
 // import { Department } from "../models/department.models.js";
 
 const createComplaint = asyncHandler(async (req, res) => {
@@ -80,15 +80,30 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
 
     console.log(req.user);
 
-    const complaints = await Complaint.find({ user_id: userId })
+    let complaints = await Complaint.find({ user_id: userId })
         .sort({ createdAt: -1 })
         .populate("user_id", "name email")
         .populate("evidence_ids")
         .populate("votedUsers", "name email profile_image")
         .populate("assigned_officer_id", "name email profile_image")
-        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt");
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean(); // 👈 makes results plain JS objects instead of Mongoose docs
+
+    console.log("These are the complaints, hello hello: ", complaints);
+
+    complaints = await Promise.all(
+        complaints.map(async complaint => {
+            if (complaint.category === "rail") {
+                const train = await getTrainByNumber(complaint.category_data_id);
+                // add extra field safely
+                return { ...complaint, category_specific_data: train };
+            }
+            return complaint;
+        })
+    );
 
     console.log("User ID:", userId);
+
     if (!complaints || complaints.length === 0) {
         throw new ApiError(404, "No complaints found for this user");
     }
@@ -98,7 +113,7 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         count: complaints.length,
         data: complaints
     });
-})
+});
 
 const updateComplaintStatus = asyncHandler(async (req, res) => {
     const { complaintId } = req.params;
