@@ -8,10 +8,10 @@ import { ensureTrainExists } from "../services/rail.service.js";
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const { title, description, category, location, address, evidenceIds = [], category_data_url } = req.body;
+  const { title, description, category, location, address, evidenceIds = [], category_data_id } = req.body;
 
-  if (!title || !description || !category || !location || !address || !category_data_url) {
-    throw new ApiError(400, "All required fields (title, description, category, location, address, category_data_url) must be provided");
+  if (!title || !description || !category || !location || !address || !category_data_id) {
+    throw new ApiError(400, "All required fields (title, description, category, location, address, category_data_id) must be provided");
   }
 
   if (!category) {
@@ -22,7 +22,7 @@ const createComplaint = asyncHandler(async (req, res) => {
   if (category === "rail") {
     console.log("difhfbksdjnbnsdjnbsdjnbskdjnbkdjgbnksdjbnsdkjgbnsdjgbnsdgj")
     console.log("fjghkjlndfjvnsgnlsgnbldgbn")
-    trainMatched = await ensureTrainExists(category_data_url);
+    trainMatched = await ensureTrainExists(category_data_id);
     if (!trainMatched) {
       throw new ApiError(400, "Invalid train: train does not exist");
     }
@@ -37,7 +37,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     address,
     evidence_ids: evidenceIds || [],
     user_id: userId,
-    category_data_url,
+    category_data_id,
   })
 
   res.status(201).json({
