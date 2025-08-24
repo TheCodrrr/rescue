@@ -1129,11 +1129,12 @@ export default function Complaint() {
         
         // Search filter - search in title and description
         const searchMatch = searchQuery === '' || 
-            complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
-            
+        complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
+        
         return categoryMatch && searchMatch;
     });
+    console.log("These are the filtered complaints: ", filteredComplaints);
 
     return (
         <>
@@ -1688,6 +1689,67 @@ export default function Complaint() {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             </svg>
                                                             <span>{complaint.address}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Rail specific train meta */}
+                                                    {complaint.category === 'rail' && complaint.category_specific_data && (
+                                                        <div className="rail-train-meta">
+                                                            <div className="train-header-line">
+                                                                <div className="train-title-wrap">
+                                                                    <span className="train-emoji" role="img" aria-label="train details">🚈</span>
+                                                                    <span className="train-name-text">{complaint.category_specific_data.train_name || complaint.category_specific_data.trainNumber || complaint.category_data_id}</span>
+                                                                    <span className="train-number-pill">{complaint.category_specific_data.train_number || complaint.category_data_id}</span>
+                                                                </div>
+                                                                {complaint.category_specific_data.train_type && (
+                                                                    <span className="train-type-badge" title="Train Type">{complaint.category_specific_data.train_type.replace(/_/g,' ')}</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="train-route-grid">
+                                                                {(complaint.category_specific_data.routes?.from_station) && (
+                                                                    <div className="route-segment from">
+                                                                        <div className="seg-label">Origin</div>
+                                                                        <div className="seg-station">
+                                                                            <span className="station-name origin-name">{complaint.category_specific_data.routes.from_station.name}</span>
+                                                                            <span className="code origin-code">({complaint.category_specific_data.routes.from_station.code})</span>
+                                                                        </div>
+                                                                        {complaint.category_specific_data.routes.from_station.time && (
+                                                                            <div className="seg-time">Dep: {complaint.category_specific_data.routes.from_station.time.replace('.', ':')}</div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                {(complaint.category_specific_data.routes?.to_station) && (
+                                                                    <div className="route-segment to">
+                                                                        <div className="seg-label">Destination</div>
+                                                                        <div className="seg-station">
+                                                                            <span className="station-name destination-name">{complaint.category_specific_data.routes.to_station.name}</span>
+                                                                            <span className="code destination-code">({complaint.category_specific_data.routes.to_station.code})</span>
+                                                                        </div>
+                                                                        {complaint.category_specific_data.routes.to_station.time && (
+                                                                            <div className="seg-time">Arr: {complaint.category_specific_data.routes.to_station.time.replace('.', ':')}</div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {(complaint.category_specific_data.frequency || complaint.category_specific_data.total_distance || complaint.category_specific_data.avg_speed) && (
+                                                                <div className="train-extra">
+                                                                    {complaint.category_specific_data.frequency && (
+                                                                        <div className="freq-row">
+                                                                            {(['Mon','Tue','Wed','Thu','Fri','Sat','Sun']).map((d,i) => (
+                                                                                <span key={d} className={`day-chip ${complaint.category_specific_data.frequency[i] ? 'active' : ''}`}>{d[0]}</span>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="stats-row">
+                                                                        {complaint.category_specific_data.total_distance && (
+                                                                            <span className="stat-chip" title="Total Distance">{complaint.category_specific_data.total_distance} km</span>
+                                                                        )}
+                                                                        {complaint.category_specific_data.avg_speed && (
+                                                                            <span className="stat-chip" title="Average Speed">{complaint.category_specific_data.avg_speed} km/h</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
 

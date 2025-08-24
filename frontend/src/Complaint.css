@@ -1419,6 +1419,90 @@
     color: #60a5fa;
 }
 
+/* Rail train meta */
+.rail-train-meta {
+    margin-top: 8px;
+    padding: 14px 16px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+}
+.rail-train-meta:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 85% 20%, rgba(99,102,241,0.25), transparent 60%);
+    opacity: 0.4;
+    pointer-events: none;
+}
+.rail-train-meta .train-header-line {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:6px;
+    gap:10px;
+}
+.rail-train-meta .train-title-wrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.rail-train-meta .train-emoji { font-size:1.2rem; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35)); }
+.rail-train-meta .train-name-text { font-weight:600; font-size:0.95rem; letter-spacing:.4px; }
+.rail-train-meta .train-number-pill { background:rgba(59,130,246,0.25); border:1px solid rgba(59,130,246,0.5); padding:4px 10px; border-radius:20px; font-size:0.7rem; font-weight:600; letter-spacing:.6px; }
+.rail-train-meta .train-type-badge {
+    background: linear-gradient(135deg,#6366f1,#8b5cf6);
+    padding:4px 9px;
+    border-radius: 14px;
+    font-size:0.55rem;
+    font-weight:600;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+    box-shadow:0 2px 6px rgba(0,0,0,0.25);
+}
+.rail-train-meta .train-number-line { margin-bottom:4px; font-size:0.7rem; }
+.rail-train-meta .train-route-line {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:4px;
+}
+.rail-train-meta .station { display:flex; flex-direction:column; }
+.rail-train-meta .station .label { font-size:0.55rem; text-transform:uppercase; color:#9ca3af; letter-spacing:.5px; }
+.rail-train-meta .station .value { font-size:0.78rem; font-weight:600; }
+.rail-train-meta .route-sep { font-size:0.75rem; opacity:.7; }
+.rail-train-meta .train-frequency { font-size:0.6rem; margin-bottom:4px; }
+.rail-train-meta .train-frequency .label { text-transform:uppercase; color:#9ca3af; margin-right:4px; letter-spacing:.5px; }
+.rail-train-meta .train-stats { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+.rail-train-meta .stat-chip {
+    background: rgba(59,130,246,0.18);
+    border:1px solid rgba(59,130,246,0.38);
+    padding:4px 8px;
+    border-radius:8px;
+    font-size:0.6rem;
+    font-weight:500;
+    letter-spacing:.35px;
+}
+/* New layout additions */
+.rail-train-meta .train-route-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:6px; }
+.rail-train-meta .route-segment { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); padding:6px 8px; border-radius:8px; position:relative; overflow:hidden; }
+.rail-train-meta .route-segment:before { content:''; position:absolute; inset:0; background:linear-gradient(120deg,rgba(255,255,255,0.04),rgba(255,255,255,0)); pointer-events:none; }
+.rail-train-meta .route-segment .seg-label { font-size:0.55rem; text-transform:uppercase; letter-spacing:.85px; color:#cbd5e1; margin-bottom:3px; }
+.rail-train-meta .route-segment .seg-station { font-size:0.8rem; font-weight:600; line-height:1.25; display:flex; flex-wrap:wrap; gap:4px; }
+.rail-train-meta .route-segment .seg-station .code { opacity:1; font-weight:600; }
+.rail-train-meta .station-name.origin-name { color:#fbbf24; text-shadow:0 0 4px rgba(251,191,36,0.35); }
+.rail-train-meta .station-name.destination-name { color:#34d399; text-shadow:0 0 4px rgba(52,211,153,0.35); }
+.rail-train-meta .origin-code { color:#fde68a; }
+.rail-train-meta .destination-code { color:#6ee7b7; }
+.rail-train-meta .route-segment .seg-time { font-size:0.65rem; margin-top:3px; color:#bfdbfe; font-weight:700; text-shadow:0 0 4px rgba(191,219,254,0.35); }
+.rail-train-meta .train-extra { display:flex; flex-direction:column; gap:6px; }
+.rail-train-meta .freq-row { display:flex; gap:4px; }
+.rail-train-meta .day-chip { width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:600; border-radius:6px; background:rgba(148,163,184,0.15); border:1px solid rgba(148,163,184,0.35); color:#e2e8f0; transition:all .25s; }
+.rail-train-meta .day-chip.active { background:linear-gradient(135deg,#059669,#10b981); border-color:#10b981; color:#ecfdf5; box-shadow:0 2px 6px rgba(16,185,129,0.4); }
+.rail-train-meta .day-chip:hover { transform:translateY(-2px); }
+.rail-train-meta .stats-row { display:flex; gap:6px; flex-wrap:wrap; }
+
 .complaint-meta {
     display: flex;
     align-items: center;
