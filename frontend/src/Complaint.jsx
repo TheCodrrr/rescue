@@ -64,7 +64,9 @@ export default function Complaint() {
             latitude: null,
             longitude: null
         },
-        address: ''
+        address: '',
+        // Rail-specific optional field (required only when category === 'rail')
+        trainNumber: ''
     });
     
     const [locationMethod, setLocationMethod] = useState('map'); // 'map', 'manual', 'current'
@@ -436,7 +438,7 @@ export default function Complaint() {
             return;
         }
         
-        // Validate form
+        // Validate form (base fields)
         if (!formData.title || !formData.description || !formData.category || 
             !formData.location.latitude || !formData.location.longitude) {
             toast.error('📝 Please fill in all required fields', {
@@ -455,6 +457,47 @@ export default function Complaint() {
                 icon: '⚠️',
             });
             return;
+        }
+
+        // Rail category specific validation
+        if (formData.category === 'rail') {
+            const tn = formData.trainNumber?.trim();
+            if (!tn) {
+                toast.error('🚂 Please enter the 5-digit train number', {
+                    duration: 4000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-warning',
+                    style: {
+                        background: 'rgba(245, 158, 11, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
+                    },
+                    icon: '⚠️',
+                });
+                return;
+            }
+            if (!/^\d{5}$/.test(tn)) {
+                toast.error('🔢 Train number must be exactly 5 digits', {
+                    duration: 4000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-warning',
+                    style: {
+                        background: 'rgba(245, 158, 11, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
+                    },
+                    icon: '⚠️',
+                });
+                return;
+            }
         }
 
         // Show submitting toast
@@ -482,7 +525,9 @@ export default function Complaint() {
                 latitude: formData.location.latitude,
                 longitude: formData.location.longitude,
                 address: formData.address || null
-            }
+            },
+            // Include rail-specific metadata only when applicable (renamed for backend)
+            ...(formData.category === 'rail' && { category_data_id: formData.trainNumber.trim() })
         };
 
         console.log('Dispatching submitComplaint with data:', complaintData);
@@ -1225,6 +1270,39 @@ export default function Complaint() {
                         </div>
 
                         {/* Description Field */}
+                        {/* Rail Specific: Train Number (moved before description) */}
+                        {formData.category === 'rail' && (
+                            <div className="form-group">
+                                <label htmlFor="trainNumber" className="form-label">
+                                    <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M9 21V3m6 0v18" />
+                                    </svg>
+                                    Train Number *
+                                </label>
+                                <input
+                                    type="text"
+                                    id="trainNumber"
+                                    name="trainNumber"
+                                    value={formData.trainNumber}
+                                    onChange={(e) => {
+                                        const digitsOnly = e.target.value.replace(/[^0-9]/g, '').slice(0,5);
+                                        setFormData(prev => ({ ...prev, trainNumber: digitsOnly }));
+                                    }}
+                                    className="form-input"
+                                    placeholder="e.g., 12345"
+                                    inputMode="numeric"
+                                    pattern="[0-9]{5}"
+                                    maxLength={5}
+                                    title="Enter exactly 5 digits (0-9)"
+                                    required
+                                />
+                                <p className="helper-text" style={{ marginTop: '6px', fontSize: '0.85rem', color: '#9ca3af' }}>
+                                    Enter the 5-digit train number (digits only).
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Description Field */}
                         <div className="form-group">
                             <label htmlFor="description" className="form-label">
                                 <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1393,6 +1471,8 @@ export default function Complaint() {
                                 placeholder="Street address or landmark"
                             />
                         </div>
+
+                        
 
                         {/* Submit Button */}
                         <div className="form-actions">

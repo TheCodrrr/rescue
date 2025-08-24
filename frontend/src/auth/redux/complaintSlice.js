@@ -34,7 +34,8 @@ export const submitComplaint = createAsyncThunk(
         },
         address: complaintData.location.address || null,
         status: 'pending', // Default status
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        ...(complaintData.category_data_id && { category_data_id: complaintData.category_data_id })
       };
 
       console.log("Formatted complaint data:", formattedComplaintData);
