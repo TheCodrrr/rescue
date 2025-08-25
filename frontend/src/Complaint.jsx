@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
 import "./Complaint.css";
@@ -78,6 +79,7 @@ export default function Complaint() {
 
     const categories = [
         { value: 'rail', label: 'Rail Incidents', icon: '🚂', color: '#f59e0b' },
+        { value: 'road', label: 'Road Issues', icon: '🛣️', color: '#db2777' }, // New road category
         { value: 'fire', label: 'Fire Emergency', icon: '🔥', color: '#ef4444' },
         { value: 'cyber', label: 'Cyber Crime', icon: '💻', color: '#8b5cf6' },
         { value: 'police', label: 'Police', icon: '👮', color: '#3b82f6' },
@@ -526,8 +528,8 @@ export default function Complaint() {
                 longitude: formData.location.longitude,
                 address: formData.address || null
             },
-            // Include rail-specific metadata only when applicable (renamed for backend)
-            ...(formData.category === 'rail' && { category_data_id: formData.trainNumber.trim() })
+            // Always send category_data_id; rail uses trainNumber, others placeholder 'N/A'
+            category_data_id: formData.category === 'rail' ? formData.trainNumber.trim() : 'N/A'
         };
 
         console.log('Dispatching submitComplaint with data:', complaintData);
@@ -1185,7 +1187,7 @@ export default function Complaint() {
             />
             
             <div className="complaint-page">
-                <div className="complaint-container">
+                <div className={`complaint-container ${activeTab === 'view' ? 'complaint-container-wide' : ''}`}>
                     <div className="complaint-header">
                         <h1 className="complaint-title">Complaint Management</h1>
                         <p className="complaint-subtitle">Submit new complaints or view your existing ones</p>
@@ -1552,6 +1554,7 @@ export default function Complaint() {
                                                 >
                                                     <option value="all">All Categories</option>
                                                     <option value="rail">🚂 Rail Incidents</option>
+                                                    <option value="road">🛣️ Road Issues</option>
                                                     <option value="fire">🔥 Fire Emergency</option>
                                                     <option value="cyber">💻 Cyber Crime</option>
                                                     <option value="police">👮 Police</option>
@@ -2253,6 +2256,8 @@ export default function Complaint() {
             )}
 
             <Footer />
+            {/* Nested route content (e.g., follow-up) will render here */}
+            <Outlet />
         </>
     );
 }

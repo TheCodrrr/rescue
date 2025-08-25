@@ -20,10 +20,15 @@
 }
 
 .complaint-container {
-    max-width: 900px;
+    max-width: 900px; /* original width for register form */
     margin: 0 auto;
     position: relative;
     z-index: 2;
+    transition: max-width 0.35s ease;
+}
+
+.complaint-container-wide {
+    max-width: 1300px; /* wider only when viewing complaints */
 }
 
 .complaint-header {
@@ -1300,7 +1305,8 @@
 /* Complaints Grid */
 .complaints-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    /* reduce min width so 3 fit inside widened container */
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 1.5rem;
 }
 
