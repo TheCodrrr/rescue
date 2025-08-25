@@ -1,7 +1,7 @@
 import Home from './Home'
 import Login from './auth/Login'
 import Signup from './auth/Signup'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import NotFound from './NotFound'
 import ProtectedRoute from './ProtectedRoute'
 
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './auth/redux/authSlice';
 import UserProfile from './UserProfile'
 import Complaint from './Complaint'
+import FollowUp from './FollowUp'
 
 function App() {
   const dispatch = useDispatch();
@@ -25,14 +26,19 @@ function App() {
   return (
     <>
       <Router>
+  {/* Programmatic-only route guard defined inside Router context */}
+  <ProgrammaticOnlyRouteDefinitions />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/complain" element={
-            <ProtectedRoute>
-              <Complaint />
-            </ProtectedRoute>
-          } />
+          {/* Complaint parent route with nested follow-up (programmatic only) */}
+          <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>}>
+            <Route path="follow-up" element={
+              <ProgrammaticOnly>
+                <FollowUp />
+              </ProgrammaticOnly>
+            } />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/user" element={
@@ -46,5 +52,27 @@ function App() {
     </>
   );
 }
+
+// Component that enforces navigation only via navigate(path, { state: { _viaCode: true } })
+function ProgrammaticOnly({ children }) {
+  const location = useLocation();
+  if (!location.state || !location.state._viaCode) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
+// Example target component (replace with your real screen)
+function AuditPage() {
+  return <div style={{ padding: '2rem', color: '#fff' }}>Audit / Sensitive Report Page</div>;
+}
+
+// (Optional) central place to export a helper navigate flag (could also be a custom hook elsewhere)
+export function navigateProgrammatically(navigate, path) {
+  navigate(path, { state: { _viaCode: true } });
+}
+
+// Placeholder to keep possibility for future shared logic; currently empty
+function ProgrammaticOnlyRouteDefinitions() { return null; }
 
 export default App
