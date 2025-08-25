@@ -3,7 +3,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import mongoose from "mongoose";
 
-const allowedCategories = ['fire', 'police', 'rail', 'cyber', 'court'];
+const allowedCategories = ['fire', 'police', 'rail', 'cyber', 'court', 'road'];
 
 const createDepartment = asyncHandler(async (req, res) => {
     const { category, name, contact_email, contact_phone, jurisdiction_area } = req.body;

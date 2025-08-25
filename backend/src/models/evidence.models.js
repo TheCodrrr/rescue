@@ -8,7 +8,7 @@ const evidenceSchema = new Schema({
     },
     category: {
         type: String,
-        enum: ['rail', 'fire', 'cyber', 'police', 'court'],
+        enum: ['rail', 'fire', 'cyber', 'police', 'court', 'road'],
         required: true,
     },
     evidence_type: {

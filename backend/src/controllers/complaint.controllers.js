@@ -10,8 +10,8 @@ const createComplaint = asyncHandler(async (req, res) => {
 
   const { title, description, category, location, address, evidenceIds = [], category_data_id } = req.body;
 
-  if (!title || !description || !category || !location || !address || !category_data_id) {
-    throw new ApiError(400, "All required fields (title, description, category, location, address, category_data_id) must be provided");
+  if (!title || !description || !category || !location || !address) {
+    throw new ApiError(400, "All required fields (title, description, category, location, address) must be provided");
   }
 
   if (!category) {
@@ -37,7 +37,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     address,
     evidence_ids: evidenceIds || [],
     user_id: userId,
-    category_data_id,
+    category_data_id: category_data_id || '',
   })
 
   res.status(201).json({

@@ -18,7 +18,7 @@ const complaintSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['rail', 'fire', 'cyber', 'police', 'court'],
+        enum: ['rail', 'fire', 'cyber', 'police', 'court', 'road'],
         required: true,
     },
     category_data_id: {
