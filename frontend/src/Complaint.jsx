@@ -116,7 +116,7 @@ export default function Complaint() {
 
     // Initialize map for location selection
     useEffect(() => {
-        if (locationMethod !== 'map') return;
+        if (locationMethod !== 'map' || activeTab !== 'register') return;
 
         const loadMap = async () => {
             try {
@@ -192,7 +192,7 @@ export default function Complaint() {
             }
             setMapReady(false);
         };
-    }, [locationMethod, userCurrentLocation]);
+    }, [locationMethod, userCurrentLocation, activeTab]);
 
     // Handle success and error states
     useEffect(() => {
