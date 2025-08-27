@@ -11,6 +11,10 @@ import { loadUser } from './auth/redux/authSlice';
 import UserProfile from './UserProfile'
 import Complaint from './Complaint'
 import FollowUp from './FollowUp'
+import Trending from './Trending.jsx'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient();
 
 function App() {
   const dispatch = useDispatch();
@@ -25,30 +29,33 @@ function App() {
 
   return (
     <>
-      <Router>
-  {/* Programmatic-only route guard defined inside Router context */}
-  <ProgrammaticOnlyRouteDefinitions />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          {/* Complaint parent route with nested follow-up (programmatic only) */}
-          <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>}>
-            <Route path="follow-up" element={
-              <ProgrammaticOnly>
-                <FollowUp />
-              </ProgrammaticOnly>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          {/* Programmatic-only route guard defined inside Router context */}
+          <ProgrammaticOnlyRouteDefinitions />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            {/* Complaint parent route with nested follow-up (programmatic only) */}
+            <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>}>
+              <Route path="follow-up" element={
+                <ProgrammaticOnly>
+                  <FollowUp />
+                </ProgrammaticOnly>
+              } />
+            </Route>
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/user" element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
             } />
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/user" element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </QueryClientProvider>
     </>
   );
 }
