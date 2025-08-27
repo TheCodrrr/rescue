@@ -7,6 +7,7 @@ import "./Toast.css";
 import "leaflet/dist/leaflet.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import CommentModal from "./CommentModal.jsx";
 import { 
     submitComplaint, 
     clearSuccess, 
@@ -1100,6 +1101,63 @@ export default function Complaint() {
         }, 300); // 300ms animation duration
     };
 
+    // Handler functions for CommentModal component
+    const handleModalCommentSubmit = async (commentData) => {
+        try {
+            const result = await dispatch(addComment({
+                complaintId: commentData.complaintId,
+                content: commentData.comment,
+                rating: commentData.rating
+            }));
+
+            if (addComment.fulfilled.match(result)) {
+                // Fetch updated comments
+                await dispatch(fetchComments(selectedComplaintForComments._id));
+            } else {
+                throw new Error(result.payload || 'Failed to add comment');
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            throw error;
+        }
+    };
+
+    const handleModalCommentUpdate = async (commentId, updateData) => {
+        try {
+            const result = await dispatch(updateComment({
+                commentId,
+                comment: updateData.comment,
+                rating: updateData.rating
+            }));
+
+            if (result.type === 'comments/updateComment/fulfilled') {
+                // Fetch updated comments
+                await dispatch(fetchComments(selectedComplaintForComments._id));
+            } else {
+                throw new Error('Failed to update comment');
+            }
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            throw error;
+        }
+    };
+
+    const handleModalCommentDelete = async (commentId) => {
+        try {
+            const result = await dispatch(removeComment(commentId));
+
+            if (result.type === 'comments/removeComment/fulfilled') {
+                // Fetch updated comments
+                await dispatch(fetchComments(selectedComplaintForComments._id));
+            } else {
+                throw new Error('Failed to delete comment');
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            throw error;
+        }
+    };
+
     // Function to highlight matching text
     const highlightText = (text, searchQuery) => {
         if (!searchQuery.trim()) return text;
@@ -2015,245 +2073,19 @@ export default function Complaint() {
             )}
 
             {/* Comment Modal */}
-            {commentModalOpen && selectedComplaintForComments && (
-                <div className="modal-overlay comment-modal-overlay">
-                    <div className="comment-modal">
-                        <div className="modal-header">
-                            <div className="header-content">
-                                <div className="complaint-info-inline">
-                                    <h4 className="complaint-title-modal">{selectedComplaintForComments.title}</h4>
-                                    <span className="complaint-category-badge">
-                                        {getCategoryIcon(selectedComplaintForComments.category)} {selectedComplaintForComments.category}
-                                    </span>
-                                </div>
-                            </div>
-                            <button 
-                                className="modal-close-btn"
-                                onClick={closeCommentModal}
-                            >
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div className="comment-modal-content">
-                            <h3 className="comments-section-title">Comments</h3>
-
-                            <div className="comments-section">
-                                <div className="comments-list">
-                                    {(() => {
-                                        // Get the updated complaint from Redux store
-                                        const updatedComplaint = complaints.find(c => 
-                                            c._id === selectedComplaintForComments._id || 
-                                            c.id === selectedComplaintForComments._id
-                                        );
-                                        const commentsToShow = updatedComplaint?.comments || selectedComplaintForComments.comments || [];
-                                        
-                                        return commentsToShow.length > 0 ? (
-                                            commentsToShow.map((comment, index) => {
-                                                const isEditing = editingComment === (comment._id || comment.id);
-                                                const isOwner = comment.user_id?._id === user?.id || comment.user_id?.id === user?.id;
-                                                const isDeleting = deletingComment === (comment._id || comment.id);
-                                                const isUpdating = updatingComment === (comment._id || comment.id);
-                                                
-                                                return (
-                                                <div 
-                                                    key={comment._id || comment.id || index} 
-                                                    className={`comment-item ${isDeleting ? 'deleting' : ''} ${isUpdating ? 'updating' : ''}`}
-                                                >
-                                                    <div className="comment-header">
-                                                        <div className="comment-author">
-                                                            {comment.user_id?.profileImage ? (
-                                                                <img 
-                                                                    className="user-profile-image" 
-                                                                    src={comment.user_id.profileImage} 
-                                                                    alt={comment.user_id?.name || 'User'}
-                                                                    onError={(e) => {
-                                                                        e.target.style.display = 'none';
-                                                                        e.target.nextElementSibling.style.display = 'block';
-                                                                    }}
-                                                                />
-                                                            ) : null}
-                                                            <svg 
-                                                                className="user-icon" 
-                                                                fill="none" 
-                                                                stroke="currentColor" 
-                                                                viewBox="0 0 24 24"
-                                                                style={{display: comment.user_id?.profileImage ? 'none' : 'block'}}
-                                                            >
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                            </svg>
-                                                            <span className="author-name">
-                                                                {comment.user_id?.name || comment.author || 'Anonymous'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="comment-actions">
-                                                            <span className="comment-date">
-                                                                {formatDate(comment.createdAt || comment.created_at)}
-                                                            </span>
-                                                            {isOwner && (
-                                                                <div className="comment-action-buttons">
-                                                                    {!isEditing ? (
-                                                                        <>
-                                                                            <button 
-                                                                                className="comment-action-btn edit-btn"
-                                                                                onClick={() => startEditingComment(comment)}
-                                                                                title="Edit comment"
-                                                                            >
-                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                                </svg>
-                                                                            </button>
-                                                                            <button 
-                                                                                className="comment-action-btn delete-btn"
-                                                                                onClick={() => deleteComment(comment._id || comment.id)}
-                                                                                title="Delete comment"
-                                                                            >
-                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <button 
-                                                                                className="comment-action-btn save-btn"
-                                                                                onClick={() => saveEditedComment(comment._id || comment.id)}
-                                                                                disabled={editInProgress}
-                                                                                title="Save changes"
-                                                                            >
-                                                                                {editInProgress ? (
-                                                                                    <div className="comment-spinner-small"></div>
-                                                                                ) : (
-                                                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                                    </svg>
-                                                                                )}
-                                                                            </button>
-                                                                            <button 
-                                                                                className="comment-action-btn cancel-btn"
-                                                                                onClick={cancelEditingComment}
-                                                                                disabled={editInProgress}
-                                                                                title="Cancel editing"
-                                                                            >
-                                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="comment-body">
-                                                        <div className="comment-content">
-                                                            {isEditing ? (
-                                                                <textarea
-                                                                    className="edit-comment-input"
-                                                                    value={editedCommentText}
-                                                                    onChange={(e) => setEditedCommentText(e.target.value)}
-                                                                    placeholder="Edit your comment..."
-                                                                    maxLength={500}
-                                                                />
-                                                            ) : (
-                                                                comment.comment || comment.content
-                                                            )}
-                                                        </div>
-                                                        {comment.rating && (
-                                                            <div className="comment-rating">
-                                                                {isEditing ? (
-                                                                    <div className="edit-rating">
-                                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                                            <span
-                                                                                key={star}
-                                                                                className={`star editable ${star <= editedCommentRating ? 'filled' : ''}`}
-                                                                                onClick={() => setEditedCommentRating(star)}
-                                                                            >
-                                                                                ★
-                                                                            </span>
-                                                                        ))}
-                                                                    </div>
-                                                                ) : (
-                                                                    renderStars(comment.rating)
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <div className="no-comments">
-                                                <svg className="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
-                                                </svg>
-                                                <p>No comments yet. Be the first to comment!</p>
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
-
-                                <div className="add-comment-section">
-                                    <div className="comment-input-container">
-                                        <div className="input-with-rating">
-                                            <div className="comment-input-wrapper">
-                                                <textarea
-                                                    className="comment-input"
-                                                    value={newComment}
-                                                    onChange={(e) => setNewComment(e.target.value)}
-                                                    placeholder="Write a comment..."
-                                                    rows={3}
-                                                    maxLength={500}
-                                                />
-                                                <span className="character-count-overlay">
-                                                    {newComment.length}/500
-                                                </span>
-                                            </div>
-                                            <div className="rating-section-inline">
-                                                <div className="rating-left">
-                                                    <label className="rating-label">Rate:</label>
-                                                    <div className="star-rating">
-                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                            <span
-                                                                key={star}
-                                                                className={`star ${star <= commentRating ? 'filled' : ''}`}
-                                                                onClick={() => setCommentRating(star)}
-                                                            >
-                                                                ★
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    className="submit-comment-btn-rating"
-                                                    onClick={handleCommentSubmit}
-                                                    disabled={commentInProgress || !newComment.trim()}
-                                                >
-                                                    {commentInProgress ? (
-                                                        <>
-                                                            <div className="comment-spinner-small"></div>
-                                                            <span>Posting...</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <svg className="send-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                                            </svg>
-                                                            <span>Comment</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <CommentModal
+                complaintId={selectedComplaintForComments?._id}
+                complaintTitle={selectedComplaintForComments?.title}
+                complaintCategory={selectedComplaintForComments?.category}
+                complaintType={selectedComplaintForComments?.type}
+                isOpen={commentModalOpen}
+                onClose={closeCommentModal}
+                onCommentSubmit={handleModalCommentSubmit}
+                onCommentUpdate={handleModalCommentUpdate}
+                onCommentDelete={handleModalCommentDelete}
+                comments={selectedComplaintForComments?.comments || []}
+                totalComments={selectedComplaintForComments?.comments?.length || 0}
+            />
 
             <Footer />
             {/* Nested route content (e.g., follow-up) will render here */}
