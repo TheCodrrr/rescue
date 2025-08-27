@@ -3,7 +3,46 @@ import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
 import mongoose from "mongoose";
 import { ensureTrainExists, getTrainByNumber } from "../services/rail.service.js";
+import { calculateTrendingScore } from "../../utils/trendingScore.js";
 // import { Department } from "../models/department.models.js";
+
+const getTrendingComplaints = asyncHandler(async (req, res) => {
+    const { cursor, limit } = req.query;
+
+    const query = cursor ? { createdAt: { $lt: new Date(cursor) } } : {};
+
+    let complaints = await Complaint.find(query)
+        .sort({ createdAt: -1 })
+        .limit(Number(limit) + 1)
+        .lean();
+
+    if (!complaints || complaints.length == 0) {
+        return res.status(200).json({
+            success: true,
+            data: [],
+            nextCursor: null,
+            hasNextPage: false,
+        });
+    }
+
+    complaints = complaints.map((c) => ({
+        ...c,
+        score: calculateTrendingScore(c),
+    }));
+
+    complaints.sort((a, b) => b.score - a.score);
+
+    const hasNextPage = complaints.length > limit;
+    const results = complaints.slice(0, limit);
+    const nextCursor = hasNextPage ? results[results.length - 1].createdAt.toISOString() : null;
+
+    res.status(200).json({
+        success: true,
+        data: results,
+        nextCursor,
+        hasNextPage,
+    });
+});
 
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
@@ -282,4 +321,5 @@ export {
     deleteComplaint,
     upvoteComplaint,
     downvoteComplaint,
+    getTrendingComplaints
 }
