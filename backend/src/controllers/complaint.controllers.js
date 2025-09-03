@@ -47,7 +47,7 @@ const getTrendingComplaints = asyncHandler(async (req, res) => {
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const { title, description, category, location, address, evidenceIds = [], category_data_id } = req.body;
+  const { title, description, category, location, address, evidenceIds = [], category_data_id, severity } = req.body;
 
   if (!title || !description || !category || !location || !address) {
     throw new ApiError(400, "All required fields (title, description, category, location, address) must be provided");
@@ -77,6 +77,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     evidence_ids: evidenceIds || [],
     user_id: userId,
     category_data_id: category_data_id || '',
+    severity,
   })
 
   res.status(201).json({

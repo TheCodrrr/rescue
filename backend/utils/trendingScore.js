@@ -5,7 +5,7 @@ export const calculateTrendingScore = (complaint) => {
 
     const hrsSinceCreated = (Date.now() - new Date(createdAt).getTime() / (1000 * 60 * 60));
 
-    const score = (upvotes - downvotes) / Math.pow(hrsSinceCreated + 2, 1.5);
+    const score = (upvotes - downvotes) / Math.pow(hrsSinceCreated + 2, 1.5);   
     
     return score;
 }
