@@ -6,7 +6,7 @@ const fetchTrendingComplaints = async ({ pageParam }) => {
     const { data } = await axiosInstance.get("/complaints/trending", {
       params: {
         cursor: pageParam,
-        limit: 10,
+        limit: 9,
       }
     });
     
@@ -30,7 +30,7 @@ export const useTrendingComplaints = () => {
     queryFn: fetchTrendingComplaints,
     getNextPageParam: (lastPage) => {
       return lastPage.hasNextPage ? lastPage.nextCursor : undefined;
-    },
+    },  
     initialPageParam: undefined, // Start with no cursor for the first page
   });
 };

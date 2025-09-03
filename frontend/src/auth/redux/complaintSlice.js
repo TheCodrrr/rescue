@@ -37,7 +37,8 @@ export const submitComplaint = createAsyncThunk(
         timestamp: new Date().toISOString(),
         category_data_id: complaintData.category_data_id !== undefined && complaintData.category_data_id !== ''
           ? complaintData.category_data_id
-          : 'N/A'
+          : 'N/A',
+        severity: complaintData.severity
       };
 
       console.log("Formatted complaint data:", formattedComplaintData);

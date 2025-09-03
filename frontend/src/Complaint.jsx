@@ -9,6 +9,30 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CommentModal from "./CommentModal.jsx";
 import { 
+  FiThumbsUp, 
+  FiThumbsDown, 
+  FiMessageCircle, 
+  FiMapPin, 
+  FiGlobe, 
+  FiPhone,
+  FiTool,
+  FiAlertTriangle,
+  FiCheckCircle,
+  FiXCircle,
+  FiLoader
+} from 'react-icons/fi';
+import { 
+  MdLocalFireDepartment,
+  MdBalance,
+  MdLocalHospital,
+  MdWater,
+  MdConstruction,
+  MdWarning,
+  MdElectricalServices,
+  MdTrain,
+  MdDirectionsRailway
+} from 'react-icons/md';
+import { 
     submitComplaint, 
     clearSuccess, 
     clearError, 
@@ -62,6 +86,7 @@ export default function Complaint() {
         title: '',
         description: '',
         category: '',
+        severity: 'medium', // Default to medium severity
         location: {
             latitude: null,
             longitude: null
@@ -79,12 +104,12 @@ export default function Complaint() {
     const markerRef = useRef(null);
 
     const categories = [
-        { value: 'rail', label: 'Rail Incidents', icon: '🚂', color: '#f59e0b' },
-        { value: 'road', label: 'Road Issues', icon: '🛣️', color: '#db2777' }, // New road category
-        { value: 'fire', label: 'Fire Emergency', icon: '🔥', color: '#ef4444' },
-        { value: 'cyber', label: 'Cyber Crime', icon: '💻', color: '#8b5cf6' },
-        { value: 'police', label: 'Police', icon: '👮', color: '#3b82f6' },
-        { value: 'court', label: 'Court', icon: '⚖️', color: '#10b981' }
+        { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
+        { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: '#db2777' }, // New road category
+        { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: '#ef4444' },
+        { value: 'cyber', label: 'Cyber Crime', icon: <FiAlertTriangle />, color: '#8b5cf6' },
+        { value: 'police', label: 'Police', icon: <FiAlertTriangle />, color: '#3b82f6' },
+        { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
     ];
 
     // Get user's current location
@@ -218,11 +243,13 @@ export default function Complaint() {
                 title: '',
                 description: '',
                 category: '',
+                severity: 'medium', // Reset to default medium severity
                 location: {
                     latitude: null,
                     longitude: null
                 },
-                address: ''
+                address: '',
+                trainNumber: ''
             });
             
             // Reset location method to default
@@ -372,9 +399,10 @@ export default function Complaint() {
                 location: location
             }));
             
-            toast.success('📍 Location detected successfully!', {
+            toast.success('Location detected successfully!', {
                 duration: 3000,
                 position: 'top-center',
+                icon: <FiMapPin />,
                 className: 'custom-toast custom-toast-success',
                 style: {
                     background: 'rgba(59, 130, 246, 0.2)',
@@ -401,9 +429,10 @@ export default function Complaint() {
                 console.error('Error getting address:', error);
             }
         } catch (error) {
-            toast.error(`🌍 Error getting location: ${error.message}`, {
+            toast.error(`Error getting location: ${error.message}`, {
                 duration: 4000,
                 position: 'top-center',
+                icon: <FiGlobe />,
                 className: 'custom-toast custom-toast-error',
                 style: {
                     background: 'rgba(239, 68, 68, 0.2)',
@@ -442,9 +471,9 @@ export default function Complaint() {
         }
         
         // Validate form (base fields)
-        if (!formData.title || !formData.description || !formData.category || 
+        if (!formData.title || !formData.description || !formData.category || !formData.severity ||
             !formData.location.latitude || !formData.location.longitude) {
-            toast.error('📝 Please fill in all required fields', {
+            toast.error('📝 Please fill in all required fields including severity level', {
                 duration: 4000,
                 position: 'top-center',
                 className: 'custom-toast custom-toast-warning',
@@ -524,6 +553,7 @@ export default function Complaint() {
             title: formData.title,
             description: formData.description,
             category: formData.category,
+            severity: formData.severity,
             location: {
                 latitude: formData.location.latitude,
                 longitude: formData.location.longitude,
@@ -596,6 +626,57 @@ export default function Complaint() {
         return categoryData ? categoryData.color : '#6b7280';
     };
 
+    // Severity helper functions
+    const getSeverityInfo = (severity) => {
+        const severityMap = {
+            'low': {
+                label: 'Low Priority',
+                color: '#ffffff',
+                bgColor: 'rgba(16, 185, 129, 0.8)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                )
+            },
+            'medium': {
+                label: 'Medium Priority',
+                color: '#1f2937',
+                bgColor: 'rgba(245, 158, 11, 0.9)',
+                borderColor: 'rgba(245, 158, 11, 1)',
+                icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                )
+            },
+            'high': {
+                label: 'High Priority',
+                color: '#ffffff',
+                bgColor: 'rgba(239, 68, 68, 0.9)',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                )
+            }
+        };
+        
+        return severityMap[severity] || {
+            label: 'Unknown',
+            color: '#ffffff',
+            bgColor: 'rgba(107, 114, 128, 0.8)',
+            borderColor: 'rgba(107, 114, 128, 1)',
+            icon: (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            )
+        };
+    };
+
     const handleUpvote = async (complaintId) => {
         if (!isAuthenticated) {
             toast.error('🔐 Please log in to vote', {
@@ -611,10 +692,11 @@ export default function Complaint() {
         try {
             const result = await dispatch(upvoteComplaint(complaintId));
             if (upvoteComplaint.fulfilled.match(result)) {
-                toast.success('👍 Upvoted successfully!', {
+                toast.success('Upvoted successfully!', {
                     duration: 2000,
                     position: 'top-center',
                     className: 'custom-toast custom-toast-success',
+                    icon: <FiThumbsUp />,
                     style: {
                         background: 'rgba(34, 197, 94, 0.2)',
                         backdropFilter: 'blur(20px)',
@@ -657,10 +739,11 @@ export default function Complaint() {
         try {
             const result = await dispatch(downvoteComplaint(complaintId));
             if (downvoteComplaint.fulfilled.match(result)) {
-                toast.success('👎 Downvoted successfully!', {
+                toast.success('Downvoted successfully!', {
                     duration: 2000,
                     position: 'top-center',
                     className: 'custom-toast custom-toast-success',
+                    icon: <FiThumbsDown />,
                     style: {
                         background: 'rgba(239, 68, 68, 0.2)',
                         backdropFilter: 'blur(20px)',
@@ -975,7 +1058,7 @@ export default function Complaint() {
                 toast.success('Comment added successfully!', {
                     duration: 3000,
                     position: 'top-center',
-                    icon: '💬',
+                    icon: <FiMessageCircle />,
                 });
             } else {
                 // Handle the error case
@@ -1330,6 +1413,112 @@ export default function Complaint() {
                             </div>
                         </div>
 
+                        {/* Severity Field */}
+                        <div className="form-group">
+                            <label htmlFor="severity" className="form-label">
+                                <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                Severity Level *
+                            </label>
+                            <div className="severity-container">
+                                <div className="severity-options">
+                                    <label className={`severity-option severity-low ${formData.severity === 'low' ? 'selected' : ''}`}>
+                                        <input
+                                            type="radio"
+                                            name="severity"
+                                            value="low"
+                                            checked={formData.severity === 'low'}
+                                            onChange={handleInputChange}
+                                            className="severity-radio"
+                                        />
+                                        <div className="severity-card">
+                                            <div className="severity-icon-wrapper">
+                                                <svg className="severity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <div className="severity-pulse"></div>
+                                            </div>
+                                            <div className="severity-content">
+                                                <div className="severity-header">
+                                                    <span className="severity-label">Low Priority</span>
+                                                    <div className="severity-badge severity-badge-low">
+                                                        <span className="severity-dot"></span>
+                                                        Low
+                                                    </div>
+                                                </div>
+                                                <span className="severity-description">
+                                                    General issues that need to be noted and addressed when convenient
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label className={`severity-option severity-medium ${formData.severity === 'medium' ? 'selected' : ''}`}>
+                                        <input
+                                            type="radio"
+                                            name="severity"
+                                            value="medium"
+                                            checked={formData.severity === 'medium'}
+                                            onChange={handleInputChange}
+                                            className="severity-radio"
+                                        />
+                                        <div className="severity-card">
+                                            <div className="severity-icon-wrapper">
+                                                <svg className="severity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                </svg>
+                                                <div className="severity-pulse"></div>
+                                            </div>
+                                            <div className="severity-content">
+                                                <div className="severity-header">
+                                                    <span className="severity-label">Medium Priority</span>
+                                                    <div className="severity-badge severity-badge-medium">
+                                                        <span className="severity-dot"></span>
+                                                        Medium
+                                                    </div>
+                                                </div>
+                                                <span className="severity-description">
+                                                    Issues requiring prompt attention and timely action
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label className={`severity-option severity-high ${formData.severity === 'high' ? 'selected' : ''}`}>
+                                        <input
+                                            type="radio"
+                                            name="severity"
+                                            value="high"
+                                            checked={formData.severity === 'high'}
+                                            onChange={handleInputChange}
+                                            className="severity-radio"
+                                        />
+                                        <div className="severity-card">
+                                            <div className="severity-icon-wrapper">
+                                                <svg className="severity-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <div className="severity-pulse"></div>
+                                            </div>
+                                            <div className="severity-content">
+                                                <div className="severity-header">
+                                                    <span className="severity-label">High Priority</span>
+                                                    <div className="severity-badge severity-badge-high">
+                                                        <span className="severity-dot"></span>
+                                                        Emergency
+                                                    </div>
+                                                </div>
+                                                <span className="severity-description">
+                                                    Critical emergencies requiring immediate attention
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Description Field */}
                         {/* Rail Specific: Train Number (moved before description) */}
                         {formData.category === 'rail' && (
@@ -1424,7 +1613,7 @@ export default function Complaint() {
                                         <p>Click on the map to select the incident location</p>
                                         {formData.location.latitude && (
                                             <div className="selected-coordinates">
-                                                <span>📍 {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}</span>
+                                                <span><FiMapPin style={{marginRight: '5px'}} /> {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}</span>
                                             </div>
                                         )}
                                     </div>
@@ -1506,7 +1695,7 @@ export default function Complaint() {
                                         </button>
                                         {formData.location.latitude && (
                                             <div className="current-coordinates">
-                                                <span>📍 {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}</span>
+                                                <span><FiMapPin style={{marginRight: '5px'}} /> {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}</span>
                                             </div>
                                         )}
                                     </div>
@@ -1611,12 +1800,11 @@ export default function Complaint() {
                                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                                 >
                                                     <option value="all">All Categories</option>
-                                                    <option value="rail">🚂 Rail Incidents</option>
-                                                    <option value="road">🛣️ Road Issues</option>
-                                                    <option value="fire">🔥 Fire Emergency</option>
-                                                    <option value="cyber">💻 Cyber Crime</option>
-                                                    <option value="police">👮 Police</option>
-                                                    <option value="court">⚖️ Court</option>
+                                                    {categories.map(category => (
+                                                        <option key={category.value} value={category.value}>
+                                                            {category.label}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                         </div>
@@ -1703,17 +1891,20 @@ export default function Complaint() {
                                         {filteredComplaints.map((complaint, index) => (
                                             <div key={complaint._id || index} className="complaint-card">
                                                 <div className="complaint-card-header">
-                                                    <div className="complaint-category">
-                                                        <span 
-                                                            className="category-icon-display"
-                                                            style={{ color: getCategoryColor(complaint.category) }}
-                                                        >
-                                                            {getCategoryIcon(complaint.category)}
-                                                        </span>
-                                                        <span className="category-name">
-                                                            {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
-                                                        </span>
+                                                    <div className="complaint-card-header-left">
+                                                        <div className="complaint-category">
+                                                            <span 
+                                                                className="category-icon-display"
+                                                                style={{ color: getCategoryColor(complaint.category) }}
+                                                            >
+                                                                {getCategoryIcon(complaint.category)}
+                                                            </span>
+                                                            <span className="category-name">
+                                                                {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
+                                                            </span>
+                                                        </div>
                                                     </div>
+                                                    
                                                     <div className="card-header-right">
                                                         <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
                                                             {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
@@ -1736,9 +1927,32 @@ export default function Complaint() {
                                                 </div>
                                                 
                                                 <div className="complaint-card-body">
-                                                    <h4 className="complaint-title-display">
-                                                        {searchQuery ? highlightText(complaint.title, searchQuery) : complaint.title}
-                                                    </h4>
+                                                    <div className="complaint-title-section">
+                                                        <h4 className="complaint-title-display">
+                                                            {searchQuery ? highlightText(complaint.title, searchQuery) : complaint.title}
+                                                        </h4>
+                                                        
+                                                        {/* Severity Display */}
+                                                        {complaint.severity && (
+                                                            <div className="complaint-severity">
+                                                                <div 
+                                                                    className="severity-badge-display"
+                                                                    style={{
+                                                                        color: getSeverityInfo(complaint.severity).color,
+                                                                        backgroundColor: getSeverityInfo(complaint.severity).bgColor,
+                                                                        border: `1px solid ${getSeverityInfo(complaint.severity).borderColor}`
+                                                                    }}
+                                                                >
+                                                                    <span className="severity-icon-display" style={{ color: getSeverityInfo(complaint.severity).color }}>
+                                                                        {getSeverityInfo(complaint.severity).icon}
+                                                                    </span>
+                                                                    <span className="severity-text">
+                                                                        {getSeverityInfo(complaint.severity).label}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                     <p className="complaint-description-display">
                                                         {searchQuery ? highlightText(complaint.description, searchQuery) : complaint.description}
                                                     </p>
@@ -1758,7 +1972,7 @@ export default function Complaint() {
                                                         <div className="rail-train-meta">
                                                             <div className="train-header-line">
                                                                 <div className="train-title-wrap">
-                                                                    <span className="train-emoji" role="img" aria-label="train details">🚈</span>
+                                                                    <span className="train-emoji" role="img" aria-label="train details"><MdDirectionsRailway /></span>
                                                                     <span className="train-name-text">{complaint.category_specific_data.train_name || complaint.category_specific_data.trainNumber || complaint.category_data_id}</span>
                                                                     <span className="train-number-pill">{complaint.category_specific_data.train_number || complaint.category_data_id}</span>
                                                                 </div>

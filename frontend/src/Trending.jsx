@@ -7,6 +7,31 @@ import { toast } from 'react-hot-toast';
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
 import CommentModal from "./CommentModal.jsx";
+import { 
+  FiTrendingUp, 
+  FiThumbsUp, 
+  FiThumbsDown, 
+  FiMessageCircle, 
+  FiMapPin, 
+  FiGlobe, 
+  FiPhone,
+  FiTool,
+  FiAlertTriangle,
+  FiCheckCircle,
+  FiXCircle,
+  FiLoader
+} from 'react-icons/fi';
+import { 
+  MdTrendingUp,
+  MdLocalFireDepartment,
+  MdBalance,
+  MdLocalHospital,
+  MdWater,
+  MdConstruction,
+  MdWarning,
+  MdElectricalServices,
+  MdTrain
+} from 'react-icons/md';
 import "./Trending.css";
 
 const Trending = () => {
@@ -27,6 +52,8 @@ const Trending = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   // Local state to track comment counts and comments for trending complaints
   const [localCommentData, setLocalCommentData] = useState({});
+  // State to control animated loader visibility for demo purposes
+  const [showAnimatedLoader, setShowAnimatedLoader] = useState(true);
 
   // Helper function to get comment count for a complaint
   const getCommentCount = (complaint) => {
@@ -143,12 +170,12 @@ const Trending = () => {
 
   // Categories array for icons and colors
   const categories = [
-    { value: 'rail', label: 'Rail Incidents', icon: '🚂', color: '#f59e0b' },
-    { value: 'road', label: 'Road Issues', icon: '🛣️', color: '#db2777' },
-    { value: 'fire', label: 'Fire Emergency', icon: '🔥', color: '#ef4444' },
-    { value: 'cyber', label: 'Cyber Crime', icon: '💻', color: '#8b5cf6' },
-    { value: 'police', label: 'Police', icon: '👮', color: '#3b82f6' },
-    { value: 'court', label: 'Court', icon: '⚖️', color: '#10b981' }
+    { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
+    { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: '#db2777' },
+    { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: '#ef4444' },
+    { value: 'cyber', label: 'Cyber Crime', icon: <FiAlertTriangle />, color: '#8b5cf6' },
+    { value: 'police', label: 'Police', icon: <FiAlertTriangle />, color: '#3b82f6' },
+    { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
   ];
 
   // Handle ESC key to close modals
@@ -214,7 +241,7 @@ const Trending = () => {
         <div className="trending-page">
           <div className="trending-container">
             <div className="empty-state">
-              <div className="empty-icon">📈</div>
+              <div className="empty-icon"><MdTrendingUp /></div>
               <h3>No Trending Complaints</h3>
               <p>No trending complaints found at the moment.</p>
             </div>
@@ -286,10 +313,11 @@ const Trending = () => {
         // Force refetch of trending data to get updated vote counts
         window.location.reload();
         
-        toast.success('👍 Upvoted successfully!', {
+        toast.success('Upvoted successfully!', {
           duration: 2000,
           position: 'top-center',
           className: 'custom-toast custom-toast-success',
+          icon: <FiThumbsUp />,
           style: {
             background: 'rgba(34, 197, 94, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -301,9 +329,10 @@ const Trending = () => {
           },
         });
       } else {
-        toast.error('❌ Failed to upvote. Please try again.', {
+        toast.error('Failed to upvote. Please try again.', {
           duration: 3000,
           position: 'top-center',
+          icon: <FiXCircle />,
         });
       }
     } catch (error) {
@@ -333,10 +362,11 @@ const Trending = () => {
         // Force refetch of trending data to get updated vote counts
         window.location.reload();
         
-        toast.success('👎 Downvoted successfully!', {
+        toast.success('Downvoted successfully!', {
           duration: 2000,
           position: 'top-center',
           className: 'custom-toast custom-toast-success',
+          icon: <FiThumbsDown />,
           style: {
             background: 'rgba(239, 68, 68, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -485,7 +515,7 @@ const Trending = () => {
         toast.success('Comment added successfully!', {
           duration: 3000,
           position: 'top-center',
-          icon: '💬',
+          icon: <FiMessageCircle />,
         });
       } else {
         const errorMessage = result.payload || 'Failed to add comment';
@@ -630,7 +660,7 @@ const Trending = () => {
         <div className="trending-container">
           <div className="trending-header">
             <h1 className="trending-title">
-              <span className="trending-icon">📈</span>
+              <span className="trending-icon"><MdTrendingUp /></span>
               Trending Complaints
             </h1>
             <p className="trending-subtitle">
@@ -661,7 +691,7 @@ const Trending = () => {
                         </span>
                       )}
                       <div className="trending-score">
-                        <span className="score-icon">🔥</span>
+                        <span className="score-icon"><MdLocalFireDepartment /></span>
                         <span className="score-value">{complaint.score?.toFixed(1) || '0.0'}</span>
                       </div>
                     </div>
@@ -695,9 +725,7 @@ const Trending = () => {
                         {votingInProgress[`${complaint._id}-upvote`] ? (
                           <div className="vote-spinner"></div>
                         ) : (
-                          <svg className="trending-vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                          </svg>
+                          <FiThumbsUp className="trending-vote-icon" />
                         )}
                         <span className="trending-vote-count">
                           {complaint.upvote || 0}
@@ -712,9 +740,7 @@ const Trending = () => {
                         {votingInProgress[`${complaint._id}-downvote`] ? (
                           <div className="vote-spinner"></div>
                         ) : (
-                          <svg className="trending-vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                          </svg>
+                          <FiThumbsDown className="trending-vote-icon" />
                         )}
                         <span className="trending-vote-count">
                           {complaint.downvote || 0}
@@ -726,9 +752,7 @@ const Trending = () => {
                         className="trending-vote-btn trending-comment-btn"
                         onClick={() => openCommentModal(complaint)}
                       >
-                        <svg className="trending-vote-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
-                        </svg>
+                        <FiMessageCircle className="trending-vote-icon" />
                         <span className="trending-vote-count">
                           {getCommentCount(complaint)}
                         </span>
@@ -753,7 +777,24 @@ const Trending = () => {
           <div ref={ref} className="load-more-section">
             {isFetchingNextPage ? (
               <div className="loading-more">
-                <div className="loading-spinner"></div>
+                <div className="animated-loader">
+                  <div className="animated-circle">
+                    <div className="dot"></div>
+                    <div className="outline"></div>
+                  </div>
+                  <div className="animated-circle">
+                    <div className="dot"></div>
+                    <div className="outline"></div>
+                  </div>
+                  <div className="animated-circle">
+                    <div className="dot"></div>
+                    <div className="outline"></div>
+                  </div>
+                  <div className="animated-circle">
+                    <div className="dot"></div>
+                    <div className="outline"></div>
+                  </div>
+                </div>
                 <span>Loading more complaints...</span>
               </div>
             ) : hasNextPage ? (
