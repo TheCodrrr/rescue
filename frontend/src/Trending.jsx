@@ -252,6 +252,8 @@ const Trending = () => {
     );
   }
 
+  console.log("kem cho, this is the data: ", data);
+
   // Helper functions
   const getCategoryIcon = (category) => {
     const categoryData = categories.find(cat => cat.value === category);
@@ -293,6 +295,57 @@ const Trending = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Severity helper function
+  const getSeverityInfo = (severity) => {
+    const severityMap = {
+      'low': {
+        label: 'Low Priority',
+        color: '#ffffff',
+        bgColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: 'rgba(16, 185, 129, 1)',
+        icon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )
+      },
+      'medium': {
+        label: 'Medium Priority',
+        color: '#1f2937',
+        bgColor: 'rgba(245, 158, 11, 0.9)',
+        borderColor: 'rgba(245, 158, 11, 1)',
+        icon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        )
+      },
+      'high': {
+        label: 'High Priority',
+        color: '#ffffff',
+        bgColor: 'rgba(239, 68, 68, 0.9)',
+        borderColor: 'rgba(239, 68, 68, 1)',
+        icon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )
+      }
+    };
+    
+    return severityMap[severity] || {
+      label: 'Unknown',
+      color: '#ffffff',
+      bgColor: 'rgba(107, 114, 128, 0.8)',
+      borderColor: 'rgba(107, 114, 128, 1)',
+      icon: (
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    };
   };
 
   // Voting handlers
@@ -685,6 +738,27 @@ const Trending = () => {
                       </span>
                     </div>
                     <div className="trending-header-right">
+                      {/* Minimal User Profile */}
+                      {complaint.user_id && (
+                        <div className="trending-user-profile">
+                          <div className="trending-user-avatar-mini">
+                            {complaint.user_id.profileImage ? (
+                              <img 
+                                src={complaint.user_id.profileImage} 
+                                alt={complaint.user_id.name || 'User'} 
+                                className="trending-avatar-img-mini"
+                              />
+                            ) : (
+                              <div className="trending-avatar-placeholder-mini">
+                                {(complaint.user_id.name || 'U').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <span className="trending-user-name-mini">
+                            {complaint.user_id.name || 'Anonymous'}
+                          </span>
+                        </div>
+                      )}
                       {complaint.status && (
                         <span className={`trending-status-badge ${getStatusBadgeClass(complaint.status)}`}>
                           {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
@@ -698,9 +772,33 @@ const Trending = () => {
                   </div>
                   
                   <div className="trending-card-body">
-                    <h4 className="trending-title">
-                      {complaint.title}
-                    </h4>
+                    <div className="trending-title-section">
+                      <div className="trending-title-with-severity">
+                        <h4 className="trending-title">
+                          {complaint.title}
+                        </h4>
+                        {/* Severity Display */}
+                        {complaint.severity && (
+                          <div className="trending-complaint-severity" title="Severity">
+                            <div 
+                              className="trending-severity-badge-display"
+                              style={{
+                                color: getSeverityInfo(complaint.severity).color,
+                                backgroundColor: getSeverityInfo(complaint.severity).bgColor,
+                                border: `1px solid ${getSeverityInfo(complaint.severity).borderColor}`
+                              }}
+                            >
+                              <span className="trending-severity-icon-display" style={{ color: getSeverityInfo(complaint.severity).color }}>
+                                {getSeverityInfo(complaint.severity).icon}
+                              </span>
+                              <span className="trending-severity-text">
+                                {complaint.severity.charAt(0).toUpperCase() + complaint.severity.slice(1)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <p className="trending-description">
                       {complaint.description}
                     </p>
