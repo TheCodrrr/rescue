@@ -14,6 +14,7 @@ const getTrendingComplaints = asyncHandler(async (req, res) => {
     let complaints = await Complaint.find(query)
         .sort({ createdAt: -1 })
         .limit(Number(limit) + 1)
+        .populate("user_id", "name profileImage")
         .lean();
 
     if (!complaints || complaints.length == 0) {
@@ -97,8 +98,8 @@ const getComplaintById = asyncHandler(async (req, res) => {
     const complaint = await Complaint.findById(complaintId)
         .populate("user_id", "name email")
         .populate("evidence_ids")
-        .populate("votedUsers", "name email profile_image")
-        .populate("assigned_officer_id", "name email profile_image")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
         .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt");
 
     if (!complaint) {
@@ -124,8 +125,8 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .populate("user_id", "name email")
         .populate("evidence_ids")
-        .populate("votedUsers", "name email profile_image")
-        .populate("assigned_officer_id", "name email profile_image")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
         .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
         .lean(); // 👈 makes results plain JS objects instead of Mongoose docs
 
