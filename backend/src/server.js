@@ -22,6 +22,25 @@ import departmentRouter from "./routes/department.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
 import evidenceRouter from "./routes/evidence.routes.js";
 import { initRailSchema } from "./services/rail.service.js";
+import http from "http";
+import { Server } from "socket.io";
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: process.env.CORS_ORIGIN,
+        credentials: true,
+    }
+})
+
+io.on("connection", (socket) => {
+    console.log("A user connected: ", socket.id);
+
+    socket.on("disconnect", () => {
+        console.log("A user disconnected", socket.id);
+    });
+});
 
 (async function initializeServices() {
     try {
@@ -44,4 +63,4 @@ app.use("/api/v1/evidences", evidenceRouter);
 import { errorHandler } from "./middlewares/error.middlewares.js";
 app.use(errorHandler);
 
-export { app };
+export { app, server, io };
