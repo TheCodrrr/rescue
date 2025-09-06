@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { ensureTrainExists, getTrainByNumber } from "../services/rail.service.js";
 import { calculateTrendingScore } from "../../utils/trendingScore.js";
 // import { Department } from "../models/department.models.js";
+import { io } from "../server.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -80,6 +81,22 @@ const createComplaint = asyncHandler(async (req, res) => {
     category_data_id: category_data_id || '',
     severity,
   })
+
+  if (complaint) {
+    console.log("Complaint created successfully, emitting to socket...");
+    console.log("Complaint ID:", complaint._id);
+    
+    // Populate user information before emitting
+    const populatedComplaint = await Complaint.findById(complaint._id)
+      .populate("user_id", "name email profileImage")
+      .lean();
+    
+    console.log("Populated complaint:", JSON.stringify(populatedComplaint, null, 2));
+    console.log("Emitting newComplaint event to all connected clients...");
+    
+    io.emit("newComplaint", populatedComplaint);
+    console.log("Socket emit completed");
+  }
 
   res.status(201).json({
     success: true,
