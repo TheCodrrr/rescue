@@ -1,10 +1,31 @@
+/* Global fixes for proper scrolling */
+html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden !important; /* Prevent horizontal scrolling */
+    overflow-y: auto !important; /* Ensure vertical scrolling works */
+}
+
+/* Force proper layout behavior */
+* {
+    box-sizing: border-box;
+}
+
+/* App container fixes */
+#root {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
 /* Home Page Background */
 .home-page {
-    min-height: 100vh;
+    min-height: 100vh !important; /* Allow page to grow beyond viewport */
+    height: auto !important; /* Force auto height */
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
     position: relative;
-    overflow-x: hidden;
+    overflow-x: hidden; /* Only hide horizontal overflow */
     padding-top: 5rem; /* Add padding to account for fixed navbar */
+    padding-bottom: 6rem; /* Even more bottom padding for footer spacing */
 }
 
 .home-page::before {
@@ -24,18 +45,20 @@
 .main-content {
     position: relative;
     z-index: 1;
+    /* Remove all height constraints to allow natural content flow */
+    width: 100%;
 }
 
 .hero-section {
-    height: 100vh;
+    height: calc(100vh - 5rem); /* Take full height minus navbar */
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     text-align: center;
     position: relative;
-    overflow: hidden;
-    background: transparent; /* Remove background since it's now on the page wrapper */
+    padding: 2rem 0;
+    background: transparent;
 }
 
 .hero-section::before {
@@ -348,32 +371,154 @@
     }
 }
 
-/* Live Map Section - Glassmorphism */
+/* Split Layout Section */
 .map-section {
+    height: 60vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4rem 0.5rem 2rem 0.5rem; /* Reduced horizontal padding from 1rem to 0.5rem */
-    background: none;
+    padding: 1rem;
+    gap: 1rem;
+    overflow: hidden;
 }
 
-.map-glass {
+.map-container {
+    flex: 1;
     background: rgba(30, 58, 138, 0.15);
-    border-radius: 2rem;
+    border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border: 1.5px solid rgba(59, 130, 246, 0.18);
-    padding: 2rem 2rem 2rem 2rem;
-    max-width: 1400px; /* Increased from 1000px */
-    width: 95%; /* Increased from 100% to use more screen width */
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+.complaint-sidebar {
+    width: 400px;
+    background: rgba(30, 58, 138, 0.15);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1.5px solid rgba(59, 130, 246, 0.18);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.complaint-sidebar h3 {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+
+.complaints-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.complaints-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.complaints-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.complaints-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.complaints-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.complaint-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.complaint-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.complaint-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
-    position: relative;
-    z-index: 2;
-    animation: fadeInScale 1.2s ease-out;
+    margin-bottom: 0.5rem;
+}
+
+.complaint-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+.complaint-time {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.complaint-title {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.complaint-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0 0 0.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.complaint-location {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.map-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    max-width: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Use full height of container */
+    overflow: visible;
 }
 
 .map-title {
@@ -447,7 +592,8 @@
 
 .live-map {
     width: 100%;
-    height: 500px; /* Increased from 450px */
+    flex: 1;
+    min-height: 300px;
     border-radius: 1.5rem;
     box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
     overflow: hidden;
@@ -580,6 +726,612 @@
 .court-marker .marker-pulse { background: rgba(16, 185, 129, 0.3); }
 .court-marker .marker-icon { border-color: #10b981; }
 
+/* Real Complaint Markers - Enhanced styling for live complaints */
+.real-complaint.incident-marker {
+    transform: scale(1.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.real-complaint.incident-marker:hover {
+    transform: scale(1.2);
+    filter: brightness(1.1);
+}
+
+.real-complaint .marker-pulse {
+    animation: realComplaintPulse 1.5s ease-in-out infinite;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.real-complaint .marker-icon {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.4);
+    border-width: 3px;
+    font-size: 1.6rem;
+    animation: realComplaintBounce 2s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+.real-complaint.incident-marker:hover .marker-icon {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 35px rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+/* Real complaint marker type-specific enhancements */
+.real-complaint.rail-marker .marker-pulse { 
+    background: rgba(245, 158, 11, 0.5); 
+    border-color: rgba(245, 158, 11, 0.8);
+}
+.real-complaint.fire-marker .marker-pulse { 
+    background: rgba(239, 68, 68, 0.5); 
+    border-color: rgba(239, 68, 68, 0.8);
+}
+.real-complaint.cyber-marker .marker-pulse { 
+    background: rgba(139, 92, 246, 0.5); 
+    border-color: rgba(139, 92, 246, 0.8);
+}
+.real-complaint.police-marker .marker-pulse { 
+    background: rgba(59, 130, 246, 0.5); 
+    border-color: rgba(59, 130, 246, 0.8);
+}
+.real-complaint.court-marker .marker-pulse { 
+    background: rgba(16, 185, 129, 0.5); 
+    border-color: rgba(16, 185, 129, 0.8);
+}
+
+/* Real Complaint Popup Styles */
+.real-complaint-popup {
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+    min-width: 280px;
+}
+
+.real-complaint-popup h3 {
+    color: #dc2626;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+/* Floating Complaint Popup - Outside Map */
+.floating-complaint-popup {
+    position: fixed;
+    width: 350px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2), 0 15px 35px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    z-index: 10000;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    cursor: default;
+}
+
+.floating-complaint-popup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
+}
+
+.floating-complaint-popup .incident-popup {
+    position: relative;
+    z-index: 1;
+}
+
+/* Enhanced Popup Styles */
+.custom-popup {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    padding: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.custom-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 0;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.custom-popup .leaflet-popup-tip {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-popup .leaflet-popup-close-button {
+    color: #64748b;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px;
+    transition: all 0.2s ease;
+}
+
+.custom-popup .leaflet-popup-close-button:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+.incident-popup {
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.popup-header {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 16px 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.popup-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    pointer-events: none;
+}
+
+.header-left {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.incident-title {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1.3;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.incident-category {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.live-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: liveBadgePulse 2s ease-in-out infinite;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.popup-body {
+    padding: 20px;
+    background: white;
+}
+
+.incident-details .description {
+    margin: 0 0 16px 0;
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.6;
+    max-height: 60px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 3px solid #e5e7eb;
+}
+
+.status-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.severity-badge, .status-badge {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.severity-low {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.severity-medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.severity-high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-in_progress {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.status-resolved {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.address {
+    margin: 0 0 16px 0;
+    color: #6b7280;
+    font-size: 13px;
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    border-left: 3px solid #9ca3af;
+}
+
+.user-section {
+    margin: 16px 0;
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.user-email {
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.incident-meta {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 80px;
+}
+
+.meta-label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.meta-value {
+    font-size: 13px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.popup-footer {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.live-indicator {
+    color: #059669;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.live-indicator::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling for popup content */
+.custom-popup .leaflet-popup-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Enhanced Real Complaint Popup Styles */
+.real-complaint-popup {
+    min-width: 320px;
+    max-width: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+}
+
+.popup-header h3 {
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.live-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: liveBadgePulse 2s ease-in-out infinite;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.popup-content {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.complaint-details p {
+    margin: 0.5rem 0;
+    color: #374151;
+}
+
+.user-details {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+}
+
+.user-details h4 {
+    margin: 0 0 0.5rem 0;
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.user-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.user-text {
+    flex: 1;
+}
+
+.user-name {
+    margin: 0;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.user-email {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.incident-meta {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+}
+
+.incident-meta p {
+    margin: 0.4rem 0;
+    font-size: 0.85rem;
+}
+
+.incident-id {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem !important;
+    color: #9ca3af;
+    background: rgba(156, 163, 175, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.75rem !important;
+}
+
+.popup-divider {
+    border: none;
+    border-top: 1px solid rgba(156, 163, 175, 0.2);
+    margin: 0.75rem 0;
+}
+
+.popup-footer {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(156, 163, 175, 0.2);
+}
+
+.real-time-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #059669;
+    font-weight: 600;
+    background: rgba(5, 150, 105, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+/* Hover effects for markers */
+.custom-incident-marker:hover .real-complaint .marker-icon {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.custom-incident-marker:hover .real-complaint .marker-pulse {
+    animation-duration: 1s;
+}
+
 /* Popup Styles */
 .incident-popup h3 {
     margin: 0 0 0.5rem 0;
@@ -668,7 +1420,8 @@
 /* Map Loading State */
 .map-loading {
     width: 100%;
-    height: 500px;
+    flex: 1;
+    min-height: 300px;
     border-radius: 1.5rem;
     box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
     border: 1px solid rgba(59, 130, 246, 0.18);
@@ -787,6 +1540,51 @@
     }
     50% {
         transform: translateY(-5px);
+    }
+}
+
+/* Real Complaint Animations */
+@keyframes realComplaintPulse {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(1.8);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+}
+
+@keyframes realComplaintBounce {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    25% {
+        transform: translateY(-3px) scale(1.05);
+    }
+    50% {
+        transform: translateY(-6px) scale(1.1);
+    }
+    75% {
+        transform: translateY(-3px) scale(1.05);
+    }
+}
+
+@keyframes liveBadgePulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 2px 12px rgba(239, 68, 68, 0.5), 0 0 20px rgba(239, 68, 68, 0.2);
     }
 }
 
@@ -981,5 +1779,948 @@
     .map-loading-spinner {
         width: 2.5rem;
         height: 2.5rem;
+    }
+}
+
+/* ========================================
+   CATEGORY TABS STYLES
+   ======================================== */
+
+.category-tabs {
+    margin-bottom: 2rem;
+    width: 100%;
+    padding: 0 1rem; /* Add horizontal padding */
+}
+
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* Add gap between tabs */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
+    max-width: 900px; /* Increase max width to accommodate gaps */
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tabs-container::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem; /* Increase padding for better spacing */
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    min-width: fit-content; /* Ensure tabs don't shrink too much */
+}
+
+.tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 40px;
+}
+
+.tab:hover::before {
+    opacity: 1;
+}
+
+.tab:hover {
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+}
+
+.tab.active {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+    color: white;
+    font-weight: 600;
+    box-shadow: 
+        0 4px 15px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    animation: tabActivate 0.3s ease-out;
+}
+
+@keyframes tabActivate {
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 
+            0 2px 8px rgba(255, 255, 255, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+        transform: translateY(-1px) scale(1);
+        box-shadow: 
+            0 4px 15px rgba(255, 255, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.tab.active::before {
+    opacity: 0;
+}
+
+.tab-icon {
+    font-size: 1.2rem; /* Increase icon size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Responsive tabs */
+@media (max-width: 768px) {
+    .tabs-container {
+        padding: 0.4rem;
+        max-width: 95%;
+        gap: 0.3rem; /* Reduce gap on mobile */
+    }
+    
+    .tab {
+        padding: 0.6rem 0.8rem; /* Reduce padding on mobile */
+        font-size: 0.8rem;
+        gap: 0.3rem; /* Reduce gap between icon and text */
+    }
+    
+    .tab-icon {
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   SPLIT LAYOUT STYLES
+   ======================================== */
+
+.incidents-section {
+    padding: 3rem 1rem 6rem; /* Increase padding significantly */
+    max-width: 100%;
+    margin: 0 auto;
+    /* Remove min-height constraint to allow natural content growth */
+}
+
+.incidents-container {
+    display: flex;
+    gap: 2rem;
+    min-height: 70vh;
+    height: auto !important;
+    align-items: stretch; /* Change back to stretch for equal heights */
+}
+
+/* Left Panel - Map */
+.map-panel {
+    flex: 0.7; /* Slightly increase map panel */
+    min-width: 0;
+}
+
+/* Map panel specific styles */
+.map-panel .live-map {
+    flex: 1;
+    min-height: 450px; /* Reduce slightly for better balance */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.map-panel .map-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.map-panel .map-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.map-panel .incident-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.map-panel .legend-item span {
+    font-size: 0.8rem;
+}
+
+/* Right Panel - Complaints */
+.complaints-panel {
+    flex: 1.3; /* Slightly reduce complaints panel */
+    min-width: 0;
+}
+
+.complaints-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    height: 100%; /* Use full height of container */
+    display: flex;
+    flex-direction: column;
+}
+
+.complaints-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.complaints-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.complaints-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 0.5rem;
+    min-height: 500px; /* Ensure minimum height for content */
+    max-height: none; /* Remove any height restrictions */
+    transition: all 0.3s ease; /* Smooth transition when content changes */
+}
+
+/* Custom scrollbar for complaints list */
+.complaints-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.complaints-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.complaints-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.complaints-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Complaint Card */
+.complaint-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.complaint-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.incident-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.incident-badge .incident-icon {
+    font-size: 1rem;
+}
+
+.incident-badge .incident-type {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    letter-spacing: 0.5px;
+}
+
+.time-badge {
+    background: rgba(34, 197, 94, 0.1);
+    color: #15803d;
+    padding: 0.3rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.complaint-content {
+    margin-bottom: 1rem;
+}
+
+.complaint-card .complaint-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem;
+    line-height: 1.4;
+}
+
+.complaint-card .complaint-description {
+    color: #4b5563;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0 0 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.complaint-card .complaint-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: rgba(249, 250, 251, 0.8);
+    border-radius: 8px;
+}
+
+.complaint-card .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #374151;
+}
+
+.complaint-card .meta-icon {
+    font-size: 0.85rem;
+    width: 14px;
+}
+
+.complaint-card .reporter-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(243, 244, 246, 0.8);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.complaint-card .reporter-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.complaint-card .reporter-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.complaint-card .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.complaint-card .reporter-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.complaint-card .reporter-name {
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.8rem;
+}
+
+.complaint-card .reporter-label {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+.complaint-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.complaint-actions .action-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.complaint-actions .view-btn {
+    background: rgba(59, 130, 246, 0.1);
+    color: #1d4ed8;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.complaint-actions .view-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.complaint-actions .help-btn {
+    background: rgba(34, 197, 94, 0.1);
+    color: #15803d;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.complaint-actions .help-btn:hover {
+    background: rgba(34, 197, 94, 0.2);
+    transform: translateY(-1px);
+}
+
+.complaint-actions .action-btn span {
+    font-size: 0.8rem;
+}
+
+/* No Complaints State */
+.no-complaints {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+}
+
+.no-complaints-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.no-complaints h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.no-complaints p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    max-width: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .incidents-container {
+        gap: 1.5rem;
+    }
+    
+    .complaints-glass {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 968px) {
+    .incidents-container {
+        flex-direction: column;
+        min-height: auto; /* Remove height constraints on medium screens */
+        gap: 2rem;
+    }
+    
+    .map-panel,
+    .complaints-panel {
+        flex: none;
+    }
+    
+    .map-panel {
+        height: 60vh;
+        min-height: 400px;
+    }
+    
+    .complaints-panel {
+        height: 60vh;
+        min-height: 500px;
+    }
+    
+    .complaints-glass {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .incidents-section {
+        padding: 2rem 0.5rem 5rem; /* Increase vertical padding significantly */
+    }
+    
+    .incidents-container {
+        flex-direction: column; /* Stack vertically on mobile */
+        gap: 2rem; /* Increase gap between sections */
+        min-height: auto; /* Remove all height restrictions */
+    }
+    
+    .map-panel {
+        flex: 1; /* Reset to equal on mobile */
+        min-height: 400px;
+    }
+    
+    .complaints-panel {
+        flex: 1; /* Reset to equal on mobile */
+        min-height: 400px;
+    }
+    
+    .complaints-glass {
+        padding: 1rem;
+    }
+    
+    .complaints-title {
+        font-size: 1.5rem;
+    }
+    
+    .complaint-card {
+        padding: 1rem;
+    }
+    
+    .map-panel .incident-legend {
+        gap: 0.5rem;
+    }
+    
+    .map-panel .legend-item span {
+        font-size: 0.7rem;
+    }
+}
+
+/* ========================================
+   ORIGINAL MODAL STYLES (Now Unused but kept for reference)
+   ======================================== */
+
+.complaint-modal {
+    width: 380px;
+    max-width: 90vw;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+@keyframes modalSlideIn {
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 15px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.incident-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+}
+
+.incident-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.incident-type-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1f2937;
+    letter-spacing: 0.5px;
+}
+
+.severity-indicator {
+    padding: 4px 0;
+}
+
+.severity {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.severity.low {
+    background: rgba(34, 197, 94, 0.2);
+    color: #166534;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.severity.medium {
+    background: rgba(251, 191, 36, 0.2);
+    color: #92400e;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.severity.high {
+    background: rgba(239, 68, 68, 0.2);
+    color: #991b1b;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.modal-content {
+    padding: 20px;
+}
+
+.complaint-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 10px;
+    line-height: 1.4;
+}
+
+.complaint-description {
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 20px;
+    max-height: 80px;
+    overflow-y: auto;
+}
+
+.complaint-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(249, 250, 251, 0.8);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.meta-icon {
+    font-size: 0.9rem;
+    width: 16px;
+    text-align: center;
+}
+
+.reporter-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(243, 244, 246, 0.8);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.reporter-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.reporter-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.reporter-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.reporter-name {
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.9rem;
+}
+
+.reporter-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.evidence-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.evidence-label {
+    font-size: 0.85rem;
+    color: #92400e;
+    font-weight: 500;
+}
+
+.evidence-count {
+    font-size: 0.8rem;
+    color: #92400e;
+    background: rgba(251, 191, 36, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    backdrop-filter: blur(10px);
+}
+
+.view-btn {
+    background: rgba(59, 130, 246, 0.15);
+    color: #1d4ed8;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.view-btn:hover {
+    background: rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.help-btn {
+    background: rgba(34, 197, 94, 0.15);
+    color: #15803d;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.help-btn:hover {
+    background: rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.action-btn span {
+    font-size: 0.9rem;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .complaint-modal {
+        width: 95vw;
+        max-width: 350px;
+        margin: 10px;
+    }
+    
+    .modal-header,
+    .modal-content,
+    .modal-actions {
+        padding: 15px;
+    }
+    
+    .complaint-title {
+        font-size: 1.1rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Responsive Design for Split Layout */
+@media (max-width: 1024px) {
+    .map-section {
+        flex-direction: column;
+        height: auto;
+        min-height: 60vh;
+    }
+    
+    .complaint-sidebar {
+        width: 100%;
+        height: 300px;
+        order: -1;
+    }
+    
+    .map-container {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        height: 30vh;
+        padding: 1rem;
+    }
+    
+    .map-section {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .map-container,
+    .complaint-sidebar {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+    
+    .complaint-sidebar {
+        height: 250px;
+    }
+    
+    .map-container {
+        min-height: 300px;
+    }
+}
+
+/* Large screens - ensure proper spacing and height */
+@media (min-width: 1200px) {
+    .incidents-section {
+        padding: 3rem 2rem 5rem; /* More padding on larger screens */
+    }
+    
+    .incidents-container {
+        max-width: 1400px; /* Limit max width for better readability */
+        margin: 0 auto;
+        gap: 3rem; /* Larger gap on big screens */
+        /* Remove min-height constraint to avoid conflicts */
+    }
+    
+    .map-panel .live-map {
+        min-height: 600px; /* Larger map on big screens */
+    }
+    
+    .complaints-list {
+        min-height: 600px; /* Match map height */
     }
 }

@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { loadUser, loginSuccess, logout } from "./auth/redux/authSlice";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
+import { io } from "socket.io-client";
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -19,11 +20,26 @@ export default function Home() {
     const [locationPermission, setLocationPermission] = useState(null); // 'granted', 'denied', 'prompt', null
     const [userLocation, setUserLocation] = useState(null);
     const [mapReady, setMapReady] = useState(false);
+    
+    // Recent complaints state for right panel
+    const [recentComplaints, setRecentComplaints] = useState([]);
+    
+    // Category filter state
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    
+    // Filtered complaints based on selected category
+    const filteredComplaints = recentComplaints.filter(complaint => 
+        selectedCategory === 'all' || complaint.category === selectedCategory
+    );
+    
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const location = useLocation();
     const hasLoadedUser = useRef(false);
     const mapRef = useRef(null);
+
+    const socketRef = useRef(null);
+    const incidentMarkersRef = useRef([]);
 
     // Function to request location permission
     const requestLocationPermission = () => {
@@ -60,6 +76,322 @@ export default function Home() {
                 }
             );
         });
+    };
+
+    // Socket initialization
+    useEffect(() => {
+        // Initialize socket connection
+        const socketURL = import.meta.env.VITE_SOCKET_URL || 
+                         'http://localhost:5000';
+        
+        console.log("Initializing socket connection to:", socketURL);
+        socketRef.current = io(socketURL, {
+            withCredentials: true,
+            transports: ['websocket', 'polling']
+        });
+
+        socketRef.current.on('connect', () => {
+            console.log('Socket connected:', socketRef.current.id);
+        });
+
+        socketRef.current.on('disconnect', () => {
+            console.log('Socket disconnected');
+        });
+
+        // Set up the newComplaint listener here (for storing pending complaints)
+        socketRef.current.on('newComplaint', (complaint) => {
+            console.log('🚨 New complaint received via socket:', complaint);
+            console.log('Complaint details:', {
+                id: complaint._id,
+                title: complaint.title,
+                category: complaint.category,
+                coordinates: { lat: complaint.latitude, lng: complaint.longitude },
+                address: complaint.address,
+                user: complaint.user_id
+            });
+            
+            // Always store for later processing - the dedicated useEffect will handle it
+            console.log('Storing complaint for processing when map is ready');
+            window.pendingComplaints = window.pendingComplaints || [];
+            window.pendingComplaints.push(complaint);
+            console.log(`Total pending complaints: ${window.pendingComplaints.length}`);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (socketRef.current) {
+                console.log('Cleaning up socket connection');
+                socketRef.current.off('newComplaint');
+                socketRef.current.disconnect();
+            }
+        };
+    }, []);
+
+    // Set up newComplaint listener when map becomes ready
+    useEffect(() => {
+        const setupListener = async () => {
+            if (socketRef.current && mapReady && mapRef.current && userLocation) {
+                console.log('Setting up newComplaint listener - map is ready');
+                
+                // Remove any existing listener
+                socketRef.current.off('newComplaint');
+                
+                // Add the listener
+                socketRef.current.on('newComplaint', async (complaint) => {
+                    console.log('🚨 New complaint received via socket (map ready):', complaint);
+                    console.log('Processing complaint immediately...');
+                    try {
+                        await processNewComplaint(complaint);
+                    } catch (error) {
+                        console.error('Error processing new complaint:', error);
+                    }
+                });
+                
+                // Process any pending complaints
+                if (window.pendingComplaints && window.pendingComplaints.length > 0) {
+                    console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
+                    for (const complaint of window.pendingComplaints) {
+                        try {
+                            await processNewComplaint(complaint);
+                        } catch (error) {
+                            console.error('Error processing pending complaint:', error);
+                        }
+                    }
+                    window.pendingComplaints = []; // Clear the pending complaints
+                }
+            }
+        };
+        
+        setupListener();
+    }, [mapReady, userLocation]);
+
+    // Function to process new complaints (can be used both for live and pending complaints)
+    const processNewComplaint = async (complaint) => {
+        if (!mapRef.current || !userLocation) {
+            console.log('Map or location not available for processing complaint');
+            return;
+        }
+
+        console.log('Processing new complaint:', complaint);
+        console.log('User location:', userLocation);
+        console.log('Complaint location:', { lat: complaint.latitude, lng: complaint.longitude });
+
+        // Calculate distance between user and complaint
+        const calculateDistance = (lat1, lng1, lat2, lng2) => {
+            const R = 6371; // Radius of the Earth in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        };
+
+        const distance = calculateDistance(
+            userLocation.lat, 
+            userLocation.lng, 
+            complaint.latitude, 
+            complaint.longitude
+        );
+
+        console.log(`Distance from user to complaint: ${distance.toFixed(2)} km`);
+
+        // Debug mode - temporarily show all complaints regardless of distance
+        const DEBUG_MODE = true; // Set to false for production
+        const MAX_DISTANCE_KM = 100;
+        
+        if (!DEBUG_MODE && distance > MAX_DISTANCE_KM) {
+            console.log(`Complaint is too far away (${distance.toFixed(2)} km > ${MAX_DISTANCE_KM} km), skipping`);
+            return;
+        }
+
+        if (DEBUG_MODE) {
+            console.log(`🔧 DEBUG MODE: Showing complaint regardless of distance (${distance.toFixed(2)} km)`);
+        } else {
+            console.log('✅ Complaint is within acceptable distance, creating marker...');
+        }
+
+        // Get incident type configuration by category
+        const getIncidentTypeByCategory = (category) => {
+            const typeMap = {
+                'rail': { type: 'rail', icon: '🚂', color: '#f59e0b' },
+                'fire': { type: 'fire', icon: '🔥', color: '#ef4444' },
+                'cyber': { type: 'cyber', icon: '💻', color: '#8b5cf6' },
+                'police': { type: 'police', icon: '👮', color: '#3b82f6' },
+                'court': { type: 'court', icon: '⚖️', color: '#10b981' },
+                'road': { type: 'police', icon: '🚗', color: '#3b82f6' }
+            };
+            return typeMap[category] || typeMap['police'];
+        };
+
+        const incidentType = getIncidentTypeByCategory(complaint.category);
+        
+        const newIncident = {
+            lat: complaint.latitude,
+            lng: complaint.longitude,
+            id: complaint._id,
+            timestamp: new Date(complaint.createdAt),
+            title: complaint.title,
+            description: complaint.description,
+            category: complaint.category,
+            severity: complaint.severity,
+            status: complaint.status,
+            address: complaint.address,
+            user: complaint.user_id ? {
+                name: complaint.user_id.name || 'Anonymous User',
+                email: complaint.user_id.email || 'No email provided',
+                profileImage: complaint.user_id.profileImage || null
+            } : null
+        };
+
+        console.log('Created incident object:', newIncident);
+
+        // Create the marker directly without using stored function references
+        try {
+            const L = await import("leaflet");
+            console.log('✅ Creating new complaint marker...');
+            
+            // Create the marker HTML
+            const markerHtml = `
+                <div class="incident-marker ${incidentType.type}-marker real-complaint">
+                    <div class="marker-pulse"></div>
+                    <div class="marker-icon">${incidentType.icon}</div>
+                </div>
+            `;
+
+            // Create the marker
+            const marker = L.marker([newIncident.lat, newIncident.lng], {
+                icon: L.divIcon({
+                    html: markerHtml,
+                    className: 'custom-incident-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                })
+            }).addTo(mapRef.current);
+
+            console.log('✅ Marker created successfully');
+            console.log('� Map reference:', mapRef.current);
+
+            // Calculate distance
+            const distance = Math.sqrt(
+                Math.pow((userLocation.lat - newIncident.lat) * 111, 2) + 
+                Math.pow((userLocation.lng - newIncident.lng) * 111 * Math.cos(userLocation.lat * Math.PI / 180), 2)
+            );
+
+            console.log('� Distance calculated:', distance.toFixed(2), 'km');
+
+            // Create popup content
+            const reportedTime = newIncident.timestamp.toLocaleString();
+            const timeDiff = Math.floor((new Date() - newIncident.timestamp) / (1000 * 60)); // minutes ago
+            const timeAgo = timeDiff < 1 ? 'Just now' : timeDiff < 60 ? `${timeDiff}m ago` : `${Math.floor(timeDiff / 60)}h ago`;
+            
+            const popupContent = `
+                <div class="incident-popup real-complaint-popup">
+                    <div class="popup-header">
+                        <div class="header-left">
+                            <h3 class="incident-title">🚨 ${newIncident.title}</h3>
+                            <span class="incident-category">${newIncident.category.charAt(0).toUpperCase() + newIncident.category.slice(1)}</span>
+                        </div>
+                        <span class="live-badge">🔴 LIVE</span>
+                    </div>
+                    
+                    <div class="popup-body">
+                        <div class="incident-details">
+                            <p class="description">📝 ${newIncident.description}</p>
+                            
+                            <div class="status-row">
+                                <span class="severity-badge severity-${newIncident.severity}">${newIncident.severity.toUpperCase()}</span>
+                                <span class="status-badge status-${newIncident.status}">${newIncident.status.replace('_', ' ').toUpperCase()}</span>
+                            </div>
+                            
+                            ${newIncident.address ? `<p class="address">📍 ${newIncident.address}</p>` : ''}
+                        </div>
+                        
+                        ${newIncident.user ? `
+                            <div class="user-section">
+                                <div class="user-info">
+                                    ${newIncident.user.profileImage ? 
+                                        `<img src="${newIncident.user.profileImage}" alt="${newIncident.user.name}" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                         <div class="user-avatar-placeholder" style="display:none;">${newIncident.user.name ? newIncident.user.name.charAt(0).toUpperCase() : '?'}</div>` : 
+                                        `<div class="user-avatar-placeholder">${newIncident.user.name ? newIncident.user.name.charAt(0).toUpperCase() : '?'}</div>`
+                                    }
+                                    <div class="user-details">
+                                        <p class="user-name">${newIncident.user.name || 'Anonymous User'}</p>
+                                        ${newIncident.user.email ? `<p class="user-email">${newIncident.user.email}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="incident-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">📏 Distance:</span>
+                                <span class="meta-value">${distance.toFixed(2)} km</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">🕒 Reported:</span>
+                                <span class="meta-value">${timeAgo}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="popup-footer">
+                        <span class="live-indicator">📍 Live incident data</span>
+                    </div>
+                </div>
+            `;
+
+            // Add the complaint to recent complaints list (newest first)
+            const complaintData = {
+                ...newIncident,
+                distance: distance.toFixed(2),
+                timeAgo: timeDiff < 1 ? 'Just now' : timeDiff < 60 ? `${timeDiff}m ago` : `${Math.floor(timeDiff / 60)}h ago`,
+                incidentType: incidentType.type,  // Use the type property
+                incidentIcon: incidentType.icon   // Also store the icon
+            };
+
+            // Update recent complaints (keep only latest 10)
+            setRecentComplaints(prevComplaints => {
+                const updatedComplaints = [complaintData, ...prevComplaints];
+                return updatedComplaints.slice(0, 10); // Keep only latest 10
+            });
+
+            // Store the marker
+            incidentMarkersRef.current.push(marker);
+            
+            console.log('✅ Marker added to map successfully!');
+            console.log('� Total markers on map:', incidentMarkersRef.current.length);
+            
+            // Check if marker is visible in current view
+            const markerLatLng = marker.getLatLng();
+            const currentBounds = mapRef.current.getBounds();
+            const isInCurrentView = currentBounds.contains(markerLatLng);
+            
+            if (!isInCurrentView) {
+                console.log('📍 Panning map to show new complaint...');
+                mapRef.current.panTo(markerLatLng);
+            }
+
+            // Add entrance animation
+            setTimeout(() => {
+                const markerElement = marker.getElement();
+                if (markerElement) {
+                    markerElement.style.animation = 'markerBounce 0.6s ease-out';
+                    markerElement.style.transform = 'scale(1.2)';
+                    
+                    setTimeout(() => {
+                        markerElement.style.transform = 'scale(1)';
+                        markerElement.style.animation = '';
+                    }, 600);
+                }
+            }, 100);
+
+            console.log('🎉 New complaint marker successfully displayed on map!');
+            
+        } catch (error) {
+            console.error('❌ Error creating marker:', error);
+        }
     };
 
     useEffect(() => {
@@ -118,29 +450,12 @@ export default function Home() {
         let userLocationMarker;
         
         const incidentTypes = [
-            { type: 'rail', icon: '🚂', color: '#f59e0b', incidents: [] },
-            { type: 'fire', icon: '🔥', color: '#ef4444', incidents: [] },
-            { type: 'cyber', icon: '💻', color: '#8b5cf6', incidents: [] },
-            { type: 'police', icon: '👮', color: '#3b82f6', incidents: [] },
-            { type: 'court', icon: '⚖️', color: '#10b981', incidents: [] }
+            { type: 'rail', icon: '🚂', color: '#f59e0b' },
+            { type: 'fire', icon: '🔥', color: '#ef4444' },
+            { type: 'cyber', icon: '💻', color: '#8b5cf6' },
+            { type: 'police', icon: '👮', color: '#3b82f6' },
+            { type: 'court', icon: '⚖️', color: '#10b981' }
         ];
-
-        // Generate random incidents across the visible map area
-        const generateIncidents = (centerLat, centerLng, count = 3) => {
-            const incidents = [];
-            for (let i = 0; i < count; i++) {
-                // Spread incidents across a much larger area (visible map bounds)
-                const lat = centerLat + (Math.random() - 0.5) * 0.2; // Increased from 0.02 to 0.2
-                const lng = centerLng + (Math.random() - 0.5) * 0.2; // Increased from 0.02 to 0.2
-                incidents.push({
-                    lat,
-                    lng,
-                    id: Math.random().toString(36).substr(2, 9),
-                    timestamp: new Date()
-                });
-            }
-            return incidents;
-        };
 
         const loadMap = async () => {
             try {
@@ -203,15 +518,10 @@ export default function Home() {
 
                 userLocationMarker.bindPopup(userPopupContent).openPopup();
 
-                // Generate incidents for each type around user location
-                incidentTypes.forEach(incidentType => {
-                    incidentType.incidents = generateIncidents(userLocation.lat, userLocation.lng, Math.floor(Math.random() * 4) + 3); // 3-6 incidents per type
-                });
-
                 // Create animated markers for incidents
-                const createIncidentMarker = (incident, type) => {
+                const createIncidentMarker = (incident, type, isRealComplaint = false) => {
                     const markerHtml = `
-                        <div class="incident-marker ${type.type}-marker">
+                        <div class="incident-marker ${type.type}-marker ${isRealComplaint ? 'real-complaint' : ''}">
                             <div class="marker-pulse"></div>
                             <div class="marker-icon">${type.icon}</div>
                         </div>
@@ -228,15 +538,74 @@ export default function Home() {
 
                     const distance = calculateDistance(userLocation.lat, userLocation.lng, incident.lat, incident.lng);
 
-                    marker.bindPopup(`
-                        <div class="incident-popup">
-                            <h3>${type.type.charAt(0).toUpperCase() + type.type.slice(1)} Incident</h3>
-                            <p><strong>Type:</strong> ${type.type}</p>
-                            <p><strong>Distance:</strong> ${distance.toFixed(2)} km from you</p>
-                            <p><strong>Time:</strong> ${incident.timestamp.toLocaleTimeString()}</p>
-                            <p><strong>Status:</strong> <span class="status-active">Active</span></p>
-                        </div>
-                    `);
+                    // Create different popup content for real complaints vs simulated ones
+                    let popupContent;
+                    if (isRealComplaint) {
+                        // More detailed popup for real complaints
+                        const reportedTime = incident.timestamp.toLocaleString();
+                        const timeDiff = Math.floor((new Date() - incident.timestamp) / (1000 * 60)); // minutes ago
+                        const timeAgo = timeDiff < 1 ? 'Just now' : timeDiff < 60 ? `${timeDiff}m ago` : `${Math.floor(timeDiff / 60)}h ago`;
+                        
+                        popupContent = `
+                            <div class="incident-popup real-complaint-popup">
+                                <div class="popup-header">
+                                    <h3>🚨 ${incident.title}</h3>
+                                    <span class="live-badge">🔴 LIVE</span>
+                                </div>
+                                
+                                <div class="popup-content">
+                                    <div class="complaint-details">
+                                        <p><strong>� Category:</strong> ${incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}</p>
+                                        <p><strong>📝 Description:</strong> ${incident.description}</p>
+                                        <p><strong>🎯 Severity:</strong> <span class="severity-${incident.severity}">${incident.severity.toUpperCase()}</span></p>
+                                        <p><strong>📊 Status:</strong> <span class="status-${incident.status}">${incident.status.replace('_', ' ').toUpperCase()}</span></p>
+                                        ${incident.address ? `<p><strong>📍 Address:</strong> ${incident.address}</p>` : ''}
+                                    </div>
+                                    
+                                    ${incident.user ? `
+                                        <div class="user-details">
+                                            <hr class="popup-divider">
+                                            <h4>👤 Reported by:</h4>
+                                            <div class="user-info">
+                                                ${incident.user.profileImage ? 
+                                                    `<img src="${incident.user.profileImage}" alt="${incident.user.name}" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                                     <div class="user-avatar-placeholder" style="display:none;">${incident.user.name ? incident.user.name.charAt(0).toUpperCase() : '?'}</div>` : 
+                                                    `<div class="user-avatar-placeholder">${incident.user.name ? incident.user.name.charAt(0).toUpperCase() : '?'}</div>`
+                                                }
+                                                <div class="user-text">
+                                                    <p class="user-name">${incident.user.name || 'Anonymous User'}</p>
+                                                    ${incident.user.email ? `<p class="user-email">${incident.user.email}</p>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <div class="incident-meta">
+                                        <hr class="popup-divider">
+                                        <p><strong>📏 Distance:</strong> ${distance.toFixed(2)} km from you</p>
+                                        <p><strong>🕒 Reported:</strong> ${timeAgo}</p>
+                                        <p class="incident-id"><strong>🆔 ID:</strong> ${incident.id}</p>
+                                    </div>
+                                    
+                                    <div class="popup-footer">
+                                        <span class="real-time-indicator">📍 Live incident data</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        popupContent = `
+                            <div class="incident-popup">
+                                <h3>${type.type.charAt(0).toUpperCase() + type.type.slice(1)} Incident</h3>
+                                <p><strong>Type:</strong> ${type.type}</p>
+                                <p><strong>Distance:</strong> ${distance.toFixed(2)} km from you</p>
+                                <p><strong>Time:</strong> ${incident.timestamp.toLocaleTimeString()}</p>
+                                <p><strong>Status:</strong> <span class="status-active">Active</span></p>
+                            </div>
+                        `;
+                    }
+
+                    marker.bindPopup(popupContent);
 
                     return marker;
                 };
@@ -253,37 +622,23 @@ export default function Home() {
                     return R * c;
                 };
 
-                // Add all incident markers
-                incidentTypes.forEach(type => {
-                    type.incidents.forEach(incident => {
-                        const marker = createIncidentMarker(incident, type);
-                        incidentMarkers.push(marker);
-                    });
-                });
-
-                // Simulate live updates by adding new incidents periodically
-                const addRandomIncident = () => {
-                    const randomType = incidentTypes[Math.floor(Math.random() * incidentTypes.length)];
-                    const newIncident = generateIncidents(userLocation.lat, userLocation.lng, 1)[0];
-                    
-                    const marker = createIncidentMarker(newIncident, randomType);
-                    incidentMarkers.push(marker);
-                    
-                    // Remove old incidents to keep the map clean
-                    if (incidentMarkers.length > 25) {
-                        const oldMarker = incidentMarkers.shift();
-                        map.removeLayer(oldMarker);
-                    }
-                };
-
-                // Add new incidents every 5-8 seconds for live effect
-                const intervalId = setInterval(addRandomIncident, Math.random() * 3000 + 5000);
-
-                // Store interval ID for cleanup
-                map._incidentInterval = intervalId;
+                // Store reference to createIncidentMarker function for use in socket listener
+                window.createIncidentMarkerRef = createIncidentMarker;
+                
+                // Store reference to calculateDistance function for use in socket listener  
+                window.calculateDistanceRef = calculateDistance;
 
                 console.log('Map loaded successfully with user location:', userLocation);
                 setMapReady(true);
+                
+                // Process any pending complaints that arrived before map was ready
+                if (window.pendingComplaints && window.pendingComplaints.length > 0) {
+                    console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
+                    window.pendingComplaints.forEach(complaint => {
+                        processNewComplaint(complaint);
+                    });
+                    window.pendingComplaints = []; // Clear the pending complaints
+                }
                 
             } catch (error) {
                 console.error('Error loading map:', error);
@@ -295,13 +650,20 @@ export default function Home() {
         setTimeout(loadMap, 100);
         
         return () => {
+            // Clean up stored function references
+            window.createIncidentMarkerRef = null;
+            window.calculateDistanceRef = null;
+            window.pendingComplaints = [];
+            
+            // Clean up map
             if (mapRef.current) {
-                if (mapRef.current._incidentInterval) {
-                    clearInterval(mapRef.current._incidentInterval);
-                }
                 mapRef.current.remove();
                 mapRef.current = null;
             }
+            
+            // Clean up marker references
+            incidentMarkersRef.current = [];
+            
             setMapReady(false);
         };
     }, [userLocation, isAuthenticated, user, locationPermission]); // Dependencies: userLocation, auth state
@@ -360,74 +722,195 @@ export default function Home() {
                         </div>
                     </section>
 
-                {/* Live Incidents Map Section */}
-                <section className="map-section">
-                    <div className="map-glass">
-                        <h2 className="map-title">Live Incidents Near You</h2>
-                        <p className="map-subtitle">
-                            Real-time emergency incidents in your area
-                            {locationPermission === 'granted' && ' (High Accuracy)'}
-                            {locationPermission === 'denied' && ' (Approximate Location)'}
-                        </p>
-                        
-                        {/* Location Permission Status */}
-                        {locationPermission === 'denied' && (
-                            <div className="location-permission-banner">
-                                <svg className="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div className="permission-text">
-                                    <p>Location access denied. Showing approximate area.</p>
-                                    <button 
-                                        className="retry-location-btn"
-                                        onClick={() => {
-                                            setLocationPermission(null);
-                                            setUserLocation(null);
-                                            requestLocationPermission();
-                                        }}
-                                    >
-                                        Enable Location
-                                    </button>
+                {/* Live Incidents Split Layout */}
+                <section className="incidents-section">
+                    {/* Category Filter Tab Bar */}
+                    <div className="category-tabs">
+                        <div className="tabs-container">
+                            <button 
+                                className={`tab ${selectedCategory === 'all' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('all')}
+                            >
+                                <span className="tab-icon">🚨</span>
+                                All Reports
+                            </button>
+                            <button 
+                                className={`tab ${selectedCategory === 'rail' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('rail')}
+                            >
+                                <span className="tab-icon">🚂</span>
+                                Rail
+                            </button>
+                            <button 
+                                className={`tab ${selectedCategory === 'fire' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('fire')}
+                            >
+                                <span className="tab-icon">🔥</span>
+                                Fire
+                            </button>
+                            <button 
+                                className={`tab ${selectedCategory === 'cyber' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('cyber')}
+                            >
+                                <span className="tab-icon">💻</span>
+                                Cyber
+                            </button>
+                            <button 
+                                className={`tab ${selectedCategory === 'police' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('police')}
+                            >
+                                <span className="tab-icon">👮</span>
+                                Police
+                            </button>
+                            <button 
+                                className={`tab ${selectedCategory === 'court' ? 'active' : ''}`}
+                                onClick={() => setSelectedCategory('court')}
+                            >
+                                <span className="tab-icon">⚖️</span>
+                                Court
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="incidents-container">
+                        {/* Left Side - Map */}
+                        <div className="map-panel">
+                            <div className="map-glass">
+                                {/* Location Permission Status */}
+                                {locationPermission === 'denied' && (
+                                    <div className="location-permission-banner">
+                                        <svg className="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <div className="permission-text">
+                                            <p>Location access denied. Showing approximate area.</p>
+                                            <button 
+                                                className="retry-location-btn"
+                                                onClick={() => {
+                                                    setLocationPermission(null);
+                                                    setUserLocation(null);
+                                                    requestLocationPermission();
+                                                }}
+                                            >
+                                                Enable Location
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {userLocation ? (
+                                    <div id="live-map" className="live-map"></div>
+                                ) : (
+                                    <div className="map-loading">
+                                        <div className="map-loading-spinner"></div>
+                                        <p>Loading map with your location...</p>
+                                    </div>
+                                )}
+                                
+                                <div className="live-indicator">
+                                    <div className="pulse-dot"></div>
+                                    <span>Live Updates {mapReady ? '✓' : '...'}</span>
                                 </div>
                             </div>
-                        )}
-
-                        <div className="incident-legend">
-                            <div className="legend-item">
-                                <div className="legend-icon rail-icon">🚂</div>
-                                <span>Rail Incidents</span>
-                            </div>
-                            <div className="legend-item">
-                                <div className="legend-icon fire-icon">🔥</div>
-                                <span>Fire Emergency</span>
-                            </div>
-                            <div className="legend-item">
-                                <div className="legend-icon cyber-icon">💻</div>
-                                <span>Cyber Crime</span>
-                            </div>
-                            <div className="legend-item">
-                                <div className="legend-icon police-icon">👮</div>
-                                <span>Police</span>
-                            </div>
-                            <div className="legend-item">
-                                <div className="legend-icon court-icon">⚖️</div>
-                                <span>Court</span>
-                            </div>
                         </div>
-                        
-                        {userLocation ? (
-                            <div id="live-map" className="live-map"></div>
-                        ) : (
-                            <div className="map-loading">
-                                <div className="map-loading-spinner"></div>
-                                <p>Loading map with your location...</p>
+
+                        {/* Right Side - Complaint Details */}
+                        <div className="complaints-panel">
+                            <div className="complaints-glass">
+                                <div className="complaints-list">
+                                    {filteredComplaints.length > 0 ? (
+                                        filteredComplaints.map((complaint, index) => (
+                                            <div key={`${complaint._id}-${index}`} className="complaint-card">
+                                                <div className="complaint-header">
+                                                    <div className="incident-badge">
+                                                        <span className={`incident-icon ${complaint.incidentType || 'unknown'}`}>
+                                                            {complaint.incidentIcon || '🚨'}
+                                                        </span>
+                                                        <span className="incident-type">
+                                                            {complaint.incidentType ? 
+                                                                String(complaint.incidentType).toUpperCase() : 
+                                                                'INCIDENT'
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                    <div className="time-badge">
+                                                        {complaint.timeAgo}
+                                                    </div>
+                                                </div>
+
+                                                <div className="complaint-content">
+                                                    <h3 className="complaint-title">{complaint.title}</h3>
+                                                    <p className="complaint-description">{complaint.description}</p>
+                                                    
+                                                    <div className="complaint-meta">
+                                                        <div className="meta-item">
+                                                            <span className="meta-icon">📍</span>
+                                                            <span>{complaint.location}</span>
+                                                        </div>
+                                                        <div className="meta-item">
+                                                            <span className="meta-icon">📏</span>
+                                                            <span>{complaint.distance} km away</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {complaint.user && (
+                                                        <div className="reporter-info">
+                                                            <div className="reporter-avatar">
+                                                                {complaint.user.profilePicture ? (
+                                                                    <img src={complaint.user.profilePicture} alt="Reporter" />
+                                                                ) : (
+                                                                    <div className="avatar-placeholder">
+                                                                        {complaint.user.name?.charAt(0) || 'U'}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="reporter-details">
+                                                                <span className="reporter-name">{complaint.user.name || 'Anonymous'}</span>
+                                                                <span className="reporter-label">Reported by</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="complaint-actions">
+                                                    <button className="action-btn view-btn">
+                                                        <span>👁️</span>
+                                                        View
+                                                    </button>
+                                                    <button className="action-btn help-btn">
+                                                        <span>🤝</span>
+                                                        Help
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="no-complaints">
+                                            <div className="no-complaints-icon">
+                                                {selectedCategory === 'all' ? '📡' : 
+                                                 selectedCategory === 'rail' ? '🚂' :
+                                                 selectedCategory === 'fire' ? '🔥' :
+                                                 selectedCategory === 'cyber' ? '💻' :
+                                                 selectedCategory === 'police' ? '👮' :
+                                                 selectedCategory === 'court' ? '⚖️' : '📡'}
+                                            </div>
+                                            <h3>
+                                                {selectedCategory === 'all' 
+                                                    ? 'Listening for reports...' 
+                                                    : `No ${selectedCategory} reports found`
+                                                }
+                                            </h3>
+                                            <p>
+                                                {selectedCategory === 'all' 
+                                                    ? 'No recent emergency reports in your area. We\'ll show new incidents as they\'re reported.'
+                                                    : `No recent ${selectedCategory} emergency reports in your area. Try selecting "All Reports" or wait for new incidents.`
+                                                }
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
-                        
-                        <div className="live-indicator">
-                            <div className="pulse-dot"></div>
-                            <span>Live Updates {mapReady ? '✓' : '...'}</span>
                         </div>
                     </div>
                 </section>
