@@ -301,7 +301,7 @@ const Trending = () => {
   const getSeverityInfo = (severity) => {
     const severityMap = {
       'low': {
-        label: 'Low Priority',
+        label: 'Low',
         color: '#ffffff',
         bgColor: 'rgba(16, 185, 129, 0.8)',
         borderColor: 'rgba(16, 185, 129, 1)',
@@ -312,7 +312,7 @@ const Trending = () => {
         )
       },
       'medium': {
-        label: 'Medium Priority',
+        label: 'Medium',
         color: '#1f2937',
         bgColor: 'rgba(245, 158, 11, 0.9)',
         borderColor: 'rgba(245, 158, 11, 1)',
@@ -323,7 +323,7 @@ const Trending = () => {
         )
       },
       'high': {
-        label: 'High Priority',
+        label: 'High',
         color: '#ffffff',
         bgColor: 'rgba(239, 68, 68, 0.9)',
         borderColor: 'rgba(239, 68, 68, 1)',
@@ -725,8 +725,9 @@ const Trending = () => {
             {data.pages.map((page, pageIndex) =>
               page.complaints?.map((complaint, index) => (
                 <div key={complaint._id || `${pageIndex}-${index}`} className="trending-card">
+                  {/* Card Header - Category with status + User info on right */}
                   <div className="trending-card-header">
-                    <div className="trending-category">
+                    <div className="trending-category-with-status">
                       <span 
                         className="trending-category-icon"
                         style={{ color: getCategoryColor(complaint.category) }}
@@ -736,134 +737,130 @@ const Trending = () => {
                       <span className="trending-category-name">
                         {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
                       </span>
+                      {complaint.status && (
+                        <div className="trending-status-mini">
+                          <span 
+                            className={`trending-status-dot ${getStatusBadgeClass(complaint.status)}`}
+                            title={`Status: ${mapStatusToFrontend(complaint.status).replace('-', ' ')}`}
+                          ></span>
+                        </div>
+                      )}
                     </div>
-                    <div className="trending-header-right">
-                      {/* Minimal User Profile */}
-                      {complaint.user_id && (
-                        <div className="trending-user-profile">
-                          <div className="trending-user-avatar-mini">
-                            {complaint.user_id.profileImage ? (
-                              <img 
-                                src={complaint.user_id.profileImage} 
-                                alt={complaint.user_id.name || 'User'} 
-                                className="trending-avatar-img-mini"
-                              />
-                            ) : (
-                              <div className="trending-avatar-placeholder-mini">
-                                {(complaint.user_id.name || 'U').charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                          </div>
-                          <span className="trending-user-name-mini">
-                            {complaint.user_id.name || 'Anonymous'}
+                    
+                    {/* Hoverable User Info - Right aligned */}
+                    {complaint.user_id && (
+                      <div className="trending-user-hover-container">
+                        <div className="trending-user-avatar-hover">
+                          {complaint.user_id.profileImage ? (
+                            <img 
+                              src={complaint.user_id.profileImage} 
+                              alt={complaint.user_id.name || 'User'} 
+                              className="trending-avatar-image-hover"
+                            />
+                          ) : (
+                            <div className="trending-avatar-placeholder-hover">
+                              {(complaint.user_id.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="trending-user-name-expandable">
+                          {complaint.user_id.name || 'Anonymous'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Main Content Area */}
+                  <div className="trending-card-content">
+                    {/* Title and Severity Row */}
+                    <div className="trending-title-row">
+                      <h4 className="trending-complaint-title">
+                        {complaint.title}
+                      </h4>
+                      {complaint.severity && (
+                        <div 
+                          className="trending-severity-indicator"
+                          title="Severity"
+                          style={{
+                            color: getSeverityInfo(complaint.severity).color,
+                            backgroundColor: getSeverityInfo(complaint.severity).bgColor,
+                            borderColor: getSeverityInfo(complaint.severity).borderColor
+                          }}
+                        >
+                          <span className="trending-severity-icon">
+                            {getSeverityInfo(complaint.severity).icon}
+                          </span>
+                          <span className="trending-severity-label">
+                            {getSeverityInfo(complaint.severity).label}
                           </span>
                         </div>
                       )}
-                      {complaint.status && (
-                        <span className={`trending-status-badge ${getStatusBadgeClass(complaint.status)}`}>
-                          {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
-                        </span>
-                      )}
-                      <div className="trending-score">
-                        <span className="score-icon"><MdLocalFireDepartment /></span>
-                        <span className="score-value">{complaint.score?.toFixed(1) || '0.0'}</span>
-                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="trending-card-body">
-                    <div className="trending-title-section">
-                      <div className="trending-title-with-severity">
-                        <h4 className="trending-title">
-                          {complaint.title}
-                        </h4>
-                        {/* Severity Display */}
-                        {complaint.severity && (
-                          <div className="trending-complaint-severity" title="Severity">
-                            <div 
-                              className="trending-severity-badge-display"
-                              style={{
-                                color: getSeverityInfo(complaint.severity).color,
-                                backgroundColor: getSeverityInfo(complaint.severity).bgColor,
-                                border: `1px solid ${getSeverityInfo(complaint.severity).borderColor}`
-                              }}
-                            >
-                              <span className="trending-severity-icon-display" style={{ color: getSeverityInfo(complaint.severity).color }}>
-                                {getSeverityInfo(complaint.severity).icon}
-                              </span>
-                              <span className="trending-severity-text">
-                                {complaint.severity.charAt(0).toUpperCase() + complaint.severity.slice(1)}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <p className="trending-description">
+
+                    {/* Description */}
+                    <p className="trending-complaint-description">
                       {complaint.description}
                     </p>
-                    
+
+                    {/* Address - Left aligned */}
                     {complaint.address && (
-                      <div className="trending-location">
-                        <svg className="trending-location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>{complaint.address}</span>
+                      <div className="trending-address-display">
+                        <FiMapPin className="trending-address-icon" />
+                        <span className="trending-address-text">{complaint.address}</span>
                       </div>
                     )}
+                  </div>
 
-                    {/* Voting Section */}
-                    <div className="trending-voting">
+                  {/* Card Footer - Actions and Stats */}
+                  <div className="trending-card-footer">
+                    {/* Engagement Actions */}
+                    <div className="trending-actions">
                       <button 
-                        className={`trending-vote-btn trending-upvote-btn ${votingInProgress[`${complaint._id}-upvote`] ? 'voting' : ''}`}
+                        className={`trending-action-btn trending-upvote ${votingInProgress[`${complaint._id}-upvote`] ? 'loading' : ''}`}
                         onClick={() => handleUpvote(complaint._id)}
                         disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
+                        title="Upvote"
                       >
                         {votingInProgress[`${complaint._id}-upvote`] ? (
-                          <div className="vote-spinner"></div>
+                          <div className="action-spinner"></div>
                         ) : (
-                          <FiThumbsUp className="trending-vote-icon" />
+                          <FiThumbsUp className="action-icon" />
                         )}
-                        <span className="trending-vote-count">
-                          {complaint.upvote || 0}
-                        </span>
+                        <span className="action-count">{complaint.upvote || 0}</span>
                       </button>
                       
                       <button 
-                        className={`trending-vote-btn trending-downvote-btn ${votingInProgress[`${complaint._id}-downvote`] ? 'voting' : ''}`}
+                        className={`trending-action-btn trending-downvote ${votingInProgress[`${complaint._id}-downvote`] ? 'loading' : ''}`}
                         onClick={() => handleDownvote(complaint._id)}
                         disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
+                        title="Downvote"
                       >
                         {votingInProgress[`${complaint._id}-downvote`] ? (
-                          <div className="vote-spinner"></div>
+                          <div className="action-spinner"></div>
                         ) : (
-                          <FiThumbsDown className="trending-vote-icon" />
+                          <FiThumbsDown className="action-icon" />
                         )}
-                        <span className="trending-vote-count">
-                          {complaint.downvote || 0}
-                        </span>
+                        <span className="action-count">{complaint.downvote || 0}</span>
                       </button>
 
-                      {/* Comments Button */}
                       <button 
-                        className="trending-vote-btn trending-comment-btn"
+                        className="trending-action-btn trending-comment"
                         onClick={() => openCommentModal(complaint)}
+                        title="View Comments"
                       >
-                        <FiMessageCircle className="trending-vote-icon" />
-                        <span className="trending-vote-count">
-                          {getCommentCount(complaint)}
-                        </span>
+                        <FiMessageCircle className="action-icon" />
+                        <span className="action-count">{getCommentCount(complaint)}</span>
                       </button>
                     </div>
 
-                    {/* Meta information */}
-                    <div className="trending-meta">
-                      <div className="trending-date">
-                        <svg className="trending-date-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {formatDate(complaint.createdAt)}
+                    {/* Meta Info */}
+                    <div className="trending-meta-info">
+                      <div className="trending-score-display">
+                        <MdLocalFireDepartment className="trending-fire-icon" />
+                        <span className="trending-score-value">{complaint.score?.toFixed(1) || '0.0'}</span>
+                      </div>
+                      <div className="trending-date-display">
+                        <span className="trending-date-text">{formatDate(complaint.createdAt)}</span>
                       </div>
                     </div>
                   </div>
