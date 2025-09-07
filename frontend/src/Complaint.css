@@ -2353,8 +2353,8 @@
 /* Removed generic button styles to prevent conflicts with navbar and other components */
 /* If specific buttons need this styling, add it to their specific classes */
 
-/* Status Modal */
-.modal-overlay {
+/* Complaint Status Modal */
+.complaint-status-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -2374,11 +2374,11 @@
     overscroll-behavior: contain;
 }
 
-.modal-overlay::-webkit-scrollbar {
+.complaint-status-modal-overlay::-webkit-scrollbar {
     display: none;
 }
 
-.modal-overlay {
+.complaint-status-modal-overlay {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
@@ -3016,7 +3016,7 @@ html.modal-open {
     flex-shrink: 0;
 }
 
-.header-content {
+.complaint-header-content {
     flex: 1;
     display: flex;
     flex-direction: column;
