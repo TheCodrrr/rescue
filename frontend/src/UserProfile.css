@@ -1364,8 +1364,8 @@
     height: 1.125rem;
 }
 
-/* Modal Styles */
-.modal-overlay {
+/* User Profile Modal Styles */
+.user-profile-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -1381,7 +1381,7 @@
     animation: fadeInUp 0.3s ease-out;
 }
 
-.modal-container {
+.user-profile-modal-container {
     background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1401,13 +1401,13 @@
     }
 }
 
-.modal-header {
+.user-profile-modal-header {
     text-align: center;
     padding: 2rem 2rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-icon-container {
+.user-profile-modal-icon-container {
     width: 4rem;
     height: 4rem;
     margin: 0 auto 1rem;
@@ -1419,31 +1419,31 @@
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.modal-icon-container.danger {
+.user-profile-modal-icon-container.danger {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
     border-color: rgba(239, 68, 68, 0.3);
 }
 
-.modal-icon {
+.user-profile-modal-icon {
     width: 2rem;
     height: 2rem;
     color: #ef4444;
 }
 
-.modal-title {
+.user-profile-modal-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.95);
     margin-bottom: 0.5rem;
 }
 
-.modal-subtitle {
+.user-profile-modal-subtitle {
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
 }
 
-.modal-content {
+.user-profile-modal-content {
     padding: 2rem;
 }
 
