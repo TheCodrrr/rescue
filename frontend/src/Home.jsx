@@ -32,7 +32,7 @@ export default function Home() {
         selectedCategory === 'all' || complaint.category === selectedCategory
     );
     
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
     const dispatch = useDispatch();
     const location = useLocation();
     const hasLoadedUser = useRef(false);
@@ -139,6 +139,7 @@ export default function Home() {
                 // Add the new listener for immediate processing
                 socketRef.current.on('newComplaint', (complaint) => {
                     console.log('🔴 Received live complaint:', complaint?._id || '(no id)');
+                    console.log(complaint);
                     processNewComplaint(complaint);
                     
                     // Also update the right panel complaints
@@ -229,8 +230,20 @@ export default function Home() {
         const parsedLat = typeof rawLat === 'string' ? parseFloat(rawLat) : rawLat;
         const parsedLng = typeof rawLng === 'string' ? parseFloat(rawLng) : rawLng;
 
+        console.log('🗺️ Coordinate extraction:', {
+            raw: { lat: rawLat, lng: rawLng },
+            parsed: { lat: parsedLat, lng: parsedLng },
+            types: { lat: typeof parsedLat, lng: typeof parsedLng }
+        });
+
         if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
             console.warn('[process] Skipping: invalid coordinates', { rawLat, rawLng, complaintId: complaint?._id });
+            return;
+        }
+
+        // Validate coordinate ranges (basic sanity check)
+        if (parsedLat < -90 || parsedLat > 90 || parsedLng < -180 || parsedLng > 180) {
+            console.warn('[process] Skipping: coordinates out of valid range', { lat: parsedLat, lng: parsedLng, complaintId: complaint?._id });
             return;
         }
 
@@ -273,11 +286,19 @@ export default function Home() {
                     html: markerHtml,
                     className: 'custom-incident-marker',
                     iconSize: [40, 40],
-                    iconAnchor: [20, 20]
+                    iconAnchor: [20, 20], // Center the icon properly
+                    popupAnchor: [0, -20] // Position popup above the marker
                 })
             }).addTo(mapRef.current);
 
-            console.log('✅ Marker created successfully');
+            console.log('✅ Marker created successfully at coordinates:', [newIncident.lat, newIncident.lng]);
+
+            // Force map invalidation to ensure marker appears correctly
+            setTimeout(() => {
+                if (mapRef.current) {
+                    mapRef.current.invalidateSize();
+                }
+            }, 100);
 
             // Calculate distance
             const distance = Math.sqrt(
@@ -299,7 +320,10 @@ export default function Home() {
                             <h3 class="incident-title">🚨 ${newIncident.title}</h3>
                             <span class="incident-category">${newIncident.category.charAt(0).toUpperCase() + newIncident.category.slice(1)}</span>
                         </div>
-                        <span class="live-badge">🔴 LIVE</span>
+                        <div class="header-right">
+                            <span class="live-badge">🔴 LIVE</span>
+                            ${complaint.priority && complaint.priority > 1 ? `<span class="priority-badge priority-${complaint.priority}">P${complaint.priority}</span>` : ''}
+                        </div>
                     </div>
                     
                     <div class="popup-body">
@@ -309,9 +333,12 @@ export default function Home() {
                             <div class="status-row">
                                 <span class="severity-badge severity-${newIncident.severity}">${newIncident.severity.toUpperCase()}</span>
                                 <span class="status-badge status-${newIncident.status}">${newIncident.status.replace('_', ' ').toUpperCase()}</span>
+                                ${complaint.level ? `<span class="level-badge level-${complaint.level}">Level ${complaint.level}</span>` : ''}
                             </div>
                             
                             ${newIncident.address ? `<p class="address">📍 ${newIncident.address}</p>` : ''}
+                            
+                            ${complaint.assignedDepartment ? `<p class="assignment">🏢 Assigned to: ${complaint.assignedDepartment}</p>` : ''}
                         </div>
                         
                         ${newIncident.user ? `
@@ -325,8 +352,26 @@ export default function Home() {
                                     <div class="user-details">
                                         <p class="user-name">${newIncident.user.name || 'Anonymous User'}</p>
                                         ${newIncident.user.email ? `<p class="user-email">${newIncident.user.email}</p>` : ''}
+                                        <p class="user-id">ID: ${newIncident.user._id || 'Unknown'}</p>
                                     </div>
                                 </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${(complaint.upvote > 0 || complaint.downvote > 0) ? `
+                            <div class="engagement-section">
+                                <div class="vote-info">
+                                    <span class="upvotes">👍 ${complaint.upvote || 0}</span>
+                                    <span class="downvotes">👎 ${complaint.downvote || 0}</span>
+                                    ${complaint.votedUsers && complaint.votedUsers.length > 0 ? `<span class="total-voters">${complaint.votedUsers.length} voted</span>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${(complaint.evidence_ids && complaint.evidence_ids.length > 0) || (complaint.feedback_ids && complaint.feedback_ids.length > 0) ? `
+                            <div class="attachments-section">
+                                ${complaint.evidence_ids && complaint.evidence_ids.length > 0 ? `<span class="evidence-count">📎 ${complaint.evidence_ids.length} Evidence</span>` : ''}
+                                ${complaint.feedback_ids && complaint.feedback_ids.length > 0 ? `<span class="feedback-count">💬 ${complaint.feedback_ids.length} Feedback</span>` : ''}
                             </div>
                         ` : ''}
                         
@@ -339,11 +384,16 @@ export default function Home() {
                                 <span class="meta-label">🕒 Reported:</span>
                                 <span class="meta-value">${timeAgo}</span>
                             </div>
+                            <div class="meta-item">
+                                <span class="meta-label">🆔 Incident ID:</span>
+                                <span class="meta-value">${complaint._id}</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="popup-footer">
                         <span class="live-indicator">📍 Live incident data</span>
+                        <span class="report-time">Updated: ${new Date(complaint.updatedAt || complaint.createdAt).toLocaleString()}</span>
                     </div>
                 </div>
             `;
@@ -354,7 +404,24 @@ export default function Home() {
                 distance: distance.toFixed(2),
                 timeAgo: timeDiff < 1 ? 'Just now' : timeDiff < 60 ? `${timeDiff}m ago` : `${Math.floor(timeDiff / 60)}h ago`,
                 incidentType: incidentType.type,  // Use the type property
-                incidentIcon: incidentType.icon   // Also store the icon
+                incidentIcon: incidentType.icon,   // Also store the icon
+                // Enhanced user information from WebSocket
+                user: complaint.user_id ? {
+                    _id: complaint.user_id._id,
+                    name: complaint.user_id.name || 'Anonymous User',
+                    email: complaint.user_id.email || 'No email provided',
+                    profileImage: complaint.user_id.profileImage || null
+                } : null,
+                // Additional complaint metadata
+                priority: complaint.priority || 1,
+                upvote: complaint.upvote || 0,
+                downvote: complaint.downvote || 0,
+                level: complaint.level || 1,
+                votedUsers: complaint.votedUsers || [],
+                assignedDepartment: complaint.assignedDepartment,
+                assigned_officer_id: complaint.assigned_officer_id,
+                evidence_ids: complaint.evidence_ids || [],
+                feedback_ids: complaint.feedback_ids || []
             };
 
             // Update recent complaints (keep only latest 10)
@@ -374,15 +441,23 @@ export default function Home() {
             Promise.resolve().then(() => {
                 try {
                     if (!mapRef.current) return;
+                    
+                    // Update marker if needed
                     if (marker && typeof marker.update === 'function') {
                         marker.update();
                     }
-                    // Recalculate map size and trigger a no-op movement to flush rendering
+                    
+                    // Force map to recalculate its size and rendering
                     mapRef.current.invalidateSize(true);
-                    mapRef.current.panBy([0, 0], { animate: false });
-                    mapRef.current.fire('moveend');
+                    
+                    // Small pan to force coordinate recalculation
+                    const currentCenter = mapRef.current.getCenter();
+                    mapRef.current.panTo([currentCenter.lat + 0.0001, currentCenter.lng + 0.0001]);
+                    mapRef.current.panTo([currentCenter.lat, currentCenter.lng]);
+                    
+                    console.log('🗺️ Map refreshed and marker position validated');
                 } catch (e) {
-                    console.warn('Map redraw nudge failed:', e);
+                    console.warn('Map refresh failed:', e);
                 }
             });
             
@@ -502,6 +577,14 @@ export default function Home() {
                 // Initialize map with user's location
                 map = L.map("live-map").setView([userLocation.lat, userLocation.lng], 13);
                 mapRef.current = map;
+                
+                // Force initial size calculation
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                        console.log('🗺️ Map size invalidated after initialization');
+                    }
+                }, 100);
                 
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -799,7 +882,7 @@ export default function Home() {
                     <div className="incidents-container">
                         {/* Left Side - Map */}
                         <div className="map-panel">
-                            <div className="map-glass">
+                            <div className="home-map-glass-container">
                                 {/* Location Permission Status */}
                                 {locationPermission === 'denied' && (
                                     <div className="location-permission-banner">
@@ -824,15 +907,15 @@ export default function Home() {
                                 )}
 
                                 {userLocation ? (
-                                    <div id="live-map" className="live-map"></div>
+                                    <div id="live-map" className="home-live-map-container"></div>
                                 ) : (
-                                    <div className="map-loading">
-                                        <div className="map-loading-spinner"></div>
+                                    <div className="home-map-loading-container">
+                                        <div className="home-map-loading-spinner"></div>
                                         <p>Loading map with your location...</p>
                                     </div>
                                 )}
                                 
-                                <div className="live-indicator">
+                                <div className="home-live-indicator">
                                     <div className="pulse-dot"></div>
                                     <span>Live Updates {mapReady ? '✓' : '...'}</span>
                                 </div>
@@ -840,78 +923,147 @@ export default function Home() {
                         </div>
 
                         {/* Right Side - Complaint Details */}
-                        <div className="complaints-panel">
-                            <div className="complaints-glass">
-                                <div className="complaints-list">
-                                    {filteredComplaints.length > 0 ? (
-                                        filteredComplaints.map((complaint, index) => (
-                                            <div key={`${complaint._id}-${index}`} className="complaint-card">
-                                                <div className="complaint-header">
-                                                    <div className="incident-badge">
-                                                        <span className={`incident-icon ${complaint.incidentType || 'unknown'}`}>
-                                                            {complaint.incidentIcon || '🚨'}
+                        <div className="home-complaints-section">
+                            <div className="home-complaints-header">
+                                <h3 className="home-complaints-title">Live Reports</h3>
+                                <p className="home-complaints-subtitle">Recent incidents in your area</p>
+                            </div>
+                            <div className="home-complaints-panel">
+                                <div className="home-complaints-list">
+                                {filteredComplaints.length > 0 ? (
+                                    filteredComplaints.map((complaint, index) => (
+                                        <div key={`${complaint._id}-${index}`} className="home-live-complaint-card">
+                                            <div className="home-card-header">
+                                                <div className="home-incident-info">
+                                                    <span className="home-incident-icon">{complaint.incidentIcon || '🚨'}</span>
+                                                    <span className="home-incident-type">
+                                                        {complaint.incidentType ? 
+                                                            String(complaint.incidentType).toUpperCase() : 
+                                                            'INCIDENT'
+                                                        }
+                                                    </span>
+                                                    {/* Priority indicator */}
+                                                    {complaint.priority && complaint.priority > 1 && (
+                                                        <span className={`home-priority-badge priority-${complaint.priority}`}>
+                                                            P{complaint.priority}
                                                         </span>
-                                                        <span className="incident-type">
-                                                            {complaint.incidentType ? 
-                                                                String(complaint.incidentType).toUpperCase() : 
-                                                                'INCIDENT'
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                    <div className="time-badge">
-                                                        {complaint.timeAgo}
-                                                    </div>
-                                                </div>
-
-                                                <div className="complaint-content">
-                                                    <h3 className="complaint-title">{complaint.title}</h3>
-                                                    <p className="complaint-description">{complaint.description}</p>
-                                                    
-                                                    <div className="complaint-meta">
-                                                        <div className="meta-item">
-                                                            <span className="meta-icon">📍</span>
-                                                            <span>{complaint.location}</span>
-                                                        </div>
-                                                        <div className="meta-item">
-                                                            <span className="meta-icon">📏</span>
-                                                            <span>{complaint.distance} km away</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {complaint.user && (
-                                                        <div className="reporter-info">
-                                                            <div className="reporter-avatar">
-                                                                {complaint.user.profilePicture ? (
-                                                                    <img src={complaint.user.profilePicture} alt="Reporter" />
-                                                                ) : (
-                                                                    <div className="avatar-placeholder">
-                                                                        {complaint.user.name?.charAt(0) || 'U'}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="reporter-details">
-                                                                <span className="reporter-name">{complaint.user.name || 'Anonymous'}</span>
-                                                                <span className="reporter-label">Reported by</span>
-                                                            </div>
-                                                        </div>
                                                     )}
                                                 </div>
-
-                                                <div className="complaint-actions">
-                                                    <button className="action-btn view-btn">
-                                                        <span>👁️</span>
-                                                        View
-                                                    </button>
-                                                    <button className="action-btn help-btn">
-                                                        <span>🤝</span>
-                                                        Help
-                                                    </button>
+                                                <span className="home-time-badge">{complaint.timeAgo}</span>
+                                            </div>
+                                            
+                                            <h3 className="home-card-title">{complaint.title}</h3>
+                                            <p className="home-card-description">{complaint.description}</p>
+                                            
+                                            {/* Enhanced address display */}
+                                            <div className="home-card-content">
+                                            {complaint.address && (
+                                                <div className="home-address-section">
+                                                    <span className="home-address-icon">📍</span>
+                                                    <span className="home-address-text">{complaint.address}</span>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="home-card-meta">
+                                                <div className="home-meta-item">
+                                                    <span className="home-meta-icon">�</span>
+                                                    <span>{complaint.distance} km away</span>
+                                                </div>
+                                                <div className="home-meta-item">
+                                                    <span className="home-meta-icon">⚡</span>
+                                                    <span className={`home-severity-${complaint.severity}`}>
+                                                        {complaint.severity?.toUpperCase() || 'UNKNOWN'}
+                                                    </span>
+                                                </div>
+                                                <div className="home-meta-item">
+                                                    <span className="home-meta-icon">�</span>
+                                                    <span className={`home-status-${complaint.status}`}>
+                                                        {complaint.status?.replace('_', ' ').toUpperCase() || 'PENDING'}
+                                                    </span>
                                                 </div>
                                             </div>
+
+                                            {/* Enhanced user information */}
+                                            {complaint.user && (
+                                                <div className="home-reporter-info">
+                                                    <div className="home-reporter-avatar">
+                                                        {complaint.user.profileImage ? (
+                                                            <img 
+                                                                src={complaint.user.profileImage} 
+                                                                alt={complaint.user.name || 'Reporter'} 
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.nextElementSibling.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <span 
+                                                            className="home-avatar-placeholder"
+                                                            style={{display: complaint.user.profileImage ? 'none' : 'flex'}}
+                                                        >
+                                                            {complaint.user.name?.charAt(0).toUpperCase() || 'U'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="home-reporter-details">
+                                                        <span className="home-reporter-name">
+                                                            {complaint.user.name || 'Anonymous User'}
+                                                        </span>
+                                                        {complaint.user.email && (
+                                                            <span className="home-reporter-email">
+                                                                {complaint.user.email}
+                                                            </span>
+                                                        )}
+                                                        <span className="home-reporter-label">Reported by</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Voting and engagement section */}
+                                            {(complaint.upvote > 0 || complaint.downvote > 0) && (
+                                                <div className="home-engagement-section">
+                                                    <div className="home-vote-info">
+                                                        <span className="home-upvotes">
+                                                            👍 {complaint.upvote || 0}
+                                                        </span>
+                                                        <span className="home-downvotes">
+                                                            👎 {complaint.downvote || 0}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Department assignment info */}
+                                            {complaint.assignedDepartment && (
+                                                <div className="home-assignment-info">
+                                                    <span className="home-assignment-icon">🏢</span>
+                                                    <span className="home-assignment-text">
+                                                        Assigned to: {complaint.assignedDepartment}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            </div>
+
+                                            <div className="home-card-actions">
+                                                <button className="home-action-btn home-view-btn">
+                                                    <span>👁️</span>
+                                                    View Details
+                                                </button>
+                                                <button className="home-action-btn home-help-btn">
+                                                    <span>🤝</span>
+                                                    Offer Help
+                                                </button>
+                                                {complaint.evidence_ids && complaint.evidence_ids.length > 0 && (
+                                                    <button className="home-action-btn home-evidence-btn">
+                                                        <span>📎</span>
+                                                        Evidence ({complaint.evidence_ids.length})
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
                                         ))
                                     ) : (
-                                        <div className="no-complaints">
-                                            <div className="no-complaints-icon">
+                                        <div className="home-no-complaints">
+                                            <div className="home-no-complaints-icon">
                                                 {selectedCategory === 'all' ? '📡' : 
                                                  selectedCategory === 'rail' ? '🚂' :
                                                  selectedCategory === 'fire' ? '🔥' :

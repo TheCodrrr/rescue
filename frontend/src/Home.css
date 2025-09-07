@@ -590,7 +590,7 @@ html, body {
 .police-icon { background: rgba(59, 130, 246, 0.2); }
 .court-icon { background: rgba(16, 185, 129, 0.2); }
 
-.live-map {
+.home-live-map-container {
     width: 100%;
     flex: 1;
     min-height: 300px;
@@ -601,15 +601,48 @@ html, body {
     background: rgba(255,255,255,0.15);
 }
 
-.live-indicator {
+.home-live-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin: 0.5rem 0; /* Balanced margin top and bottom */
     font-size: 0.9rem;
     color: #059669;
     font-weight: 600;
+    flex-shrink: 0; /* Prevent shrinking */
+    height: 30px; /* Fixed height for consistency */
+}
+
+.home-live-indicator .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Map Loading State */
+.home-map-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    color: white;
+    text-align: center;
+    animation: slideInFromTop 0.6s ease-out;
+}
+
+.home-map-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #60a5fa;
+    border-radius: 50%;
+    animation: mapSpinnerRotate 1s linear infinite;
+    margin-bottom: 1rem;
 }
 
 .pulse-dot {
@@ -1367,14 +1400,16 @@ html, body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem; /* Reduced padding */
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.3);
     border-radius: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem; /* Minimal bottom margin */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     animation: slideInFromTop 0.5s ease-out;
+    flex-shrink: 0; /* Prevent shrinking */
+    height: auto; /* Let content determine height */
 }
 
 .location-icon {
@@ -1931,59 +1966,24 @@ html, body {
 .incidents-container {
     display: flex;
     gap: 2rem;
-    min-height: 70vh;
-    height: auto !important;
-    align-items: stretch; /* Change back to stretch for equal heights */
+    height: 80vh; /* Fixed height for equal panel sizing */
+    align-items: stretch; /* Equal heights */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 /* Left Panel - Map */
 .map-panel {
-    flex: 0.7; /* Slightly increase map panel */
+    flex: 1; /* Equal flex with complaints panel */
     min-width: 0;
-}
-
-/* Map panel specific styles */
-.map-panel .live-map {
-    flex: 1;
-    min-height: 450px; /* Reduce slightly for better balance */
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    height: auto;
-    position: relative;
-    z-index: 1;
-}
-
-.map-panel .map-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.map-panel .map-subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-.map-panel .incident-legend {
+    height: 100%; /* Match complaints section */
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    overflow: hidden; /* Prevent overflow from children */
 }
 
-.map-panel .legend-item span {
-    font-size: 0.8rem;
-}
-
-/* Right Panel - Complaints */
-.complaints-panel {
-    flex: 1.3; /* Slightly reduce complaints panel */
-    min-width: 0;
-}
-
-.complaints-glass {
+.home-map-glass-container {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
     border-radius: 25px;
@@ -1992,12 +1992,128 @@ html, body {
         0 25px 50px -12px rgba(0, 0, 0, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     padding: 1.5rem;
-    height: 100%; /* Use full height of container */
+    /* Use flex instead of height to properly fit within parent */
+    flex: 1;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 
-.complaints-title {
+/* Map panel specific styles */
+.map-panel .home-live-map-container {
+    /* Don't use flex: 1, instead use calc to leave space for other elements */
+    height: calc(100% - 80px); /* Reserve 80px for indicator and banner */
+    flex-shrink: 0; /* Don't shrink */
+    width: 100%;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
+    overflow: hidden;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background: rgba(255,255,255,0.15);
+}
+
+/* Map loading container should have same constraints */
+.home-map-loading-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-height: 100%;
+}
+
+.map-panel .map-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-weight: 600;
+}
+
+.map-panel .map-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.map-panel .incident-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.map-panel .legend-item span {
+    font-size: 0.8rem;
+}
+
+/* Right Panel - Complaints */
+.home-complaints-section {
+    flex: 1; /* Equal flex with map panel */
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Match map panel height */
+}
+
+.home-complaints-header {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 25px 25px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: none;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 1.5rem 1rem;
+}
+
+.home-complaints-panel {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 0 0 25px 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    /* Add scrolling to the panel itself */
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0; /* Allow flex shrinking */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Custom scrollbar for complaints panel */
+.home-complaints-panel::-webkit-scrollbar {
+    width: 8px; /* Slightly wider for better visibility */
+}
+
+.home-complaints-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15); /* More visible track */
+    border-radius: 4px;
+}
+
+.home-complaints-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4); /* More visible thumb */
+    border-radius: 4px;
+}
+
+.home-complaints-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6); /* Even more visible on hover */
+}
+
+.home-complaints-title {
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
@@ -2005,53 +2121,272 @@ html, body {
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.complaints-subtitle {
+.home-complaints-subtitle {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
-    margin-bottom: 1.5rem;
+    margin: 0;
 }
 
-.complaints-list {
-    flex: 1;
-    overflow-y: auto;
+.home-complaints-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding-right: 0.5rem;
-    min-height: 500px; /* Ensure minimum height for content */
-    max-height: none; /* Remove any height restrictions */
-    transition: all 0.3s ease; /* Smooth transition when content changes */
+    padding: 1rem 0.5rem 0 0;
+    /* Remove all scrolling - let parent panel handle it */
+    overflow: visible;
+    flex-shrink: 0; /* Don't shrink - let content grow naturally */
 }
 
-/* Custom scrollbar for complaints list */
-.complaints-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.complaints-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.complaints-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-}
-
-.complaints-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* Complaint Card */
-.complaint-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+/* Simplified Live Complaint Card - Home page specific */
+.home-live-complaint-card {
+    background: rgba(255, 255, 255, 0.15); /* Much more transparent, matching glassmorphism */
+    backdrop-filter: blur(15px);
     border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 1.5rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 1.25rem;
+    box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out;
+    /* Fixed height for consistent card sizing */
+    height: auto; /* Let content determine height naturally */
+    min-height: 250px; /* Reasonable minimum height */
+    max-height: none; /* Remove max height constraint */
+    display: flex;
+    flex-direction: column;
+    overflow: visible; /* Allow content to show fully */
+    flex-shrink: 0; /* Prevent cards from shrinking - let container scroll instead */
+    color: white; /* Ensure text is visible on transparent background */
+}
+
+.home-live-complaint-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Simplified Card Header */
+.home-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.home-incident-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.home-incident-icon {
+    font-size: 1.2rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.home-incident-type {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1e40af;
+    letter-spacing: 0.5px;
+}
+
+.home-time-badge {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: rgba(100, 116, 139, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Simplified Card Content */
+.home-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+    /* Remove line clamping to show full titles */
+    flex-shrink: 0;
+}
+
+.home-card-description {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+    /* Remove line clamping to show full content */
+    flex-shrink: 0;
+}
+
+/* Remove scrollable content area - content should not scroll inside cards */
+.home-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    /* Remove all scrolling properties */
+    overflow: visible; /* Allow content to flow naturally */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Simplified Meta */
+.home-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+}
+
+.home-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    background: rgba(248, 250, 252, 0.8);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.home-meta-icon {
+    font-size: 0.8rem;
+}
+
+/* Simplified Reporter Info */
+.home-reporter-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+}
+
+.home-reporter-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    flex-shrink: 0;
+}
+
+.home-reporter-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-reporter-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.home-reporter-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-reporter-email {
+    font-size: 0.65rem;
+    color: rgba(100, 116, 139, 0.8);
+    margin: 0;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-reporter-label {
+    font-size: 0.65rem;
+    color: #64748b;
+}
+
+/* Simplified Actions - Fixed at bottom */
+.home-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto; /* Push to bottom */
+    flex-shrink: 0; /* Prevent shrinking */
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.home-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.6rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.home-view-btn {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.home-view-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.home-help-btn {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.home-help-btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateY(-1px);
+}
+
+.home-action-btn span {
+    font-size: 0.9rem;
 }
 
 @keyframes slideInRight {
@@ -2063,11 +2398,6 @@ html, body {
         opacity: 1;
         transform: translateX(0);
     }
-}
-
-.complaint-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
 .complaint-header {
@@ -2110,101 +2440,6 @@ html, body {
 
 .complaint-content {
     margin-bottom: 1rem;
-}
-
-.complaint-card .complaint-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #111827;
-    margin: 0 0 0.5rem;
-    line-height: 1.4;
-}
-
-.complaint-card .complaint-description {
-    color: #4b5563;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    margin: 0 0 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.complaint-card .complaint-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
-    padding: 0.8rem;
-    background: rgba(249, 250, 251, 0.8);
-    border-radius: 8px;
-}
-
-.complaint-card .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: #374151;
-}
-
-.complaint-card .meta-icon {
-    font-size: 0.85rem;
-    width: 14px;
-}
-
-.complaint-card .reporter-info {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem;
-    background: rgba(243, 244, 246, 0.8);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.complaint-card .reporter-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-.complaint-card .reporter-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.complaint-card .avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-.complaint-card .reporter-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.complaint-card .reporter-name {
-    font-weight: 600;
-    color: #111827;
-    font-size: 0.8rem;
-}
-
-.complaint-card .reporter-label {
-    font-size: 0.7rem;
-    color: #6b7280;
 }
 
 .complaint-actions {
@@ -2254,7 +2489,7 @@ html, body {
 }
 
 /* No Complaints State */
-.no-complaints {
+.home-no-complaints {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2264,20 +2499,20 @@ html, body {
     padding: 2rem;
 }
 
-.no-complaints-icon {
+.home-no-complaints-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
     opacity: 0.7;
 }
 
-.no-complaints h3 {
+.home-no-complaints h3 {
     color: white;
     font-size: 1.2rem;
     margin: 0 0 0.5rem;
     font-weight: 600;
 }
 
-.no-complaints p {
+.home-no-complaints p {
     color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
     line-height: 1.5;
@@ -2288,79 +2523,108 @@ html, body {
 @media (max-width: 1200px) {
     .incidents-container {
         gap: 1.5rem;
+        height: 75vh; /* Proportionally increased height for smaller screens */
     }
     
-    .complaints-glass {
-        padding: 1.5rem;
+    .home-complaints-panel,
+    .home-complaints-header,
+    .home-map-glass-container {
+        padding: 1.5rem 1.5rem; /* Maintain horizontal padding in responsive */
     }
 }
 
 @media (max-width: 968px) {
     .incidents-container {
         flex-direction: column;
-        min-height: auto; /* Remove height constraints on medium screens */
+        height: auto; /* Allow natural height when stacked */
         gap: 2rem;
     }
     
     .map-panel,
-    .complaints-panel {
-        flex: none;
+    .home-complaints-section {
+        flex: none; /* Remove flex when stacked */
+        height: 65vh; /* Increased height for both panels */
+        min-height: 500px; /* Increased minimum usable height */
     }
     
-    .map-panel {
-        height: 60vh;
-        min-height: 400px;
-    }
-    
-    .complaints-panel {
-        height: 60vh;
-        min-height: 500px;
-    }
-    
-    .complaints-glass {
-        padding: 1.5rem;
+    .home-complaints-panel {
+        flex: 1; /* Within complaints-section, take remaining space */
     }
 }
 
 @media (max-width: 768px) {
     .incidents-section {
-        padding: 2rem 0.5rem 5rem; /* Increase vertical padding significantly */
+        padding: 2rem 0.5rem 5rem;
     }
     
     .incidents-container {
-        flex-direction: column; /* Stack vertically on mobile */
-        gap: 2rem; /* Increase gap between sections */
-        min-height: auto; /* Remove all height restrictions */
+        flex-direction: column;
+        gap: 1.5rem;
+        height: auto; /* Natural height on mobile */
     }
     
-    .map-panel {
-        flex: 1; /* Reset to equal on mobile */
-        min-height: 400px;
+    .map-panel,
+    .home-complaints-section {
+        height: 55vh; /* Increased height on mobile */
+        min-height: 450px; /* Maintain usable space */
     }
     
-    .complaints-panel {
-        flex: 1; /* Reset to equal on mobile */
-        min-height: 400px;
-    }
-    
-    .complaints-glass {
+    .home-complaints-panel,
+    .home-complaints-header {
         padding: 1rem;
     }
     
-    .complaints-title {
+    .home-complaints-title {
         font-size: 1.5rem;
     }
     
-    .complaint-card {
+    .home-live-complaint-card {
         padding: 1rem;
     }
     
     .map-panel .incident-legend {
         gap: 0.5rem;
+        margin-bottom: 0.75rem;
     }
     
     .map-panel .legend-item span {
         font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .incidents-section {
+        padding: 1.5rem 0.25rem 4rem;
+    }
+    
+    .incidents-container {
+        gap: 1rem;
+    }
+    
+    .map-panel,
+    .home-complaints-section {
+        height: 50vh; /* Increased height for very small screens */
+        min-height: 400px; /* Maintain minimum usable height */
+    }
+    
+    .home-complaints-panel,
+    .home-complaints-header {
+        padding: 0.75rem;
+        border-radius: 20px; /* Smaller border radius */
+    }
+    
+    .home-complaints-title {
+        font-size: 1.3rem;
+    }
+    
+    .home-complaints-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .home-live-complaint-card {
+        padding: 0.75rem;
+        border-radius: 12px;
     }
 }
 
@@ -2716,11 +2980,281 @@ html, body {
         /* Remove min-height constraint to avoid conflicts */
     }
     
-    .map-panel .live-map {
-        min-height: 600px; /* Larger map on big screens */
+    .map-panel .home-live-map-container {
+        min-height: 700px; /* Increased height for larger map on big screens */
     }
     
-    .complaints-list {
-        min-height: 600px; /* Match map height */
+    .home-complaints-list {
+        min-height: 700px; /* Match increased map height */
+        /* Ensure complaint cards fit properly on larger screens */
+        gap: 1.25rem; /* Slightly larger gap for better spacing */
     }
+}
+
+/* Enhanced Complaint Card Styles - Compact versions */
+.home-priority-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+}
+
+.home-priority-badge.priority-2 {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.home-priority-badge.priority-3 {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.home-address-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.home-address-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+}
+
+.home-address-text {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.3;
+    word-break: break-word;
+    /* Remove line clamping to show full address */
+}
+
+.home-severity-low {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.home-severity-medium {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.home-severity-high {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.home-status-pending {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.home-status-in_progress {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.home-status-resolved {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.home-status-closed {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.home-engagement-section {
+    margin: 0.5rem 0;
+    padding: 0.4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.home-vote-info {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.home-upvotes, .home-downvotes {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.home-upvotes {
+    color: #10b981;
+}
+
+.home-downvotes {
+    color: #ef4444;
+}
+
+.home-assignment-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+    padding: 0.4rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    flex-shrink: 0;
+}
+
+.home-assignment-icon {
+    font-size: 0.9rem;
+}
+
+.home-assignment-text {
+    font-size: 0.75rem;
+    color: #60a5fa;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-evidence-btn {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    color: white !important;
+}
+
+.home-evidence-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    transform: translateY(-1px);
+}
+
+/* Enhanced Popup Styles */
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.priority-badge {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-badge.priority-2 {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.level-badge {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.assignment {
+    color: #60a5fa;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.user-id {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: monospace;
+}
+
+.engagement-section {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vote-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.upvotes {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.downvotes {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.total-voters {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+.attachments-section {
+    margin: 1rem 0;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.evidence-count, .feedback-count {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.evidence-count {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+}
+
+.feedback-count {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+}
+
+.popup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-time {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
 }
