@@ -708,6 +708,7 @@ html, body {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     border: 2px solid;
+    /* Keep subtle animation on inner icon only */
     animation: markerBounce 3s ease-in-out infinite;
 }
 
@@ -754,7 +755,6 @@ html, body {
 
 .real-complaint.incident-marker:hover .marker-icon {
     box-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 35px rgba(255, 255, 255, 0.6);
-    transform: scale(1.1);
 }
 
 /* Real complaint marker type-specific enhancements */

@@ -136,27 +136,23 @@ export default function Home() {
                 // Remove any existing listener
                 socketRef.current.off('newComplaint');
                 
-                // Add the listener
-                socketRef.current.on('newComplaint', async (complaint) => {
-                    console.log('🚨 New complaint received via socket (map ready):', complaint);
-                    console.log('Processing complaint immediately...');
-                    try {
-                        await processNewComplaint(complaint);
-                    } catch (error) {
-                        console.error('Error processing new complaint:', error);
+                // Add the new listener for immediate processing
+                socketRef.current.on('newComplaint', (complaint) => {
+                    console.log('🔴 Received live complaint:', complaint?._id || '(no id)');
+                    processNewComplaint(complaint);
+                    
+                    // Also update the right panel complaints
+                    if (setComplaints) {
+                        setComplaints(prevComplaints => [complaint, ...prevComplaints]);
                     }
                 });
                 
                 // Process any pending complaints
                 if (window.pendingComplaints && window.pendingComplaints.length > 0) {
-                    console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
-                    for (const complaint of window.pendingComplaints) {
-                        try {
-                            await processNewComplaint(complaint);
-                        } catch (error) {
-                            console.error('Error processing pending complaint:', error);
-                        }
-                    }
+                    console.log(`[mapReady] Processing ${window.pendingComplaints.length} pending complaint(s)...`);
+                    window.pendingComplaints.forEach(complaint => {
+                        processNewComplaint(complaint);
+                    });
                     window.pendingComplaints = []; // Clear the pending complaints
                 }
             }
@@ -172,9 +168,9 @@ export default function Home() {
             return;
         }
 
-        console.log('Processing new complaint:', complaint);
+    console.log('[process] Start processing complaint:', complaint?._id || '(no id)');
         console.log('User location:', userLocation);
-        console.log('Complaint location:', { lat: complaint.latitude, lng: complaint.longitude });
+    console.log('Complaint raw location payload:', { lat: complaint?.latitude, lng: complaint?.longitude });
 
         // Calculate distance between user and complaint
         const calculateDistance = (lat1, lng1, lat2, lng2) => {
@@ -226,10 +222,21 @@ export default function Home() {
         };
 
         const incidentType = getIncidentTypeByCategory(complaint.category);
-        
+
+        // Robustly extract coordinates and coerce to numbers
+        const rawLat = complaint?.latitude ?? complaint?.lat ?? complaint?.location?.latitude ?? complaint?.location?.lat;
+        const rawLng = complaint?.longitude ?? complaint?.lng ?? complaint?.location?.longitude ?? complaint?.location?.lng;
+        const parsedLat = typeof rawLat === 'string' ? parseFloat(rawLat) : rawLat;
+        const parsedLng = typeof rawLng === 'string' ? parseFloat(rawLng) : rawLng;
+
+        if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
+            console.warn('[process] Skipping: invalid coordinates', { rawLat, rawLng, complaintId: complaint?._id });
+            return;
+        }
+
         const newIncident = {
-            lat: complaint.latitude,
-            lng: complaint.longitude,
+            lat: parsedLat,
+            lng: parsedLng,
             id: complaint._id,
             timestamp: new Date(complaint.createdAt),
             title: complaint.title,
@@ -250,7 +257,7 @@ export default function Home() {
         // Create the marker directly without using stored function references
         try {
             const L = await import("leaflet");
-            console.log('✅ Creating new complaint marker...');
+            console.log('[process] Creating marker at', { lat: newIncident.lat, lng: newIncident.lng });
             
             // Create the marker HTML
             const markerHtml = `
@@ -271,7 +278,6 @@ export default function Home() {
             }).addTo(mapRef.current);
 
             console.log('✅ Marker created successfully');
-            console.log('� Map reference:', mapRef.current);
 
             // Calculate distance
             const distance = Math.sqrt(
@@ -362,6 +368,23 @@ export default function Home() {
             
             console.log('✅ Marker added to map successfully!');
             console.log('� Total markers on map:', incidentMarkersRef.current.length);
+            
+            // Force immediate render so the marker appears at the correct spot without user interaction
+            // Some layouts/animations can defer Leaflet's pixel calculations until a move/zoom.
+            Promise.resolve().then(() => {
+                try {
+                    if (!mapRef.current) return;
+                    if (marker && typeof marker.update === 'function') {
+                        marker.update();
+                    }
+                    // Recalculate map size and trigger a no-op movement to flush rendering
+                    mapRef.current.invalidateSize(true);
+                    mapRef.current.panBy([0, 0], { animate: false });
+                    mapRef.current.fire('moveend');
+                } catch (e) {
+                    console.warn('Map redraw nudge failed:', e);
+                }
+            });
             
             // Check if marker is visible in current view
             const markerLatLng = marker.getLatLng();
@@ -485,6 +508,7 @@ export default function Home() {
                     maxZoom: 19
                 }).addTo(map);
 
+                // (Reverted) No additional whenReady/resize logic
                 // Add user location marker
                 const userMarkerHtml = `
                     <div class="user-location-marker">
