@@ -2160,7 +2160,7 @@ export default function Complaint() {
 
             {/* Status Update Modal */}
             {statusModalOpen && selectedComplaintForStatus && (
-                <div className="modal-overlay" onClick={closeStatusModal}>
+                <div className="complaint-status-modal-overlay" onClick={closeStatusModal}>
                     <div className="status-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3 className="modal-title">Update Complaint Status</h3>
