@@ -1659,15 +1659,29 @@
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-/* Complaints Grid */
+/* Complaints Grid - True Masonry Layout using CSS Columns */
 .complaints-grid {
-    display: grid;
-    /* reduce min width so 3 fit inside widened container */
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 1.5rem;
-    align-items: start; /* Prevent cards from stretching to match tallest card */
+    /* Use CSS Multi-Column for true masonry effect */
+    column-count: 3;
+    column-gap: 1.5rem;
+    column-fill: balance;
+    width: 100%;
 }
 
+/* Responsive column count */
+@media (max-width: 1200px) {
+    .complaints-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .complaints-grid {
+        column-count: 1;
+    }
+}
+
+/* Clean complaint card styling */
 .complaint-card {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(15px);
@@ -1679,8 +1693,18 @@
     animation: fadeInUp 0.6s ease-out;
     display: flex;
     flex-direction: column;
-    height: auto; /* Allow card to use only required height */
-    align-self: start; /* Prevent stretching in grid */
+    /* Critical: Let the card determine its own height */
+    height: fit-content;
+    min-height: auto;
+    width: 100%;
+    box-sizing: border-box;
+    /* Prevent card breaking across columns */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    /* Add vertical spacing between cards */
+    margin-bottom: 1.5rem;
+    /* Prevent overflow */
+    overflow: hidden;
 }
 
 .complaint-card:hover {
