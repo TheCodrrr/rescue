@@ -32,6 +32,14 @@ const complaintSchema = new mongoose.Schema({
     },
     latitude: Number,
     longitude: Number,
+    location: {
+        type: { type: String, enum: ['Point'], required: true  },
+        coordinates: {
+            type: [Number],
+            required: true,
+            index: '2dsphere' // Enable geospatial queries
+        }
+    },
     address: String,
     level: {
         type: Number,
