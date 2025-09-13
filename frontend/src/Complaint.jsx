@@ -171,6 +171,8 @@ export default function Complaint() {
                 map.on('click', async (e) => {
                     const { lat, lng } = e.latlng;
                     
+                    // console.log('Map clicked at coordinates:', { lat, lng, latType: typeof lat, lngType: typeof lng });
+                    
                     // Remove existing marker
                     if (markerRef.current) {
                         map.removeLayer(markerRef.current);
@@ -180,13 +182,17 @@ export default function Complaint() {
                     markerRef.current = L.marker([lat, lng]).addTo(map);
                     
                     // Update form data
-                    setFormData(prev => ({
-                        ...prev,
-                        location: {
-                            latitude: lat,
-                            longitude: lng
-                        }
-                    }));
+                    setFormData(prev => {
+                        const newFormData = {
+                            ...prev,
+                            location: {
+                                latitude: lat,
+                                longitude: lng
+                            }
+                        };
+                        // console.log('Updated formData location:', newFormData.location);
+                        return newFormData;
+                    });
                     
                     // Try to get address using reverse geocoding
                     try {
@@ -450,6 +456,16 @@ export default function Complaint() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // console.log('=== FORM SUBMISSION DEBUG ===');
+        // console.log('Complete formData:', JSON.stringify(formData, null, 2));
+        // console.log('formData.location:', formData.location);
+        // console.log('Raw coordinates:', {
+        //     lat: formData.location.latitude,
+        //     lng: formData.location.longitude,
+        //     latType: typeof formData.location.latitude,
+        //     lngType: typeof formData.location.longitude
+        // });
+        
         // Check if user is authenticated
         if (!isAuthenticated) {
             toast.error('🔐 Please log in to submit a complaint', {
@@ -471,8 +487,7 @@ export default function Complaint() {
         }
         
         // Validate form (base fields)
-        if (!formData.title || !formData.description || !formData.category || !formData.severity ||
-            !formData.location.latitude || !formData.location.longitude) {
+        if (!formData.title || !formData.description || !formData.category || !formData.severity) {
             toast.error('📝 Please fill in all required fields including severity level', {
                 duration: 4000,
                 position: 'top-center',
@@ -487,6 +502,31 @@ export default function Complaint() {
                     boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
                 },
                 icon: '⚠️',
+            });
+            return;
+        }
+
+        // Validate location coordinates
+        const lat = formData.location.latitude;
+        const lng = formData.location.longitude;
+        
+        // console.log('Form location validation:', { lat, lng, latType: typeof lat, lngType: typeof lng });
+        
+        if (lat === null || lng === null || lat === undefined || lng === undefined || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+            toast.error('� Please select a valid location on the map', {
+                duration: 4000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-warning',
+                style: {
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)',
+                },
+                icon: '📍',
             });
             return;
         }
@@ -555,8 +595,11 @@ export default function Complaint() {
             category: formData.category,
             severity: formData.severity,
             location: {
-                latitude: formData.location.latitude,
-                longitude: formData.location.longitude,
+                type: 'Point',
+                coordinates: [
+                    Number(parseFloat(formData.location.longitude)),
+                    Number(parseFloat(formData.location.latitude))
+                ],
                 address: formData.address || null
             },
             // Always send category_data_id; rail uses trainNumber, others placeholder 'N/A'
@@ -564,6 +607,20 @@ export default function Complaint() {
         };
 
         console.log('Dispatching submitComplaint with data:', complaintData);
+        // console.log('Original location data:', formData.location);
+        // console.log('Raw coordinates before conversion:', {
+        //     lng: formData.location.longitude,
+        //     lat: formData.location.latitude,
+        //     lngType: typeof formData.location.longitude,
+        //     latType: typeof formData.location.latitude
+        // });
+        // console.log('Converted coordinates:', complaintData.location.coordinates);
+        // console.log('Converted coordinates types:', {
+        //     lng: complaintData.location.coordinates[0],
+        //     lat: complaintData.location.coordinates[1],
+        //     lngType: typeof complaintData.location.coordinates[0],
+        //     latType: typeof complaintData.location.coordinates[1]
+        // });
         dispatch(submitComplaint(complaintData));
         
         // Dismiss the loading toast after a short delay
