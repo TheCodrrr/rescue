@@ -152,6 +152,44 @@ export const getAllComplaints = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to get nearby complaints (past 30 minutes)
+export const getNearbyComplaints = createAsyncThunk(
+  'complaints/getNearbyComplaints',
+  async ({ latitude, longitude }, thunkAPI) => {
+    try {
+      console.log("🌍 [API] Making request to get nearby complaints...", { latitude, longitude });
+      console.log("🌍 [API] Request URL:", `/complaints/nearby?latitude=${latitude}&longitude=${longitude}`);
+      
+      const response = await axiosInstance.get(`/complaints/nearby?latitude=${latitude}&longitude=${longitude}`);
+      console.log("🌍 [API] Full response received:", response);
+      console.log("🌍 [API] Response status:", response.status);
+      console.log("🌍 [API] Response data:", response.data);
+      
+      // Extract complaints data from the response
+      const complaints = response.data.complaints || response.data.data || response.data;
+      console.log("🌍 [API] Extracted complaints array:", complaints);
+      console.log("🌍 [API] Number of complaints extracted:", complaints?.length || 0);
+      
+      if (complaints && complaints.length > 0) {
+        console.log("🌍 [API] First complaint sample:", complaints[0]);
+        console.log("🌍 [API] All complaint IDs:", complaints.map(c => c._id));
+      }
+      
+      return complaints;
+    } catch (error) {
+      console.error("Get nearby complaints API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to load nearby complaints';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // 👇 Thunk to upvote a complaint
 export const upvoteComplaint = createAsyncThunk(
   'complaints/upvote',
@@ -570,6 +608,21 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(getAllComplaints.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.complaints = [];
+      })
+      // Get nearby complaints cases
+      .addCase(getNearbyComplaints.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getNearbyComplaints.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.complaints = Array.isArray(action.payload) ? action.payload : [];
+        state.error = null;
+      })
+      .addCase(getNearbyComplaints.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
         state.complaints = [];

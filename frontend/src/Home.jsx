@@ -4,9 +4,26 @@ import "leaflet/dist/leaflet.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadUser, loginSuccess, logout } from "./auth/redux/authSlice";
+import { getNearbyComplaints } from "./auth/redux/complaintSlice";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { io } from "socket.io-client";
+import { 
+  MdTrain, 
+  MdConstruction, 
+  MdLocalFireDepartment, 
+  MdBalance,
+  MdLocationOn,
+  MdSecurity
+} from 'react-icons/md';
+import { 
+  FiAlertTriangle, 
+  FiThumbsUp, 
+  FiThumbsDown,
+  FiEye,
+  FiUsers,
+  FiShield
+} from 'react-icons/fi';
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -15,8 +32,21 @@ function getCookie(name) {
     return null;
 }
 
+// Helper function to extract coordinates from complaint data
+function getComplaintCoordinates(complaint) {
+    // Try new GeoJSON format first, then fall back to old format
+    const lat = complaint?.location?.coordinates?.[1] ?? complaint?.latitude ?? complaint?.lat ?? complaint?.location?.latitude ?? complaint?.location?.lat;
+    const lng = complaint?.location?.coordinates?.[0] ?? complaint?.longitude ?? complaint?.lng ?? complaint?.location?.longitude ?? complaint?.location?.lng;
+    
+    return {
+        lat: typeof lat === 'string' ? parseFloat(lat) : lat,
+        lng: typeof lng === 'string' ? parseFloat(lng) : lng
+    };
+}
+
 export default function Home() {
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+    const { isLoading: complaintsLoading } = useSelector((state) => state.complaints);
     const [locationPermission, setLocationPermission] = useState(null); // 'granted', 'denied', 'prompt', null
     const [userLocation, setUserLocation] = useState(null);
     const [mapReady, setMapReady] = useState(false);
@@ -105,7 +135,7 @@ export default function Home() {
                 id: complaint._id,
                 title: complaint.title,
                 category: complaint.category,
-                coordinates: { lat: complaint.latitude, lng: complaint.longitude },
+                coordinates: getComplaintCoordinates(complaint),
                 address: complaint.address,
                 user: complaint.user_id
             });
@@ -138,7 +168,7 @@ export default function Home() {
                 
                 // Add the new listener for immediate processing
                 socketRef.current.on('newComplaint', (complaint) => {
-                    console.log('🔴 Received live complaint:', complaint?._id || '(no id)');
+                    console.log('🔴 [SOCKET] Received live complaint:', complaint?._id || '(no id)');
                     console.log(complaint);
                     processNewComplaint(complaint);
                     
@@ -169,9 +199,26 @@ export default function Home() {
             return;
         }
 
-    console.log('[process] Start processing complaint:', complaint?._id || '(no id)');
+        // Check if this complaint is already being displayed to prevent duplicates
+        const existingComplaint = recentComplaints.find(existing => existing.id === complaint._id);
+        if (existingComplaint) {
+            console.log('Complaint already exists, skipping duplicate:', complaint._id);
+            return;
+        }
+
+        // Also check if marker already exists on map
+        const existingMarker = incidentMarkersRef.current.find(marker => 
+            marker.complaintId === complaint._id
+        );
+        if (existingMarker) {
+            console.log('Marker for complaint already exists on map, skipping:', complaint._id);
+            return;
+        }
+
+    console.log('[PROCESS] Processing complaint:', complaint?._id || '(no id)', 'Category:', complaint?.category);
         console.log('User location:', userLocation);
-    console.log('Complaint raw location payload:', { lat: complaint?.latitude, lng: complaint?.longitude });
+    const complaintCoords = getComplaintCoordinates(complaint);
+    console.log('Complaint raw location payload:', complaintCoords);
 
         // Calculate distance between user and complaint
         const calculateDistance = (lat1, lng1, lat2, lng2) => {
@@ -188,8 +235,8 @@ export default function Home() {
         const distance = calculateDistance(
             userLocation.lat, 
             userLocation.lng, 
-            complaint.latitude, 
-            complaint.longitude
+            complaintCoords.lat, 
+            complaintCoords.lng
         );
 
         console.log(`Distance from user to complaint: ${distance.toFixed(2)} km`);
@@ -225,19 +272,17 @@ export default function Home() {
         const incidentType = getIncidentTypeByCategory(complaint.category);
 
         // Robustly extract coordinates and coerce to numbers
-        const rawLat = complaint?.latitude ?? complaint?.lat ?? complaint?.location?.latitude ?? complaint?.location?.lat;
-        const rawLng = complaint?.longitude ?? complaint?.lng ?? complaint?.location?.longitude ?? complaint?.location?.lng;
-        const parsedLat = typeof rawLat === 'string' ? parseFloat(rawLat) : rawLat;
-        const parsedLng = typeof rawLng === 'string' ? parseFloat(rawLng) : rawLng;
+        const finalCoords = getComplaintCoordinates(complaint);
+        const parsedLat = finalCoords.lat;
+        const parsedLng = finalCoords.lng;
 
         console.log('🗺️ Coordinate extraction:', {
-            raw: { lat: rawLat, lng: rawLng },
-            parsed: { lat: parsedLat, lng: parsedLng },
+            coordinates: finalCoords,
             types: { lat: typeof parsedLat, lng: typeof parsedLng }
         });
 
         if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
-            console.warn('[process] Skipping: invalid coordinates', { rawLat, rawLng, complaintId: complaint?._id });
+            console.warn('[process] Skipping: invalid coordinates', { finalCoords, complaintId: complaint?._id });
             return;
         }
 
@@ -430,7 +475,8 @@ export default function Home() {
                 return updatedComplaints.slice(0, 10); // Keep only latest 10
             });
 
-            // Store the marker
+            // Store the marker with complaint ID for duplicate checking
+            marker.complaintId = complaint._id;
             incidentMarkersRef.current.push(marker);
             
             console.log('✅ Marker added to map successfully!');
@@ -533,6 +579,41 @@ export default function Home() {
             }
         }
     }, [dispatch, user, loading, userLocation]);
+
+    // Periodic refresh of nearby complaints every 5 minutes
+    useEffect(() => {
+        if (!userLocation || !mapReady) {
+            return;
+        }
+
+        // Set up interval to refresh nearby complaints every 5 minutes
+        const refreshInterval = setInterval(() => {
+            console.log('🔄 [REFRESH] Refreshing nearby complaints...');
+            dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
+                .unwrap()
+                .then((nearbyComplaints) => {
+                    console.log('🔄 [REFRESH] Nearby complaints refreshed:', nearbyComplaints?.length || 0, 'complaints found');
+                    
+                    if (nearbyComplaints && nearbyComplaints.length > 0) {
+                        console.log('🔄 [REFRESH] Complaint IDs found:', nearbyComplaints.map(c => c._id));
+                        nearbyComplaints.forEach((complaint, index) => {
+                            console.log(`🔄 [REFRESH] Processing complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id, '- Title:', complaint.title);
+                            processNewComplaint(complaint);
+                        });
+                    } else {
+                        console.log('🔄 [REFRESH] No complaints found during refresh');
+                    }
+                })
+                .catch((error) => {
+                    console.error('🔄 [REFRESH] Failed to refresh nearby complaints:', error);
+                });
+        }, 5 * 60 * 1000); // 5 minutes
+
+        // Clean up interval on unmount
+        return () => {
+            clearInterval(refreshInterval);
+        };
+    }, [userLocation, mapReady, dispatch]);
 
     // Map initialization useEffect - runs when userLocation is available
     useEffect(() => {
@@ -738,6 +819,63 @@ export default function Home() {
                 console.log('Map loaded successfully with user location:', userLocation);
                 setMapReady(true);
                 
+                // Fetch nearby complaints from the past 30 minutes
+                console.log('Fetching nearby complaints...');
+                dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
+                    .unwrap()
+                    .then((nearbyComplaints) => {
+                        console.log('Nearby complaints fetched successfully:', nearbyComplaints);
+                        console.log('📊 [NEARBY COMPLAINTS SUMMARY]');
+                        console.log('Total nearby complaints found:', nearbyComplaints?.length || 0);
+                        
+                        // Log detailed information about each complaint
+                        if (nearbyComplaints && nearbyComplaints.length > 0) {
+                            console.log('📋 [DETAILED COMPLAINTS LIST]');
+                            nearbyComplaints.forEach((complaint, index) => {
+                                console.log(`\n--- Complaint ${index + 1} ---`);
+                                console.log('ID:', complaint._id);
+                                console.log('Title:', complaint.title);
+                                console.log('Description:', complaint.description);
+                                console.log('Category:', complaint.category);
+                                console.log('Severity:', complaint.severity);
+                                console.log('Status:', complaint.status);
+                                console.log('Address:', complaint.address);
+                                console.log('Created At:', complaint.createdAt);
+                                console.log('Updated At:', complaint.updatedAt);
+                                if (complaint.location) {
+                                    if (complaint.location.coordinates) {
+                                        console.log('Location (GeoJSON):', complaint.location);
+                                        console.log('Coordinates [lng, lat]:', complaint.location.coordinates);
+                                    } else if (complaint.latitude && complaint.longitude) {
+                                        console.log('Location (Legacy):', { lat: complaint.latitude, lng: complaint.longitude });
+                                    }
+                                }
+                                if (complaint.user_id) {
+                                    console.log('Reporter:', {
+                                        id: complaint.user_id._id || complaint.user_id,
+                                        name: complaint.user_id.name || 'Unknown',
+                                        email: complaint.user_id.email || 'Unknown'
+                                    });
+                                }
+                                console.log('Upvotes:', complaint.upvote || 0);
+                                console.log('Downvotes:', complaint.downvote || 0);
+                                console.log('Priority:', complaint.priority || 1);
+                                console.log('---');
+                            });
+                            
+                            console.log('\n🔄 [PROCESSING] Starting to process complaints on map...');
+                            nearbyComplaints.forEach((complaint, index) => {
+                                console.log(`🗂️ [API] Processing nearby complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id);
+                                processNewComplaint(complaint);
+                            });
+                        } else {
+                            console.log('No nearby complaints found in the past 30 minutes');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Failed to fetch nearby complaints:', error);
+                    });
+                
                 // Process any pending complaints that arrived before map was ready
                 if (window.pendingComplaints && window.pendingComplaints.length > 0) {
                     console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
@@ -838,42 +976,42 @@ export default function Home() {
                                 className={`tab ${selectedCategory === 'all' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('all')}
                             >
-                                <span className="tab-icon">🚨</span>
+                                <span className="tab-icon" style={{color: '#ffffff'}}><FiAlertTriangle /></span>
                                 All Reports
                             </button>
                             <button 
                                 className={`tab ${selectedCategory === 'rail' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('rail')}
                             >
-                                <span className="tab-icon">🚂</span>
+                                <span className="tab-icon" style={{color: '#fde047'}}><MdTrain /></span>
                                 Rail
                             </button>
                             <button 
                                 className={`tab ${selectedCategory === 'fire' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('fire')}
                             >
-                                <span className="tab-icon">🔥</span>
+                                <span className="tab-icon" style={{color: '#fb7185'}}><MdLocalFireDepartment /></span>
                                 Fire
                             </button>
                             <button 
                                 className={`tab ${selectedCategory === 'cyber' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('cyber')}
                             >
-                                <span className="tab-icon">💻</span>
+                                <span className="tab-icon" style={{color: '#e879f9'}}><FiAlertTriangle /></span>
                                 Cyber
                             </button>
                             <button 
                                 className={`tab ${selectedCategory === 'police' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('police')}
                             >
-                                <span className="tab-icon">👮</span>
+                                <span className="tab-icon" style={{color: '#7dd3fc'}}><FiShield /></span>
                                 Police
                             </button>
                             <button 
                                 className={`tab ${selectedCategory === 'court' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('court')}
                             >
-                                <span className="tab-icon">⚖️</span>
+                                <span className="tab-icon" style={{color: '#4ade80'}}><MdBalance /></span>
                                 Court
                             </button>
                         </div>
@@ -917,7 +1055,11 @@ export default function Home() {
                                 
                                 <div className="home-live-indicator">
                                     <div className="pulse-dot"></div>
-                                    <span>Live Updates {mapReady ? '✓' : '...'}</span>
+                                    <span>
+                                        {complaintsLoading ? 'Loading complaints...' : 
+                                         mapReady ? 'Live Updates' : 'Preparing map...'}
+                                        {mapReady && !complaintsLoading ? <FiAlertTriangle /> : '...'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -935,7 +1077,15 @@ export default function Home() {
                                         <div key={`${complaint._id}-${index}`} className="home-live-complaint-card">
                                             <div className="home-card-header">
                                                 <div className="home-incident-info">
-                                                    <span className="home-incident-icon">{complaint.incidentIcon || '🚨'}</span>
+                                                    <span className="home-incident-icon">
+                                                        {complaint.category === 'rail' && <MdTrain style={{color: '#fde047'}} />}
+                                                        {complaint.category === 'road' && <MdConstruction style={{color: '#fb7185'}} />}
+                                                        {complaint.category === 'fire' && <MdLocalFireDepartment style={{color: '#fb7185'}} />}
+                                                        {complaint.category === 'cyber' && <FiAlertTriangle style={{color: '#e879f9'}} />}
+                                                        {complaint.category === 'police' && <FiShield style={{color: '#7dd3fc'}} />}
+                                                        {complaint.category === 'court' && <MdBalance style={{color: '#4ade80'}} />}
+                                                        {!complaint.category && <FiAlertTriangle style={{color: '#ffffff'}} />}
+                                                    </span>
                                                     <span className="home-incident-type">
                                                         {complaint.incidentType ? 
                                                             String(complaint.incidentType).toUpperCase() : 
@@ -959,24 +1109,24 @@ export default function Home() {
                                             <div className="home-card-content">
                                             {complaint.address && (
                                                 <div className="home-address-section">
-                                                    <span className="home-address-icon">📍</span>
+                                                    <span className="home-address-icon"><MdLocationOn /></span>
                                                     <span className="home-address-text">{complaint.address}</span>
                                                 </div>
                                             )}
                                             
                                             <div className="home-card-meta">
                                                 <div className="home-meta-item">
-                                                    <span className="home-meta-icon">�</span>
+                                                    <span className="home-meta-icon"><MdLocationOn /></span>
                                                     <span>{complaint.distance} km away</span>
                                                 </div>
                                                 <div className="home-meta-item">
-                                                    <span className="home-meta-icon">⚡</span>
+                                                    <span className="home-meta-icon"><FiAlertTriangle /></span>
                                                     <span className={`home-severity-${complaint.severity}`}>
                                                         {complaint.severity?.toUpperCase() || 'UNKNOWN'}
                                                     </span>
                                                 </div>
                                                 <div className="home-meta-item">
-                                                    <span className="home-meta-icon">�</span>
+                                                    <span className="home-meta-icon"><FiAlertTriangle /></span>
                                                     <span className={`home-status-${complaint.status}`}>
                                                         {complaint.status?.replace('_', ' ').toUpperCase() || 'PENDING'}
                                                     </span>
@@ -1023,10 +1173,10 @@ export default function Home() {
                                                 <div className="home-engagement-section">
                                                     <div className="home-vote-info">
                                                         <span className="home-upvotes">
-                                                            👍 {complaint.upvote || 0}
+                                                            <FiThumbsUp /> {complaint.upvote || 0}
                                                         </span>
                                                         <span className="home-downvotes">
-                                                            👎 {complaint.downvote || 0}
+                                                            <FiThumbsDown /> {complaint.downvote || 0}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -1035,7 +1185,7 @@ export default function Home() {
                                             {/* Department assignment info */}
                                             {complaint.assignedDepartment && (
                                                 <div className="home-assignment-info">
-                                                    <span className="home-assignment-icon">🏢</span>
+                                                    <span className="home-assignment-icon"><MdBalance /></span>
                                                     <span className="home-assignment-text">
                                                         Assigned to: {complaint.assignedDepartment}
                                                     </span>
@@ -1045,16 +1195,16 @@ export default function Home() {
 
                                             <div className="home-card-actions">
                                                 <button className="home-action-btn home-view-btn">
-                                                    <span>👁️</span>
+                                                    <span><FiEye /></span>
                                                     View Details
                                                 </button>
                                                 <button className="home-action-btn home-help-btn">
-                                                    <span>🤝</span>
+                                                    <span><FiUsers /></span>
                                                     Offer Help
                                                 </button>
                                                 {complaint.evidence_ids && complaint.evidence_ids.length > 0 && (
                                                     <button className="home-action-btn home-evidence-btn">
-                                                        <span>📎</span>
+                                                        <span><FiAlertTriangle /></span>
                                                         Evidence ({complaint.evidence_ids.length})
                                                     </button>
                                                 )}
@@ -1064,12 +1214,12 @@ export default function Home() {
                                     ) : (
                                         <div className="home-no-complaints">
                                             <div className="home-no-complaints-icon">
-                                                {selectedCategory === 'all' ? '📡' : 
-                                                 selectedCategory === 'rail' ? '🚂' :
-                                                 selectedCategory === 'fire' ? '🔥' :
-                                                 selectedCategory === 'cyber' ? '💻' :
-                                                 selectedCategory === 'police' ? '👮' :
-                                                 selectedCategory === 'court' ? '⚖️' : '📡'}
+                                                {selectedCategory === 'all' ? <FiAlertTriangle style={{color: '#ffffff'}} /> : 
+                                                 selectedCategory === 'rail' ? <MdTrain style={{color: '#fde047'}} /> :
+                                                 selectedCategory === 'fire' ? <MdLocalFireDepartment style={{color: '#fb7185'}} /> :
+                                                 selectedCategory === 'cyber' ? <FiAlertTriangle style={{color: '#e879f9'}} /> :
+                                                 selectedCategory === 'police' ? <FiShield style={{color: '#7dd3fc'}} /> :
+                                                 selectedCategory === 'court' ? <MdBalance style={{color: '#4ade80'}} /> : <FiAlertTriangle style={{color: '#ffffff'}} />}
                                             </div>
                                             <h3>
                                                 {selectedCategory === 'all' 
