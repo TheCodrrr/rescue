@@ -3,6 +3,7 @@ import axiosInstance from "../../api/axios";
 
 const initialState = {
   complaints: [],
+  selectedComplaint: null,
   isSubmitting: false,
   isLoading: false,
   error: null,
@@ -184,6 +185,35 @@ export const getNearbyComplaints = createAsyncThunk(
                           error.response?.data?.error || 
                           error.message || 
                           'Failed to load nearby complaints';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to fetch a single complaint by ID
+export const fetchComplaintById = createAsyncThunk(
+  'complaints/fetchComplaintById',
+  async (complaintId, thunkAPI) => {
+    try {
+      console.log("Making API call to fetch complaint by ID...", complaintId);
+      
+      const response = await axiosInstance.get(`/complaints/${complaintId}`);
+      console.log("Fetch complaint by ID API response:", response.data);
+      
+      // Extract complaint data from the response
+      const complaint = response.data.data || response.data;
+      console.log("Complaint data:", complaint);
+      
+      return complaint;
+    } catch (error) {
+      console.error("Fetch complaint by ID API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to load complaint details';
       
       return thunkAPI.rejectWithValue(errorMessage);
     }
@@ -626,6 +656,22 @@ const complaintSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         state.complaints = [];
+      })
+      // Fetch complaint by ID cases
+      .addCase(fetchComplaintById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.selectedComplaint = null;
+      })
+      .addCase(fetchComplaintById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedComplaint = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchComplaintById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.selectedComplaint = null;
       })
       // Upvote complaint cases
       .addCase(upvoteComplaint.pending, (state) => {

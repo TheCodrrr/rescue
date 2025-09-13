@@ -12,6 +12,7 @@ import UserProfile from './UserProfile'
 import Complaint from './Complaint'
 import FollowUp from './FollowUp'
 import Trending from './Trending.jsx'
+import ComplaintDetail from './ComplaintDetail.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient();
@@ -36,14 +37,16 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
-            {/* Complaint parent route with nested follow-up (programmatic only) */}
-            <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>}>
-              <Route path="follow-up" element={
-                <ProgrammaticOnly>
-                  <FollowUp />
-                </ProgrammaticOnly>
-              } />
-            </Route>
+            {/* Complaint parent route */}
+            <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>} />
+            {/* ComplaintDetail as separate route (programmatic only) */}
+            <Route path="/complaint/:id" element={
+              <ProgrammaticOnly>
+                <ProtectedRoute>
+                  <ComplaintDetail />
+                </ProtectedRoute>
+              </ProgrammaticOnly>
+            } />
             <Route path="/trending" element={<Trending />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

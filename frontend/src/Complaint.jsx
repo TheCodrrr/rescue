@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
+import { navigateProgrammatically } from './App';
 import "./Complaint.css";
 import "./Toast.css";
 import "leaflet/dist/leaflet.css";
@@ -19,7 +20,8 @@ import {
   FiAlertTriangle,
   FiCheckCircle,
   FiXCircle,
-  FiLoader
+  FiLoader,
+  FiExternalLink
 } from 'react-icons/fi';
 import { 
   MdLocalFireDepartment,
@@ -49,6 +51,7 @@ import {
 
 export default function Complaint() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { isSubmitting, success, error, complaints, isLoading } = useSelector((state) => state.complaints);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
@@ -1002,6 +1005,12 @@ export default function Complaint() {
             // Clear delete in progress
             setDeleteInProgress(prev => ({ ...prev, [complaintId]: false }));
         }
+    };
+
+    // Visit complaint handler - navigate to detailed view
+    const handleVisitComplaint = (complaint) => {
+        // Navigate to the ComplaintDetail component using programmatic navigation
+        navigateProgrammatically(navigate, `/complaint/${complaint._id}`);
     };
 
     const renderStars = (rating) => {
@@ -1979,6 +1988,13 @@ export default function Complaint() {
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                             )}
+                                                        </button>
+                                                        <button
+                                                            className="visit-btn-icon"
+                                                            onClick={() => handleVisitComplaint(complaint)}
+                                                            title="Visit Complaint Details"
+                                                        >
+                                                            <FiExternalLink className="delete-icon" />
                                                         </button>
                                                     </div>
                                                 </div>
