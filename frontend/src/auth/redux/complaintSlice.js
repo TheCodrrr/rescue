@@ -28,10 +28,7 @@ export const submitComplaint = createAsyncThunk(
         title: complaintData.title,
         description: complaintData.description,
         category: complaintData.category,
-        location: {
-          latitude: complaintData.location.latitude,
-          longitude: complaintData.location.longitude,
-        },
+        location: complaintData.location, // Already in GeoJSON format from Complaint.jsx
         address: complaintData.location.address || null,
         status: 'pending', // Default status
         timestamp: new Date().toISOString(),
