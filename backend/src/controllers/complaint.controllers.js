@@ -62,6 +62,8 @@ const getNearbyComplaints = asyncHandler(async (req, res) => {
                 }
             }
         })
+        .populate("user_id", "name email profileImage")
+        .lean();
 
         res.status(200).json({
             success: true,
