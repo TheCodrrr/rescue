@@ -46,13 +46,75 @@ const getTrendingComplaints = asyncHandler(async (req, res) => {
     });
 });
 
+const getNearbyComplaints = asyncHandler(async (req, res) => {
+    try {
+        const { latitude, longitude } = req.query;
+        if (!latitude || !longitude) return ApiError(400, "Latitude and longitude are required");
+
+        const minsAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+        const complaints = await Complaint.find({
+            createdAt: { $gte: minsAgo },
+            location: {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+                    $maxDistance: 30000 // meters
+                }
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            count: complaints.length,
+            complaints
+        });
+    } catch (error) {
+        console.error("Error in getNearbyComplaints: ", error);
+        res.status(500).json({ success: false, error: error.message })
+    }
+})
+
 const createComplaint = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
+  // console.log('=== BACKEND REQUEST DEBUG ===');
+  // console.log('Full req.body:', JSON.stringify(req.body, null, 2));
+  // console.log('req.body keys:', Object.keys(req.body));
+
   const { title, description, category, location, address, evidenceIds = [], category_data_id, severity } = req.body;
+
+  // console.log('Received complaint data:', { title, description, category, location, address, category_data_id, severity });
+  // console.log('Location object:', JSON.stringify(location, null, 2));
 
   if (!title || !description || !category || !location || !address) {
     throw new ApiError(400, "All required fields (title, description, category, location, address) must be provided");
+  }
+
+  // Validate location structure
+  if (!location.type || !location.coordinates) {
+    // console.log('Location validation failed - missing type or coordinates:', location);
+    throw new ApiError(400, "Location must have 'type' and 'coordinates' fields (GeoJSON format)");
+  }
+
+  if (location.type !== 'Point') {
+    // console.log('Location type validation failed:', location.type);
+    throw new ApiError(400, "Location type must be 'Point'");
+  }
+
+  if (!Array.isArray(location.coordinates) || location.coordinates.length !== 2) {
+    // console.log('Location coordinates array validation failed:', location.coordinates);
+    throw new ApiError(400, "Location coordinates must be an array of [longitude, latitude]");
+  }
+
+  const [lng, lat] = location.coordinates;
+  // console.log('Extracted coordinates:', { lng, lat, lngType: typeof lng, latType: typeof lat });
+  // console.log('Raw coordinates array:', location.coordinates);
+  // console.log('isNaN checks:', { lngNaN: isNaN(lng), latNaN: isNaN(lat) });
+  // console.log('Finite checks:', { lngFinite: Number.isFinite(lng), latFinite: Number.isFinite(lat) });
+  
+  if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat) || !Number.isFinite(lng) || !Number.isFinite(lat)) {
+    // console.log('Coordinate number validation failed:', { lng, lat, lngType: typeof lng, latType: typeof lat });
+    throw new ApiError(400, `Location coordinates must be valid numbers. Received: lng=${lng} (${typeof lng}), lat=${lat} (${typeof lat})`);
   }
 
   if (!category) {
@@ -73,8 +135,10 @@ const createComplaint = asyncHandler(async (req, res) => {
     title,
     description,
     category,
-    latitude: location.latitude,
-    longitude: location.longitude,
+    location: {
+      type: location.type,
+      coordinates: location.coordinates
+    },
     address,
     evidence_ids: evidenceIds || [],
     user_id: userId,
@@ -340,5 +404,6 @@ export {
     deleteComplaint,
     upvoteComplaint,
     downvoteComplaint,
-    getTrendingComplaints
+    getTrendingComplaints,
+    getNearbyComplaints
 }
