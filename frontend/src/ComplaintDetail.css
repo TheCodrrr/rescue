@@ -1,10 +1,15 @@
 /* Complaint Detail Page - Unique Styles */
 
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
 /* Main Layout */
 .cd-page-wrapper {
     min-height: 100vh;
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    padding: 6rem 1rem 2rem 1rem;
+    padding: 8rem 1rem 2rem 1rem;
     position: relative;
     overflow-x: hidden;
 }
@@ -463,8 +468,13 @@
 
 /* Loading and Error States */
 .cd-loading-wrapper, .cd-error-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 10rem);
     text-align: center;
-    padding: 5rem 2rem;
+    padding: 2rem;
     color: white;
 }
 

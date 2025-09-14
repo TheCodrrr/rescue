@@ -62,6 +62,23 @@ export default function ComplaintDetail() {
         if (id) {
             dispatch(fetchComplaintById(id));
         }
+        
+        // Scroll to top when component mounts with a slight delay for better UX
+        const scrollToTop = () => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+        };
+        
+        // Immediate scroll
+        scrollToTop();
+        
+        // Backup scroll after a short delay (in case of slow rendering)
+        const timeoutId = setTimeout(scrollToTop, 100);
+        
+        return () => clearTimeout(timeoutId);
     }, [id, dispatch]);
 
     // Handle success and error states
@@ -107,7 +124,6 @@ export default function ComplaintDetail() {
             case 'pending': return 'status-badge-pending';
             case 'in-progress': return 'status-badge-in-progress';
             case 'resolved': return 'status-badge-resolved';
-            case 'closed': return 'status-badge-closed';
             case 'rejected': return 'status-badge-rejected';
             default: return 'status-badge-pending';
         }
@@ -298,7 +314,7 @@ export default function ComplaintDetail() {
                             <p>The complaint you're looking for doesn't exist or has been removed.</p>
                             <button 
                                 className="cd-primary-btn"
-                                onClick={() => navigate('/complain')}
+                                onClick={() => navigate('/complain?tab=view')}
                             >
                                 <FiArrowLeft /> Back to Complaints
                             </button>
@@ -322,7 +338,7 @@ export default function ComplaintDetail() {
                             <p>Unable to load complaint details. Please try again.</p>
                             <button 
                                 className="cd-primary-btn"
-                                onClick={() => navigate('/complain')}
+                                onClick={() => navigate('/complain?tab=view')}
                             >
                                 <FiArrowLeft /> Back to Complaints
                             </button>
@@ -346,7 +362,7 @@ export default function ComplaintDetail() {
                     <div className="cd-header-section">
                         <button 
                             className="cd-nav-back-btn"
-                            onClick={() => navigate('/complain')}
+                            onClick={() => navigate('/complain?tab=view')}
                         >
                             <FiArrowLeft /> Back to Complaints
                         </button>
@@ -519,7 +535,7 @@ export default function ComplaintDetail() {
                                 <div className="cd-status-management">
                                     <h3>Update Status</h3>
                                     <div className="cd-status-controls">
-                                        {['pending', 'in-progress', 'resolved', 'closed', 'rejected'].map((status) => (
+                                        {['pending', 'in-progress', 'resolved', 'rejected'].map((status) => (
                                             <button
                                                 key={status}
                                                 className={`cd-status-option-btn ${selectedComplaint.status === status ? 'cd-active-status' : ''}`}

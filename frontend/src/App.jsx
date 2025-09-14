@@ -39,13 +39,11 @@ function App() {
             <Route path="/home" element={<Home />} />
             {/* Complaint parent route */}
             <Route path="/complain" element={<ProtectedRoute><Complaint /></ProtectedRoute>} />
-            {/* ComplaintDetail as separate route (programmatic only) */}
+            {/* ComplaintDetail as separate route (now accessible directly) */}
             <Route path="/complaint/:id" element={
-              <ProgrammaticOnly>
-                <ProtectedRoute>
-                  <ComplaintDetail />
-                </ProtectedRoute>
-              </ProgrammaticOnly>
+              <ProtectedRoute>
+                <ComplaintDetail />
+              </ProtectedRoute>
             } />
             <Route path="/trending" element={<Trending />} />
             <Route path="/login" element={<Login />} />

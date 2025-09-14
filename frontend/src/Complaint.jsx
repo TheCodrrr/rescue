@@ -1007,10 +1007,10 @@ export default function Complaint() {
         }
     };
 
-    // Visit complaint handler - navigate to detailed view
+    // Visit complaint handler - open complaint details in new tab
     const handleVisitComplaint = (complaint) => {
-        // Navigate to the ComplaintDetail component using programmatic navigation
-        navigateProgrammatically(navigate, `/complaint/${complaint._id}`);
+        // Open the ComplaintDetail component in a new tab
+        window.open(`/complaint/${complaint._id}`, '_blank', 'noopener,noreferrer');
     };
 
     const renderStars = (rating) => {
