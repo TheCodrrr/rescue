@@ -34,7 +34,12 @@ import {
   MdTrain,
   MdSpeed,
   MdDirectionsTransit,
-  MdAccessTime
+  MdDirectionsRailway,
+  MdAccessTime,
+  MdLocationOn,
+  MdSchedule,
+  MdFlag,
+  MdMyLocation
 } from 'react-icons/md';
 import { 
     fetchComplaintById,
@@ -239,6 +244,12 @@ export default function ComplaintDetail() {
         return trainType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
+    // Helper function to format time from MM.SS to MM:SS
+    const formatTime = (timeStr) => {
+        if (!timeStr || timeStr === 'First' || timeStr === 'Last') return timeStr;
+        return timeStr.replace('.', ':');
+    };
+
     // Helper function to get coordinates in consistent format [lat, lng]
     const getCoordinates = (complaint) => {
         if (!complaint?.location) return null;
@@ -322,10 +333,23 @@ export default function ComplaintDetail() {
         );
     };
 
-    // Rail Route Timeline Component
-    const RailRouteTimeline = ({ fromStation, toStation, totalDistance }) => {
-        if (!fromStation?.name || !toStation?.name) return null;
-        
+    // Enhanced Rail Route Timeline Component with All Stations
+    const RailRouteTimeline = ({ fromStation, toStation, totalDistance, stations = [] }) => {
+        const [animationProgress, setAnimationProgress] = useState(0);
+        const [selectedStation, setSelectedStation] = useState(null);
+
+        useEffect(() => {
+            const timer = setTimeout(() => {
+                setAnimationProgress(100);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }, []);
+
+        // Use stations array if available, otherwise fallback to basic route
+        const routeStations = stations && stations.length > 0 ? stations : [fromStation, toStation].filter(Boolean);
+
+        if (!routeStations || routeStations.length === 0) return null;
+
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -333,43 +357,147 @@ export default function ComplaintDetail() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="cd-rail-route-timeline"
             >
-                <div className="cd-timeline-container">
-                    <div className="cd-timeline-station cd-timeline-start">
-                        <div className="cd-timeline-dot cd-timeline-dot-start"></div>
-                        <div className="cd-timeline-content">
-                            <h4>{fromStation.name}</h4>
-                            <span className="cd-station-code">({fromStation.code})</span>
-                            {fromStation.time && (
-                                <span className="cd-station-time">{fromStation.time}</span>
-                            )}
+                <div className="cd-route-overview">
+                    <div className="cd-route-summary">
+                        <div className="cd-route-info-item">
+                            <span className="cd-route-label">Total Stations:</span>
+                            <span className="cd-route-value">{routeStations.length}</span>
                         </div>
-                    </div>
-                    
-                    <div className="cd-timeline-line">
-                        <motion.div
-                            className="cd-timeline-progress"
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: 1.2, delay: 0.5 }}
-                        />
-                        {totalDistance && (
-                            <div className="cd-timeline-distance">
-                                {totalDistance} km
-                            </div>
-                        )}
-                    </div>
-                    
-                    <div className="cd-timeline-station cd-timeline-end">
-                        <div className="cd-timeline-dot cd-timeline-dot-end"></div>
-                        <div className="cd-timeline-content">
-                            <h4>{toStation.name}</h4>
-                            <span className="cd-station-code">({toStation.code})</span>
-                            {toStation.time && (
-                                <span className="cd-station-time">{toStation.time}</span>
-                            )}
+                        <div className="cd-route-info-item">
+                            <span className="cd-route-label">Total Distance:</span>
+                            <span className="cd-route-value">{totalDistance} km</span>
+                        </div>
+                        <div className="cd-route-info-item">
+                            <span className="cd-route-label">Journey Time:</span>
+                            <span className="cd-route-value">
+                                {routeStations.length > 1 ? 
+                                    `${formatTime(routeStations[0]?.depart || routeStations[0]?.time || 'N/A')} - ${formatTime(routeStations[routeStations.length - 1]?.arrive || routeStations[routeStations.length - 1]?.time || 'N/A')}` 
+                                    : 'N/A'}
+                            </span>
                         </div>
                     </div>
                 </div>
+
+                <div className="cd-stations-timeline">
+                    {routeStations.map((station, index) => {
+                        const isFirst = index === 0;
+                        const isLast = index === routeStations.length - 1;
+                        const progress = ((index) / Math.max(routeStations.length - 1, 1)) * 100;
+                        
+                        // Handle both new station format and old format
+                        const stationName = station.source_stn_name || station.name || `Station ${index + 1}`;
+                        const stationCode = station.source_stn_code || station.code || 'N/A';
+                        
+                        return (
+                            <motion.div
+                                key={`${stationCode}-${index}`}
+                                className={`cd-station-item ${isFirst ? 'cd-station-first' : ''} ${isLast ? 'cd-station-last' : ''}`}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.05 }}
+                                onHoverStart={() => setSelectedStation(station)}
+                                onHoverEnd={() => setSelectedStation(null)}
+                            >
+                                <div className="cd-station-timeline-track">
+                                    <div 
+                                        className={`cd-station-dot ${isFirst ? 'cd-dot-start' : isLast ? 'cd-dot-end' : 'cd-dot-middle'}`}
+                                    >
+                                        {isFirst ? <MdMyLocation /> : isLast ? <MdFlag /> : <MdLocationOn />}
+                                    </div>
+                                    {!isLast && (
+                                        <motion.div 
+                                            className="cd-station-connector"
+                                            initial={{ scaleY: 0 }}
+                                            animate={{ 
+                                                scaleY: animationProgress >= progress ? 1 : 0 
+                                            }}
+                                            transition={{ 
+                                                duration: 0.3, 
+                                                delay: 1 + (index * 0.05) 
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                                
+                                <div className="cd-station-info">
+                                    <div className="cd-station-main-info">
+                                        <h4 className="cd-station-name">
+                                            {stationName}
+                                        </h4>
+                                        <span className="cd-station-code-badge">
+                                            {stationCode}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="cd-station-timing">
+                                        {station.arrive && station.arrive !== 'First' && (
+                                            <span className="cd-station-time cd-arrival-time">
+                                                <MdSchedule /> {formatTime(station.arrive)}
+                                            </span>
+                                        )}
+                                        {station.depart && station.depart !== 'Last' && (
+                                            <span className="cd-station-time cd-departure-time">
+                                                <MdSchedule /> {formatTime(station.depart)}
+                                            </span>
+                                        )}
+                                        {station.arrive === 'First' && (
+                                            <span className="cd-station-time cd-origin-time">
+                                                <MdMyLocation /> {formatTime(station.depart)}
+                                            </span>
+                                        )}
+                                        {station.depart === 'Last' && (
+                                            <span className="cd-station-time cd-destination-time">
+                                                <MdFlag /> {formatTime(station.arrive)}
+                                            </span>
+                                        )}
+                                        {station.time && !station.arrive && !station.depart && (
+                                            <span className="cd-station-time cd-general-time">
+                                                <MdAccessTime /> {formatTime(station.time)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="cd-station-details">
+                                        <span className="cd-station-distance">
+                                            <MdDirectionsRailway /> {station.distance || 'N/A'} km
+                                        </span>
+                                        {station.zone && (
+                                            <span className="cd-station-zone">
+                                                <MdLocationOn /> {station.zone}
+                                            </span>
+                                        )}
+                                        {station.day && (
+                                            <span className="cd-station-day">
+                                                <MdAccessTime /> Day {station.day}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+
+                {selectedStation && (
+                    <motion.div
+                        className="cd-station-tooltip"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <h5>{selectedStation.source_stn_name || selectedStation.name}</h5>
+                        <p>Code: {selectedStation.source_stn_code || selectedStation.code}</p>
+                        <p>Distance: {selectedStation.distance} km</p>
+                        {selectedStation.zone && <p>Zone: {selectedStation.zone}</p>}
+                        {selectedStation.arrive && selectedStation.arrive !== 'First' && (
+                            <p>Arrival: {formatTime(selectedStation.arrive)}</p>
+                        )}
+                        {selectedStation.depart && selectedStation.depart !== 'Last' && (
+                            <p>Departure: {formatTime(selectedStation.depart)}</p>
+                        )}
+                    </motion.div>
+                )}
             </motion.div>
         );
     };
@@ -428,6 +556,119 @@ export default function ComplaintDetail() {
                 <svg ref={svgRef} width="300" height="60"></svg>
             </motion.div>
         );
+    };
+
+    // Train Journey Summary Component
+    const TrainJourneySummary = ({ stations }) => {
+        if (!stations || stations.length === 0) return null;
+
+        const firstStation = stations[0];
+        const lastStation = stations[stations.length - 1];
+        const totalJourneyTime = calculateJourneyTime(firstStation, lastStation);
+        const averageSpeed = safeGet(selectedComplaint, 'category_specific_data.avg_speed');
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                className="cd-journey-summary"
+            >
+                <div className="cd-journey-header">
+                    <h4><MdTrain /> Journey Overview</h4>
+                </div>
+                
+                <div className="cd-journey-stats">
+                    <div className="cd-journey-stat">
+                        <span className="cd-stat-icon"><MdLocationOn /></span>
+                        <span className="cd-stat-label">Total Stations</span>
+                        <span className="cd-stat-value">{stations.length}</span>
+                    </div>
+                    
+                    <div className="cd-journey-stat">
+                        <span className="cd-stat-icon"><MdDirectionsRailway /></span>
+                        <span className="cd-stat-label">Distance</span>
+                        <span className="cd-stat-value">{lastStation.distance} km</span>
+                    </div>
+                    
+                    <div className="cd-journey-stat">
+                        <span className="cd-stat-icon"><MdAccessTime /></span>
+                        <span className="cd-stat-label">Duration</span>
+                        <span className="cd-stat-value">{totalJourneyTime}</span>
+                    </div>
+                    
+                    {averageSpeed && (
+                        <div className="cd-journey-stat">
+                            <span className="cd-stat-icon"><MdSpeed /></span>
+                            <span className="cd-stat-label">Avg Speed</span>
+                            <span className="cd-stat-value">{averageSpeed} km/h</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="cd-journey-endpoints">
+                    <div className="cd-endpoint cd-origin">
+                        <div className="cd-endpoint-icon"><MdMyLocation /></div>
+                        <div className="cd-endpoint-info">
+                            <h5>{firstStation.source_stn_name}</h5>
+                            <span className="cd-endpoint-code">{firstStation.source_stn_code}</span>
+                            <span className="cd-endpoint-time">Departs: {formatTime(firstStation.depart)}</span>
+                        </div>
+                    </div>
+                    
+                    <div className="cd-journey-arrow">
+                        <motion.div
+                            animate={{ x: [0, 10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                        >
+                            <MdDirectionsRailway />
+                        </motion.div>
+                    </div>
+                    
+                    <div className="cd-endpoint cd-destination">
+                        <div className="cd-endpoint-icon"><MdFlag /></div>
+                        <div className="cd-endpoint-info">
+                            <h5>{lastStation.source_stn_name}</h5>
+                            <span className="cd-endpoint-code">{lastStation.source_stn_code}</span>
+                            <span className="cd-endpoint-time">Arrives: {formatTime(lastStation.arrive)}</span>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    };
+
+    // Helper function to calculate journey time
+    const calculateJourneyTime = (startStation, endStation) => {
+        if (!startStation?.depart || !endStation?.arrive) return 'N/A';
+        
+        try {
+            const startTime = startStation.depart;
+            const endTime = endStation.arrive;
+            
+            // Parse time strings (assuming HH.MM or HH:MM format)
+            const parseTime = (timeStr) => {
+                const [hours, minutes] = timeStr.split(/[.:]/).map(Number);
+                return hours * 60 + minutes;
+            };
+            
+            const startMinutes = parseTime(startTime);
+            const endMinutes = parseTime(endTime);
+            
+            let duration = endMinutes - startMinutes;
+            
+            // Handle overnight journeys
+            if (duration < 0) {
+                duration += 24 * 60;
+            }
+            
+            const hours = Math.floor(duration / 60);
+            const minutes = duration % 60;
+            
+            return `${hours}h ${minutes}m`;
+        } catch (error) {
+            return 'N/A';
+        }
     };
 
     // Enhanced Train Info Card Component
@@ -1004,7 +1245,25 @@ export default function ComplaintDetail() {
                                                 delay={0.4}
                                             />
                                         )}
+                                        
+                                        {safeGet(selectedComplaint, 'category_specific_data.coaches') && 
+                                         Object.keys(safeGet(selectedComplaint, 'category_specific_data.coaches')).length > 0 && (
+                                            <TrainInfoCard
+                                                icon={<MdDirectionsRailway />}
+                                                label="Total Coaches"
+                                                value={Object.keys(safeGet(selectedComplaint, 'category_specific_data.coaches')).length}
+                                                color="#f59e0b"
+                                                delay={0.5}
+                                            />
+                                        )}
                                     </div>
+
+                                    {/* Journey Summary */}
+                                    {safeGet(selectedComplaint, 'category_specific_data.stations') && (
+                                        <TrainJourneySummary 
+                                            stations={safeGet(selectedComplaint, 'category_specific_data.stations')} 
+                                        />
+                                    )}
 
                                     {/* Route Timeline */}
                                     {safeGet(selectedComplaint, 'category_specific_data.routes.from_station') && (
@@ -1021,6 +1280,7 @@ export default function ComplaintDetail() {
                                                 fromStation={safeGet(selectedComplaint, 'category_specific_data.routes.from_station')}
                                                 toStation={safeGet(selectedComplaint, 'category_specific_data.routes.to_station')}
                                                 totalDistance={safeGet(selectedComplaint, 'category_specific_data.total_distance')}
+                                                stations={safeGet(selectedComplaint, 'category_specific_data.stations')}
                                             />
                                         </motion.div>
                                     )}
