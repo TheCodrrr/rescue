@@ -198,7 +198,15 @@ const getComplaintById = asyncHandler(async (req, res) => {
     if (complaint.category === "rail" && complaint.category_data_id) {
         try {
             const train = await getTrainByNumber(complaint.category_data_id);
-            complaint = { ...complaint, category_specific_data: train };
+            if (train && train.stations) {
+                // Parse stations if it's a JSON string
+                const stations = typeof train.stations === 'string' 
+                    ? JSON.parse(train.stations) 
+                    : train.stations;
+                complaint = { ...complaint, category_specific_data: { ...train, stations } };
+            } else {
+                complaint = { ...complaint, category_specific_data: train };
+            }
         } catch (error) {
             console.error("Error fetching train data:", error);
             // Continue without train data if there's an error
@@ -231,8 +239,16 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         complaints.map(async complaint => {
             if (complaint.category === "rail") {
                 const train = await getTrainByNumber(complaint.category_data_id);
-                // add extra field safely
-                return { ...complaint, category_specific_data: train };
+                if (train && train.stations) {
+                    // Parse stations if it's a JSON string
+                    const stations = typeof train.stations === 'string' 
+                        ? JSON.parse(train.stations) 
+                        : train.stations;
+                    // add extra field safely with stations
+                    return { ...complaint, category_specific_data: { ...train, stations } };
+                } else {
+                    return { ...complaint, category_specific_data: train };
+                }
             }
             return complaint;
         })
