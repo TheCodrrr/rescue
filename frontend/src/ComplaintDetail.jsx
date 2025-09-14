@@ -82,7 +82,12 @@ export default function ComplaintDetail() {
     // Fetch complaint details on component mount
     useEffect(() => {
         if (id) {
-            dispatch(fetchComplaintById(id));
+            dispatch(fetchComplaintById(id)).then((result) => {
+                // After successfully fetching complaint, also fetch comments to get the correct count
+                if (fetchComplaintById.fulfilled.match(result)) {
+                    dispatch(fetchComments(id));
+                }
+            });
         }
         
         // Scroll to top when component mounts with a slight delay for better UX
@@ -387,6 +392,7 @@ export default function ComplaintDetail() {
 
     const openCommentModal = () => {
         setCommentModalOpen(true);
+        // Comments are already fetched on component mount, but refresh them for the modal
         dispatch(fetchComments(id));
     };
 
