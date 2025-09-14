@@ -125,8 +125,8 @@ const createComplaint = asyncHandler(async (req, res) => {
 
   let trainMatched = null; 
   if (category === "rail") {
-    console.log("difhfbksdjnbnsdjnbsdjnbskdjnbkdjgbnksdjbnsdkjgbnsdjgbnsdgj")
-    console.log("fjghkjlndfjvnsgnlsgnbldgbn")
+    // console.log("difhfbksdjnbnsdjnbsdjnbskdjnbkdjgbnksdjbnsdkjgbnsdjgbnsdgj")
+    // console.log("fjghkjlndfjvnsgnlsgnbldgbn")
     trainMatched = await ensureTrainExists(category_data_id);
     if (!trainMatched) {
       throw new ApiError(400, "Invalid train: train does not exist");
@@ -149,19 +149,19 @@ const createComplaint = asyncHandler(async (req, res) => {
   })
 
   if (complaint) {
-    console.log("Complaint created successfully, emitting to socket...");
-    console.log("Complaint ID:", complaint._id);
+    // console.log("Complaint created successfully, emitting to socket...");
+    // console.log("Complaint ID:", complaint._id);
     
     // Populate user information before emitting
     const populatedComplaint = await Complaint.findById(complaint._id)
       .populate("user_id", "name email profileImage")
       .lean();
     
-    console.log("Populated complaint:", JSON.stringify(populatedComplaint, null, 2));
-    console.log("Emitting newComplaint event to all connected clients...");
+    // console.log("Populated complaint:", JSON.stringify(populatedComplaint, null, 2));
+    // console.log("Emitting newComplaint event to all connected clients...");
     
     io.emit("newComplaint", populatedComplaint);
-    console.log("Socket emit completed");
+    // console.log("Socket emit completed");
   }
 
   res.status(201).json({
@@ -202,7 +202,7 @@ const getComplaintById = asyncHandler(async (req, res) => {
 const getComplaintByUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    console.log(req.user);
+    // console.log(req.user);
 
     let complaints = await Complaint.find({ user_id: userId })
         .sort({ createdAt: -1 })
@@ -213,7 +213,7 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
         .lean(); // 👈 makes results plain JS objects instead of Mongoose docs
 
-    console.log("These are the complaints, hello hello: ", complaints);
+    // console.log("These are the complaints, hello hello: ", complaints);
 
     complaints = await Promise.all(
         complaints.map(async complaint => {
@@ -226,7 +226,7 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
         })
     );
 
-    console.log("User ID:", userId);
+    // console.log("User ID:", userId);
 
     if (!complaints || complaints.length === 0) {
         throw new ApiError(404, "No complaints found for this user");

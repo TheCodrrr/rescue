@@ -30,8 +30,6 @@ const complaintSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    latitude: Number,
-    longitude: Number,
     location: {
         type: { type: String, enum: ['Point'], required: true  },
         coordinates: {
