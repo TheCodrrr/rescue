@@ -16,7 +16,7 @@ export const submitComplaint = createAsyncThunk(
   'complaints/submit',
   async (complaintData, thunkAPI) => {
     try {
-      console.log("Making API call to submit complaint...", complaintData);
+      // console.log("Making API call to submit complaint...", complaintData);
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -39,11 +39,11 @@ export const submitComplaint = createAsyncThunk(
         severity: complaintData.severity
       };
 
-      console.log("Formatted complaint data:", formattedComplaintData);
-      console.log("Token found, making request to submit complaint");
+      // console.log("Formatted complaint data:", formattedComplaintData);
+      // console.log("Token found, making request to submit complaint");
       
       const response = await axiosInstance.post('/complaints/create', formattedComplaintData);
-      console.log("Submit complaint API response:", response.data);
+      // console.log("Submit complaint API response:", response.data);
       
       // Extract complaint data from the response
       const submittedComplaint = response.data.data || response.data;
@@ -701,6 +701,21 @@ const complaintSlice = createSlice({
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
+        
+        // Also update selectedComplaint if it matches the voted complaint
+        if (state.selectedComplaint && (
+          state.selectedComplaint._id === complaintId ||
+          state.selectedComplaint._id?.toString() === complaintId?.toString() ||
+          state.selectedComplaint.id === complaintId ||
+          state.selectedComplaint.id?.toString() === complaintId?.toString()
+        )) {
+          console.log("Updating selectedComplaint upvotes/downvotes");
+          state.selectedComplaint.upvote = upvotes;
+          state.selectedComplaint.downvote = downvotes;
+          state.selectedComplaint.upvotes = upvotes;
+          state.selectedComplaint.downvotes = downvotes;
+        }
+        
         state.error = null;
       })
       .addCase(upvoteComplaint.rejected, (state, action) => {
@@ -734,6 +749,21 @@ const complaintSlice = createSlice({
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
+        
+        // Also update selectedComplaint if it matches the voted complaint
+        if (state.selectedComplaint && (
+          state.selectedComplaint._id === complaintId ||
+          state.selectedComplaint._id?.toString() === complaintId?.toString() ||
+          state.selectedComplaint.id === complaintId ||
+          state.selectedComplaint.id?.toString() === complaintId?.toString()
+        )) {
+          console.log("Updating selectedComplaint upvotes/downvotes");
+          state.selectedComplaint.upvote = upvotes;
+          state.selectedComplaint.downvote = downvotes;
+          state.selectedComplaint.upvotes = upvotes;
+          state.selectedComplaint.downvotes = downvotes;
+        }
+        
         state.error = null;
       })
       .addCase(downvoteComplaint.rejected, (state, action) => {
@@ -766,6 +796,19 @@ const complaintSlice = createSlice({
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
+        
+        // Also update selectedComplaint if it matches the updated complaint
+        if (state.selectedComplaint && (
+          state.selectedComplaint._id === complaintId ||
+          state.selectedComplaint._id?.toString() === complaintId?.toString() ||
+          state.selectedComplaint.id === complaintId ||
+          state.selectedComplaint.id?.toString() === complaintId?.toString()
+        )) {
+          console.log("Updating selectedComplaint status");
+          state.selectedComplaint.status = status;
+          state.selectedComplaint.updatedAt = updatedAt;
+        }
+        
         state.error = null;
       })
       .addCase(updateComplaintStatus.rejected, (state, action) => {
@@ -815,6 +858,19 @@ const complaintSlice = createSlice({
           state.complaints[complaintIndex].comments.push(comment);
         }
         
+        // Also update selectedComplaint if it matches
+        if (state.selectedComplaint && (
+          state.selectedComplaint._id?.toString() === complaintId?.toString() ||
+          state.selectedComplaint.id === complaintId ||
+          state.selectedComplaint.id?.toString() === complaintId?.toString()
+        )) {
+          if (!state.selectedComplaint.comments) {
+            state.selectedComplaint.comments = [];
+          }
+          state.selectedComplaint.comments.push(comment);
+          state.selectedComplaint.commentCount = state.selectedComplaint.comments.length;
+        }
+        
         state.error = null;
       })
       .addCase(addComment.rejected, (state, action) => {
@@ -842,6 +898,18 @@ const complaintSlice = createSlice({
           console.log(`Updated comments for complaint ${complaintId}:`, comments);
         } else {
           console.log(`Complaint not found in state for ID: ${complaintId}`);
+        }
+        
+        // Also update selectedComplaint if it matches the complaint with new comments
+        if (state.selectedComplaint && (
+          state.selectedComplaint._id === complaintId ||
+          state.selectedComplaint._id?.toString() === complaintId?.toString() ||
+          state.selectedComplaint.id === complaintId ||
+          state.selectedComplaint.id?.toString() === complaintId?.toString()
+        )) {
+          console.log("Updating selectedComplaint comments");
+          state.selectedComplaint.comments = comments;
+          state.selectedComplaint.commentCount = comments.length;
         }
         
         state.error = null;

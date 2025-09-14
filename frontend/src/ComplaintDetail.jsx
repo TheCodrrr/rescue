@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CommentModal from "./CommentModal.jsx";
@@ -32,12 +35,31 @@ import {
     updateComplaintStatus,
     deleteComplaint,
     fetchComments,
+    addComment,
+    updateComment,
+    removeComment,
     clearSuccess,
     clearError
 } from './auth/redux/complaintSlice';
 import "./Complaint.css";
 import "./ComplaintDetail.css";
 import "./Toast.css";
+
+// Fix for Leaflet default markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Fix for Leaflet marker icons in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function ComplaintDetail() {
     const { id } = useParams();
@@ -52,7 +74,7 @@ export default function ComplaintDetail() {
     } = useSelector((state) => state.complaints);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
-    const [votingInProgress, setVotingInProgress] = useState(false);
+    const [votingInProgress, setVotingInProgress] = useState({});
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
     const [deleteInProgress, setDeleteInProgress] = useState(false);
@@ -121,12 +143,34 @@ export default function ComplaintDetail() {
 
     const getStatusBadgeClass = (status) => {
         switch (status?.toLowerCase()) {
-            case 'pending': return 'status-badge-pending';
-            case 'in-progress': return 'status-badge-in-progress';
-            case 'resolved': return 'status-badge-resolved';
-            case 'rejected': return 'status-badge-rejected';
-            default: return 'status-badge-pending';
+            case 'pending': return 'cd-status-badge-pending';
+            case 'in-progress': return 'cd-status-badge-in-progress';
+            case 'resolved': return 'cd-status-badge-resolved';
+            case 'rejected': return 'cd-status-badge-rejected';
+            default: return 'cd-status-badge-pending';
         }
+    };
+
+    // Map frontend status values to backend format
+    const mapStatusToBackend = (frontendStatus) => {
+        const statusMapping = {
+            'pending': 'pending',
+            'in-progress': 'in_progress',
+            'resolved': 'resolved',
+            'rejected': 'rejected'
+        };
+        return statusMapping[frontendStatus] || frontendStatus;
+    };
+
+    // Map backend status values to frontend format
+    const mapStatusToFrontend = (backendStatus) => {
+        const statusMapping = {
+            'pending': 'pending',
+            'in_progress': 'in-progress',
+            'resolved': 'resolved',
+            'rejected': 'rejected'
+        };
+        return statusMapping[backendStatus] || backendStatus;
     };
 
     const getSeverityInfo = (severity) => {
@@ -162,19 +206,42 @@ export default function ComplaintDetail() {
             });
             return;
         }
-
-        setVotingInProgress(true);
+        
+        // Set voting in progress
+        setVotingInProgress(prev => ({ ...prev, [`${id}-upvote`]: true }));
+        
         try {
-            await dispatch(upvoteComplaint(id));
-            // Refresh complaint data
-            dispatch(fetchComplaintById(id));
+            const result = await dispatch(upvoteComplaint(id));
+            if (upvoteComplaint.fulfilled.match(result)) {
+                toast.success('Upvoted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    icon: <FiThumbsUp />,
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+            } else {
+                toast.error('❌ Failed to upvote. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
-            toast.error('❌ Failed to upvote. Please try again.', {
+            toast.error('❌ Error while voting. Please try again.', {
                 duration: 3000,
                 position: 'top-center',
             });
         } finally {
-            setVotingInProgress(false);
+            // Clear voting in progress
+            setVotingInProgress(prev => ({ ...prev, [`${id}-upvote`]: false }));
         }
     };
 
@@ -186,19 +253,42 @@ export default function ComplaintDetail() {
             });
             return;
         }
-
-        setVotingInProgress(true);
+        
+        // Set voting in progress
+        setVotingInProgress(prev => ({ ...prev, [`${id}-downvote`]: true }));
+        
         try {
-            await dispatch(downvoteComplaint(id));
-            // Refresh complaint data
-            dispatch(fetchComplaintById(id));
+            const result = await dispatch(downvoteComplaint(id));
+            if (downvoteComplaint.fulfilled.match(result)) {
+                toast.success('Downvoted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    icon: <FiThumbsDown />,
+                    style: {
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(239, 68, 68, 0.3)',
+                    },
+                });
+            } else {
+                toast.error('❌ Failed to downvote. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
-            toast.error('❌ Failed to downvote. Please try again.', {
+            toast.error('❌ Error while voting. Please try again.', {
                 duration: 3000,
                 position: 'top-center',
             });
         } finally {
-            setVotingInProgress(false);
+            // Clear voting in progress
+            setVotingInProgress(prev => ({ ...prev, [`${id}-downvote`]: false }));
         }
     };
 
@@ -213,15 +303,32 @@ export default function ComplaintDetail() {
 
         setStatusUpdateInProgress(true);
         try {
-            await dispatch(updateComplaintStatus({ complaintId: id, status: newStatus }));
-            // Refresh complaint data
-            dispatch(fetchComplaintById(id));
-            toast.success('Status updated successfully!', {
-                duration: 2000,
-                position: 'top-center',
-            });
+            // Map frontend status to backend format
+            const backendStatus = mapStatusToBackend(newStatus);
+            const result = await dispatch(updateComplaintStatus({ complaintId: id, status: backendStatus }));
+            if (updateComplaintStatus.fulfilled.match(result)) {
+                toast.success(`Status updated to ${newStatus.replace('-', ' ')}!`, {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+            } else {
+                toast.error('❌ Failed to update status. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
-            toast.error('❌ Failed to update status. Please try again.', {
+            toast.error('❌ Error while updating status. Please try again.', {
                 duration: 3000,
                 position: 'top-center',
             });
@@ -245,14 +352,31 @@ export default function ComplaintDetail() {
 
         setDeleteInProgress(true);
         try {
-            await dispatch(deleteComplaint(id));
-            toast.success('Complaint deleted successfully!', {
-                duration: 2000,
-                position: 'top-center',
-            });
-            navigate('/complain');
+            const result = await dispatch(deleteComplaint(id));
+            if (deleteComplaint.fulfilled.match(result)) {
+                toast.success('Complaint deleted successfully!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    className: 'custom-toast custom-toast-success',
+                    style: {
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(34, 197, 94, 0.4)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                    },
+                });
+                navigate('/complain?tab=view');
+            } else {
+                toast.error('❌ Failed to delete complaint. Please try again.', {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
-            toast.error('❌ Failed to delete complaint. Please try again.', {
+            toast.error('❌ Error while deleting complaint. Please try again.', {
                 duration: 3000,
                 position: 'top-center',
             });
@@ -270,19 +394,64 @@ export default function ComplaintDetail() {
         setCommentModalOpen(false);
     };
 
+    // Handler functions for CommentModal component
     const handleCommentSubmit = async (commentData) => {
-        // This will be handled by CommentModal
-        return true;
+        try {
+            const result = await dispatch(addComment({
+                complaintId: commentData.complaintId,
+                content: commentData.comment,
+                rating: commentData.rating
+            }));
+
+            if (addComment.fulfilled.match(result)) {
+                // Fetch updated comments to refresh the comment list
+                await dispatch(fetchComments(id));
+                return true;
+            } else {
+                throw new Error(result.payload || 'Failed to add comment');
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            throw error;
+        }
     };
 
     const handleCommentUpdate = async (commentId, updateData) => {
-        // This will be handled by CommentModal
-        return true;
+        try {
+            const result = await dispatch(updateComment({
+                commentId,
+                comment: updateData.comment,
+                rating: updateData.rating
+            }));
+
+            if (updateComment.fulfilled.match(result)) {
+                // Fetch updated comments
+                await dispatch(fetchComments(id));
+                return true;
+            } else {
+                throw new Error(result.payload || 'Failed to update comment');
+            }
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            throw error;
+        }
     };
 
     const handleCommentDelete = async (commentId) => {
-        // This will be handled by CommentModal
-        return true;
+        try {
+            const result = await dispatch(removeComment(commentId));
+
+            if (removeComment.fulfilled.match(result)) {
+                // Fetch updated comments to refresh the comment list
+                await dispatch(fetchComments(id));
+                return true;
+            } else {
+                throw new Error(result.payload || 'Failed to delete comment');
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            throw error;
+        }
     };
 
     if (isLoading) {
@@ -416,8 +585,8 @@ export default function ComplaintDetail() {
                                 </div>
                                 
                                 <div className="cd-header-right-section">
-                                    <span className={`cd-status-indicator ${getStatusBadgeClass(selectedComplaint.status)}`}>
-                                        {selectedComplaint.status?.replace('-', ' ').toUpperCase() || 'PENDING'}
+                                    <span className={`cd-status-indicator ${getStatusBadgeClass(mapStatusToFrontend(selectedComplaint.status))}`}>
+                                        {mapStatusToFrontend(selectedComplaint.status)?.replace('-', ' ').toUpperCase() || 'PENDING'}
                                     </span>
                                 </div>
                             </div>
@@ -488,21 +657,21 @@ export default function ComplaintDetail() {
                                     <button
                                         className={`cd-vote-button cd-upvote-button ${selectedComplaint.userVote === 'upvote' ? 'cd-voted' : ''}`}
                                         onClick={handleUpvote}
-                                        disabled={votingInProgress}
+                                        disabled={votingInProgress[`${id}-upvote`] || votingInProgress[`${id}-downvote`]}
                                         title="Upvote this complaint"
                                     >
                                         <FiThumbsUp />
-                                        <span>{selectedComplaint.upvotes || 0}</span>
+                                        <span>{selectedComplaint.upvote || 0}</span>
                                     </button>
                                     
                                     <button
                                         className={`cd-vote-button cd-downvote-button ${selectedComplaint.userVote === 'downvote' ? 'cd-voted' : ''}`}
                                         onClick={handleDownvote}
-                                        disabled={votingInProgress}
+                                        disabled={votingInProgress[`${id}-upvote`] || votingInProgress[`${id}-downvote`]}
                                         title="Downvote this complaint"
                                     >
                                         <FiThumbsDown />
-                                        <span>{selectedComplaint.downvotes || 0}</span>
+                                        <span>{selectedComplaint.downvote || 0}</span>
                                     </button>
                                 </div>
 
@@ -514,21 +683,38 @@ export default function ComplaintDetail() {
                                         <FiMessageCircle />
                                         Comments ({selectedComplaint.commentCount || 0})
                                     </button>
-                                    
-                                    {selectedComplaint.location && (
-                                        <button
-                                            className="cd-map-view-btn"
-                                            onClick={() => {
-                                                const { latitude, longitude } = selectedComplaint.location;
-                                                window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
-                                            }}
-                                        >
-                                            <FiExternalLink />
-                                            View on Map
-                                        </button>
-                                    )}
                                 </div>
                             </div>
+
+                            {/* Location Map */}
+                            {selectedComplaint.location && selectedComplaint.location.coordinates && (
+                                <div className="cd-location-map-wrapper">
+                                    <h3>Complaint Location</h3>
+                                    <div className="cd-map-container">
+                                        <MapContainer
+                                            center={[selectedComplaint.location.coordinates[1], selectedComplaint.location.coordinates[0]]}
+                                            zoom={15}
+                                            style={{ height: '300px', width: '100%', borderRadius: '12px' }}
+                                        >
+                                            <TileLayer
+                                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            />
+                                            <Marker position={[selectedComplaint.location.coordinates[1], selectedComplaint.location.coordinates[0]]}>
+                                                <Popup>
+                                                    <div style={{ textAlign: 'center', minWidth: '200px' }}>
+                                                        <strong>{selectedComplaint.title}</strong>
+                                                        <br />
+                                                        <span style={{ fontSize: '12px', color: '#666' }}>
+                                                            {selectedComplaint.address || `${selectedComplaint.location.coordinates[1].toFixed(6)}, ${selectedComplaint.location.coordinates[0].toFixed(6)}`}
+                                                        </span>
+                                                    </div>
+                                                </Popup>
+                                            </Marker>
+                                        </MapContainer>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Status Update Section (for admins or complaint owner) */}
                             {canEdit && (
@@ -538,7 +724,7 @@ export default function ComplaintDetail() {
                                         {['pending', 'in-progress', 'resolved', 'rejected'].map((status) => (
                                             <button
                                                 key={status}
-                                                className={`cd-status-option-btn ${selectedComplaint.status === status ? 'cd-active-status' : ''}`}
+                                                className={`cd-status-option-btn ${mapStatusToFrontend(selectedComplaint.status) === status ? 'cd-active-status' : ''}`}
                                                 onClick={() => handleStatusUpdate(status)}
                                                 disabled={statusUpdateInProgress}
                                             >
@@ -555,7 +741,13 @@ export default function ComplaintDetail() {
                 {/* Comment Modal */}
                 {commentModalOpen && (
                     <CommentModal
-                        complaint={selectedComplaint}
+                        complaintId={selectedComplaint._id}
+                        complaintTitle={selectedComplaint.title}
+                        complaintCategory={selectedComplaint.category}
+                        complaintType={selectedComplaint.category}
+                        isOpen={commentModalOpen}
+                        comments={selectedComplaint.comments || []}
+                        totalComments={selectedComplaint.commentCount || 0}
                         onClose={closeCommentModal}
                         onCommentSubmit={handleCommentSubmit}
                         onCommentUpdate={handleCommentUpdate}
@@ -564,6 +756,26 @@ export default function ComplaintDetail() {
                 )}
             </div>
             <Footer />
+            <Toaster 
+                position="top-center"
+                containerStyle={{
+                    top: '120px', // Account for navbar
+                }}
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: 'rgba(0, 0, 0, 0.8)',
+                        color: '#fff',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '16px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        padding: '16px 20px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                    },
+                }}
+            />
         </>
     );
 }
