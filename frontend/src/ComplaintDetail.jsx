@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as d3 from 'd3';
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CommentModal from "./CommentModal.jsx";
@@ -20,13 +22,19 @@ import {
   FiArrowLeft,
   FiExternalLink,
   FiEdit3,
-  FiTrash2
+  FiTrash2,
+  FiClock,
+  FiNavigation,
+  FiInfo
 } from 'react-icons/fi';
 import { 
   MdLocalFireDepartment,
   MdBalance,
   MdConstruction,
-  MdTrain
+  MdTrain,
+  MdSpeed,
+  MdDirectionsTransit,
+  MdAccessTime
 } from 'react-icons/md';
 import { 
     fetchComplaintById,
@@ -202,6 +210,244 @@ export default function ComplaintDetail() {
             minute: '2-digit'
         });
     };
+
+    // Helper function to safely access nested properties
+    const safeGet = (obj, path, defaultValue = null) => {
+        try {
+            return path.split('.').reduce((curr, key) => curr?.[key], obj) ?? defaultValue;
+        } catch (error) {
+            return defaultValue;
+        }
+    };
+
+    // Helper function to format frequency data
+    const formatFrequency = (frequency) => {
+        if (!frequency || typeof frequency !== 'object') return 'Not available';
+        
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const runningDays = Object.keys(frequency)
+            .filter(key => frequency[key] === true)
+            .map(key => days[parseInt(key)] || `Day ${key}`)
+            .filter(Boolean);
+        
+        return runningDays.length > 0 ? runningDays.join(', ') : 'Not available';
+    };
+
+    // Helper function to format train type
+    const formatTrainType = (trainType) => {
+        if (!trainType) return 'Unknown';
+        return trainType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    };
+
+    // Helper function to get coordinates in consistent format [lat, lng]
+    const getCoordinates = (complaint) => {
+        if (!complaint?.location) return null;
+        
+        // Handle different coordinate formats
+        if (complaint.location.coordinates && Array.isArray(complaint.location.coordinates)) {
+            // GeoJSON format: [longitude, latitude]
+            return [complaint.location.coordinates[1], complaint.location.coordinates[0]];
+        } else if (complaint.location.latitude && complaint.location.longitude) {
+            // Standard format: {latitude, longitude}
+            return [complaint.location.latitude, complaint.location.longitude];
+        }
+        
+        return null;
+    };
+
+    // Rail Speed Gauge Component
+    const RailSpeedGauge = ({ speed, maxSpeed = 160 }) => {
+        const svgRef = useRef();
+        
+        useEffect(() => {
+            if (!speed || !svgRef.current) return;
+            
+            const svg = d3.select(svgRef.current);
+            svg.selectAll("*").remove();
+            
+            const width = 200;
+            const height = 120;
+            const radius = 80;
+            
+            const arc = d3.arc()
+                .innerRadius(radius - 20)
+                .outerRadius(radius)
+                .startAngle(-Math.PI / 2)
+                .cornerRadius(10);
+            
+            const g = svg.append("g")
+                .attr("transform", `translate(${width/2}, ${height - 20})`);
+            
+            // Background arc
+            g.append("path")
+                .datum({endAngle: Math.PI / 2})
+                .style("fill", "rgba(255, 255, 255, 0.1)")
+                .attr("d", arc);
+            
+            // Speed arc
+            const speedAngle = (speed / maxSpeed) * Math.PI - Math.PI / 2;
+            g.append("path")
+                .datum({endAngle: speedAngle})
+                .style("fill", speed > 100 ? "#ef4444" : speed > 60 ? "#f59e0b" : "#22c55e")
+                .attr("d", arc)
+                .style("filter", "drop-shadow(0 0 8px rgba(96, 165, 250, 0.6))");
+            
+            // Center text
+            g.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "-10px")
+                .style("font-size", "24px")
+                .style("font-weight", "bold")
+                .style("fill", "#fff")
+                .text(speed);
+            
+            g.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "10px")
+                .style("font-size", "12px")
+                .style("fill", "rgba(255, 255, 255, 0.8)")
+                .text("km/h");
+                
+        }, [speed, maxSpeed]);
+        
+        return (
+            <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="cd-rail-speed-gauge"
+            >
+                <svg ref={svgRef} width="200" height="120"></svg>
+            </motion.div>
+        );
+    };
+
+    // Rail Route Timeline Component
+    const RailRouteTimeline = ({ fromStation, toStation, totalDistance }) => {
+        if (!fromStation?.name || !toStation?.name) return null;
+        
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="cd-rail-route-timeline"
+            >
+                <div className="cd-timeline-container">
+                    <div className="cd-timeline-station cd-timeline-start">
+                        <div className="cd-timeline-dot cd-timeline-dot-start"></div>
+                        <div className="cd-timeline-content">
+                            <h4>{fromStation.name}</h4>
+                            <span className="cd-station-code">({fromStation.code})</span>
+                            {fromStation.time && (
+                                <span className="cd-station-time">{fromStation.time}</span>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="cd-timeline-line">
+                        <motion.div
+                            className="cd-timeline-progress"
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 1.2, delay: 0.5 }}
+                        />
+                        {totalDistance && (
+                            <div className="cd-timeline-distance">
+                                {totalDistance} km
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="cd-timeline-station cd-timeline-end">
+                        <div className="cd-timeline-dot cd-timeline-dot-end"></div>
+                        <div className="cd-timeline-content">
+                            <h4>{toStation.name}</h4>
+                            <span className="cd-station-code">({toStation.code})</span>
+                            {toStation.time && (
+                                <span className="cd-station-time">{toStation.time}</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    };
+
+    // Rail Frequency Chart Component
+    const RailFrequencyChart = ({ frequency }) => {
+        const svgRef = useRef();
+        
+        useEffect(() => {
+            if (!frequency || !svgRef.current) return;
+            
+            const svg = d3.select(svgRef.current);
+            svg.selectAll("*").remove();
+            
+            const width = 300;
+            const height = 60;
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const dayWidth = width / days.length;
+            
+            const g = svg.append("g");
+            
+            days.forEach((day, i) => {
+                const isActive = frequency[i] === true;
+                
+                g.append("rect")
+                    .attr("x", i * dayWidth + 5)
+                    .attr("y", 10)
+                    .attr("width", dayWidth - 10)
+                    .attr("height", 30)
+                    .attr("rx", 8)
+                    .style("fill", isActive ? "#22c55e" : "rgba(255, 255, 255, 0.1)")
+                    .style("stroke", isActive ? "#16a34a" : "rgba(255, 255, 255, 0.2)")
+                    .style("stroke-width", 1)
+                    .style("filter", isActive ? "drop-shadow(0 0 8px rgba(34, 197, 94, 0.4))" : "none")
+                    .style("transition", "all 0.3s ease");
+                
+                g.append("text")
+                    .attr("x", i * dayWidth + dayWidth / 2)
+                    .attr("y", 30)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "10px")
+                    .style("font-weight", "600")
+                    .style("fill", isActive ? "#fff" : "rgba(255, 255, 255, 0.6)")
+                    .text(day);
+            });
+            
+        }, [frequency]);
+        
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="cd-rail-frequency-chart"
+            >
+                <svg ref={svgRef} width="300" height="60"></svg>
+            </motion.div>
+        );
+    };
+
+    // Enhanced Train Info Card Component
+    const TrainInfoCard = ({ icon, label, value, color = "#60a5fa", delay = 0 }) => (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay }}
+            whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)" }}
+            className="cd-rail-info-item cd-enhanced-info-card"
+        >
+            <div className="cd-rail-info-icon" style={{ color }}>
+                {icon}
+            </div>
+            <div className="cd-rail-info-content">
+                <span className="cd-rail-info-label">{label}</span>
+                <span className="cd-rail-info-value">{value}</span>
+            </div>
+        </motion.div>
+    );
 
     const handleUpvote = async () => {
         if (!isAuthenticated) {
@@ -615,47 +861,205 @@ export default function ComplaintDetail() {
 
                             {/* Metadata */}
                             <div className="cd-metadata-wrapper">
-                                <div className="cd-metadata-row">
-                                    <div className="cd-metadata-single-item">
-                                        <FiUser className="cd-metadata-icon" />
-                                        <span>Submitted by: {selectedComplaint.userName || 'Anonymous'}</span>
-                                    </div>
-                                    <div className="cd-metadata-single-item">
-                                        <FiCalendar className="cd-metadata-icon" />
-                                        <span>Created: {formatDate(selectedComplaint.createdAt)}</span>
+                                {/* User Information Section */}
+                                <div className="cd-user-info-section">
+                                    <div className="cd-user-card">
+                                        {safeGet(selectedComplaint, 'user_id.profileImage') && (
+                                            <motion.img
+                                                src={safeGet(selectedComplaint, 'user_id.profileImage')}
+                                                alt={safeGet(selectedComplaint, 'user_id.name') || 'User'}
+                                                className="cd-user-avatar-large"
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ duration: 0.4, delay: 0.2 }}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        )}
+                                        <div className="cd-user-info-details">
+                                            <div className="cd-user-info-header">
+                                                <FiUser className="cd-user-info-icon" />
+                                                <span className="cd-user-info-label">Submitted by</span>
+                                            </div>
+                                            <div className="cd-user-name-large">
+                                                {safeGet(selectedComplaint, 'user_id.name') || selectedComplaint.userName || 'Anonymous'}
+                                            </div>
+                                            {safeGet(selectedComplaint, 'user_id.email') && (
+                                                <div className="cd-user-email">
+                                                    {safeGet(selectedComplaint, 'user_id.email')}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                {selectedComplaint.updatedAt !== selectedComplaint.createdAt && (
-                                    <div className="cd-metadata-row">
-                                        <div className="cd-metadata-single-item">
+
+                                {/* Timestamps Section */}
+                                <div className="cd-timestamps-section">
+                                    <div className="cd-timestamp-item">
+                                        <FiCalendar className="cd-metadata-icon" />
+                                        <div className="cd-timestamp-content">
+                                            <span className="cd-timestamp-label">Created</span>
+                                            <span className="cd-timestamp-value">{formatDate(selectedComplaint.createdAt)}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {selectedComplaint.updatedAt !== selectedComplaint.createdAt && (
+                                        <div className="cd-timestamp-item">
                                             <FiCalendar className="cd-metadata-icon" />
-                                            <span>Last updated: {formatDate(selectedComplaint.updatedAt)}</span>
+                                            <div className="cd-timestamp-content">
+                                                <span className="cd-timestamp-label">Last updated</span>
+                                                <span className="cd-timestamp-value">{formatDate(selectedComplaint.updatedAt)}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                                 
+                                {/* Location Section */}
                                 {selectedComplaint.location && (
-                                    <div className="cd-metadata-row">
-                                        <div className="cd-metadata-single-item">
+                                    <div className="cd-location-section">
+                                        <div className="cd-location-item">
                                             <FiMapPin className="cd-metadata-icon" />
-                                            <span>
-                                                Location: {selectedComplaint.address || 
-                                                `${selectedComplaint.location.latitude?.toFixed(6)}, ${selectedComplaint.location.longitude?.toFixed(6)}`}
-                                            </span>
+                                            <div className="cd-location-content">
+                                                <span className="cd-location-label">Location</span>
+                                                <span className="cd-location-value">
+                                                    {selectedComplaint.address || 
+                                                    (selectedComplaint.location.coordinates ? 
+                                                        `${selectedComplaint.location.coordinates[1]?.toFixed(6)}, ${selectedComplaint.location.coordinates[0]?.toFixed(6)}` :
+                                                        `${selectedComplaint.location.latitude?.toFixed(6)}, ${selectedComplaint.location.longitude?.toFixed(6)}`)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                                 
+                                {/* Train Number (if applicable) */}
                                 {selectedComplaint.trainNumber && (
-                                    <div className="cd-metadata-row">
-                                        <div className="cd-metadata-single-item">
+                                    <div className="cd-train-section">
+                                        <div className="cd-train-item">
                                             <MdTrain className="cd-metadata-icon" />
-                                            <span>Train Number: {selectedComplaint.trainNumber}</span>
+                                            <div className="cd-train-content">
+                                                <span className="cd-train-label">Train Number</span>
+                                                <span className="cd-train-value">{selectedComplaint.trainNumber}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Rail-Specific Information Section */}
+                            {selectedComplaint.category === 'rail' && selectedComplaint.category_specific_data && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 50 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.8 }}
+                                    className="cd-rail-info-wrapper"
+                                >
+                                    <motion.h3
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.6, delay: 0.2 }}
+                                    >
+                                        Train Information
+                                    </motion.h3>
+                                    
+                                    {/* Basic Train Info Cards */}
+                                    <div className="cd-rail-basic-info">
+                                        {safeGet(selectedComplaint, 'category_specific_data.train_name') && (
+                                            <TrainInfoCard
+                                                icon={<MdTrain />}
+                                                label="Train Name"
+                                                value={safeGet(selectedComplaint, 'category_specific_data.train_name')}
+                                                color="#f59e0b"
+                                                delay={0.1}
+                                            />
+                                        )}
+                                        
+                                        {safeGet(selectedComplaint, 'category_specific_data.train_number') && (
+                                            <TrainInfoCard
+                                                icon={<FiInfo />}
+                                                label="Train Number"
+                                                value={safeGet(selectedComplaint, 'category_specific_data.train_number')}
+                                                color="#3b82f6"
+                                                delay={0.2}
+                                            />
+                                        )}
+                                        
+                                        {safeGet(selectedComplaint, 'category_specific_data.train_type') && (
+                                            <TrainInfoCard
+                                                icon={<MdDirectionsTransit />}
+                                                label="Train Type"
+                                                value={formatTrainType(safeGet(selectedComplaint, 'category_specific_data.train_type'))}
+                                                color="#8b5cf6"
+                                                delay={0.3}
+                                            />
+                                        )}
+                                        
+                                        {safeGet(selectedComplaint, 'category_specific_data.operator_zone') && (
+                                            <TrainInfoCard
+                                                icon={<FiInfo />}
+                                                label="Operator Zone"
+                                                value={safeGet(selectedComplaint, 'category_specific_data.operator_zone')}
+                                                color="#10b981"
+                                                delay={0.4}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {/* Route Timeline */}
+                                    {safeGet(selectedComplaint, 'category_specific_data.routes.from_station') && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 0.6, delay: 0.5 }}
+                                            className="cd-rail-section"
+                                        >
+                                            <h4 className="cd-rail-section-title">
+                                                <FiNavigation /> Route Information
+                                            </h4>
+                                            <RailRouteTimeline
+                                                fromStation={safeGet(selectedComplaint, 'category_specific_data.routes.from_station')}
+                                                toStation={safeGet(selectedComplaint, 'category_specific_data.routes.to_station')}
+                                                totalDistance={safeGet(selectedComplaint, 'category_specific_data.total_distance')}
+                                            />
+                                        </motion.div>
+                                    )}
+
+                                    {/* Performance Metrics */}
+                                    <div className="cd-rail-metrics">
+                                        {safeGet(selectedComplaint, 'category_specific_data.avg_speed') && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.6, delay: 0.6 }}
+                                                className="cd-rail-section"
+                                            >
+                                                <h4 className="cd-rail-section-title">
+                                                    <MdSpeed /> Average Speed
+                                                </h4>
+                                                <RailSpeedGauge speed={safeGet(selectedComplaint, 'category_specific_data.avg_speed')} />
+                                            </motion.div>
+                                        )}
+
+                                        {safeGet(selectedComplaint, 'category_specific_data.frequency') && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.6, delay: 0.7 }}
+                                                className="cd-rail-section"
+                                            >
+                                                <h4 className="cd-rail-section-title">
+                                                    <MdAccessTime /> Running Schedule
+                                                </h4>
+                                                <RailFrequencyChart frequency={safeGet(selectedComplaint, 'category_specific_data.frequency')} />
+                                                <p className="cd-frequency-summary">
+                                                    Running Days: {formatFrequency(safeGet(selectedComplaint, 'category_specific_data.frequency'))}
+                                                </p>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
 
                             {/* Voting and Actions */}
                             <div className="cd-interactions-wrapper">
@@ -693,34 +1097,37 @@ export default function ComplaintDetail() {
                             </div>
 
                             {/* Location Map */}
-                            {selectedComplaint.location && selectedComplaint.location.coordinates && (
-                                <div className="cd-location-map-wrapper">
-                                    <h3>Complaint Location</h3>
-                                    <div className="cd-map-container">
-                                        <MapContainer
-                                            center={[selectedComplaint.location.coordinates[1], selectedComplaint.location.coordinates[0]]}
-                                            zoom={15}
-                                            style={{ height: '300px', width: '100%', borderRadius: '12px' }}
-                                        >
-                                            <TileLayer
-                                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                            />
-                                            <Marker position={[selectedComplaint.location.coordinates[1], selectedComplaint.location.coordinates[0]]}>
-                                                <Popup>
-                                                    <div style={{ textAlign: 'center', minWidth: '200px' }}>
-                                                        <strong>{selectedComplaint.title}</strong>
-                                                        <br />
-                                                        <span style={{ fontSize: '12px', color: '#666' }}>
-                                                            {selectedComplaint.address || `${selectedComplaint.location.coordinates[1].toFixed(6)}, ${selectedComplaint.location.coordinates[0].toFixed(6)}`}
-                                                        </span>
-                                                    </div>
-                                                </Popup>
-                                            </Marker>
-                                        </MapContainer>
+                            {(() => {
+                                const coordinates = getCoordinates(selectedComplaint);
+                                return coordinates && (
+                                    <div className="cd-location-map-wrapper">
+                                        <h3>Complaint Location</h3>
+                                        <div className="cd-map-container">
+                                            <MapContainer
+                                                center={coordinates}
+                                                zoom={15}
+                                                style={{ height: '300px', width: '100%', borderRadius: '12px' }}
+                                            >
+                                                <TileLayer
+                                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                                />
+                                                <Marker position={coordinates}>
+                                                    <Popup>
+                                                        <div style={{ textAlign: 'center', minWidth: '200px' }}>
+                                                            <strong>{selectedComplaint.title}</strong>
+                                                            <br />
+                                                            <span style={{ fontSize: '12px', color: '#666' }}>
+                                                                {selectedComplaint.address || `${coordinates[0].toFixed(6)}, ${coordinates[1].toFixed(6)}`}
+                                                            </span>
+                                                        </div>
+                                                    </Popup>
+                                                </Marker>
+                                            </MapContainer>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Status Update Section (for admins or complaint owner) */}
                             {canEdit && (

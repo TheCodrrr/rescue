@@ -355,6 +355,52 @@ html {
     font-weight: 500;
 }
 
+/* Enhanced User Info Styles */
+.cd-user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.cd-user-info > span:first-of-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cd-user-details {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 1.75rem;
+    padding: 0.5rem 0;
+}
+
+.cd-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cd-user-avatar:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cd-user-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 1rem;
+}
+
 .cd-metadata-icon {
     width: 20px;
     height: 20px;
@@ -703,6 +749,484 @@ html {
     background: rgba(255, 255, 255, 0.95) !important;
 }
 
+/* Rail-Specific Information Styles */
+.cd-rail-info-wrapper {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin: 2.5rem 0;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.cd-rail-info-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #3b82f6, #8b5cf6, #10b981);
+    border-radius: 20px 20px 0 0;
+}
+
+.cd-rail-info-wrapper h3 {
+    color: #fff;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.cd-rail-info-wrapper h3::before {
+    content: '🚊';
+    font-size: 1.5em;
+    animation: trainMove 3s ease-in-out infinite alternate;
+}
+
+@keyframes trainMove {
+    0% { transform: translateX(0) scale(1); }
+    100% { transform: translateX(10px) scale(1.1); }
+}
+
+/* Basic Train Info Cards */
+.cd-rail-basic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.cd-enhanced-info-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.cd-enhanced-info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.cd-enhanced-info-card:hover::before {
+    left: 100%;
+}
+
+.cd-enhanced-info-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Rail Section Styling */
+.cd-rail-section {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.cd-rail-section-title {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.9;
+}
+
+/* Route Timeline Styles */
+.cd-rail-route-timeline {
+    padding: 1rem 0;
+}
+
+.cd-timeline-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.cd-timeline-station {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    min-width: 180px;
+}
+
+.cd-timeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 20px currentColor;
+    animation: pulse 2s infinite;
+}
+
+.cd-timeline-dot-start {
+    background: #22c55e;
+    color: #22c55e;
+}
+
+.cd-timeline-dot-end {
+    background: #ef4444;
+    color: #ef4444;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.cd-timeline-content h4 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    text-align: center;
+}
+
+.cd-station-code {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cd-station-time {
+    color: #60a5fa;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.cd-timeline-line {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 2rem;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cd-timeline-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #60a5fa, #ef4444);
+    border-radius: 2px;
+    transform-origin: left;
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+}
+
+.cd-timeline-distance {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Speed Gauge Styles */
+.cd-rail-speed-gauge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+/* Frequency Chart Styles */
+.cd-rail-frequency-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.cd-frequency-summary {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+/* Performance Metrics Layout */
+.cd-rail-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Legacy grid for basic info (keeping for compatibility) */
+.cd-rail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+.cd-rail-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.cd-rail-info-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cd-rail-info-icon {
+    color: #60a5fa;
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+.cd-rail-info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.cd-rail-info-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cd-rail-info-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.cd-rail-time {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9em;
+}
+
+.cd-rail-frequency-item {
+    grid-column: 1 / -1;
+}
+
+.cd-rail-frequency-item .cd-rail-info-value {
+    line-height: 1.6;
+}
+
+/* Responsive rail info styles */
+@media (max-width: 768px) {
+    .cd-rail-info-wrapper {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .cd-rail-info-wrapper h3 {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .cd-rail-basic-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .cd-rail-metrics {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .cd-rail-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .cd-rail-section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .cd-timeline-container {
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 100%;
+    }
+    
+    .cd-timeline-line {
+        width: 4px;
+        height: 60px;
+        margin: 0;
+        transform: rotate(90deg);
+    }
+    
+    .cd-timeline-progress {
+        transform-origin: bottom;
+    }
+    
+    .cd-timeline-distance {
+        top: 50%;
+        left: 40px;
+        transform: translateY(-50%);
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+    }
+    
+    .cd-timeline-station {
+        min-width: 150px;
+        padding: 1rem;
+    }
+    
+    .cd-timeline-content h4 {
+        font-size: 1rem;
+    }
+    
+    .cd-rail-speed-gauge svg {
+        width: 150px;
+        height: 90px;
+    }
+    
+    .cd-rail-frequency-chart svg {
+        width: 250px;
+        height: 50px;
+    }
+    
+    .cd-rail-info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .cd-rail-info-item {
+        padding: 1rem;
+    }
+    
+    .cd-rail-info-icon {
+        font-size: 1.25rem;
+    }
+    
+    .cd-rail-info-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.375rem;
+    }
+    
+    .cd-rail-info-value {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cd-rail-info-wrapper {
+        padding: 1.25rem;
+    }
+    
+    .cd-rail-info-wrapper h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .cd-rail-section {
+        padding: 1.25rem;
+    }
+    
+    .cd-timeline-station {
+        min-width: 120px;
+        padding: 0.75rem;
+    }
+    
+    .cd-timeline-content h4 {
+        font-size: 0.9rem;
+    }
+    
+    .cd-station-code,
+    .cd-station-time {
+        font-size: 0.8rem;
+    }
+    
+    .cd-rail-speed-gauge svg {
+        width: 120px;
+        height: 75px;
+    }
+    
+    .cd-rail-frequency-chart svg {
+        width: 200px;
+        height: 45px;
+    }
+    
+    .cd-rail-info-item {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: left;
+    }
+    
+    .cd-rail-info-icon {
+        align-self: flex-start;
+        margin-top: 0;
+    }
+    
+    .cd-user-details {
+        margin-left: 1rem;
+    }
+    
+    .cd-user-avatar {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .cd-user-name {
+        font-size: 0.9rem;
+    }
+}
+
 /* Responsive map styles */
 @media (max-width: 768px) {
     .cd-location-map-wrapper {
@@ -721,5 +1245,256 @@ html {
     
     .cd-map-container .leaflet-container {
         height: 250px !important;
+    }
+}
+
+/* Enhanced Metadata Styles - New organized layout */
+.cd-metadata-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin: 2.5rem 0;
+}
+
+.cd-user-info-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem;
+}
+
+.cd-user-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.cd-user-avatar-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cd-user-avatar-large:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.cd-user-info-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.cd-user-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cd-user-info-icon {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.cd-user-info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cd-user-name-large {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
+.cd-user-email {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+}
+
+/* Timestamps Section */
+.cd-timestamps-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.cd-timestamp-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.cd-timestamp-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cd-timestamp-content {
+    flex: 1;
+}
+
+.cd-timestamp-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.cd-timestamp-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.4;
+}
+
+/* Location Section */
+.cd-location-section {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.cd-location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.cd-location-content {
+    flex: 1;
+}
+
+.cd-location-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.cd-location-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Train Section */
+.cd-train-section {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.cd-train-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.cd-train-content {
+    flex: 1;
+}
+
+.cd-train-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.cd-train-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.4;
+}
+
+/* Mobile responsive styles for new metadata layout */
+@media (max-width: 768px) {
+    .cd-user-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        text-align: left;
+    }
+    
+    .cd-user-avatar-large {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .cd-user-name-large {
+        font-size: 1.1rem;
+    }
+    
+    .cd-timestamps-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .cd-timestamp-item,
+    .cd-location-section,
+    .cd-train-section {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cd-user-info-section {
+        padding: 1.25rem;
+    }
+    
+    .cd-user-avatar-large {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .cd-user-name-large {
+        font-size: 1rem;
+    }
+    
+    .cd-user-email {
+        font-size: 0.8rem;
     }
 }
