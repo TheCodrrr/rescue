@@ -178,19 +178,31 @@ const getComplaintById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid complaintId format");
     }
 
-    const complaint = await Complaint.findById(complaintId)
-        .populate("user_id", "name email")
+    let complaint = await Complaint.findById(complaintId)
+        .populate("user_id", "name email profileImage")
         .populate("evidence_ids")
         .populate("votedUsers", "name email profileImage")
         .populate("assigned_officer_id", "name email profileImage")
-        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt");
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean();
 
     if (!complaint) {
         throw new ApiError(404, "Complaint not found");
     }
 
-    if (req.user.role !== 'admin' && req.user._id.toString() !== complaint.user_id.toString()) {
+    if (req.user.role !== 'admin' && req.user._id.toString() !== complaint.user_id._id.toString()) {
         throw new ApiError(403, "You do not have permission to view this complaint");
+    }
+
+    // Add category-specific data if available
+    if (complaint.category === "rail" && complaint.category_data_id) {
+        try {
+            const train = await getTrainByNumber(complaint.category_data_id);
+            complaint = { ...complaint, category_specific_data: train };
+        } catch (error) {
+            console.error("Error fetching train data:", error);
+            // Continue without train data if there's an error
+        }
     }
 
     res.status(200).json({
