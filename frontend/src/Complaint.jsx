@@ -2370,8 +2370,16 @@ export default function Complaint() {
                 onCommentSubmit={handleModalCommentSubmit}
                 onCommentUpdate={handleModalCommentUpdate}
                 onCommentDelete={handleModalCommentDelete}
-                comments={selectedComplaintForComments?.comments || []}
-                totalComments={selectedComplaintForComments?.comments?.length || 0}
+                comments={
+                    selectedComplaintForComments 
+                        ? (complaints.find(c => c._id === selectedComplaintForComments._id)?.comments || [])
+                        : []
+                }
+                totalComments={
+                    selectedComplaintForComments 
+                        ? (complaints.find(c => c._id === selectedComplaintForComments._id)?.comments?.length || 0)
+                        : 0
+                }
             />
 
             <Footer />
