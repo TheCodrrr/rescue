@@ -80,7 +80,7 @@ const CommentModal = ({
         try {
             const commentData = {
                 complaintId,
-                comment: newComment.trim(),
+                content: newComment.trim(),
                 rating: commentRating || undefined
             };
 

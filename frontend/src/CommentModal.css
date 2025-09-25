@@ -331,7 +331,7 @@
 
 .save-btn:hover:not(:disabled) {
     background: rgba(16, 185, 129, 0.2);
-    color: #059669;
+    color: #10b981;
 }
 
 .cancel-btn {
