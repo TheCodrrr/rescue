@@ -194,8 +194,9 @@ const CommentModal = ({
                                     const isEditing = editingCommentId === comment._id;
                                     const isOwner = user && (
                                         comment.userId === user._id || 
-                                        comment.user?._id === user._id || 
                                         comment.user_id?._id === user._id ||
+                                        comment.user_id?._id?.toString() === user._id?.toString() ||
+                                        comment.user?._id === user._id || 
                                         comment.user_id?.id === user._id ||
                                         comment.user?.id === user._id
                                     );
@@ -204,9 +205,9 @@ const CommentModal = ({
                                         <div key={comment._id} className="comment-item">
                                             <div className="comment-header">
                                                 <div className="comment-author">
-                                                    {(comment.user?.profileImage || comment.user_id?.profileImage) ? (
+                                                    {(comment.user_id?.profileImage || comment.user?.profileImage) ? (
                                                         <img
-                                                            src={comment.user?.profileImage || comment.user_id?.profileImage}
+                                                            src={comment.user_id?.profileImage || comment.user?.profileImage}
                                                             alt="Profile"
                                                             className="user-profile-image"
                                                         />
@@ -217,10 +218,10 @@ const CommentModal = ({
                                                     )}
                                                     <div>
                                                         <span className="author-name">
-                                                            {comment.user?.username || 
-                                                             comment.user?.name || 
+                                                            {comment.user_id?.name || 
                                                              comment.user_id?.username || 
-                                                             comment.user_id?.name || 
+                                                             comment.user?.username || 
+                                                             comment.user?.name || 
                                                              comment.username || 
                                                              comment.author || 
                                                              'Anonymous'}

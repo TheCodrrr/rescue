@@ -500,6 +500,12 @@ export const fetchComments = createAsyncThunk(
       console.log("Extracted comments array:", commentsArray);
       console.log("Number of comments found:", commentsArray.length);
       
+      // Debug: Log the first comment structure if available
+      if (commentsArray.length > 0) {
+        console.log("First comment structure:", JSON.stringify(commentsArray[0], null, 2));
+        console.log("First comment user data:", commentsArray[0]?.user_id);
+      }
+      
       return {
         complaintId,
         comments: commentsArray,

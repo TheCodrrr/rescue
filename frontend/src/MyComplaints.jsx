@@ -61,7 +61,6 @@ function MyComplaints() {
     const [editInProgress, setEditInProgress] = useState(false);
     const [deletingComment, setDeletingComment] = useState(null);
     const [updatingComment, setUpdatingComment] = useState(null);
-    const loadedCommentsRef = useRef(new Set());
 
     const categories = [
         { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
@@ -81,14 +80,14 @@ function MyComplaints() {
         }
     }, [isAuthenticated, user, dispatch]);
 
-    // Fetch comment counts for complaints that haven't been loaded yet
+    // Fetch comments for all complaints when they are loaded
     useEffect(() => {
         if (complaints && complaints.length > 0) {
+            console.log('Loading comments for all complaints...', complaints.length);
             complaints.forEach((complaint) => {
-                if (complaint._id && !loadedCommentsRef.current.has(complaint._id)) {
+                if (complaint._id) {
                     console.log(`Loading comments for complaint: ${complaint._id}`);
                     dispatch(fetchComments(complaint._id));
-                    loadedCommentsRef.current.add(complaint._id);
                 }
             });
         }
