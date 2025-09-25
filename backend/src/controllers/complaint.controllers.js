@@ -237,6 +237,11 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
 
     complaints = await Promise.all(
         complaints.map(async complaint => {
+            // Determine current user's vote status
+            const userVote = complaint.votedUsers.find(vote => 
+                vote.user && vote.user._id.toString() === userId.toString()
+            );
+            
             if (complaint.category === "rail") {
                 const train = await getTrainByNumber(complaint.category_data_id);
                 if (train && train.stations) {
@@ -245,12 +250,26 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
                         ? JSON.parse(train.stations) 
                         : train.stations;
                     // add extra field safely with stations
-                    return { ...complaint, category_specific_data: { ...train, stations } };
+                    return { 
+                        ...complaint, 
+                        category_specific_data: { ...train, stations },
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+                    };
                 } else {
-                    return { ...complaint, category_specific_data: train };
+                    return { 
+                        ...complaint, 
+                        category_specific_data: train,
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+                    };
                 }
             }
-            return complaint;
+            return {
+                ...complaint,
+                userVote: userVote ? userVote.vote : null,
+                comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+            };
         })
     );
 
@@ -377,10 +396,18 @@ const upvoteComplaint = asyncHandler(async (req, res) => {
 
     await complaint.save();
 
+    // Determine current user's vote status
+    const userVote = complaint.votedUsers.find(vote => 
+        vote.user && vote.user.toString() === userId.toString()
+    );
+
     res.status(200).json({
         success: true,
         message: "Upvote recorded successfully.",
-        data: complaint
+        data: {
+            ...complaint.toObject(),
+            userVote: userVote ? userVote.vote : null
+        }
     })
 })
 
@@ -418,10 +445,18 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
 
     await complaint.save();
 
+    // Determine current user's vote status
+    const userVote = complaint.votedUsers.find(vote => 
+        vote.user && vote.user.toString() === userId.toString()
+    );
+
     res.status(200).json({
         success: true,
         message: "Downvote recorded successfully.",
-        data: complaint,
+        data: {
+            ...complaint.toObject(),
+            userVote: userVote ? userVote.vote : null
+        }
     });
 })
 

@@ -24,13 +24,21 @@ export const submitComplaint = createAsyncThunk(
         return thunkAPI.rejectWithValue('Authentication required. Please log in to submit a complaint.');
       }
 
+      // Validate location data
+      if (!complaintData.location || !complaintData.location.latitude || !complaintData.location.longitude) {
+        return thunkAPI.rejectWithValue('Location coordinates are required');
+      }
+
       // Prepare complaint data for backend
       const formattedComplaintData = {
         title: complaintData.title,
         description: complaintData.description,
         category: complaintData.category,
-        location: complaintData.location, // Already in GeoJSON format from Complaint.jsx
-        address: complaintData.location.address || null,
+        location: {
+          type: "Point",
+          coordinates: [complaintData.location.longitude, complaintData.location.latitude]
+        }, // Convert to GeoJSON format
+        address: complaintData.address, // Address is a separate field in the complaint data
         status: 'pending', // Default status
         timestamp: new Date().toISOString(),
         category_data_id: complaintData.category_data_id !== undefined && complaintData.category_data_id !== ''
@@ -39,8 +47,9 @@ export const submitComplaint = createAsyncThunk(
         severity: complaintData.severity
       };
 
-      // console.log("Formatted complaint data:", formattedComplaintData);
-      // console.log("Token found, making request to submit complaint");
+      console.log("Original complaint data:", complaintData);
+      console.log("Formatted complaint data:", formattedComplaintData);
+      console.log("Token found, making request to submit complaint");
       
       const response = await axiosInstance.post('/complaints/create', formattedComplaintData);
       // console.log("Submit complaint API response:", response.data);
@@ -252,11 +261,13 @@ export const upvoteComplaint = createAsyncThunk(
       // Try all possible field names - check singular first since that's the correct format
       const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
       const downvotes = responseData.downvote ?? responseData.downvotes ?? 0;
+      const userVote = responseData.userVote ?? null;
       
       const payload = {
         complaintId,
         upvotes: Number(upvotes),
-        downvotes: Number(downvotes)
+        downvotes: Number(downvotes),
+        userVote: userVote
       };
       
       console.log("Final payload with extracted votes:", payload);
@@ -307,11 +318,13 @@ export const downvoteComplaint = createAsyncThunk(
       // Try all possible field names - check singular first since that's the correct format
       const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
       const downvotes = responseData.downvote ?? responseData.downvotes ?? 0;
+      const userVote = responseData.userVote ?? null;
       
       const payload = {
         complaintId,
         upvotes: Number(upvotes),
-        downvotes: Number(downvotes)
+        downvotes: Number(downvotes),
+        userVote: userVote
       };
       
       console.log("Final payload with extracted votes:", payload);
@@ -679,7 +692,7 @@ const complaintSlice = createSlice({
       })
       .addCase(upvoteComplaint.fulfilled, (state, action) => {
         console.log("Upvote fulfilled with payload:", action.payload);
-        const { complaintId, upvotes, downvotes } = action.payload;
+        const { complaintId, upvotes, downvotes, userVote } = action.payload;
         console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
         console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
         
@@ -697,7 +710,8 @@ const complaintSlice = createSlice({
           console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
           complaint.downvote = downvotes;
-          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          complaint.userVote = userVote;
+          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
@@ -712,8 +726,7 @@ const complaintSlice = createSlice({
           console.log("Updating selectedComplaint upvotes/downvotes");
           state.selectedComplaint.upvote = upvotes;
           state.selectedComplaint.downvote = downvotes;
-          state.selectedComplaint.upvotes = upvotes;
-          state.selectedComplaint.downvotes = downvotes;
+          state.selectedComplaint.userVote = userVote;
         }
         
         state.error = null;
@@ -727,7 +740,7 @@ const complaintSlice = createSlice({
       })
       .addCase(downvoteComplaint.fulfilled, (state, action) => {
         console.log("Downvote fulfilled with payload:", action.payload);
-        const { complaintId, upvotes, downvotes } = action.payload;
+        const { complaintId, upvotes, downvotes, userVote } = action.payload;
         console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
         console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
         
@@ -745,7 +758,8 @@ const complaintSlice = createSlice({
           console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
           complaint.downvote = downvotes;
-          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          complaint.userVote = userVote;
+          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
@@ -760,8 +774,7 @@ const complaintSlice = createSlice({
           console.log("Updating selectedComplaint upvotes/downvotes");
           state.selectedComplaint.upvote = upvotes;
           state.selectedComplaint.downvote = downvotes;
-          state.selectedComplaint.upvotes = upvotes;
-          state.selectedComplaint.downvotes = downvotes;
+          state.selectedComplaint.userVote = userVote;
         }
         
         state.error = null;
