@@ -1865,3 +1865,600 @@
         justify-content: center;
     }
 }
+
+/* My Complaints Styles - Unique prefixed to avoid conflicts */
+.my-complaints-list {
+    width: 100%;
+}
+
+.my-complaints-grid {
+    display: column;
+    column-count: 3;
+    column-gap: 1.5rem;
+    column-fill: balance;
+}
+
+@media (max-width: 1200px) {
+    .my-complaints-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .my-complaints-grid {
+        column-count: 1;
+    }
+}
+
+.my-complaint-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    margin-bottom: 1.5rem;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+}
+
+.my-complaint-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(59, 130, 246, 0.8) 0%, 
+        rgba(139, 92, 246, 0.8) 50%, 
+        rgba(236, 72, 153, 0.8) 100%);
+    z-index: 1;
+}
+
+.my-complaint-card:hover {
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+}
+
+.my-complaint-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem 1.25rem 0.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    z-index: 2;
+}
+
+.my-complaint-card-header-left {
+    flex: 1;
+}
+
+.my-complaint-category {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.my-category-icon-display {
+    font-size: 1.1rem;
+}
+
+.my-category-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: capitalize;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.my-card-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.my-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.my-status-badge.status-pending {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.15));
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-status-badge.status-in-progress {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.25), rgba(96, 165, 250, 0.15));
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-status-badge.status-resolved {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.25), rgba(52, 211, 153, 0.15));
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-status-badge.status-rejected {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.25), rgba(248, 113, 113, 0.15));
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-delete-btn-icon,
+.my-visit-btn-icon {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.my-delete-btn-icon:hover {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(248, 113, 113, 0.1));
+    border-color: rgba(248, 113, 113, 0.3);
+    color: #f87171;
+    transform: translateY(-1px);
+}
+
+.my-visit-btn-icon:hover {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(96, 165, 250, 0.1));
+    border-color: rgba(96, 165, 250, 0.3);
+    color: #60a5fa;
+    transform: translateY(-1px);
+}
+
+.my-delete-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.my-complaint-card-body {
+    padding: 1rem 1.25rem 1.25rem 1.25rem;
+}
+
+.my-complaint-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.my-complaint-title-display {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.my-complaint-severity {
+    flex-shrink: 0;
+}
+
+.my-severity-badge-display {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.my-severity-icon-display {
+    font-size: 0.875rem;
+}
+
+.my-severity-text {
+    text-transform: capitalize;
+}
+
+.my-complaint-description-display {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.my-complaint-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.my-location-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.my-rail-train-meta {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.05));
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.my-train-header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.my-train-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.my-train-emoji {
+    font-size: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+}
+
+.my-train-name-text {
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.my-train-number-pill {
+    background: rgba(59, 130, 246, 0.25);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.my-train-type-badge {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(147, 51, 234, 0.4);
+    padding: 0.125rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.my-train-route-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.my-route-segment {
+    display: flex;
+    flex-direction: column;
+}
+
+.my-seg-label {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.my-seg-station {
+    margin-bottom: 0.25rem;
+}
+
+.my-station-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    display: block;
+}
+
+.my-station-name.origin-name {
+    color: #fbbf24;
+    text-shadow: 0 0 4px rgba(251, 191, 36, 0.35);
+}
+
+.my-station-name.destination-name {
+    color: #34d399;
+    text-shadow: 0 0 4px rgba(52, 211, 153, 0.35);
+}
+
+.my-code.origin-code {
+    color: #fde68a;
+}
+
+.my-code.destination-code {
+    color: #6ee7b7;
+}
+
+.my-code {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.my-seg-time {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.my-complaint-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.my-complaint-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.my-complaint-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.my-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.my-action-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.my-action-btn.upvote.voted {
+    color: #4ade80;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.25), rgba(74, 222, 128, 0.15));
+    border-color: rgba(74, 222, 128, 0.4);
+    box-shadow: 0 0 16px rgba(74, 222, 128, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-action-btn.downvote.voted {
+    color: #fb7185;
+    background: linear-gradient(135deg, rgba(251, 113, 133, 0.25), rgba(251, 113, 133, 0.15));
+    border-color: rgba(251, 113, 133, 0.4);
+    box-shadow: 0 0 16px rgba(251, 113, 133, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-action-btn.comments:hover {
+    color: #93c5fd;
+    background: linear-gradient(135deg, rgba(147, 197, 253, 0.25), rgba(147, 197, 253, 0.15));
+    border-color: rgba(147, 197, 253, 0.4);
+}
+
+/* Search highlight */
+.search-highlight {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.4), rgba(251, 191, 36, 0.3));
+    color: #fbbf24;
+    padding: 0.125rem 0.25rem;
+    border-radius: 4px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* My Complaints Delete Modal Styles */
+.my-delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.my-delete-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 28rem;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.my-delete-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.my-delete-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.my-delete-modal-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+
+.my-delete-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.my-delete-modal-close-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.my-delete-modal-content {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+}
+
+.my-delete-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+}
+
+.my-delete-warning-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #dc2626;
+}
+
+.my-delete-confirmation-content {
+    text-align: center;
+}
+
+.my-delete-complaint-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.my-delete-warning-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.my-delete-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.my-cancel-delete-btn,
+.my-confirm-delete-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.my-cancel-delete-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+}
+
+.my-cancel-delete-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.my-confirm-delete-btn {
+    background: #dc2626;
+    border: 1px solid #dc2626;
+    color: white;
+}
+
+.my-confirm-delete-btn:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.my-confirm-delete-btn:disabled,
+.my-cancel-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { loadUser } from "./auth/redux/authSlice";
 import { ArrowLeft } from "lucide-react";
 import UserProfileSidebar from './UserProfileSidebar';
 import UserProfileContent from './UserProfileContent';
 
 function UserProfile() {
-    const [activeSection, setActiveSection] = useState('profile');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [activeSection, setActiveSection] = useState(() => {
+        return searchParams.get('tab') || 'profile';
+    });
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
     const hasLoadedUser = useRef(false);
+    
+    // Handle tab changes and update URL
+    const handleSectionChange = (section) => {
+        setActiveSection(section);
+        setSearchParams({ tab: section });
+    };
     
     // Load user data when component mounts - runs only once
     useEffect(() => {
@@ -80,7 +89,7 @@ function UserProfile() {
             {/* Sidebar */}
             <UserProfileSidebar 
                 activeSection={activeSection}
-                setActiveSection={setActiveSection}
+                setActiveSection={handleSectionChange}
                 onBackToHome={handleBackToHome}
             />
             

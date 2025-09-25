@@ -10,7 +10,8 @@ import {
     Activity, 
     LogOut, 
     ArrowLeft,
-    Shield
+    Shield,
+    CircleAlert
 } from 'lucide-react';
 
 function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
@@ -36,6 +37,7 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
 
     const sidebarLinks = [
         { id: 'profile', label: 'Profile', icon: User },
+        { id: 'my-complaint', label: 'Complaints', icon: CircleAlert },
         { id: 'settings', label: 'Settings', icon: Settings },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'History', label: 'History', icon: Clock },

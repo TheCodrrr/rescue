@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUser, uploadProfileImage, changePassword, deleteUser } from './auth/redux/authSlice';
+import MyComplaints from './MyComplaints';
 import { 
     User, 
     Mail, 
@@ -938,6 +939,8 @@ function UserProfileContent({ activeSection }) {
         switch (activeSection) {
             case 'profile':
                 return renderProfileContent();
+            case 'my-complaint':
+                return <MyComplaints />;
             case 'settings':
                 return renderSettingsContent();
             case 'notifications':
