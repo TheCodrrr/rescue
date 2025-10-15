@@ -137,7 +137,7 @@ const PasswordChangeModal = React.memo(({
     </div>
 ));
 
-function UserProfileContent({ activeSection }) {
+function UserProfileContent({ activeSection, contentRef }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({
         name: '',
@@ -170,6 +170,13 @@ function UserProfileContent({ activeSection }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
+    
+    // Reset scroll position when activeSection changes
+    useEffect(() => {
+        if (contentRef && contentRef.current) {
+            contentRef.current.scrollTop = 0;
+        }
+    }, [activeSection, contentRef]);
     
     const handleEditProfile = () => {
         setEditForm({
@@ -956,7 +963,7 @@ function UserProfileContent({ activeSection }) {
 
     return (
         <>
-            <div className="content-container">
+            <div className="content-container" ref={contentRef}>
                 {renderContent()}
             </div>
 

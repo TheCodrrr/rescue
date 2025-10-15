@@ -16,11 +16,35 @@ function UserProfile() {
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
     const hasLoadedUser = useRef(false);
+    const contentRef = useRef(null);
     
     // Handle tab changes and update URL
     const handleSectionChange = (section) => {
         setActiveSection(section);
         setSearchParams({ tab: section });
+        
+        // Reset scroll position when changing sections
+        setTimeout(() => {
+            // Reset content container scroll using ref
+            if (contentRef.current) {
+                contentRef.current.scrollTop = 0;
+            }
+            
+            // Also try querySelector as fallback
+            const contentContainer = document.querySelector('.content-container');
+            if (contentContainer) {
+                contentContainer.scrollTop = 0;
+            }
+            
+            // Reset main profile content area scroll
+            const profileMain = document.querySelector('.profile-main');
+            if (profileMain) {
+                profileMain.scrollTop = 0;
+            }
+            
+            // Reset window scroll as well
+            window.scrollTo(0, 0);
+        }, 50); // Small delay to ensure DOM has updated
     };
     
     // Load user data when component mounts - runs only once
@@ -103,7 +127,10 @@ function UserProfile() {
                 </div>
                 
                 {/* Content */}
-                <UserProfileContent activeSection={activeSection} />
+                <UserProfileContent 
+                    activeSection={activeSection} 
+                    contentRef={contentRef}
+                />
             </div>
         </div>
     );
