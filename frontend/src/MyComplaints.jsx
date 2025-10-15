@@ -61,6 +61,7 @@ function MyComplaints() {
     const [editInProgress, setEditInProgress] = useState(false);
     const [deletingComment, setDeletingComment] = useState(null);
     const [updatingComment, setUpdatingComment] = useState(null);
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
     const categories = [
         { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
@@ -71,11 +72,20 @@ function MyComplaints() {
         { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
     ];
 
+    // Track successful data loading to prevent fluctuation
+    useEffect(() => {
+        if (complaints && complaints.length > 0 && !isLoading) {
+            setHasLoadedOnce(true);
+        }
+    }, [complaints, isLoading]);
+
     // Load user complaints when component mounts
     useEffect(() => {
         console.log('MyComplaints mounted - Auth state:', { isAuthenticated, userExists: !!user });
         if (isAuthenticated && user) {
             console.log('Loading user complaints...');
+            // Clear any previous errors before loading
+            dispatch(clearError());
             dispatch(getUserComplaints());
         }
     }, [isAuthenticated, user, dispatch]);
@@ -84,10 +94,15 @@ function MyComplaints() {
     useEffect(() => {
         if (complaints && complaints.length > 0) {
             console.log('Loading comments for all complaints...', complaints.length);
+            // Don't let comment loading errors affect the main UI
             complaints.forEach((complaint) => {
                 if (complaint._id) {
                     console.log(`Loading comments for complaint: ${complaint._id}`);
-                    dispatch(fetchComments(complaint._id));
+                    // Dispatch comments fetch but don't let it affect main error state
+                    dispatch(fetchComments(complaint._id)).catch((err) => {
+                        console.warn(`Failed to load comments for complaint ${complaint._id}:`, err);
+                        // Silently handle comment loading errors - don't propagate to main UI
+                    });
                 }
             });
         }
@@ -105,12 +120,17 @@ function MyComplaints() {
     // Handle retry function
     const handleRetry = () => {
         console.log('Retrying to load complaints...');
+        // Clear error state first
         dispatch(clearError());
-        if (isAuthenticated && user) {
-            dispatch(getUserComplaints());
-        } else {
-            console.warn('Cannot retry - user not authenticated or user data missing');
-        }
+        
+        // Add a small delay to prevent rapid state changes
+        setTimeout(() => {
+            if (isAuthenticated && user) {
+                dispatch(getUserComplaints());
+            } else {
+                console.warn('Cannot retry - user not authenticated or user data missing');
+            }
+        }, 100);
     };
 
     // Handle ESC key to close modals
@@ -468,7 +488,7 @@ function MyComplaints() {
 
             <div className="my-complaints-list">
                 {/* Search and Filter Section */}
-                {!isLoading && !error && complaints.length > 0 && (
+                {hasLoadedOnce && complaints.length > 0 && (
                     <div className="search-filter-section">
                         <div className="search-bar-container">
                             <div className="search-input-wrapper">
@@ -529,12 +549,12 @@ function MyComplaints() {
                     </div>
                 )}
 
-                {isLoading ? (
+                {isLoading && !hasLoadedOnce ? (
                     <div className="loading-state">
                         <div className="loading-spinner"></div>
                         <p>Loading your complaints...</p>
                     </div>
-                ) : error ? (
+                ) : error && !hasLoadedOnce ? (
                     <div className="error-state">
                         <div className="error-icon">❌</div>
                         <h3>Error Loading Complaints</h3>
@@ -553,13 +573,13 @@ function MyComplaints() {
                         <h3>Authentication Required</h3>
                         <p>Please log in to view your complaints.</p>
                     </div>
-                ) : complaints.length === 0 ? (
+                ) : complaints.length === 0 && !isLoading ? (
                     <div className="empty-state">
                         <div className="empty-icon">📝</div>
                         <h3>No Complaints Found</h3>
                         <p>You haven't submitted any complaints yet.</p>
                     </div>
-                ) : filteredComplaints.length === 0 ? (
+                ) : filteredComplaints.length === 0 && complaints.length > 0 ? (
                     <div className="empty-state">
                         <div className="empty-icon">🔍</div>
                         <h3>No Complaints Found</h3>

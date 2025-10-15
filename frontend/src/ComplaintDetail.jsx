@@ -892,7 +892,7 @@ export default function ComplaintDetail() {
         try {
             const result = await dispatch(addComment({
                 complaintId: commentData.complaintId,
-                content: commentData.comment,
+                content: commentData.content,
                 rating: commentData.rating
             }));
 
