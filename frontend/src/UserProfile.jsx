@@ -20,31 +20,34 @@ function UserProfile() {
     
     // Handle tab changes and update URL
     const handleSectionChange = (section) => {
-        setActiveSection(section);
-        setSearchParams({ tab: section });
-        
-        // Reset scroll position when changing sections
-        setTimeout(() => {
-            // Reset content container scroll using ref
-            if (contentRef.current) {
-                contentRef.current.scrollTop = 0;
-            }
+        console.log("Section change requested:", section);
+        if (section !== activeSection) {
+            setActiveSection(section);
+            setSearchParams({ tab: section });
             
-            // Also try querySelector as fallback
-            const contentContainer = document.querySelector('.content-container');
-            if (contentContainer) {
-                contentContainer.scrollTop = 0;
-            }
-            
-            // Reset main profile content area scroll
-            const profileMain = document.querySelector('.profile-main');
-            if (profileMain) {
-                profileMain.scrollTop = 0;
-            }
-            
-            // Reset window scroll as well
-            window.scrollTo(0, 0);
-        }, 50); // Small delay to ensure DOM has updated
+            // Reset scroll position when changing sections
+            setTimeout(() => {
+                // Reset content container scroll using ref
+                if (contentRef.current) {
+                    contentRef.current.scrollTop = 0;
+                }
+                
+                // Also try querySelector as fallback
+                const contentContainer = document.querySelector('.content-container');
+                if (contentContainer) {
+                    contentContainer.scrollTop = 0;
+                }
+                
+                // Reset main profile content area scroll
+                const profileMain = document.querySelector('.profile-main');
+                if (profileMain) {
+                    profileMain.scrollTop = 0;
+                }
+                
+                // Reset window scroll as well
+                window.scrollTo(0, 0);
+            }, 50); // Small delay to ensure DOM has updated
+        }
     };
     
     // Load user data when component mounts - runs only once
@@ -57,6 +60,15 @@ function UserProfile() {
             hasLoadedUser.current = true;
         }
     }, []); // Empty dependency array - run only once on mount
+
+    // Listen for URL parameter changes and update activeSection accordingly
+    useEffect(() => {
+        const currentTab = searchParams.get('tab') || 'profile';
+        if (currentTab !== activeSection) {
+            console.log("URL tab changed, updating activeSection:", currentTab);
+            setActiveSection(currentTab);
+        }
+    }, [searchParams]); // Listen to searchParams changes
 
     // Handle authentication redirects
     useEffect(() => {
@@ -76,7 +88,19 @@ function UserProfile() {
     }, []);
     
     const handleBackToHome = () => {
-        navigate('/');
+        console.log("Back button clicked. Auth state:", { isAuthenticated, hasToken: !!localStorage.getItem("token") });
+        
+        // Try to go back to previous page first, fallback to home routes
+        if (window.history.length > 1) {
+            navigate(-1); // Go back to previous page
+        } else {
+            // For authenticated users, navigate to a main app page instead of landing page
+            if (isAuthenticated && localStorage.getItem("token")) {
+                navigate('/home'); // or '/dashboard' - wherever your main app content is
+            } else {
+                navigate('/');
+            }
+        }
     };
     
     // Show loading state only during initial load (no user data and specific loading condition)
