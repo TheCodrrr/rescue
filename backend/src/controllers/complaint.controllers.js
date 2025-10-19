@@ -6,6 +6,7 @@ import { ensureTrainExists, getTrainByNumber } from "../services/rail.service.js
 import { calculateTrendingScore } from "../../utils/trendingScore.js";
 // import { Department } from "../models/department.models.js";
 import { io } from "../server.js";
+import { History } from "../models/history.models.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -149,6 +150,25 @@ const createComplaint = asyncHandler(async (req, res) => {
   })
 
   if (complaint) {
+    // Add history entry for complaint registration
+    try {
+      await History.create({
+        user_id: userId,
+        actionType: 'COMPLAINT_REGISTERED',
+        complaint_id: complaint._id,
+        category: category,
+        details: {
+          title: title,
+          category: category,
+          severity: severity,
+          location: address
+        }
+      });
+    } catch (historyError) {
+      console.error("Error adding history entry:", historyError);
+      // Don't fail the complaint creation if history fails
+    }
+
     // console.log("Complaint created successfully, emitting to socket...");
     // console.log("Complaint ID:", complaint._id);
     

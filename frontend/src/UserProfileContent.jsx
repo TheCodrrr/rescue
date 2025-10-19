@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUser, uploadProfileImage, changePassword, deleteUser } from './auth/redux/authSlice';
 import MyComplaints from './MyComplaints';
+import UserHistory from './UserHistory';
 import { 
     User, 
     Mail, 
@@ -921,14 +922,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     );
 
     const renderHistoryContent = () => (
-        <div className="space-y-8">
-            <div className="profile-card">
-                <h2 className="section-title">History</h2>
-                <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
-                    History panel coming soon...
-                </p>
-            </div>
-        </div>
+        <UserHistory />
     );
 
     const renderActivityContent = () => (

@@ -3,6 +3,7 @@ import { useInView } from "react-intersection-observer";
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { upvoteComplaint, downvoteComplaint, addComment, fetchComments, updateComment, removeComment } from "./auth/redux/complaintSlice.js";
+import { addComplaintVoteHistory, addCommentHistory } from "./auth/redux/historySlice.js";
 import { toast } from 'react-hot-toast';
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
@@ -36,7 +37,7 @@ import "./Trending.css";
 
 const Trending = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { complaints: reduxComplaints } = useSelector((state) => state.complaints);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, error } =
     useTrendingComplaints();
@@ -363,6 +364,20 @@ const Trending = () => {
     try {
       const result = await dispatch(upvoteComplaint(complaintId));
       if (upvoteComplaint.fulfilled.match(result)) {
+        // Add history entry for upvote
+        if (user) {
+          // Find the complaint to get its category
+          const complaint = data?.pages?.flatMap(page => page.complaints)?.find(c => c._id === complaintId);
+          if (complaint) {
+            dispatch(addComplaintVoteHistory({
+              userId: user._id,
+              complaintId: complaintId,
+              category: complaint.category,
+              voteType: 'upvote'
+            }));
+          }
+        }
+        
         // Force refetch of trending data to get updated vote counts
         window.location.reload();
         
@@ -412,6 +427,20 @@ const Trending = () => {
     try {
       const result = await dispatch(downvoteComplaint(complaintId));
       if (downvoteComplaint.fulfilled.match(result)) {
+        // Add history entry for downvote
+        if (user) {
+          // Find the complaint to get its category
+          const complaint = data?.pages?.flatMap(page => page.complaints)?.find(c => c._id === complaintId);
+          if (complaint) {
+            dispatch(addComplaintVoteHistory({
+              userId: user._id,
+              complaintId: complaintId,
+              category: complaint.category,
+              voteType: 'downvote'
+            }));
+          }
+        }
+        
         // Force refetch of trending data to get updated vote counts
         window.location.reload();
         
@@ -539,6 +568,18 @@ const Trending = () => {
       }));
 
       if (addComment.fulfilled.match(result)) {
+        // Add history entry for comment added
+        if (user && selectedComplaintForComments) {
+          dispatch(addCommentHistory({
+            userId: user._id,
+            complaintId: selectedComplaintForComments._id,
+            commentId: result.payload?.comment?._id || 'unknown',
+            commentText: newComment.trim(),
+            category: selectedComplaintForComments.category,
+            actionType: 'COMMENT_ADDED'
+          }));
+        }
+        
         setNewComment('');
         setCommentRating(5);
         
@@ -596,6 +637,19 @@ const Trending = () => {
       }));
 
       if (updateComment.fulfilled.match(result)) {
+        // Add history entry for comment edited
+        if (user && selectedComplaintForComments) {
+          dispatch(addCommentHistory({
+            userId: user._id,
+            complaintId: selectedComplaintForComments._id,
+            commentId: commentId,
+            commentText: updateData.comment,
+            category: selectedComplaintForComments.category,
+            actionType: 'COMMENT_EDITED',
+            previousText: 'Previous comment text' // Would need original text here
+          }));
+        }
+        
         // Fetch updated comments
         const fetchResult = await dispatch(fetchComments(selectedComplaintForComments._id));
         
@@ -629,6 +683,18 @@ const Trending = () => {
       const result = await dispatch(removeComment(commentId));
 
       if (removeComment.fulfilled.match(result)) {
+        // Add history entry for comment deleted
+        if (user && selectedComplaintForComments) {
+          dispatch(addCommentHistory({
+            userId: user._id,
+            complaintId: selectedComplaintForComments._id,
+            commentId: commentId,
+            commentText: 'Deleted comment text', // Would need original text here
+            category: selectedComplaintForComments.category,
+            actionType: 'COMMENT_DELETED'
+          }));
+        }
+        
         // Fetch updated comments
         const fetchResult = await dispatch(fetchComments(selectedComplaintForComments._id));
         

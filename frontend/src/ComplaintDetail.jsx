@@ -54,6 +54,11 @@ import {
     clearSuccess,
     clearError
 } from './auth/redux/complaintSlice';
+import { 
+    addComplaintVoteHistory, 
+    addComplaintStatusUpdatedHistory,
+    addCommentHistory 
+} from './auth/redux/historySlice';
 import "./Complaint.css";
 import "./ComplaintDetail.css";
 import "./Toast.css";
@@ -705,6 +710,16 @@ export default function ComplaintDetail() {
         try {
             const result = await dispatch(upvoteComplaint(id));
             if (upvoteComplaint.fulfilled.match(result)) {
+                // Add history entry for upvote
+                if (user && selectedComplaint) {
+                    dispatch(addComplaintVoteHistory({
+                        userId: user._id,
+                        complaintId: id,
+                        category: selectedComplaint.category,
+                        voteType: 'upvote'
+                    }));
+                }
+                
                 toast.success('Upvoted successfully!', {
                     duration: 2000,
                     position: 'top-center',
@@ -752,6 +767,16 @@ export default function ComplaintDetail() {
         try {
             const result = await dispatch(downvoteComplaint(id));
             if (downvoteComplaint.fulfilled.match(result)) {
+                // Add history entry for downvote
+                if (user && selectedComplaint) {
+                    dispatch(addComplaintVoteHistory({
+                        userId: user._id,
+                        complaintId: id,
+                        category: selectedComplaint.category,
+                        voteType: 'downvote'
+                    }));
+                }
+                
                 toast.success('Downvoted successfully!', {
                     duration: 2000,
                     position: 'top-center',

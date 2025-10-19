@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axios";
+import { 
+  addComplaintRegisteredHistory, 
+  addComplaintStatusUpdatedHistory, 
+  addComplaintVoteHistory,
+  addCommentHistory 
+} from "./historySlice";
 
 const initialState = {
   complaints: [],
@@ -11,7 +17,7 @@ const initialState = {
   lastSubmittedComplaint: null,
 };
 
-// 👇 Thunk to submit a new complaint
+// 👇 Thunk to submit a new complaint with history tracking
 export const submitComplaint = createAsyncThunk(
   'complaints/submit',
   async (complaintData, thunkAPI) => {
@@ -57,6 +63,28 @@ export const submitComplaint = createAsyncThunk(
       // Extract complaint data from the response
       const submittedComplaint = response.data.data || response.data;
       console.log("Submitted complaint data:", submittedComplaint);
+      
+      // Add history entry for complaint registration
+      const state = thunkAPI.getState();
+      const user = state.auth.user;
+      
+      if (user && submittedComplaint) {
+        try {
+          await thunkAPI.dispatch(addComplaintRegisteredHistory({
+            userId: user._id,
+            complaintId: submittedComplaint._id,
+            complaintDetails: {
+              title: complaintData.title,
+              category: complaintData.category,
+              severity: complaintData.severity,
+              address: complaintData.address
+            }
+          }));
+        } catch (historyError) {
+          console.warn('Failed to add complaint registration history:', historyError);
+          // Don't fail the main operation if history fails
+        }
+      }
       
       return {
         complaint: submittedComplaint,
