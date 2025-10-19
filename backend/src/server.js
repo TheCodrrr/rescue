@@ -22,6 +22,7 @@ import departmentRouter from "./routes/department.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
 import evidenceRouter from "./routes/evidence.routes.js";
 import railRouter from "./routes/rail.routes.js";
+import historyRouter from "./routes/history.routes.js";
 import { initRailSchema } from "./services/rail.service.js";
 import http from "http";
 import { Server } from "socket.io";
@@ -60,6 +61,7 @@ app.use("/api/v1/departments", departmentRouter);
 app.use("/api/v1/feedbacks", feedbackRouter);
 app.use("/api/v1/evidences", evidenceRouter);
 app.use("/api/v1/rail", railRouter);
+app.use("/api/v1/history", historyRouter);
 
 
 import { errorHandler } from "./middlewares/error.middlewares.js";
