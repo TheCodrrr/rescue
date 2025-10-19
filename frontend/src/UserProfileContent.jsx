@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { updateUser, uploadProfileImage, changePassword, deleteUser } from './auth/redux/authSlice';
 import MyComplaints from './MyComplaints';
 import UserHistory from './UserHistory';
+import Analytics from './Analytics';
 import { 
     User, 
     Mail, 
@@ -937,14 +938,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     );
 
     const renderAnalyticsContent = () => (
-        <div className="space-y-8">
-            <div className="profile-card">
-                <h2 className="section-title">Analytics</h2>
-                <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
-                    Analytics dashboard coming soon...
-                </p>
-            </div>
-        </div>
+        <Analytics />
     );
 
     const renderContent = () => {
