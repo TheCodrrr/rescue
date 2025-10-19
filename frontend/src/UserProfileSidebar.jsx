@@ -6,12 +6,10 @@ import {
     User, 
     Settings, 
     Bell, 
-    Clock, 
-    Activity, 
-    LogOut, 
-    ArrowLeft,
-    Shield,
-    CircleAlert
+    Clock,
+    LogOut,
+    CircleAlert,
+    BarChart3,
 } from 'lucide-react';
 
 function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
@@ -38,10 +36,10 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
     const sidebarLinks = [
         { id: 'profile', label: 'Profile', icon: User },
         { id: 'my-complaint', label: 'Complaints', icon: CircleAlert },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'History', label: 'History', icon: Clock },
-        { id: 'activity', label: 'Activity Log', icon: Activity },
+        { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
     return (
