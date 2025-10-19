@@ -47,13 +47,6 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
     return (
         <div className="profile-sidebar">
             <div className="sidebar-content">
-                {/* Logo Section */}
-                <div className="profile-logo">
-                    <div className="logo-icon">
-                        <Shield className="w-6 h-6 text-white" />
-                    </div>
-                    <span className="logo-text">RescueApp</span>
-                </div>
 
                 {/* User Quick Info */}
                 <div className="user-quick-info">

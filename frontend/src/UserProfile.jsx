@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { loadUser } from "./auth/redux/authSlice";
 import { ArrowLeft } from "lucide-react";
+import Navbar from './Navbar';
 import UserProfileSidebar from './UserProfileSidebar';
 import UserProfileContent from './UserProfileContent';
 
@@ -18,8 +19,8 @@ function UserProfile() {
     const hasLoadedUser = useRef(false);
     const contentRef = useRef(null);
     
-    // Handle tab changes and update URL
-    const handleSectionChange = (section) => {
+    // Handle tab changes and update URL - memoized to prevent re-creation
+    const handleSectionChange = useCallback((section) => {
         console.log("Section change requested:", section);
         if (section !== activeSection) {
             setActiveSection(section);
@@ -48,7 +49,7 @@ function UserProfile() {
                 window.scrollTo(0, 0);
             }, 50); // Small delay to ensure DOM has updated
         }
-    };
+    }, [activeSection, setSearchParams]);
     
     // Load user data when component mounts - runs only once
     useEffect(() => {
@@ -87,7 +88,7 @@ function UserProfile() {
         };
     }, []);
     
-    const handleBackToHome = () => {
+    const handleBackToHome = useCallback(() => {
         console.log("Back button clicked. Auth state:", { isAuthenticated, hasToken: !!localStorage.getItem("token") });
         
         // Try to go back to previous page first, fallback to home routes
@@ -101,7 +102,7 @@ function UserProfile() {
                 navigate('/');
             }
         }
-    };
+    }, [isAuthenticated, navigate]);
     
     // Show loading state only during initial load (no user data and specific loading condition)
     if (!user && loading && !hasLoadedUser.current && localStorage.getItem("token")) {
@@ -125,8 +126,14 @@ function UserProfile() {
         return null; // Will redirect via useEffect
     }
 
+    // Memoize navbar to prevent re-renders
+    const navbarComponent = useMemo(() => <Navbar />, []);
+
     return (
         <div className="user-profile-container">
+            {/* Navbar */}
+            {navbarComponent}
+            
             {/* Background Elements */}
             <div className="profile-background">
                 <div className="profile-bg-element"></div>

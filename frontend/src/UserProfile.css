@@ -140,6 +140,7 @@
     position: relative;
     overflow: hidden;
     display: flex;
+    padding-top: 80px; /* Add padding to account for navbar height */
 }
 
 /* Add special background effects to make it look important */
@@ -208,6 +209,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 0; /* Ensure background stays behind everything */
 }
 
 .profile-bg-element {
@@ -252,6 +254,7 @@
     position: fixed;
     left: 0;
     top: 0;
+    padding-top: 80px; /* Add padding to account for navbar */
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -494,7 +497,7 @@
     padding: 0;
     position: relative;
     z-index: 2;
-    height: 100vh;
+    height: calc(100vh - 80px); /* Adjust height to account for navbar */
     overflow-y: auto;
     overflow-x: hidden;
     top: 0;
