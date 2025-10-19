@@ -332,7 +332,10 @@ function MyComplaints() {
     };
 
     const handleVisitComplaint = (complaint) => {
-        navigate(`/complaint/${complaint._id}`);
+        // Clear any potential state conflicts and navigate
+        setTimeout(() => {
+            navigate(`/complaint/${complaint._id}`, { replace: true });
+        }, 0);
     };
 
     const renderStars = (rating) => {
