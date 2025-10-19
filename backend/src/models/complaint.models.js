@@ -34,8 +34,7 @@ const complaintSchema = new mongoose.Schema({
         type: { type: String, enum: ['Point'], required: true  },
         coordinates: {
             type: [Number],
-            required: true,
-            index: '2dsphere' // Enable geospatial queries
+            required: true
         }
     },
     address: String,
@@ -98,6 +97,9 @@ const complaintSchema = new mongoose.Schema({
         default: null,
     }
 }, { timestamps: true });
+
+// Create geospatial index for location queries
+complaintSchema.index({ location: '2dsphere' });
 
 complaintSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
     try {
