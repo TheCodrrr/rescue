@@ -1,7 +1,8 @@
-import { useTrendingComplaints } from "./hooks/useTrendingComplaints.jsx";
+import { useTrendingComplaintsCache } from "./hooks/useTrendingComplaintsCache.jsx";
 import { useInView } from "react-intersection-observer";
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { upvoteComplaint, downvoteComplaint, addComment, fetchComments, updateComment, removeComment } from "./auth/redux/complaintSlice.js";
 import { addComplaintVoteHistory, addCommentHistory } from "./auth/redux/historySlice.js";
 import { toast } from 'react-hot-toast';
@@ -37,10 +38,22 @@ import "./Trending.css";
 
 const Trending = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { complaints: reduxComplaints } = useSelector((state) => state.complaints);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, error } =
-    useTrendingComplaints();
+  const { 
+    data, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage, 
+    status, 
+    error,
+    interactionCount,
+    recordInteraction,
+    clearCacheAndRefetch,
+    isUsingCache,
+    interactionsRemaining
+  } = useTrendingComplaintsCache();
   
   // State for voting, comments, and modals
   const [votingInProgress, setVotingInProgress] = useState({});
@@ -364,6 +377,32 @@ const Trending = () => {
     try {
       const result = await dispatch(upvoteComplaint(complaintId));
       if (upvoteComplaint.fulfilled.match(result)) {
+        // Record interaction for cache management
+        recordInteraction();
+        
+        // Update React Query cache directly with the new vote counts
+        queryClient.setQueryData(["trendingComplaints"], (oldData) => {
+          if (!oldData) return oldData;
+          
+          return {
+            ...oldData,
+            pages: oldData.pages.map(page => ({
+              ...page,
+              complaints: page.complaints.map(complaint => {
+                if (complaint._id === complaintId) {
+                  return {
+                    ...complaint,
+                    upvote: result.payload.upvotes,
+                    downvote: result.payload.downvotes,
+                    userVote: result.payload.userVote
+                  };
+                }
+                return complaint;
+              })
+            }))
+          };
+        });
+        
         // Add history entry for upvote
         if (user) {
           // Find the complaint to get its category
@@ -377,9 +416,6 @@ const Trending = () => {
             }));
           }
         }
-        
-        // Force refetch of trending data to get updated vote counts
-        window.location.reload();
         
         toast.success('Upvoted successfully!', {
           duration: 2000,
@@ -427,6 +463,32 @@ const Trending = () => {
     try {
       const result = await dispatch(downvoteComplaint(complaintId));
       if (downvoteComplaint.fulfilled.match(result)) {
+        // Record interaction for cache management
+        recordInteraction();
+        
+        // Update React Query cache directly with the new vote counts
+        queryClient.setQueryData(["trendingComplaints"], (oldData) => {
+          if (!oldData) return oldData;
+          
+          return {
+            ...oldData,
+            pages: oldData.pages.map(page => ({
+              ...page,
+              complaints: page.complaints.map(complaint => {
+                if (complaint._id === complaintId) {
+                  return {
+                    ...complaint,
+                    upvote: result.payload.upvotes,
+                    downvote: result.payload.downvotes,
+                    userVote: result.payload.userVote
+                  };
+                }
+                return complaint;
+              })
+            }))
+          };
+        });
+        
         // Add history entry for downvote
         if (user) {
           // Find the complaint to get its category
@@ -440,9 +502,6 @@ const Trending = () => {
             }));
           }
         }
-        
-        // Force refetch of trending data to get updated vote counts
-        window.location.reload();
         
         toast.success('Downvoted successfully!', {
           duration: 2000,
@@ -568,6 +627,9 @@ const Trending = () => {
       }));
 
       if (addComment.fulfilled.match(result)) {
+        // Record interaction for cache management
+        recordInteraction();
+        
         // Add history entry for comment added
         if (user && selectedComplaintForComments) {
           dispatch(addCommentHistory({
