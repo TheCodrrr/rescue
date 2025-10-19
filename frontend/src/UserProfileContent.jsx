@@ -936,12 +936,25 @@ function UserProfileContent({ activeSection, contentRef }) {
         </div>
     );
 
+    const renderAnalyticsContent = () => (
+        <div className="space-y-8">
+            <div className="profile-card">
+                <h2 className="section-title">Analytics</h2>
+                <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
+                    Analytics dashboard coming soon...
+                </p>
+            </div>
+        </div>
+    );
+
     const renderContent = () => {
         switch (activeSection) {
             case 'profile':
                 return renderProfileContent();
             case 'my-complaint':
                 return <MyComplaints />;
+            case 'analytics':
+                return renderAnalyticsContent();
             case 'settings':
                 return renderSettingsContent();
             case 'notifications':
