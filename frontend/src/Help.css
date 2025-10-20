@@ -18,12 +18,12 @@
     right: 0;
     bottom: 0;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    animation: grain 20s linear infinite;
+    animation: helpGrainAnimation 20s linear infinite;
     pointer-events: none;
     z-index: 0;
 }
 
-@keyframes grain {
+@keyframes helpGrainAnimation {
     0%, 100% { transform: translate(0, 0); }
     10% { transform: translate(-5%, -10%); }
     20% { transform: translate(-15%, 5%); }
@@ -60,7 +60,7 @@
     border-radius: 50%;
     filter: blur(80px);
     opacity: 0.15;
-    animation: floatContained 20s ease-in-out infinite;
+    animation: helpFloatContained 20s ease-in-out infinite;
 }
 
 .hero-bg-element:nth-child(1) {
@@ -91,7 +91,7 @@
     animation-delay: 14s;
 }
 
-@keyframes floatContained {
+@keyframes helpFloatContained {
     0%, 100% { transform: translate(0, 0) scale(1); }
     33% { transform: translate(-15px, -15px) scale(1.05); }
     66% { transform: translate(15px, 15px) scale(0.95); }
@@ -114,10 +114,10 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
-    animation: pulse 2s ease-in-out infinite;
+    animation: helpIconPulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
+@keyframes helpIconPulse {
     0%, 100% { transform: scale(1); box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4); }
     50% { transform: scale(1.05); box-shadow: 0 25px 70px rgba(59, 130, 246, 0.6); }
 }
@@ -188,18 +188,18 @@
 }
 
 /* Section Styles */
-section {
+.help-page section {
     padding: 6rem 0;
     position: relative;
     z-index: 1;
 }
 
-.section-header {
+.help-section-header {
     text-align: center;
     margin-bottom: 4rem;
 }
 
-.section-icon {
+.help-section-icon {
     width: 48px;
     height: 48px;
     color: #60a5fa;
@@ -207,7 +207,7 @@ section {
     display: block;
 }
 
-.section-title {
+.help-section-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0 0 1rem 0;
@@ -217,7 +217,7 @@ section {
     background-clip: text;
 }
 
-.section-subtitle {
+.help-section-subtitle {
     font-size: 1.125rem;
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
@@ -615,13 +615,13 @@ section {
 }
 
 /* Contact */
-.contact-grid {
+.help-contact-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
 }
 
-.contact-card {
+.help-contact-card {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -631,14 +631,14 @@ section {
     transition: all 0.3s ease;
 }
 
-.contact-card:hover {
+.help-contact-card:hover {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.25);
     box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
     transform: translateY(-5px);
 }
 
-.contact-icon {
+.help-contact-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 1.5rem;
@@ -649,19 +649,19 @@ section {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.contact-title {
+.help-contact-title {
     font-size: 1.5rem;
     font-weight: 600;
     margin: 0 0 0.75rem 0;
     color: white;
 }
 
-.contact-description {
+.help-contact-description {
     color: rgba(255, 255, 255, 0.6);
     margin: 0 0 1.5rem 0;
 }
 
-.contact-link {
+.help-contact-link {
     color: #60a5fa;
     text-decoration: none;
     font-weight: 600;
@@ -669,7 +669,7 @@ section {
     transition: all 0.3s ease;
 }
 
-.contact-link:hover {
+.help-contact-link:hover {
     color: #93c5fd;
     text-decoration: underline;
 }
@@ -692,17 +692,17 @@ section {
         padding: 0 1.5rem;
     }
 
-    section {
+    .help-page section {
         padding: 4rem 0;
     }
 
-    .section-title {
+    .help-section-title {
         font-size: 2rem;
     }
 
     .quick-links-grid,
     .features-grid,
-    .contact-grid {
+    .help-contact-grid {
         grid-template-columns: 1fr;
     }
 
@@ -734,7 +734,7 @@ section {
         height: 80px;
     }
 
-    .section-title {
+    .help-section-title {
         font-size: 1.75rem;
     }
 

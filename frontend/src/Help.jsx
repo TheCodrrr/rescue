@@ -368,11 +368,11 @@ const Help = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="section-header"
+                        className="help-section-header"
                     >
-                        <BookOpen className="section-icon" />
-                        <h2 className="section-title">How It Works</h2>
-                        <p className="section-subtitle">
+                        <BookOpen className="help-section-icon" />
+                        <h2 className="help-section-title">How It Works</h2>
+                        <p className="help-section-subtitle">
                             Get started in just 4 simple steps
                         </p>
                     </motion.div>
@@ -422,11 +422,11 @@ const Help = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="section-header"
+                        className="help-section-header"
                     >
-                        <Zap className="section-icon" />
-                        <h2 className="section-title">Platform Features</h2>
-                        <p className="section-subtitle">
+                        <Zap className="help-section-icon" />
+                        <h2 className="help-section-title">Platform Features</h2>
+                        <p className="help-section-subtitle">
                             Powerful tools to help you manage and track complaints
                         </p>
                     </motion.div>
@@ -470,11 +470,11 @@ const Help = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="section-header"
+                        className="help-section-header"
                     >
-                        <MessageCircle className="section-icon" />
-                        <h2 className="section-title">Frequently Asked Questions</h2>
-                        <p className="section-subtitle">
+                        <MessageCircle className="help-section-icon" />
+                        <h2 className="help-section-title">Frequently Asked Questions</h2>
+                        <p className="help-section-subtitle">
                             Find quick answers to common questions
                         </p>
                     </motion.div>
@@ -534,11 +534,11 @@ const Help = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="section-header"
+                        className="help-section-header"
                     >
-                        <Heart className="section-icon" />
-                        <h2 className="section-title">What Our Users Say</h2>
-                        <p className="section-subtitle">
+                        <Heart className="help-section-icon" />
+                        <h2 className="help-section-title">What Our Users Say</h2>
+                        <p className="help-section-subtitle">
                             Real experiences from real people
                         </p>
                     </motion.div>
@@ -596,11 +596,11 @@ const Help = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="section-header"
+                        className="help-section-header"
                     >
-                        <Phone className="section-icon" />
-                        <h2 className="section-title">Still Need Help?</h2>
-                        <p className="section-subtitle">
+                        <Phone className="help-section-icon" />
+                        <h2 className="help-section-title">Still Need Help?</h2>
+                        <p className="help-section-subtitle">
                             Our support team is here to assist you
                         </p>
                     </motion.div>
@@ -610,37 +610,37 @@ const Help = () => {
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
-                        className="contact-grid"
+                        className="help-contact-grid"
                     >
-                        <motion.div variants={itemVariants} className="contact-card">
-                            <div className="contact-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #60a5fa)' }}>
+                        <motion.div variants={itemVariants} className="help-contact-card">
+                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #60a5fa)' }}>
                                 <Mail size={28} />
                             </div>
-                            <h3 className="contact-title">Email Support</h3>
-                            <p className="contact-description">Get help via email</p>
-                            <a href="mailto:support@rescue.com" className="contact-link">
+                            <h3 className="help-contact-title">Email Support</h3>
+                            <p className="help-contact-description">Get help via email</p>
+                            <a href="mailto:support@rescue.com" className="help-contact-link">
                                 support@rescue.com
                             </a>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="contact-card">
-                            <div className="contact-icon" style={{ background: 'linear-gradient(135deg, #10b981, #34d399)' }}>
+                        <motion.div variants={itemVariants} className="help-contact-card">
+                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #10b981, #34d399)' }}>
                                 <Phone size={28} />
                             </div>
-                            <h3 className="contact-title">Phone Support</h3>
-                            <p className="contact-description">Call us directly</p>
-                            <a href="tel:+1234567890" className="contact-link">
+                            <h3 className="help-contact-title">Phone Support</h3>
+                            <p className="help-contact-description">Call us directly</p>
+                            <a href="tel:+1234567890" className="help-contact-link">
                                 +1 (234) 567-890
                             </a>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="contact-card">
-                            <div className="contact-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
+                        <motion.div variants={itemVariants} className="help-contact-card">
+                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
                                 <Clock size={28} />
                             </div>
-                            <h3 className="contact-title">Business Hours</h3>
-                            <p className="contact-description">We're available</p>
-                            <p className="contact-link">
+                            <h3 className="help-contact-title">Business Hours</h3>
+                            <p className="help-contact-description">We're available</p>
+                            <p className="help-contact-link">
                                 Mon-Fri: 9AM - 6PM
                             </p>
                         </motion.div>
