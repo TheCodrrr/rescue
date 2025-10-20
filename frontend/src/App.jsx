@@ -13,6 +13,7 @@ import Complaint from './Complaint'
 import FollowUp from './FollowUp'
 import Trending from './Trending.jsx'
 import ComplaintDetail from './ComplaintDetail.jsx'
+import Help from './Help.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/trending" element={<Trending />} />
+            <Route path="/help" element={<Help />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/user" element={

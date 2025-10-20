@@ -9,33 +9,18 @@ const NavLinks = React.memo(({ links }) => {
     return (
         <>
             {links.map((link, index) => (
-                link.href.startsWith('#') ? (
-                    <a
-                        key={link.name}
-                        href={link.href}
-                        className="navbar-link"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                        <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                        </svg>
-                        <span className="navbar-link-text">{link.name}</span>
-                        <div className="navbar-link-hover-effect"></div>
-                    </a>
-                ) : (
-                    <Link
-                        key={link.name}
-                        to={link.href}
-                        className="navbar-link"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                        <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                        </svg>
-                        <span className="navbar-link-text">{link.name}</span>
-                        <div className="navbar-link-hover-effect"></div>
-                    </Link>
-                )
+                <Link
+                    key={link.name}
+                    to={link.href}
+                    className="navbar-link"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                    <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
+                    </svg>
+                    <span className="navbar-link-text">{link.name}</span>
+                    <div className="navbar-link-hover-effect"></div>
+                </Link>
             ))}
         </>
     );
@@ -149,7 +134,7 @@ const Navbar = () => {
     const navLinks = useMemo(() => [
         { name: 'Home', href: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
         { name: 'Trending', href: '/trending', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
-        { name: 'Help', href: '#help', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { name: 'Help', href: '/help', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
         { name: 'Authority', href: '#authority', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' }
     ], []);
 
@@ -205,33 +190,18 @@ const Navbar = () => {
             <div className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu-active' : ''}`}>
                 <div className="mobile-menu-content">
                     {displayNavLinks.map((link, index) => (
-                        link.href.startsWith('#') ? (
-                            <a
-                                key={link.name}
-                                href={link.href}
-                                className="mobile-menu-link"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                                onClick={closeMobileMenu}
-                            >
-                                <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                                </svg>
-                                <span className="mobile-menu-link-text">{link.name}</span>
-                            </a>
-                        ) : (
-                            <Link
-                                key={link.name}
-                                to={link.href}
-                                className="mobile-menu-link"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                                onClick={closeMobileMenu}
-                            >
-                                <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                                </svg>
-                                <span className="mobile-menu-link-text">{link.name}</span>
-                            </Link>
-                        )
+                        <Link
+                            key={link.name}
+                            to={link.href}
+                            className="mobile-menu-link"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                            onClick={closeMobileMenu}
+                        >
+                            <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
+                            </svg>
+                            <span className="mobile-menu-link-text">{link.name}</span>
+                        </Link>
                     ))}
                 </div>
             </div>
