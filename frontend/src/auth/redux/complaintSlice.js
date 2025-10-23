@@ -271,7 +271,7 @@ export const upvoteComplaint = createAsyncThunk(
       }
 
       console.log("Token found, making request to upvote complaint");
-      const response = await axiosInstance.patch(`/complaints/${complaintId}/upvote`);
+      const response = await axiosInstance.patch(`/complaints/${complaintId}/upvote`, {});
       console.log("Upvote complaint API response:", response.data);
       
       // Try multiple ways to extract the data
@@ -328,7 +328,7 @@ export const downvoteComplaint = createAsyncThunk(
       }
 
       console.log("Token found, making request to downvote complaint");
-      const response = await axiosInstance.patch(`/complaints/${complaintId}/downvote`);
+      const response = await axiosInstance.patch(`/complaints/${complaintId}/downvote`, {});
       console.log("Downvote complaint API response:", response.data);
       
       // Try multiple ways to extract the data
@@ -727,8 +727,6 @@ const complaintSlice = createSlice({
       .addCase(upvoteComplaint.fulfilled, (state, action) => {
         console.log("Upvote fulfilled with payload:", action.payload);
         const { complaintId, upvotes, downvotes, userVote } = action.payload;
-        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
-        console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
         
         // Try different ways to match the complaint ID
         const complaint = state.complaints.find(c => 
@@ -738,8 +736,6 @@ const complaintSlice = createSlice({
           c.id?.toString() === complaintId?.toString()
         );
         
-        console.log("Found complaint for upvote:", complaint);
-        
         if (complaint) {
           console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
@@ -747,7 +743,8 @@ const complaintSlice = createSlice({
           complaint.userVote = userVote;
           console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
-          console.error("Could not find complaint with ID:", complaintId);
+          // Complaint not in current state.complaints array (e.g., viewing from different context)
+          console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
         }
         
         // Also update selectedComplaint if it matches the voted complaint
@@ -775,8 +772,6 @@ const complaintSlice = createSlice({
       .addCase(downvoteComplaint.fulfilled, (state, action) => {
         console.log("Downvote fulfilled with payload:", action.payload);
         const { complaintId, upvotes, downvotes, userVote } = action.payload;
-        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
-        console.log("All complaint IDs in state:", state.complaints.map(c => ({ id: c._id, type: typeof c._id, title: c.title })));
         
         // Try different ways to match the complaint ID
         const complaint = state.complaints.find(c => 
@@ -786,8 +781,6 @@ const complaintSlice = createSlice({
           c.id?.toString() === complaintId?.toString()
         );
         
-        console.log("Found complaint for downvote:", complaint);
-        
         if (complaint) {
           console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
@@ -795,7 +788,8 @@ const complaintSlice = createSlice({
           complaint.userVote = userVote;
           console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
-          console.error("Could not find complaint with ID:", complaintId);
+          // Complaint not in current state.complaints array (e.g., viewing from different context)
+          console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
         }
         
         // Also update selectedComplaint if it matches the voted complaint

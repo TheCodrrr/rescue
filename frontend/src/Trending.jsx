@@ -377,6 +377,8 @@ const Trending = () => {
     try {
       const result = await dispatch(upvoteComplaint(complaintId));
       if (upvoteComplaint.fulfilled.match(result)) {
+        console.log('Upvote result payload:', result.payload);
+        
         // Record interaction for cache management
         recordInteraction();
         
@@ -384,23 +386,33 @@ const Trending = () => {
         queryClient.setQueryData(["trendingComplaints"], (oldData) => {
           if (!oldData) return oldData;
           
-          return {
+          const newData = {
             ...oldData,
             pages: oldData.pages.map(page => ({
               ...page,
               complaints: page.complaints.map(complaint => {
                 if (complaint._id === complaintId) {
-                  return {
+                  const updatedComplaint = {
                     ...complaint,
                     upvote: result.payload.upvotes,
                     downvote: result.payload.downvotes,
                     userVote: result.payload.userVote
                   };
+                  console.log('Updating complaint cache:', {
+                    id: complaintId,
+                    oldUpvote: complaint.upvote,
+                    newUpvote: result.payload.upvotes,
+                    oldDownvote: complaint.downvote,
+                    newDownvote: result.payload.downvotes
+                  });
+                  return updatedComplaint;
                 }
                 return complaint;
               })
             }))
           };
+          
+          return newData;
         });
         
         // Add history entry for upvote
@@ -463,6 +475,8 @@ const Trending = () => {
     try {
       const result = await dispatch(downvoteComplaint(complaintId));
       if (downvoteComplaint.fulfilled.match(result)) {
+        console.log('Downvote result payload:', result.payload);
+        
         // Record interaction for cache management
         recordInteraction();
         
@@ -470,23 +484,33 @@ const Trending = () => {
         queryClient.setQueryData(["trendingComplaints"], (oldData) => {
           if (!oldData) return oldData;
           
-          return {
+          const newData = {
             ...oldData,
             pages: oldData.pages.map(page => ({
               ...page,
               complaints: page.complaints.map(complaint => {
                 if (complaint._id === complaintId) {
-                  return {
+                  const updatedComplaint = {
                     ...complaint,
                     upvote: result.payload.upvotes,
                     downvote: result.payload.downvotes,
                     userVote: result.payload.userVote
                   };
+                  console.log('Updating complaint cache (downvote):', {
+                    id: complaintId,
+                    oldUpvote: complaint.upvote,
+                    newUpvote: result.payload.upvotes,
+                    oldDownvote: complaint.downvote,
+                    newDownvote: result.payload.downvotes
+                  });
+                  return updatedComplaint;
                 }
                 return complaint;
               })
             }))
           };
+          
+          return newData;
         });
         
         // Add history entry for downvote

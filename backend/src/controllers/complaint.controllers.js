@@ -414,7 +414,15 @@ const upvoteComplaint = asyncHandler(async (req, res) => {
         complaint.votedUsers.push({ user: userId, vote: "upvote" });
     }
 
-    await complaint.save();
+    // Use updateOne to bypass validation on other fields
+    await Complaint.updateOne(
+        { _id: complaintId },
+        { 
+            upvote: complaint.upvote,
+            downvote: complaint.downvote,
+            votedUsers: complaint.votedUsers
+        }
+    );
 
     // Determine current user's vote status
     const userVote = complaint.votedUsers.find(vote => 
@@ -425,7 +433,8 @@ const upvoteComplaint = asyncHandler(async (req, res) => {
         success: true,
         message: "Upvote recorded successfully.",
         data: {
-            ...complaint.toObject(),
+            upvote: complaint.upvote,
+            downvote: complaint.downvote,
             userVote: userVote ? userVote.vote : null
         }
     })
@@ -463,7 +472,15 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
         complaint.votedUsers.push({ user: userId, vote: "downvote" });
     }
 
-    await complaint.save();
+    // Use updateOne to bypass validation on other fields
+    await Complaint.updateOne(
+        { _id: complaintId },
+        { 
+            upvote: complaint.upvote,
+            downvote: complaint.downvote,
+            votedUsers: complaint.votedUsers
+        }
+    );
 
     // Determine current user's vote status
     const userVote = complaint.votedUsers.find(vote => 
@@ -474,7 +491,8 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
         success: true,
         message: "Downvote recorded successfully.",
         data: {
-            ...complaint.toObject(),
+            upvote: complaint.upvote,
+            downvote: complaint.downvote,
             userVote: userVote ? userVote.vote : null
         }
     });
