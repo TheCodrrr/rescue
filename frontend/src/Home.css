@@ -599,6 +599,130 @@ html, body {
     overflow: hidden;
     border: 1px solid rgba(59, 130, 246, 0.18);
     background: rgba(255,255,255,0.15);
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer; /* Pointer cursor when inactive to indicate clickable */
+}
+
+/* Map inactive state - add subtle blur */
+.home-live-map-container.map-inactive {
+    filter: blur(1px);
+    cursor: pointer;
+}
+
+/* Map active state - remove blur and change cursor */
+.home-live-map-container.map-active {
+    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3), 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    filter: blur(0px);
+    cursor: grab;
+}
+
+/* When dragging the map */
+.home-live-map-container.map-active:active {
+    cursor: grabbing;
+}
+
+/* Override Leaflet default cursor behavior */
+.home-live-map-container.map-inactive .leaflet-container {
+    cursor: pointer !important;
+}
+
+.home-live-map-container.map-active .leaflet-container {
+    cursor: grab !important;
+}
+
+.home-live-map-container.map-active .leaflet-container.leaflet-dragging {
+    cursor: grabbing !important;
+}
+
+/* Event blocker overlay - completely blocks all map events when inactive */
+.map-event-blocker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+    pointer-events: all;
+    transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+/* Toggle detector overlay - detects clicks to deactivate when map is active */
+.map-toggle-detector {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    z-index: 500;
+    pointer-events: all;
+    cursor: grab;
+}
+
+.map-toggle-detector:active {
+    cursor: grabbing;
+}
+
+/* Map inactive overlay - deprecated, replaced by event blocker */
+.map-inactive-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 400;
+    transition: opacity 0.3s ease;
+}
+
+.map-inactive-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e40af;
+    animation: fadeInScale 0.3s ease;
+}
+
+.map-inactive-message .map-icon {
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .home-live-indicator {
@@ -2003,6 +2127,7 @@ html, body {
     overflow: auto;
     /* min-height: 0; */
     height: 100%;
+    position: relative; /* Needed for absolute positioned children */
 }
 
 /* Map panel specific styles */

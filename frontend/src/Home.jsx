@@ -51,6 +51,9 @@ export default function Home() {
     const [userLocation, setUserLocation] = useState(null);
     const [mapReady, setMapReady] = useState(false);
     
+    // Map interaction state
+    const [isMapActive, setIsMapActive] = useState(false);
+    
     // Recent complaints state for right panel
     const [recentComplaints, setRecentComplaints] = useState([]);
     
@@ -615,6 +618,27 @@ export default function Home() {
         };
     }, [userLocation, mapReady, dispatch]);
 
+    // Handle map active state changes
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        const map = mapRef.current;
+        
+        if (isMapActive) {
+            // Enable zoom interactions when map is active
+            map.scrollWheelZoom.enable();
+            map.doubleClickZoom.enable();
+            map.touchZoom.enable();
+            console.log('🗺️ Map activated - zoom enabled');
+        } else {
+            // Disable zoom interactions when map is inactive
+            map.scrollWheelZoom.disable();
+            map.doubleClickZoom.disable();
+            map.touchZoom.disable();
+            console.log('🗺️ Map deactivated - zoom disabled');
+        }
+    }, [isMapActive]);
+
     // Map initialization useEffect - runs when userLocation is available
     useEffect(() => {
         if (!userLocation) {
@@ -656,7 +680,12 @@ export default function Home() {
                 }
                 
                 // Initialize map with user's location
-                map = L.map("live-map").setView([userLocation.lat, userLocation.lng], 13);
+                map = L.map("live-map", {
+                    scrollWheelZoom: false, // Disable scroll wheel zoom by default
+                    doubleClickZoom: false, // Disable double click zoom when inactive
+                    touchZoom: false, // Disable touch zoom when inactive
+                    dragging: true // Keep dragging enabled
+                }).setView([userLocation.lat, userLocation.lng], 13);
                 mapRef.current = map;
                 
                 // Force initial size calculation
@@ -909,7 +938,9 @@ export default function Home() {
             // Clean up marker references
             incidentMarkersRef.current = [];
             
+            // Reset map state
             setMapReady(false);
+            setIsMapActive(false);
         };
     }, [userLocation, isAuthenticated, user, locationPermission]); // Dependencies: userLocation, auth state
 
@@ -949,7 +980,7 @@ export default function Home() {
                         <div className="hero-content">
                             <h1 className="hero-title">Report. Track. Rescue.</h1>
                             <p className="hero-subtitle">Get help or help others by reporting incidents in real-time.</p>
-                            <button className="report-incident-btn" onClick={() => navigate('/report')}>
+                            <button className="report-incident-btn" onClick={() => navigate('/complain')}>
                                 <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
@@ -1045,7 +1076,43 @@ export default function Home() {
                                 )}
 
                                 {userLocation ? (
-                                    <div id="live-map" className="home-live-map-container"></div>
+                                    <div style={{ position: 'relative', flex: 1, width: '100%', minHeight: '300px' }}>
+                                        <div 
+                                            id="live-map" 
+                                            className={`home-live-map-container ${isMapActive ? 'map-active' : 'map-inactive'}`}
+                                        ></div>
+                                        
+                                        {/* Event blocker overlay - blocks all map interactions when inactive */}
+                                        {!isMapActive ? (
+                                            <div 
+                                                className="map-event-blocker"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setIsMapActive(true);
+                                                }}
+                                            >
+                                                {/* Message overlay inside blocker */}
+                                                <div className="map-inactive-message">
+                                                    <svg className="map-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                                    </svg>
+                                                    <span>Click to activate map zoom</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div 
+                                                className="map-toggle-detector"
+                                                onClick={(e) => {
+                                                    // Check if click is on map itself (not on markers or popups)
+                                                    const target = e.target;
+                                                    const isMarker = target.closest('.leaflet-marker-icon, .leaflet-popup');
+                                                    if (!isMarker) {
+                                                        setIsMapActive(false);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    </div>
                                 ) : (
                                     <div className="home-map-loading-container">
                                         <div className="home-map-loading-spinner"></div>
