@@ -655,6 +655,7 @@ html, body {
     cursor: pointer;
     pointer-events: all;
     transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+    border-radius: 25px;
 }
 
 /* Toggle detector overlay - detects clicks to deactivate when map is active */
@@ -667,8 +668,8 @@ html, body {
     width: 100%;
     height: 100%;
     background: transparent;
-    z-index: 500;
-    pointer-events: all;
+    z-index: -1; /* Place behind map so it doesn't interfere */
+    pointer-events: none; /* Don't block map interactions */
     cursor: grab;
 }
 

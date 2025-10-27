@@ -626,15 +626,15 @@ export default function Home() {
         
         if (isMapActive) {
             // Enable zoom interactions when map is active
-            map.scrollWheelZoom.enable();
-            map.doubleClickZoom.enable();
-            map.touchZoom.enable();
+            if (map.scrollWheelZoom) map.scrollWheelZoom.enable();
+            if (map.doubleClickZoom) map.doubleClickZoom.enable();
+            if (map.touchZoom) map.touchZoom.enable();
             console.log('🗺️ Map activated - zoom enabled');
         } else {
             // Disable zoom interactions when map is inactive
-            map.scrollWheelZoom.disable();
-            map.doubleClickZoom.disable();
-            map.touchZoom.disable();
+            if (map.scrollWheelZoom) map.scrollWheelZoom.disable();
+            if (map.doubleClickZoom) map.doubleClickZoom.disable();
+            if (map.touchZoom) map.touchZoom.disable();
             console.log('🗺️ Map deactivated - zoom disabled');
         }
     }, [isMapActive]);
@@ -684,7 +684,8 @@ export default function Home() {
                     scrollWheelZoom: false, // Disable scroll wheel zoom by default
                     doubleClickZoom: false, // Disable double click zoom when inactive
                     touchZoom: false, // Disable touch zoom when inactive
-                    dragging: true // Keep dragging enabled
+                    dragging: true, // Keep dragging enabled
+                    zoomControl: true // Enable zoom control buttons
                 }).setView([userLocation.lat, userLocation.lng], 13);
                 mapRef.current = map;
                 
@@ -700,6 +701,18 @@ export default function Home() {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19
                 }).addTo(map);
+
+                // Add click handler to deactivate map when clicking on empty space
+                map.on('click', function(e) {
+                    // Only deactivate if map is active and click is not on a marker
+                    const clickedElement = e.originalEvent.target;
+                    const isMarkerClick = clickedElement.closest('.leaflet-marker-icon') || 
+                                         clickedElement.closest('.leaflet-popup');
+                    
+                    if (!isMarkerClick) {
+                        setIsMapActive(false);
+                    }
+                });
 
                 // (Reverted) No additional whenReady/resize logic
                 // Add user location marker
@@ -1083,7 +1096,7 @@ export default function Home() {
                                         ></div>
                                         
                                         {/* Event blocker overlay - blocks all map interactions when inactive */}
-                                        {!isMapActive ? (
+                                        {!isMapActive && (
                                             <div 
                                                 className="map-event-blocker"
                                                 onClick={(e) => {
@@ -1099,18 +1112,6 @@ export default function Home() {
                                                     <span>Click to activate map zoom</span>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <div 
-                                                className="map-toggle-detector"
-                                                onClick={(e) => {
-                                                    // Check if click is on map itself (not on markers or popups)
-                                                    const target = e.target;
-                                                    const isMarker = target.closest('.leaflet-marker-icon, .leaflet-popup');
-                                                    if (!isMarker) {
-                                                        setIsMapActive(false);
-                                                    }
-                                                }}
-                                            />
                                         )}
                                     </div>
                                 ) : (
