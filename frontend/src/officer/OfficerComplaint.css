@@ -1,0 +1,290 @@
+.officer-complaint-container {
+    min-height: 100vh;
+    padding: 8rem 2rem 4rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+}
+
+.officer-complaint-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.3), transparent 50%);
+    pointer-events: none;
+}
+
+.officer-complaint-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.officer-complaint-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.officer-complaint-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
+}
+
+.officer-complaint-controls {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.officer-complaint-search-box {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.officer-complaint-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: rgba(102, 126, 234, 0.7);
+    pointer-events: none;
+}
+
+.officer-complaint-search-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.officer-complaint-search-input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.officer-complaint-filter-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.officer-complaint-filter-btn {
+    padding: 0.625rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.officer-complaint-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.officer-complaint-filter-btn.active {
+    background: white;
+    color: #667eea;
+    border-color: white;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.officer-complaints-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.officer-complaint-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.officer-complaint-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.officer-complaint-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.officer-complaint-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+}
+
+.officer-complaint-priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.officer-complaint-priority-high {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    color: white;
+}
+
+.officer-complaint-priority-medium {
+    background: linear-gradient(135deg, #ffd93d, #f6b93b);
+    color: #333;
+}
+
+.officer-complaint-priority-low {
+    background: linear-gradient(135deg, #6bcf7f, #51cf66);
+    color: white;
+}
+
+.officer-complaint-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.officer-complaint-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.officer-complaint-detail-item svg {
+    width: 18px;
+    height: 18px;
+    color: #667eea;
+}
+
+.officer-complaint-status {
+    margin-bottom: 1rem;
+}
+
+.officer-complaint-status-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.officer-complaint-status-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #f57c00;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.officer-complaint-status-in-progress {
+    background: rgba(33, 150, 243, 0.2);
+    color: #1976d2;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.officer-complaint-status-resolved {
+    background: rgba(76, 175, 80, 0.2);
+    color: #388e3c;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.officer-complaint-view-details-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.officer-complaint-view-details-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.officer-complaint-view-details-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .officer-complaint-container {
+        padding: 6rem 1rem 2rem;
+    }
+
+    .officer-complaint-title {
+        font-size: 2rem;
+    }
+
+    .officer-complaint-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .officer-complaint-search-box {
+        min-width: 100%;
+    }
+
+    .officer-complaint-filter-buttons {
+        justify-content: center;
+    }
+
+    .officer-complaints-grid {
+        grid-template-columns: 1fr;
+    }
+}
