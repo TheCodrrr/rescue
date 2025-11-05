@@ -64,6 +64,8 @@ export default function Login() {
 
                 toast.success('Login successful!');
                 
+                console.log("This is the user here: ", res.data.data.user.role);
+
                 // Small delay before navigation to ensure toast is visible
                 setTimeout(() => {
                     // Navigate to the intended destination or home page
