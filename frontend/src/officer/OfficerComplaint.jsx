@@ -27,6 +27,7 @@ const OfficerComplaint = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [socketConnected, setSocketConnected] = useState(false);
+    const [rejectedComplaintIds, setRejectedComplaintIds] = useState(new Set());
     const complaintCardRefs = useRef({});
 
     // Calculate distance between two coordinates using Haversine formula
@@ -204,14 +205,15 @@ const OfficerComplaint = () => {
         ...(nearbyComplaints.high_severity?.complaints || [])
     ];
 
-    // Filter complaints based on status, severity, and search query
+    // Filter complaints based on status, severity, search query, and rejection status
     const filteredComplaints = allComplaints.filter(complaint => {
         const matchesStatus = filterStatus === 'all' || complaint.status === filterStatus;
         const matchesSeverity = filterSeverity === 'all' || complaint.severity === filterSeverity;
         const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             complaint.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             complaint.description?.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesStatus && matchesSeverity && matchesSearch;
+        const notRejected = !rejectedComplaintIds.has(complaint._id);
+        return matchesStatus && matchesSeverity && matchesSearch && notRejected;
     });
 
     // Masonry layout - adjust grid row spans based on card height
@@ -271,6 +273,48 @@ const OfficerComplaint = () => {
     const handleComplaintClick = (complaint) => {
         setSelectedComplaint(complaint);
         console.log('Selected complaint:', complaint);
+    };
+
+    const handleIgnoreComplaint = async (complaintId, e) => {
+        e.stopPropagation();
+        
+        try {
+            // Show loading toast
+            const loadingToast = toast.loading('Rejecting complaint...');
+            
+            // Make API call to reject complaint
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/reject-complaint`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ complaintId })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Add complaint ID to rejected set
+                setRejectedComplaintIds(prev => new Set([...prev, complaintId]));
+                
+                // If this was the selected complaint, clear selection
+                if (selectedComplaint?._id === complaintId) {
+                    setSelectedComplaint(null);
+                }
+                
+                // Dismiss loading and show success
+                toast.dismiss(loadingToast);
+                toast.success('Complaint rejected successfully');
+                
+                console.log('✅ Complaint rejected:', complaintId);
+            } else {
+                throw new Error(data.message || 'Failed to reject complaint');
+            }
+        } catch (error) {
+            console.error('Error rejecting complaint:', error);
+            toast.error(error.message || 'Failed to reject complaint');
+        }
     };
 
     // Handle click outside to deselect complaint
@@ -567,11 +611,7 @@ const OfficerComplaint = () => {
                                 <div className="officer-complaint-actions">
                                     <button 
                                         className="officer-complaint-ignore-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            // Handle ignore action
-                                            console.log('Ignore complaint:', complaint._id);
-                                        }}
+                                        onClick={(e) => handleIgnoreComplaint(complaint._id, e)}
                                     >
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
