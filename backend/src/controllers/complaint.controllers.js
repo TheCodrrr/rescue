@@ -177,10 +177,39 @@ const createComplaint = asyncHandler(async (req, res) => {
       .populate("user_id", "name email profileImage")
       .lean();
     
+    // Add train data if it's a rail complaint
+    let enrichedComplaint = populatedComplaint;
+    if (populatedComplaint.category === "rail" && populatedComplaint.category_data_id) {
+      try {
+        const train = await getTrainByNumber(populatedComplaint.category_data_id);
+        if (train && train.stations) {
+          const stations = typeof train.stations === 'string' 
+            ? JSON.parse(train.stations) 
+            : train.stations;
+          enrichedComplaint = { ...populatedComplaint, category_specific_data: { ...train, stations } };
+        } else {
+          enrichedComplaint = { ...populatedComplaint, category_specific_data: train };
+        }
+      } catch (error) {
+        console.error("Error fetching train data for socket emit:", error);
+      }
+    }
+    
     // console.log("Populated complaint:", JSON.stringify(populatedComplaint, null, 2));
     // console.log("Emitting newComplaint event to all connected clients...");
     
-    io.emit("newComplaint", populatedComplaint);
+    // Emit general complaint event
+    io.emit("newComplaint", enrichedComplaint);
+    
+    // Emit specific event for officers with severity and location info
+    io.emit("newComplaintForOfficer", {
+      complaint: enrichedComplaint,
+      location: enrichedComplaint.location,
+      severity: enrichedComplaint.severity,
+      category: enrichedComplaint.category,
+      timestamp: enrichedComplaint.createdAt
+    });
+    
     // console.log("Socket emit completed");
   }
 

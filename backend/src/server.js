@@ -24,6 +24,7 @@ import evidenceRouter from "./routes/evidence.routes.js";
 import railRouter from "./routes/rail.routes.js";
 import historyRouter from "./routes/history.routes.js";
 import analyticsRouter from "./routes/analytics.routes.js";
+import officerRouter from "./routes/officer.routes.js";
 import { initRailSchema } from "./services/rail.service.js";
 import http from "http";
 import { Server } from "socket.io";
@@ -64,6 +65,7 @@ app.use("/api/v1/evidences", evidenceRouter);
 app.use("/api/v1/rail", railRouter);
 app.use("/api/v1/history", historyRouter);
 app.use("/api/v1/analytics", analyticsRouter);
+app.use("/api/v1/officer", officerRouter);
 
 
 import { errorHandler } from "./middlewares/error.middlewares.js";
