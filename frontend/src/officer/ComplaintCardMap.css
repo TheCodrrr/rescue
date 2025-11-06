@@ -1,0 +1,41 @@
+.complaint-card-map-container {
+    width: 100%;
+    height: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.complaint-card-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.complaint-card-map-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.complaint-card-map-placeholder p {
+    color: #666;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Disable leaflet attribution in card maps */
+.complaint-card-map .leaflet-control-attribution {
+    display: none;
+}
+
+/* Make sure map tiles load properly */
+.complaint-card-map .leaflet-container {
+    background: #f5f7fa;
+}
