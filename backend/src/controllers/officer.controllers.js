@@ -2,6 +2,58 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
 import { getTrainByNumber } from "../services/rail.service.js";
+import redisClient from "../../utils/redisClient.js";
+
+/**
+ * Redis Key Structure:
+ * Key: `officer:${officerId}:rejected_complaints`
+ * Value: Set of complaint IDs that the officer has rejected
+ */
+
+/**
+ * Add a complaint to officer's rejected list in Redis
+ * 
+ * @route POST /api/v1/officer/reject-complaint
+ * @access Protected (requires authentication)
+ * @body { complaintId: string }
+ */
+const rejectComplaint = asyncHandler(async (req, res) => {
+    const { complaintId } = req.body;
+    const officerId = req.user._id.toString();
+
+    if (!complaintId) {
+        throw new ApiError(400, "Complaint ID is required");
+    }
+
+    // Verify complaint exists
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) {
+        throw new ApiError(404, "Complaint not found");
+    }
+
+    try {
+        // Redis key for this officer's rejected complaints
+        const redisKey = `officer:${officerId}:rejected_complaints`;
+        
+        // Add complaint ID to the set in Redis
+        await redisClient.sAdd(redisKey, complaintId);
+        
+        // Set expiry to 2 hours (matching complaint fetch time window)
+        await redisClient.expire(redisKey, 2 * 60 * 60);
+
+        res.status(200).json({
+            success: true,
+            message: "Complaint rejected successfully",
+            data: {
+                complaint_id: complaintId,
+                officer_id: officerId
+            }
+        });
+    } catch (error) {
+        console.error("Error rejecting complaint:", error);
+        throw new ApiError(500, `Error rejecting complaint: ${error.message}`);
+    }
+});
 
 /**
  * Get nearby complaints for officers based on their location
@@ -22,7 +74,7 @@ import { getTrainByNumber } from "../services/rail.service.js";
  */
 const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
     const { latitude, longitude } = req.query;
-    const officerId = req.user._id;
+    const officerId = req.user._id.toString();
 
     if (!latitude || !longitude) {
         throw new ApiError(400, "Latitude and longitude are required");
@@ -38,10 +90,26 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
     // Get complaints from the last 2 hours
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
 
+    // Get rejected complaint IDs from Redis for this officer
+    const redisKey = `officer:${officerId}:rejected_complaints`;
+    let rejectedComplaintIds = [];
     try {
+        rejectedComplaintIds = await redisClient.sMembers(redisKey);
+    } catch (error) {
+        console.warn("Could not fetch rejected complaints from Redis:", error);
+        // Continue without filtering if Redis fails
+    }
+
+    try {
+        // Base query filter to exclude rejected complaints
+        const baseFilter = {
+            createdAt: { $gte: twoHoursAgo },
+            ...(rejectedComplaintIds.length > 0 && { _id: { $nin: rejectedComplaintIds } })
+        };
+
         // Query for complaints within 10km radius with severity "low"
         const lowSeverityComplaints = await Complaint.find({
-            createdAt: { $gte: twoHoursAgo },
+            ...baseFilter,
             severity: "low",
             location: {
                 $near: {
@@ -58,7 +126,7 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
 
         // Query for complaints within 20km radius with severity "medium"
         const mediumSeverityComplaints = await Complaint.find({
-            createdAt: { $gte: twoHoursAgo },
+            ...baseFilter,
             severity: "medium",
             location: {
                 $near: {
@@ -75,7 +143,7 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
 
         // Query for complaints within 100km radius with severity "high"
         const highSeverityComplaints = await Complaint.find({
-            createdAt: { $gte: twoHoursAgo },
+            ...baseFilter,
             severity: "high",
             location: {
                 $near: {
@@ -153,5 +221,6 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
 });
 
 export {
-    getNearbyComplaintsForOfficer
+    getNearbyComplaintsForOfficer,
+    rejectComplaint
 };
