@@ -481,7 +481,7 @@ export default function Complaint() {
             <div className="complaint-page">
                 <div className="complaint-container">
                     {/* Tab Navigation */}
-                    <div className="tab-navigation">
+                    {/* <div className="tab-navigation">
                         <button 
                             className={`tab-button ${activeTab === 'register' ? 'active' : ''}`}
                             onClick={() => handleTabChange('register')}
@@ -491,10 +491,10 @@ export default function Complaint() {
                             </svg>
                             Register Complaint
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Register Complaint Section */}
-                    {activeTab === 'register' && (
+                    {/* {activeTab === 'register' && ( */}
                         <div className="tab-content">
                             <div className="section-header">
                                 <h2 className="section-title">Report an Incident</h2>
@@ -682,7 +682,10 @@ export default function Complaint() {
                                                 name="locationMethod"
                                                 value="current"
                                                 checked={locationMethod === 'current'}
-                                                onChange={(e) => setLocationMethod(e.target.value)}
+                                                onChange={(e) => {
+                                                    setLocationMethod(e.target.value);
+                                                    handleUseCurrentLocation();
+                                                }}
                                             />
                                             Use Current Location
                                         </label>
@@ -804,32 +807,23 @@ export default function Complaint() {
                                     )}
 
                                     {/* Current Location */}
-                                    {locationMethod === 'current' && (
+                                    {locationMethod === 'current' && formData.location.latitude && formData.location.longitude && (
                                         <div className="current-location-section">
-                                            <button
-                                                type="button"
-                                                onClick={handleUseCurrentLocation}
-                                                className="current-location-btn"
-                                            >
-                                                Use My Current Location
-                                            </button>
-                                            {formData.location.latitude && formData.location.longitude && (
-                                                <div className="current-coordinates">
-                                                    <div className="coordinates-info">
-                                                        <strong>Current Location:</strong>
-                                                    </div>
-                                                    <div className="coordinates-details">
-                                                        <div className="coordinates-line">
-                                                            📍 Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
-                                                        </div>
-                                                        {formData.address && (
-                                                            <div className="address-line">
-                                                                🏠 Address: {formData.address}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                            <div className="current-coordinates">
+                                                <div className="coordinates-info">
+                                                    <strong>Current Location:</strong>
                                                 </div>
-                                            )}
+                                                <div className="coordinates-details">
+                                                    <div className="coordinates-line">
+                                                        📍 Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
+                                                    </div>
+                                                    {formData.address && (
+                                                        <div className="address-line">
+                                                            🏠 Address: {formData.address}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -878,7 +872,7 @@ export default function Complaint() {
                                 </div>
                             </form>
                         </div>
-                    )}
+                    {/* )} */}
 
                     {/* View Complaints Section moved to UserProfile -> MyComplaints component */}
                 </div>

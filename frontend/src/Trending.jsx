@@ -103,6 +103,11 @@ const Trending = () => {
     return 0;
   };
 
+  const shortenString = (str, lens) => {
+    if (str.length > lens) return str.substring(0, lens) + "...";
+    return str;
+  }
+
   // Helper function to get comments for a complaint
   const getComments = (complaint) => {
     if (!complaint || !complaint._id) {
@@ -927,7 +932,7 @@ const Trending = () => {
                     {/* Title and Severity Row */}
                     <div className="trending-title-row">
                       <h4 className="trending-complaint-title">
-                        {complaint.title}
+                        {shortenString(complaint?.title || "", 15)}
                       </h4>
                       {complaint.severity && (
                         <div 
@@ -951,7 +956,7 @@ const Trending = () => {
 
                     {/* Description */}
                     <p className="trending-complaint-description">
-                      {complaint.description}
+                      {shortenString(complaint?.description || "", 130)}
                     </p>
 
                     {/* Address - Left aligned */}
