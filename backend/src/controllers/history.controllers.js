@@ -13,7 +13,7 @@ const addHistory = asyncHandler( async (req, res) => {
             user_id,
             actionType,
             complaint_id: complaint_id || null,
-            cateogry: category || null,
+            category: category || null,
             previous_state: previous_state || null,
             new_state: new_state || null,
             comment_id: comment_id || null,
