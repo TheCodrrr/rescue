@@ -239,7 +239,7 @@ const getComplaintById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Complaint not found");
     }
 
-    if (req.user.role !== 'admin' && req.user._id.toString() !== complaint.user_id._id.toString()) {
+    if (req.user.role !== 'admin' && req.user.role !== 'officer' && req.user._id.toString() !== complaint.user_id._id.toString()) {
         throw new ApiError(403, "You do not have permission to view this complaint");
     }
 

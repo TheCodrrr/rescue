@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 import './OfficerComplaint.css';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 
 const OfficerComplaint = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const location = useGeolocation();
     const socketRef = useRef(null);
     
@@ -275,6 +277,13 @@ const OfficerComplaint = () => {
         console.log('Selected complaint:', complaint);
     };
 
+    const handleVisitComplaint = (complaint) => {
+        // Clear any potential state conflicts and navigate
+        setTimeout(() => {
+            navigate(`/complaint/${complaint._id}`, { replace: true });
+        }, 0);
+    };
+
     const handleIgnoreComplaint = async (complaintId, e) => {
         e.stopPropagation();
         
@@ -537,13 +546,12 @@ const OfficerComplaint = () => {
                                             className="officer-complaint-info-btn"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                // Navigate to complaint detail page
-                                                window.location.href = `/complaint/${complaint._id}`;
+                                                handleVisitComplaint(complaint);
                                             }}
                                             title="View full details"
                                         >
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
                                         </button>
                                     </div>
@@ -629,7 +637,7 @@ const OfficerComplaint = () => {
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        Assign
+                                        Accept
                                     </button>
                                 </div>
                             </div>
