@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 import './OfficerComplaint.css';
-import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime } from '../auth/redux/officerSlice';
+import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime, rejectComplaint, acceptComplaint, addEscalationEvent } from '../auth/redux/officerSlice';
 import useGeolocation from '../hooks/useGeolocation';
 import ComplaintMap from './ComplaintMap';
 import { io } from 'socket.io-client';
@@ -303,19 +303,13 @@ const OfficerComplaint = () => {
             // Show loading toast
             const loadingToast = toast.loading('Rejecting complaint...');
             
-            // Make API call to reject complaint
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/reject-complaint`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ complaintId })
-            });
+            // Use Redux thunk to reject complaint
+            const result = await dispatch(rejectComplaint(complaintId));
+            
+            // Dismiss loading toast
+            toast.dismiss(loadingToast);
 
-            const data = await response.json();
-
-            if (response.ok && data.success) {
+            if (rejectComplaint.fulfilled.match(result)) {
                 // Add complaint ID to rejected set
                 setRejectedComplaintIds(prev => new Set([...prev, complaintId]));
                 
@@ -324,13 +318,12 @@ const OfficerComplaint = () => {
                     setSelectedComplaint(null);
                 }
                 
-                // Dismiss loading and show success
-                toast.dismiss(loadingToast);
+                // Show success toast
                 toast.success('Complaint rejected successfully');
                 
                 console.log('✅ Complaint rejected:', complaintId);
             } else {
-                throw new Error(data.message || 'Failed to reject complaint');
+                throw new Error(result.payload || 'Failed to reject complaint');
             }
         } catch (error) {
             console.error('Error rejecting complaint:', error);
@@ -350,19 +343,32 @@ const OfficerComplaint = () => {
             // Show loading toast
             const loadingToast = toast.loading('Accepting complaint...');
             
-            // Make API call to assign complaint to officer
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/${user._id}/assign-complaint/${complaintId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            });
+            // Use Redux thunk to accept complaint
+            const acceptResult = await dispatch(acceptComplaint({ 
+                complaintId, 
+                officerId: user._id 
+            }));
 
-            const data = await response.json();
-            console.log("The response data is : ", data);
+            if (acceptComplaint.fulfilled.match(acceptResult)) {
+                // Initialize escalation for the complaint (from level 0 to 1)
+                console.log('🔄 Initializing escalation for complaint:', complaintId);
+                
+                const escalationResult = await dispatch(addEscalationEvent({
+                    complaintId,
+                    from_level: 0,
+                    to_level: 1,
+                    reason: 'Complaint assigned to officer - Initial escalation'
+                }));
 
-            if (response.ok) {
+                if (addEscalationEvent.fulfilled.match(escalationResult)) {
+                    console.log('✅ Escalation initialized for complaint:', complaintId);
+                } else {
+                    console.error('❌ Failed to initialize escalation:', escalationResult.payload);
+                    toast.error(`Warning: ${escalationResult.payload || 'Failed to initialize escalation'}`, {
+                        duration: 3000
+                    });
+                }
+
                 // Remove complaint from rejected list if it was there
                 setRejectedComplaintIds(prev => {
                     const newSet = new Set(prev);
@@ -373,41 +379,6 @@ const OfficerComplaint = () => {
                 // If this was the selected complaint, clear selection
                 if (selectedComplaint?._id === complaintId) {
                     setSelectedComplaint(null);
-                }
-                
-                // Initialize escalation for the complaint (from level 0 to 1)
-                try {
-                    console.log('🔄 Initializing escalation for complaint:', complaintId);
-                    const escalationResponse = await fetch(`${import.meta.env.VITE_API_URL}/escalations/${complaintId}/add-event`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            from_level: 0,
-                            to_level: 1,
-                            reason: 'Complaint assigned to officer - Initial escalation'
-                        })
-                    });
-
-                    const escalationData = await escalationResponse.json();
-                    console.log('📊 Escalation response:', escalationData);
-
-                    if (escalationResponse.ok) {
-                        console.log('✅ Escalation initialized for complaint:', complaintId);
-                    } else {
-                        console.error('❌ Failed to initialize escalation:', escalationData);
-                        toast.error(`Warning: ${escalationData.message || 'Failed to initialize escalation'}`, {
-                            duration: 3000
-                        });
-                    }
-                } catch (escalationError) {
-                    console.error('💥 Error initializing escalation:', escalationError);
-                    toast.error('Warning: Failed to initialize escalation tracking', {
-                        duration: 3000
-                    });
-                    // Don't throw - escalation failure shouldn't prevent acceptance
                 }
                 
                 // Dismiss loading and show success
@@ -427,7 +398,8 @@ const OfficerComplaint = () => {
                 
                 console.log('✅ Complaint accepted:', complaintId);
             } else {
-                throw new Error(data.message || 'Failed to accept complaint');
+                toast.dismiss(loadingToast);
+                throw new Error(acceptResult.payload || 'Failed to accept complaint');
             }
         } catch (error) {
             console.error('Error accepting complaint:', error);

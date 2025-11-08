@@ -54,6 +54,131 @@ export const fetchNearbyComplaints = createAsyncThunk(
   }
 );
 
+// Thunk to reject/ignore a complaint
+export const rejectComplaint = createAsyncThunk(
+  'officer/rejectComplaint',
+  async (complaintId, thunkAPI) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required. Please log in.');
+      }
+
+      if (!complaintId) {
+        return thunkAPI.rejectWithValue('Complaint ID is required');
+      }
+
+      console.log(`Rejecting complaint: ${complaintId}`);
+      
+      const response = await axiosInstance.post('/officer/reject-complaint', {
+        complaintId
+      });
+
+      console.log("Reject complaint API response:", response.data);
+      
+      return { complaintId, ...response.data };
+    } catch (error) {
+      console.error("Reject complaint API error:", error);
+      
+      let errorMessage = 'Failed to reject complaint. Please try again.';
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk to accept/assign a complaint to officer
+export const acceptComplaint = createAsyncThunk(
+  'officer/acceptComplaint',
+  async ({ complaintId, officerId }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required. Please log in.');
+      }
+
+      if (!complaintId || !officerId) {
+        return thunkAPI.rejectWithValue('Complaint ID and Officer ID are required');
+      }
+
+      console.log(`Accepting complaint: ${complaintId} for officer: ${officerId}`);
+      
+      const response = await axiosInstance.put(
+        `/officer/${officerId}/assign-complaint/${complaintId}`
+      );
+
+      console.log("Accept complaint API response:", response.data);
+      
+      return { complaintId, ...response.data };
+    } catch (error) {
+      console.error("Accept complaint API error:", error);
+      
+      let errorMessage = 'Failed to accept complaint. Please try again.';
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk to add escalation event
+export const addEscalationEvent = createAsyncThunk(
+  'officer/addEscalationEvent',
+  async ({ complaintId, from_level = 0, to_level = 1, reason }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required. Please log in.');
+      }
+
+      if (!complaintId) {
+        return thunkAPI.rejectWithValue('Complaint ID is required');
+      }
+
+      console.log(`Adding escalation event for complaint: ${complaintId}`);
+      
+      const response = await axiosInstance.patch(
+        `/escalations/${complaintId}/add-event`,
+        {
+          from_level,
+          to_level,
+          reason: reason || 'Complaint assigned to officer - Initial escalation'
+        }
+      );
+
+      console.log("Add escalation event API response:", response.data);
+      
+      return { complaintId, ...response.data };
+    } catch (error) {
+      console.error("Add escalation event API error:", error);
+      
+      let errorMessage = 'Failed to add escalation event. Please try again.';
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const officerSlice = createSlice({
   name: 'officer',
   initialState,
@@ -100,6 +225,72 @@ const officerSlice = createSlice({
       .addCase(fetchNearbyComplaints.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || 'Failed to fetch nearby complaints';
+      })
+      // Reject complaint
+      .addCase(rejectComplaint.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(rejectComplaint.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { complaintId } = action.payload;
+        
+        // Remove complaint from all severity levels
+        state.nearbyComplaints.low_severity.complaints = 
+          state.nearbyComplaints.low_severity.complaints.filter(c => c._id !== complaintId);
+        state.nearbyComplaints.medium_severity.complaints = 
+          state.nearbyComplaints.medium_severity.complaints.filter(c => c._id !== complaintId);
+        state.nearbyComplaints.high_severity.complaints = 
+          state.nearbyComplaints.high_severity.complaints.filter(c => c._id !== complaintId);
+        
+        // Update counts
+        state.nearbyComplaints.low_severity.count = state.nearbyComplaints.low_severity.complaints.length;
+        state.nearbyComplaints.medium_severity.count = state.nearbyComplaints.medium_severity.complaints.length;
+        state.nearbyComplaints.high_severity.count = state.nearbyComplaints.high_severity.complaints.length;
+        state.totalComplaints--;
+      })
+      .addCase(rejectComplaint.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || 'Failed to reject complaint';
+      })
+      // Accept complaint
+      .addCase(acceptComplaint.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(acceptComplaint.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const { complaintId } = action.payload;
+        
+        // Update complaint's assigned_officer_id in all severity levels
+        const updateComplaint = (complaint) => {
+          if (complaint._id === complaintId) {
+            return { ...complaint, assigned_officer_id: action.payload.complaint?.assigned_officer_id };
+          }
+          return complaint;
+        };
+        
+        state.nearbyComplaints.low_severity.complaints = 
+          state.nearbyComplaints.low_severity.complaints.map(updateComplaint);
+        state.nearbyComplaints.medium_severity.complaints = 
+          state.nearbyComplaints.medium_severity.complaints.map(updateComplaint);
+        state.nearbyComplaints.high_severity.complaints = 
+          state.nearbyComplaints.high_severity.complaints.map(updateComplaint);
+      })
+      .addCase(acceptComplaint.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || 'Failed to accept complaint';
+      })
+      // Add escalation event
+      .addCase(addEscalationEvent.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(addEscalationEvent.fulfilled, (state, action) => {
+        // Escalation event added successfully
+        console.log('Escalation event added:', action.payload);
+      })
+      .addCase(addEscalationEvent.rejected, (state, action) => {
+        state.error = action.payload || 'Failed to add escalation event';
       });
   },
 });
