@@ -3,8 +3,8 @@ import mongoose, { Schema } from "mongoose"
 const escalationEventSchema = new Schema({
     from_level: {
         type: Number,
-        default: 1,
-        min: 1,
+        default: 0,
+        min: 0,
     },
     to_level: {
         type: Number,
