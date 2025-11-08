@@ -3,6 +3,7 @@ import { Complaint } from "../models/complaint.models.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import redisClient from "../../utils/redisClient.js";
+import { createNotification } from "./user.controllers.js";
 
 // const createEscalationHistory = asyncHandler(async (req, res) => {
 //   const { complaintId } = req.params;
@@ -92,7 +93,6 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
     // Store notification in Redis for the user who registered the complaint
     try {
       const userId = complaint.user_id.toString();
-      const notificationKey = `notification:${userId}:escalations`;
       
       const notificationData = {
         type: "escalation",
@@ -106,13 +106,7 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
         read: false
       };
 
-      // Add notification to a list (using LPUSH for newest first)
-      await redisClient.lPush(notificationKey, JSON.stringify(notificationData));
-      
-      // Set expiry to 30 minutes (1800 seconds)
-      await redisClient.expire(notificationKey, 30 * 60);
-      
-      console.log("✅ Escalation notification stored in Redis for user:", userId);
+      await createNotification(userId, notificationData);
     } catch (redisError) {
       console.error("⚠️ Failed to store notification in Redis:", redisError);
       // Continue even if Redis fails - don't break the escalation
