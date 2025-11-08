@@ -13,6 +13,7 @@ const historySchema = new mongoose.Schema({
             "COMPLAINT_STATUS_UPDATED",
             "COMPLAINT_UPVOTED",
             "COMPLAINT_DOWNVOTED",
+            "COMPLAINT_ESCALATED",
             "COMMENT_ADDED",
             "COMMENT_EDITED",
             "COMMENT_DELETED",
