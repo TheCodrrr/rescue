@@ -90,12 +90,15 @@ export default function ComplaintDetail() {
         error,
         success 
     } = useSelector((state) => state.complaints);
+    console.log("The selected complaint is: ", selectedComplaint);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
     const [votingInProgress, setVotingInProgress] = useState({});
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
     const [deleteInProgress, setDeleteInProgress] = useState(false);
+    const [assignmentInProgress, setAssignmentInProgress] = useState(false);
+    const [complaintIgnored, setComplaintIgnored] = useState(false);
 
     // Fetch complaint details on component mount
     useEffect(() => {
@@ -902,6 +905,97 @@ export default function ComplaintDetail() {
         }
     };
 
+    const handleAcceptComplaint = async () => {
+        if (!isAuthenticated || user?.role !== 'officer') {
+            toast.error('🔐 Only officers can accept complaints', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        setAssignmentInProgress(true);
+        try {
+            // TODO: Replace with actual API call to assign complaint to officer
+            // const result = await dispatch(assignComplaintToOfficer({ complaintId: id, officerId: user._id }));
+            
+            toast.success('✅ Complaint accepted! You are now assigned to this case.', {
+                duration: 3000,
+                position: 'top-center',
+                className: 'custom-toast custom-toast-success',
+                style: {
+                    background: 'rgba(34, 197, 94, 0.2)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(34, 197, 94, 0.4)',
+                    color: '#fff',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+                },
+            });
+            
+            // Refresh complaint data
+            dispatch(fetchComplaintById(id));
+        } catch (error) {
+            toast.error('❌ Error while accepting complaint. Please try again.', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            setAssignmentInProgress(false);
+        }
+    };
+
+    const handleIgnoreComplaint = async () => {
+        if (!isAuthenticated || user?.role !== 'officer') {
+            toast.error('🔐 Only officers can ignore complaints', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        try {
+            // Show loading toast
+            const loadingToast = toast.loading('Rejecting complaint...');
+            
+            // Make API call to reject complaint
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/reject-complaint`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ complaintId: selectedComplaint._id })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Dismiss loading and show success
+                toast.dismiss(loadingToast);
+                toast.success('Complaint rejected successfully', {
+                    duration: 2000,
+                    position: 'top-center',
+                });
+                
+                // Set the complaint as ignored to show disclaimer
+                setComplaintIgnored(true);
+                
+                console.log('✅ Complaint rejected:', selectedComplaint._id);
+            } else {
+                toast.dismiss(loadingToast);
+                throw new Error(data.message || 'Failed to reject complaint');
+            }
+        } catch (error) {
+            console.error('Error rejecting complaint:', error);
+            toast.error(error.message || '❌ Failed to reject complaint', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        }
+    };
+
     const openCommentModal = () => {
         setCommentModalOpen(true);
         // Comments are already fetched on component mount, but refresh them for the modal
@@ -1077,6 +1171,55 @@ export default function ComplaintDetail() {
                             </div>
                         )}
                     </div>
+
+                    {/* Officer Assignment Section - Show Accept/Ignore buttons for officers on unassigned complaints */}
+                    {isAuthenticated && user?.role === 'officer' && !selectedComplaint.assigned_officer_id && (
+                        <motion.div 
+                            className="cd-officer-assignment-section"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            {!complaintIgnored ? (
+                                <>
+                                    <div className="cd-assignment-header">
+                                        <FiAlertTriangle className="cd-assignment-icon" />
+                                        <h3>Unassigned complaint - Take action</h3>
+                                    </div>
+                                    <div className="cd-assignment-actions">
+                                        <button
+                                            className="cd-accept-btn"
+                                            onClick={handleAcceptComplaint}
+                                            disabled={assignmentInProgress}
+                                        >
+                                            {assignmentInProgress ? (
+                                                <div className="cd-loading-spinner-small"></div>
+                                            ) : (
+                                                <>
+                                                    <FiCheckCircle /> Accept
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            className="cd-ignore-btn"
+                                            onClick={handleIgnoreComplaint}
+                                            disabled={assignmentInProgress}
+                                        >
+                                            <FiArrowLeft /> Ignore
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="cd-ignored-disclaimer">
+                                    <FiCheckCircle className="cd-ignored-icon" />
+                                    <div className="cd-ignored-text">
+                                        <h3>You have ignored this complaint</h3>
+                                        <p>This complaint will not appear in your queue anymore.</p>
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
 
                     {/* Main complaint card */}
                     <div className="cd-primary-card">

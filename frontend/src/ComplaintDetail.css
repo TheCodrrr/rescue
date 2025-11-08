@@ -115,6 +115,154 @@ html {
     box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
 
+/* Officer Assignment Section */
+.cd-officer-assignment-section {
+    background: linear-gradient(135deg, 
+        rgba(251, 146, 60, 0.15) 0%, 
+        rgba(249, 115, 22, 0.12) 100%);
+    border: 2px solid rgba(251, 146, 60, 0.4);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(15px);
+    box-shadow: 
+        0 8px 20px rgba(251, 146, 60, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.cd-assignment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.cd-assignment-icon {
+    font-size: 1.5rem;
+    color: rgba(251, 146, 60, 1);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.cd-assignment-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.cd-assignment-message {
+    display: none;
+}
+
+.cd-assignment-actions {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.cd-accept-btn, .cd-ignore-btn {
+    padding: 0.75rem 1.75rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+}
+
+.cd-accept-btn {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(22, 163, 74, 0.95) 100%);
+    color: white;
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.cd-accept-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 1) 0%, rgba(21, 128, 61, 1) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35);
+}
+
+.cd-accept-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cd-ignore-btn {
+    background: rgba(148, 163, 184, 0.2);
+    color: white;
+    border-color: rgba(148, 163, 184, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.cd-ignore-btn:hover:not(:disabled) {
+    background: rgba(148, 163, 184, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(148, 163, 184, 0.3);
+}
+
+.cd-ignore-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Ignored Disclaimer Styles */
+.cd-ignored-disclaimer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    width: 100%;
+}
+
+.cd-ignored-icon {
+    font-size: 2rem;
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+.cd-ignored-text {
+    flex: 1;
+}
+
+.cd-ignored-text h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #10b981;
+}
+
+.cd-ignored-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
 /* Main Content Card */
 .cd-primary-card {
     background: linear-gradient(135deg, 
@@ -1993,5 +2141,46 @@ html {
     
     .cd-user-email {
         font-size: 0.8rem;
+    }
+
+    .cd-officer-assignment-section {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+    }
+
+    .cd-assignment-header h3 {
+        font-size: 1rem;
+    }
+
+    .cd-assignment-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cd-accept-btn, .cd-ignore-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .cd-ignored-disclaimer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .cd-ignored-icon {
+        font-size: 1.5rem;
+    }
+
+    .cd-ignored-text h3 {
+        font-size: 1rem;
+    }
+
+    .cd-ignored-text p {
+        font-size: 0.9rem;
     }
 }
