@@ -62,7 +62,8 @@ import {
 import { 
     addComplaintVoteHistory, 
     addComplaintStatusUpdatedHistory,
-    addCommentHistory 
+    addCommentHistory,
+    addComplaintEscalatedHistory
 } from './auth/redux/historySlice';
 import "./Complaint.css";
 import "./ComplaintDetail.css";
@@ -948,6 +949,16 @@ export default function ComplaintDetail() {
 
                 if (addEscalationEvent.fulfilled.match(escalationResult)) {
                     console.log('✅ Escalation initialized for complaint:', id);
+                    
+                    // Add escalation history entry
+                    dispatch(addComplaintEscalatedHistory({
+                        userId: user._id,
+                        complaintId: id,
+                        category: selectedComplaint?.category || null,
+                        fromLevel: 0,
+                        toLevel: 1,
+                        reason: 'Complaint assigned to officer - Initial escalation'
+                    }));
                 } else {
                     console.error('❌ Failed to initialize escalation:', escalationResult.payload);
                     toast.error(`Warning: ${escalationResult.payload || 'Failed to initialize escalation'}`, {

@@ -5,6 +5,7 @@ import Navbar from '../Navbar';
 import Footer from '../Footer';
 import './OfficerComplaint.css';
 import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime, rejectComplaint, acceptComplaint, addEscalationEvent } from '../auth/redux/officerSlice';
+import { addComplaintEscalatedHistory } from '../auth/redux/historySlice';
 import useGeolocation from '../hooks/useGeolocation';
 import ComplaintMap from './ComplaintMap';
 import { io } from 'socket.io-client';
@@ -343,6 +344,10 @@ const OfficerComplaint = () => {
             // Show loading toast
             const loadingToast = toast.loading('Accepting complaint...');
             
+            // Find the complaint to get category info
+            const complaint = allComplaints.find(c => c._id === complaintId);
+            const complaintCategory = complaint?.category || null;
+            
             // Use Redux thunk to accept complaint
             const acceptResult = await dispatch(acceptComplaint({ 
                 complaintId, 
@@ -362,6 +367,16 @@ const OfficerComplaint = () => {
 
                 if (addEscalationEvent.fulfilled.match(escalationResult)) {
                     console.log('✅ Escalation initialized for complaint:', complaintId);
+                    
+                    // Add escalation history entry
+                    dispatch(addComplaintEscalatedHistory({
+                        userId: user._id,
+                        complaintId: complaintId,
+                        category: complaintCategory,
+                        fromLevel: 0,
+                        toLevel: 1,
+                        reason: 'Complaint assigned to officer - Initial escalation'
+                    }));
                 } else {
                     console.error('❌ Failed to initialize escalation:', escalationResult.payload);
                     toast.error(`Warning: ${escalationResult.payload || 'Failed to initialize escalation'}`, {

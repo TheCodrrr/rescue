@@ -162,6 +162,25 @@ export const addUserDetailsUpdatedHistory = createAsyncThunk(
     }
 );
 
+export const addComplaintEscalatedHistory = createAsyncThunk(
+    'history/addComplaintEscalated',
+    async ({ userId, complaintId, category, fromLevel, toLevel, reason }, thunkAPI) => {
+        const historyData = {
+            user_id: userId,
+            actionType: 'COMPLAINT_ESCALATED',
+            complaint_id: complaintId,
+            category: category,
+            previous_state: { level: fromLevel },
+            new_state: { level: toLevel },
+            details: {
+                escalation: `Level ${fromLevel} → Level ${toLevel}`,
+                reason: reason || 'Complaint assigned to officer - Initial escalation'
+            }
+        };
+        return thunkAPI.dispatch(addHistoryEntry(historyData));
+    }
+);
+
 // History slice
 const historySlice = createSlice({
     name: 'history',
