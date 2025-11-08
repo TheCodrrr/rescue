@@ -3,6 +3,7 @@ import authReducer from "./authSlice.js";
 import complaintReducer from "./complaintSlice.js";
 import historyReducer from "./historySlice.js";
 import officerReducer from "./officerSlice.js";
+import notificationReducer from "./notificationSlice.js";
 
 export const store = configureStore({
     reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
         complaints: complaintReducer,
         history: historyReducer,
         officer: officerReducer,
+        notifications: notificationReducer,
     }
 })

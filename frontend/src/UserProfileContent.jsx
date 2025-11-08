@@ -5,6 +5,7 @@ import { updateUser, uploadProfileImage, changePassword, deleteUser } from './au
 import MyComplaints from './MyComplaints';
 import UserHistory from './UserHistory';
 import Analytics from './Analytics';
+import Notifications from './Notifications';
 import { 
     User, 
     Mail, 
@@ -912,14 +913,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     );
 
     const renderNotificationsContent = () => (
-        <div className="space-y-8">
-            <div className="profile-card">
-                <h2 className="section-title">Notifications</h2>
-                <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
-                    Notification settings coming soon...
-                </p>
-            </div>
-        </div>
+        <Notifications />
     );
 
     const renderHistoryContent = () => (
