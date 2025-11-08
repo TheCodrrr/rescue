@@ -40,8 +40,8 @@ const complaintSchema = new mongoose.Schema({
     address: String,
     level: {
         type: Number,
-        min: 1,
-        default: 1,
+        min: 0,
+        default: 0,
     },
     ai_classification: {
         type: mongoose.Schema.Types.ObjectId,
