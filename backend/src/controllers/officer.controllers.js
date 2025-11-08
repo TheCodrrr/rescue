@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { Complaint } from "../models/complaint.models.js";
 import { getTrainByNumber } from "../services/rail.service.js";
 import redisClient from "../../utils/redisClient.js";
+import { User } from "../models/user.models.js";
 
 /**
  * Redis Key Structure:
@@ -220,7 +221,46 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
     }
 });
 
+const assignOfficerToComplaint = asyncHandler(async (req, res) => {
+    try {
+        const { complaintId, officerId } = req.params;
+
+        if (!complaintId || !officerId) {
+            throw new ApiError(400, "Complaint ID and Officer ID are required");
+        }
+
+        const complaint = await Complaint.findById(complaintId);
+        if (!complaint) {
+            throw new ApiError(404, "Complaint not found");
+        }
+
+        const officer = await User.findById(officerId);
+        if (!officer || officer.role !== "officer") {
+            throw new ApiError(400, "Invalid officer ID or user is not an officer");
+        }
+
+        complaint.assigned_officer_id = officerId;
+        complaint.status = "in_progress";
+        await complaint.save();
+
+        if (!officer.complaints) officer.complaints = [];
+        if (!officer.complaints.includes(complaint._id)) {
+            officer.complaints.push(complaint._id);
+            await officer.save();
+        }
+
+        return res.status(200).json({
+            message: "Officer successfully assigned to complaint",
+            complaint,
+        })
+    } catch (error) {
+        console.error("Error assigning officer: ", error);
+        return ApiError(500, error.message);
+    }
+})
+
 export {
     getNearbyComplaintsForOfficer,
-    rejectComplaint
+    rejectComplaint,
+    assignOfficerToComplaint,
 };
