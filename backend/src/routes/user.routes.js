@@ -7,7 +7,9 @@ import {
     getCurrentUser,
     updateAccountDetails,
     updateUserProfileImage,
-    deleteUser
+    deleteUser,
+    getUserNotifications,
+    deleteUserNotification
 } from "../controllers/user.controllers.js";
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middlewares.js";
@@ -39,5 +41,9 @@ router.patch("/update-profile-image", verifyJWT, upload.single("profileImage"), 
 
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/delete").delete(verifyJWT, deleteUser); // Assuming logout also deletes the session
+
+// notifications crud
+router.get("/notifications", verifyJWT, getUserNotifications);
+router.delete("/notifications/:index", verifyJWT, deleteUserNotification);
 
 export default router

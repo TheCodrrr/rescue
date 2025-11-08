@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import redisClient from "../../utils/redisClient.js";
 import path from "path";
 import fs from "fs";
 import sharp from "sharp";
@@ -340,6 +341,65 @@ const deleteUser = asyncHandler( async(req, res) => {
             .json( new ApiResponse(200, {}, "User deleted successfully"))
 })
 
+const createNotification = async (userId, notificationData) => {
+    try {
+        const notificationKey = `notification:${userId}:escalations`;
+
+        await redisClient.lPush(notificationKey, JSON.stringify(notificationData));
+
+        await redisClient.expire(notificationKey, 30 * 60);
+        return true;
+    } catch (error) {
+        throw new ApiError(500, "Notification creation failed")
+    }
+}
+
+const getUserNotifications = asyncHandler(async (req, res) => {
+    const userId = req.user._id.toString();
+    const notificationKey = `notification:${userId}:escalations`;
+
+    const notifications = await redisClient.lRange(notificationKey, 0, -1);
+
+    if (!notifications || notifications.length === 0) {
+        return res.status(200).json({
+            success: true,
+            data: [],
+            message: "No notifications found.",
+        });
+    }
+
+    const parsedNotifications = notifications.map((notif) => JSON.parse(notif));
+
+    return res.status(200).json({
+        success: true,
+        data: parsedNotifications,
+    })
+})
+
+const deleteUserNotification = asyncHandler(async (req, res) => {
+    const userId = req.user._id.toString();
+    const { index } = req.params;
+    const notificationKey = `notification:${userId}:escalations`;
+
+    const notifications = await redisClient.lRange(notificationKey, 0, -1);
+
+    if (!notifications || notifications.length === 0) {
+        throw new ApiError(404, "No notifications found for this user.");
+    }
+
+    const notifToDelete = notifications[index];
+    if (!notifToDelete) {
+        throw new ApiError(404, "Notification not found.");
+    }
+
+    await redisClient.lRem(notificationKey, 1, notifToDelete);
+
+    return res.status(200).json({
+        success: true,
+        message: "Notification deleted successfully.",
+    });
+});
+
 export {
     registerUser,
     loginUser,
@@ -349,5 +409,8 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserProfileImage,
-    deleteUser
+    deleteUser,
+    createNotification,
+    getUserNotifications,
+    deleteUserNotification,
 }
