@@ -914,29 +914,45 @@ export default function ComplaintDetail() {
             return;
         }
 
+        if (!user || !user._id) {
+            toast.error('User information not available');
+            return;
+        }
+
         setAssignmentInProgress(true);
         try {
-            // TODO: Replace with actual API call to assign complaint to officer
-            // const result = await dispatch(assignComplaintToOfficer({ complaintId: id, officerId: user._id }));
+            // Show loading toast
+            const loadingToast = toast.loading('Accepting complaint...');
             
-            toast.success('✅ Complaint accepted! You are now assigned to this case.', {
-                duration: 3000,
-                position: 'top-center',
-                className: 'custom-toast custom-toast-success',
-                style: {
-                    background: 'rgba(34, 197, 94, 0.2)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                    color: '#fff',
-                    fontWeight: '600',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+            // Make API call to assign complaint to officer
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/${user._id}/assign-complaint/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
+                credentials: 'include'
             });
-            
-            // Refresh complaint data
-            dispatch(fetchComplaintById(id));
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Dismiss loading and show success
+                toast.dismiss(loadingToast);
+                toast.success('✅ Complaint accepted! You are now assigned to this case.', {
+                    duration: 4000,
+                    position: 'top-center',
+                    icon: '✅'
+                });
+
+                // Refresh complaint details to show updated assigned_officer_id
+                dispatch(fetchComplaintById(id));
+                
+                console.log('✅ Complaint accepted:', id);
+            } else {
+                throw new Error(data.message || 'Failed to accept complaint');
+            }
         } catch (error) {
+            console.error('Error accepting complaint:', error);
             toast.error('❌ Error while accepting complaint. Please try again.', {
                 duration: 3000,
                 position: 'top-center',
@@ -966,7 +982,7 @@ export default function ComplaintDetail() {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ complaintId: selectedComplaint._id })
+                body: JSON.stringify({ complaintId: id })
             });
 
             const data = await response.json();
@@ -982,7 +998,7 @@ export default function ComplaintDetail() {
                 // Set the complaint as ignored to show disclaimer
                 setComplaintIgnored(true);
                 
-                console.log('✅ Complaint rejected:', selectedComplaint._id);
+                console.log('✅ Complaint rejected:', id);
             } else {
                 toast.dismiss(loadingToast);
                 throw new Error(data.message || 'Failed to reject complaint');

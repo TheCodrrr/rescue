@@ -164,7 +164,7 @@ const ComplaintMap = ({ officerLocation, complaints, onComplaintClick }) => {
                         />
                         <Circle
                             center={[officerLocation.latitude, officerLocation.longitude]}
-                            radius={100000}
+                            radius={200000}
                             pathOptions={{ 
                                 color: '#ee5a6f', 
                                 fillColor: '#ee5a6f', 

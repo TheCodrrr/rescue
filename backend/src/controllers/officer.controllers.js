@@ -113,9 +113,8 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
             ...baseFilter,
             severity: "low",
             location: {
-                $near: {
-                    $geometry: { type: "Point", coordinates: [lng, lat] },
-                    $maxDistance: 10000 // 10 km in meters
+                $geoWithin: {
+                    $centerSphere: [[lng, lat], 10 / 6378.1] // 10 km radius (Earth radius = 6378.1 km)
                 }
             }
         })
@@ -130,9 +129,8 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
             ...baseFilter,
             severity: "medium",
             location: {
-                $near: {
-                    $geometry: { type: "Point", coordinates: [lng, lat] },
-                    $maxDistance: 20000 // 20 km in meters
+                $geoWithin: {
+                    $centerSphere: [[lng, lat], 20 / 6378.1] // 20 km radius
                 }
             }
         })
@@ -147,9 +145,8 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
             ...baseFilter,
             severity: "high",
             location: {
-                $near: {
-                    $geometry: { type: "Point", coordinates: [lng, lat] },
-                    $maxDistance: 100000 // 100 km in meters
+                $geoWithin: {
+                    $centerSphere: [[lng, lat], 200 / 6378.1] // 200 km radius (increased for better coverage)
                 }
             }
         })

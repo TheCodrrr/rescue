@@ -149,7 +149,7 @@ const OfficerComplaint = () => {
                     isInRange = true;
                 } else if (severity === 'medium' && distance <= 20) {
                     isInRange = true;
-                } else if (severity === 'high' && distance <= 100) {
+                } else if (severity === 'high' && distance <= 200) {
                     isInRange = true;
                 }
                 
@@ -219,7 +219,9 @@ const OfficerComplaint = () => {
 
     // Filter complaints based on status, severity, search query, and rejection status
     const filteredComplaints = allComplaints.filter(complaint => {
-        const matchesStatus = filterStatus === 'all' || complaint.status === filterStatus;
+        // Normalize status for comparison (backend uses underscore, frontend uses hyphen)
+        const normalizedComplaintStatus = complaint.status.replace('_', '-');
+        const matchesStatus = filterStatus === 'all' || normalizedComplaintStatus === filterStatus;
         const matchesSeverity = filterSeverity === 'all' || complaint.severity === filterSeverity;
         const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             complaint.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -278,7 +280,7 @@ const OfficerComplaint = () => {
         } else if (complaint.severity === 'medium') {
             return `Within 20km`;
         } else {
-            return `Within 100km`;
+            return `Within 200km`;
         }
     };
 
@@ -571,7 +573,7 @@ const OfficerComplaint = () => {
                         </div>
                         <div className="officer-stat-details">
                             <h3>{nearbyComplaints.high_severity?.count || 0}</h3>
-                            <p>High Priority (100km)</p>
+                            <p>High Priority (200km)</p>
                         </div>
                     </div>
                 </div>
