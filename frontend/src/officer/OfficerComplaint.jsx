@@ -30,6 +30,7 @@ const OfficerComplaint = () => {
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [socketConnected, setSocketConnected] = useState(false);
     const [rejectedComplaintIds, setRejectedComplaintIds] = useState(new Set());
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
     const complaintCardRefs = useRef({});
 
     // Calculate distance between two coordinates using Haversine formula
@@ -78,6 +79,13 @@ const OfficerComplaint = () => {
             }));
         }
     }, [location.latitude, location.longitude, location.loading, dispatch]);
+
+    // Track when complaints have loaded at least once
+    useEffect(() => {
+        if (!isLoading && totalComplaints >= 0) {
+            setHasLoadedOnce(true);
+        }
+    }, [isLoading, totalComplaints]);
 
     // Socket.io connection for real-time updates
     useEffect(() => {
@@ -353,7 +361,16 @@ const OfficerComplaint = () => {
             <Navbar />
             <div className="officer-complaint-container">
                 <div className="officer-complaint-header">
-                    <h1 className="officer-complaint-title">Nearby Complaints</h1>
+                    <h1 className="officer-complaint-title">
+                        Nearby Complaints
+                        {isLoading && hasLoadedOnce && (
+                            <span className="refreshing-indicator" title="Refreshing data...">
+                                <svg className="spinner-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </span>
+                        )}
+                    </h1>
                     <p className="officer-complaint-subtitle">
                         {location.loading ? (
                             'Getting your location...'
@@ -506,7 +523,7 @@ const OfficerComplaint = () => {
                     </div>
                 )}
 
-                {isLoading ? (
+                {isLoading && !hasLoadedOnce ? (
                     <div className="officer-complaint-loading">
                         <div className="loading-spinner"></div>
                         <p>Loading nearby complaints...</p>
