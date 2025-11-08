@@ -375,6 +375,41 @@ const OfficerComplaint = () => {
                     setSelectedComplaint(null);
                 }
                 
+                // Initialize escalation for the complaint (from level 0 to 1)
+                try {
+                    console.log('🔄 Initializing escalation for complaint:', complaintId);
+                    const escalationResponse = await fetch(`${import.meta.env.VITE_API_URL}/escalations/${complaintId}/add-event`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            from_level: 0,
+                            to_level: 1,
+                            reason: 'Complaint assigned to officer - Initial escalation'
+                        })
+                    });
+
+                    const escalationData = await escalationResponse.json();
+                    console.log('📊 Escalation response:', escalationData);
+
+                    if (escalationResponse.ok) {
+                        console.log('✅ Escalation initialized for complaint:', complaintId);
+                    } else {
+                        console.error('❌ Failed to initialize escalation:', escalationData);
+                        toast.error(`Warning: ${escalationData.message || 'Failed to initialize escalation'}`, {
+                            duration: 3000
+                        });
+                    }
+                } catch (escalationError) {
+                    console.error('💥 Error initializing escalation:', escalationError);
+                    toast.error('Warning: Failed to initialize escalation tracking', {
+                        duration: 3000
+                    });
+                    // Don't throw - escalation failure shouldn't prevent acceptance
+                }
+                
                 // Dismiss loading and show success
                 toast.dismiss(loadingToast);
                 toast.success('Complaint accepted and assigned to you successfully!', {
@@ -620,7 +655,7 @@ const OfficerComplaint = () => {
                                 onClick={() => handleComplaintClick(complaint)}
                             >
                                 <div className="officer-complaint-card-header">
-                                    <h3 className="officer-complaint-card-title">{complaint.title}</h3>
+                                    <h3 className="officer-complaint-card-title">{complaint.title?.substring(0, 15) + (complaint.title?.length > 15 ? "..." : "")}</h3>
                                     <div className="officer-complaint-header-actions">
                                         <span className={`officer-complaint-priority-badge officer-complaint-priority-${complaint.severity}`}>
                                             {complaint.severity}

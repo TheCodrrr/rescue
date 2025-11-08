@@ -936,6 +936,43 @@ export default function ComplaintDetail() {
             const data = await response.json();
 
             if (response.ok) {
+                // Initialize escalation for the complaint (from level 0 to 1)
+                try {
+                    console.log('🔄 Initializing escalation for complaint:', id);
+                    const escalationResponse = await fetch(`${import.meta.env.VITE_API_URL}/escalations/${id}/add-event`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            from_level: 0,
+                            to_level: 1,
+                            reason: 'Complaint assigned to officer - Initial escalation'
+                        })
+                    });
+
+                    const escalationData = await escalationResponse.json();
+                    console.log('📊 Escalation response:', escalationData);
+
+                    if (escalationResponse.ok) {
+                        console.log('✅ Escalation initialized for complaint:', id);
+                    } else {
+                        console.error('❌ Failed to initialize escalation:', escalationData);
+                        toast.error(`Warning: ${escalationData.message || 'Failed to initialize escalation'}`, {
+                            duration: 3000,
+                            position: 'top-center'
+                        });
+                    }
+                } catch (escalationError) {
+                    console.error('💥 Error initializing escalation:', escalationError);
+                    toast.error('Warning: Failed to initialize escalation tracking', {
+                        duration: 3000,
+                        position: 'top-center'
+                    });
+                    // Don't throw - escalation failure shouldn't prevent acceptance
+                }
+                
                 // Dismiss loading and show success
                 toast.dismiss(loadingToast);
                 toast.success('✅ Complaint accepted! You are now assigned to this case.', {
