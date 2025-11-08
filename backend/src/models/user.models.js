@@ -50,10 +50,15 @@ const userSchema = new Schema(
             type: Boolean,
             default: true,
         },
-        complaints: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'complaint'
-        }
+
+        // This is only for the user with role = officer, so that it will store the list of all the complaints handled by that officer
+
+        // complaints: [
+        //     {
+        //         type: mongoose.Schema.Types.ObjectId,
+        //         ref: 'complaint'
+        //     }
+        // ]
     },
     { timestamps: true }
 )
