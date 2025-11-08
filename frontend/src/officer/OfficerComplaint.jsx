@@ -24,6 +24,8 @@ const OfficerComplaint = () => {
         officerLocation 
     } = useSelector((state) => state.officer);
 
+    const { user } = useSelector((state) => state.auth);
+
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterSeverity, setFilterSeverity] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -334,6 +336,68 @@ const OfficerComplaint = () => {
         }
     };
 
+    const handleAcceptComplaint = async (complaintId, e) => {
+        e.stopPropagation();
+        
+        if (!user || !user._id) {
+            toast.error('User information not available');
+            return;
+        }
+
+        try {
+            // Show loading toast
+            const loadingToast = toast.loading('Accepting complaint...');
+            
+            // Make API call to assign complaint to officer
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/officer/${user._id}/assign-complaint/${complaintId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+            console.log("The response data is : ", data);
+
+            if (response.ok) {
+                // Remove complaint from rejected list if it was there
+                setRejectedComplaintIds(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(complaintId);
+                    return newSet;
+                });
+                
+                // If this was the selected complaint, clear selection
+                if (selectedComplaint?._id === complaintId) {
+                    setSelectedComplaint(null);
+                }
+                
+                // Dismiss loading and show success
+                toast.dismiss(loadingToast);
+                toast.success('Complaint accepted and assigned to you successfully!', {
+                    duration: 4000,
+                    icon: '✅'
+                });
+                
+                // Refresh complaints to update the list
+                if (location.latitude && location.longitude) {
+                    dispatch(fetchNearbyComplaints({
+                        latitude: location.latitude,
+                        longitude: location.longitude
+                    }));
+                }
+                
+                console.log('✅ Complaint accepted:', complaintId);
+            } else {
+                throw new Error(data.message || 'Failed to accept complaint');
+            }
+        } catch (error) {
+            console.error('Error accepting complaint:', error);
+            toast.error(error.message || 'Failed to accept complaint');
+        }
+    };
+
     // Handle click outside to deselect complaint
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -629,34 +693,32 @@ const OfficerComplaint = () => {
 
                                 <div className="officer-complaint-status">
                                     <span className={`officer-complaint-status-badge officer-complaint-status-${complaint.status}`}>
-                                        {complaint.status.replace('-', ' ')}
+                                        {complaint.status.replace(/-|_/g, ' ')}
                                     </span>
                                 </div>
                                 
-                                <div className="officer-complaint-actions">
-                                    <button 
-                                        className="officer-complaint-ignore-btn"
-                                        onClick={(e) => handleIgnoreComplaint(complaint._id, e)}
-                                    >
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        Ignore
-                                    </button>
-                                    <button 
-                                        className="officer-complaint-assign-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            // Handle assign action
-                                            console.log('Assign complaint:', complaint._id);
-                                        }}
-                                    >
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Accept
-                                    </button>
-                                </div>
+                                {!complaint.assigned_officer_id && (
+                                    <div className="officer-complaint-actions">
+                                        <button 
+                                            className="officer-complaint-ignore-btn"
+                                            onClick={(e) => handleIgnoreComplaint(complaint._id, e)}
+                                        >
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Ignore
+                                        </button>
+                                        <button 
+                                            className="officer-complaint-assign-btn"
+                                            onClick={(e) => handleAcceptComplaint(complaint._id, e)}
+                                        >
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Accept
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

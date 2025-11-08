@@ -348,8 +348,9 @@
     padding: 0.4rem 1rem;
     border-radius: 20px;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: capitalize;
+    letter-spacing: 0.3px;
 }
 
 .officer-complaint-status-pending {
@@ -358,7 +359,8 @@
     border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
-.officer-complaint-status-in-progress {
+.officer-complaint-status-in-progress,
+.officer-complaint-status-in_progress {
     background: rgba(33, 150, 243, 0.2);
     color: #1976d2;
     border: 1px solid rgba(33, 150, 243, 0.3);
