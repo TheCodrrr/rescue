@@ -111,6 +111,15 @@ export default function Home() {
         });
     };
 
+    // Navigate to complaint detail page
+    const handleViewComplaintDetails = (complaint) => {
+        console.log("From home.jsx: ", complaint);
+        // Clear any potential state conflicts and navigate
+        setTimeout(() => {
+            navigate(`/complaint/${complaint.id}`, { replace: true });
+        }, 0);
+    };
+
     // Socket initialization
     useEffect(() => {
         // Initialize socket connection
@@ -1262,7 +1271,13 @@ export default function Home() {
                                             </div>
 
                                             <div className="home-card-actions">
-                                                <button className="home-action-btn home-view-btn">
+                                                <button 
+                                                    className="home-action-btn home-view-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewComplaintDetails(complaint);
+                                                    }}
+                                                >
                                                     <span><FiEye /></span>
                                                     View Details
                                                 </button>
