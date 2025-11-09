@@ -268,12 +268,16 @@ const officerSlice = createSlice({
       })
       .addCase(acceptComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        const { complaintId } = action.payload;
+        const { complaintId, complaint: updatedComplaint } = action.payload;
         
-        // Update complaint's assigned_officer_id in all severity levels
+        // Update complaint's assigned_officer_id and status in all severity levels
         const updateComplaint = (complaint) => {
           if (complaint._id === complaintId) {
-            return { ...complaint, assigned_officer_id: action.payload.complaint?.assigned_officer_id };
+            return { 
+              ...complaint, 
+              assigned_officer_id: updatedComplaint?.assigned_officer_id,
+              status: updatedComplaint?.status || 'in_progress' // Update status to in_progress
+            };
           }
           return complaint;
         };

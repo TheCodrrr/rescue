@@ -417,13 +417,8 @@ const OfficerComplaint = () => {
                     icon: '✅'
                 });
                 
-                // Refresh complaints to update the list
-                if (location.latitude && location.longitude) {
-                    dispatch(fetchNearbyComplaints({
-                        latitude: location.latitude,
-                        longitude: location.longitude
-                    }));
-                }
+                // No need to refresh - Redux state is already updated in acceptComplaint.fulfilled
+                // This prevents the second unnecessary re-render
                 
                 console.log('✅ Complaint accepted:', complaintId);
             } else {
