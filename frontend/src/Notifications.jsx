@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { fetchNotifications, deleteNotification, markNotificationAsRead, clearNotificationError } from './auth/redux/notificationSlice';
+import { fetchNotifications, deleteNotification, markNotificationAsRead, clearNotificationError, addNotification } from './auth/redux/notificationSlice';
+import { io } from 'socket.io-client';
 import { 
     Bell, 
     Trash2, 
@@ -25,13 +26,101 @@ const Notifications = () => {
     
     const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
     const [deletingIndex, setDeletingIndex] = useState(null);
+    const socketRef = useRef(null);
 
+    // Fetch notifications when component mounts
     useEffect(() => {
-        // Fetch notifications when component mounts
         if (user) {
             dispatch(fetchNotifications());
         }
     }, [dispatch, user]);
+
+    // Socket.io connection for real-time notifications
+    useEffect(() => {
+        if (!user) return;
+
+        const socketURL = import.meta.env.VITE_SOCKET_URL || 
+                          import.meta.env.REACT_APP_SOCKET_URL || 
+                          'http://localhost:5000';
+
+        console.log("🔌 Notifications connecting to socket:", socketURL);
+
+        socketRef.current = io(socketURL, {
+            reconnection: true,
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+        });
+
+        socketRef.current.on('connect', () => {
+            console.log('✅ Notifications socket connected:', socketRef.current.id);
+        });
+
+        socketRef.current.on('disconnect', (reason) => {
+            console.log('❌ Notifications socket disconnected:', reason);
+        });
+
+        socketRef.current.on('connect_error', (error) => {
+            console.error('🔴 Socket connection error:', error);
+        });
+
+        // Listen for notifications specific to this user
+        const notificationEvent = `notification:${user._id}`;
+        console.log('👂 Listening for notifications on event:', notificationEvent);
+
+        socketRef.current.on(notificationEvent, (notificationData) => {
+            console.log('🔔 Received real-time notification:', notificationData);
+            
+            // Refresh notifications to get the latest from backend
+            dispatch(fetchNotifications());
+            
+            // Show toast notification
+            toast.success(
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <strong>New Notification</strong>
+                    <span style={{ fontSize: '0.9em' }}>
+                        {notificationData.complaint_title} escalated to Level {notificationData.to_level}
+                    </span>
+                </div>,
+                {
+                    duration: 5000,
+                    position: 'top-right',
+                    icon: '🔔',
+                    style: {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        padding: '16px',
+                        borderRadius: '12px',
+                    }
+                }
+            );
+
+            // Play notification sound
+            playNotificationSound();
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (socketRef.current) {
+                console.log('🔌 Disconnecting notifications socket');
+                socketRef.current.off(notificationEvent);
+                socketRef.current.disconnect();
+            }
+        };
+    }, [user, dispatch]);
+
+    // Play notification sound
+    const playNotificationSound = () => {
+        try {
+            const audio = new Audio('/notification-sound.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(err => {
+                console.log('Could not play notification sound:', err);
+            });
+        } catch (error) {
+            console.log('Notification sound not available:', error);
+        }
+    };
 
     useEffect(() => {
         if (error) {
