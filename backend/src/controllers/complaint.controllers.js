@@ -239,9 +239,11 @@ const getComplaintById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Complaint not found");
     }
 
-    if (req.user.role !== 'admin' && req.user.role !== 'officer' && req.user._id.toString() !== complaint.user_id._id.toString()) {
-        throw new ApiError(403, "You do not have permission to view this complaint");
-    }
+    // NOTE - This will only allow the complainer or an officer or an admin to view the details of a complaint, but currently anyone should be able to view the complaint details
+
+    // if (req.user.role !== 'admin' && req.user.role !== 'officer' && req.user._id.toString() !== complaint.user_id._id.toString()) {
+    //     throw new ApiError(403, "You do not have permission to view this complaint");
+    // }
 
     // Add category-specific data if available
     if (complaint.category === "rail" && complaint.category_data_id) {
