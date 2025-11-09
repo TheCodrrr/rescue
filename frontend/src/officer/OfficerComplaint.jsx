@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar';
@@ -35,6 +35,7 @@ const OfficerComplaint = () => {
     const [rejectedComplaintIds, setRejectedComplaintIds] = useState(new Set());
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
     const complaintCardRefs = useRef({});
+    const processedComplaintIds = useRef(new Set()); // Track processed real-time complaints
 
     // Calculate distance between two coordinates using Haversine formula
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -132,6 +133,12 @@ const OfficerComplaint = () => {
             
             const { complaint, location: complaintLocation, severity, category } = data;
             
+            // Check if we've already processed this complaint
+            if (processedComplaintIds.current.has(complaint._id)) {
+                console.log('⏭️ Complaint already processed, skipping:', complaint._id);
+                return;
+            }
+            
             // Check if complaint is within our vicinity based on officer's location
             if (location.latitude && location.longitude && complaintLocation?.coordinates) {
                 const [lng, lat] = complaintLocation.coordinates;
@@ -156,6 +163,11 @@ const OfficerComplaint = () => {
                 
                 if (isInRange) {
                     console.log('✅ Complaint is in range, adding to list');
+                    
+                    // Mark as processed
+                    processedComplaintIds.current.add(complaint._id);
+                    
+                    // Dispatch to Redux (which now has duplicate check)
                     dispatch(addNewComplaintRealtime(complaint));
                     
                     // Show notification
@@ -211,25 +223,27 @@ const OfficerComplaint = () => {
         }
     }, [error, dispatch]);
 
-    // Combine all complaints from different severity levels
-    const allComplaints = [
+    // Combine all complaints from different severity levels - Memoized to prevent re-renders
+    const allComplaints = useMemo(() => [
         ...(nearbyComplaints.low_severity?.complaints || []),
         ...(nearbyComplaints.medium_severity?.complaints || []),
         ...(nearbyComplaints.high_severity?.complaints || [])
-    ];
+    ], [nearbyComplaints]);
 
-    // Filter complaints based on status, severity, search query, and rejection status
-    const filteredComplaints = allComplaints.filter(complaint => {
-        // Normalize status for comparison (backend uses underscore, frontend uses hyphen)
-        const normalizedComplaintStatus = complaint.status.replace('_', '-');
-        const matchesStatus = filterStatus === 'all' || normalizedComplaintStatus === filterStatus;
-        const matchesSeverity = filterSeverity === 'all' || complaint.severity === filterSeverity;
-        const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            complaint.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            complaint.description?.toLowerCase().includes(searchQuery.toLowerCase());
-        const notRejected = !rejectedComplaintIds.has(complaint._id);
-        return matchesStatus && matchesSeverity && matchesSearch && notRejected;
-    });
+    // Filter complaints based on status, severity, search query, and rejection status - Memoized
+    const filteredComplaints = useMemo(() => {
+        return allComplaints.filter(complaint => {
+            // Normalize status for comparison (backend uses underscore, frontend uses hyphen)
+            const normalizedComplaintStatus = complaint.status.replace('_', '-');
+            const matchesStatus = filterStatus === 'all' || normalizedComplaintStatus === filterStatus;
+            const matchesSeverity = filterSeverity === 'all' || complaint.severity === filterSeverity;
+            const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                complaint.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                complaint.description?.toLowerCase().includes(searchQuery.toLowerCase());
+            const notRejected = !rejectedComplaintIds.has(complaint._id);
+            return matchesStatus && matchesSeverity && matchesSearch && notRejected;
+        });
+    }, [allComplaints, filterStatus, filterSeverity, searchQuery, rejectedComplaintIds]);
 
     // Masonry layout - adjust grid row spans based on card height
     useEffect(() => {
@@ -285,19 +299,19 @@ const OfficerComplaint = () => {
         }
     };
 
-    const handleComplaintClick = (complaint) => {
+    const handleComplaintClick = useCallback((complaint) => {
         setSelectedComplaint(complaint);
         console.log('Selected complaint:', complaint);
-    };
+    }, []);
 
-    const handleVisitComplaint = (complaint) => {
+    const handleVisitComplaint = useCallback((complaint) => {
         // Clear any potential state conflicts and navigate
         setTimeout(() => {
             navigate(`/complaint/${complaint._id}`, { replace: true });
         }, 0);
-    };
+    }, [navigate]);
 
-    const handleIgnoreComplaint = async (complaintId, e) => {
+    const handleIgnoreComplaint = useCallback(async (complaintId, e) => {
         e.stopPropagation();
         
         try {
@@ -330,7 +344,7 @@ const OfficerComplaint = () => {
             console.error('Error rejecting complaint:', error);
             toast.error(error.message || 'Failed to reject complaint');
         }
-    };
+    }, [dispatch, selectedComplaint]);
 
     const handleAcceptComplaint = async (complaintId, e) => {
         e.stopPropagation();

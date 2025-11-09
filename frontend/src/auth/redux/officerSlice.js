@@ -194,18 +194,26 @@ const officerSlice = createSlice({
       const newComplaint = action.payload;
       const severity = newComplaint.severity;
       
-      if (severity === 'low') {
-        state.nearbyComplaints.low_severity.complaints.unshift(newComplaint);
-        state.nearbyComplaints.low_severity.count++;
-      } else if (severity === 'medium') {
-        state.nearbyComplaints.medium_severity.complaints.unshift(newComplaint);
-        state.nearbyComplaints.medium_severity.count++;
-      } else if (severity === 'high') {
-        state.nearbyComplaints.high_severity.complaints.unshift(newComplaint);
-        state.nearbyComplaints.high_severity.count++;
-      }
+      // Check if complaint already exists in any severity level
+      const existsInLow = state.nearbyComplaints.low_severity.complaints.some(c => c._id === newComplaint._id);
+      const existsInMedium = state.nearbyComplaints.medium_severity.complaints.some(c => c._id === newComplaint._id);
+      const existsInHigh = state.nearbyComplaints.high_severity.complaints.some(c => c._id === newComplaint._id);
       
-      state.totalComplaints++;
+      // Only add if complaint doesn't already exist
+      if (!existsInLow && !existsInMedium && !existsInHigh) {
+        if (severity === 'low') {
+          state.nearbyComplaints.low_severity.complaints.unshift(newComplaint);
+          state.nearbyComplaints.low_severity.count++;
+        } else if (severity === 'medium') {
+          state.nearbyComplaints.medium_severity.complaints.unshift(newComplaint);
+          state.nearbyComplaints.medium_severity.count++;
+        } else if (severity === 'high') {
+          state.nearbyComplaints.high_severity.complaints.unshift(newComplaint);
+          state.nearbyComplaints.high_severity.count++;
+        }
+        
+        state.totalComplaints++;
+      }
     }
   },
   extraReducers: (builder) => {
