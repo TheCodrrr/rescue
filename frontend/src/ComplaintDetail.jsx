@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
+import { io } from 'socket.io-client';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -105,6 +106,83 @@ export default function ComplaintDetail() {
     const [deleteInProgress, setDeleteInProgress] = useState(false);
     const [assignmentInProgress, setAssignmentInProgress] = useState(false);
     const [complaintIgnored, setComplaintIgnored] = useState(false);
+    const socketRef = useRef(null);
+
+    // Socket.io connection for real-time notifications (when viewing complaint as owner)
+    useEffect(() => {
+        // Only setup socket if user is authenticated and is the complaint owner
+        if (!user || !selectedComplaint || selectedComplaint.user_id?._id !== user._id) {
+            return;
+        }
+
+        const socketURL = import.meta.env.VITE_SOCKET_URL || 
+                          import.meta.env.REACT_APP_SOCKET_URL || 
+                          'http://localhost:5000';
+
+        console.log("🔌 ComplaintDetail connecting to socket for user:", user._id);
+
+        socketRef.current = io(socketURL, {
+            reconnection: true,
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+        });
+
+        socketRef.current.on('connect', () => {
+            console.log('✅ ComplaintDetail socket connected:', socketRef.current.id);
+        });
+
+        socketRef.current.on('disconnect', (reason) => {
+            console.log('❌ ComplaintDetail socket disconnected:', reason);
+        });
+
+        socketRef.current.on('connect_error', (error) => {
+            console.error('🔴 ComplaintDetail socket connection error:', error);
+        });
+
+        // Listen for notifications specific to this user
+        const notificationEvent = `notification:${user._id}`;
+        console.log('👂 ComplaintDetail listening for notifications on event:', notificationEvent);
+
+        socketRef.current.on(notificationEvent, (notificationData) => {
+            console.log('🔔 ComplaintDetail received real-time notification:', notificationData);
+            
+            // Show toast notification if it's related to the current complaint
+            if (notificationData.complaint_id === id) {
+                toast.success(
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <strong>Complaint Update</strong>
+                        <span style={{ fontSize: '0.9em' }}>
+                            Your complaint has been escalated to Level {notificationData.to_level}
+                        </span>
+                    </div>,
+                    {
+                        duration: 5000,
+                        position: 'top-right',
+                        icon: '🔔',
+                        style: {
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            padding: '16px',
+                            borderRadius: '12px',
+                        }
+                    }
+                );
+
+                // Refresh complaint details to show updated status
+                dispatch(fetchComplaintById(id));
+            }
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (socketRef.current) {
+                console.log('🔌 Disconnecting ComplaintDetail socket');
+                socketRef.current.off(notificationEvent);
+                socketRef.current.disconnect();
+            }
+        };
+    }, [user, selectedComplaint, id, dispatch]);
 
     // Fetch complaint details on component mount
     useEffect(() => {

@@ -663,8 +663,8 @@ const OfficerComplaint = () => {
                                 </div>
                                 
                                 <p className="officer-complaint-description">
-                                    {complaint.description?.substring(0, 100)}
-                                    {complaint.description?.length > 100 ? '...' : ''}
+                                    {complaint.description?.substring(0, 35)}
+                                    {complaint.description?.length > 35 ? '...' : ''}
                                 </p>
 
                                 <div className="officer-complaint-meta">
