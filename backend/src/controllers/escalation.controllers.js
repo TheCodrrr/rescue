@@ -4,6 +4,7 @@ import { ApiError } from "../../utils/ApiError.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import redisClient from "../../utils/redisClient.js";
 import { createNotification } from "./user.controllers.js";
+import { io } from "../server.js";
 
 // const createEscalationHistory = asyncHandler(async (req, res) => {
 //   const { complaintId } = req.params;
@@ -107,6 +108,10 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
       };
 
       await createNotification(userId, notificationData);
+      
+      // Emit real-time notification to the specific user
+      io.emit(`notification:${userId}`, notificationData);
+      console.log(`🔔 Notification emitted to user ${userId} via Socket.io`);
     } catch (redisError) {
       console.error("⚠️ Failed to store notification in Redis:", redisError);
       // Continue even if Redis fails - don't break the escalation
