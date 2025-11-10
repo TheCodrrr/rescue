@@ -8,6 +8,9 @@ import redisClient from "../../utils/redisClient.js";
 import path from "path";
 import fs from "fs";
 import sharp from "sharp";
+import { Complaint } from "../models/complaint.models.js";
+import { Escalation } from "../models/escalation.models.js";
+import { Feedback } from "../models/feedback.models.js";
 // import bcrypt from "bcryptjs";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -327,6 +330,15 @@ const deleteUser = asyncHandler( async(req, res) => {
         }
     }
 
+    await Complaint.deleteMany({ user_id: userId });
+    await Escalation.deleteMany({ escalated_by: userId });
+    await Feedback.deleteMany({ user_id: userId });
+
+    await Complaint.updateMany(
+        { assigned_officer_id: userId },
+        { $unset: { assigned_officer_id: "" } }
+    )
+
     await User.findByIdAndDelete(userId);
 
     const options = {
@@ -338,7 +350,7 @@ const deleteUser = asyncHandler( async(req, res) => {
             .status(200)
             .clearCookie("accessToken", options)
             .clearCookie("refreshToken", options)
-            .json( new ApiResponse(200, {}, "User deleted successfully"))
+            .json( new ApiResponse(200, {}, "User and associated data deleted successfully."))
 })
 
 const createNotification = async (userId, notificationData) => {
