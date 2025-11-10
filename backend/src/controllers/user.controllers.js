@@ -40,6 +40,16 @@ const registerUser = asyncHandler( async(req, res) => {
     // These are the 4 mandatory fields to create a new user
     const {email, name, password, phone, role} = req.body;
 
+    const { category, department_id } = role === "officer" ? req.body : { category: "", department_id: "" };
+
+    let level = 0;
+    if (role === "officer") {
+        level = req.body.level;
+    }
+    else if (role === "admin") {
+        level = 5;
+    }
+
     // validation
     if (
         [name, email, password, phone, role].some((field) => field?.trim() === "")
@@ -47,7 +57,17 @@ const registerUser = asyncHandler( async(req, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    console.log(name, email, password, phone, role);
+    // Additional validation for officers
+    if (role === "officer") {
+        if (!category || category.trim() === "") {
+            throw new ApiError(400, "Category is required for officer role")
+        }
+        if (!department_id || department_id.trim() === "") {
+            throw new ApiError(400, "Department is required for officer role")
+        }
+    }
+
+    console.log("The req.body is: ", req.body);
 
     const existedUser = await User.findOne({
         $or: [
@@ -118,6 +138,9 @@ const registerUser = asyncHandler( async(req, res) => {
             password,
             phone,
             role,
+            user_level: level,
+            officer_category: category || "",
+            department_id: department_id || null,
         })
         // console.log("This is the user created: ");
         // console.log(user);

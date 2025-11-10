@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import { type } from "os";
 
 const userSchema = new Schema(
     {
@@ -50,15 +51,32 @@ const userSchema = new Schema(
             type: Boolean,
             default: true,
         },
-
+        
         // This is only for the user with role = officer, so that it will store the list of all the complaints handled by that officer
-
+        
         complaints: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'complaint'
             }
-        ]
+        ],
+        officer_category: {
+            type: String,
+            enum: ['rail', 'fire', 'cyber', 'police', 'court', 'road'],
+            required: function() {
+                return this.role === "officer";
+            },
+        },
+        user_level: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 5,
+        },
+        department_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'department',
+        }
     },
     { timestamps: true }
 )
