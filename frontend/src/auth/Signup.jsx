@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X, Shield, Train, Construction, Flame, AlertTriangle, Scale, Building2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginSuccess } from "./redux/authSlice";
+import { loginSuccess, verifyDepartmentSecret, registerUser, loginUser } from "./redux/authSlice";
 import axiosInstance from "../api/axios.js";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -12,6 +12,10 @@ export default function Signup() {
         email: "",
         password: "",
         phone: "",
+        role: "citizen",
+        category: "",
+        department_id: "",
+        department_secret: "",
         profileImage: null
     });
     const [sendData, setSendData] = useState({
@@ -20,8 +24,26 @@ export default function Signup() {
     });
     
     const [showPassword, setShowPassword] = useState(false);
+    const [showDepartmentSecret, setShowDepartmentSecret] = useState(false);
+    const [isVerifyingSecret, setIsVerifyingSecret] = useState(false);
+    const [isSecretVerified, setIsSecretVerified] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Department caching state
+    const [allDepartments, setAllDepartments] = useState([]);
+    const [departmentsByCategory, setDepartmentsByCategory] = useState({
+        rail: [],
+        road: [],
+        fire: [],
+        cyber: [],
+        police: [],
+        court: []
+    });
+    const [isDepartmentsLoading, setIsDepartmentsLoading] = useState(false);
+    const [categoryDepartmentsLoading, setCategoryDepartmentsLoading] = useState(false);
+    const hasFetchedDepartments = useRef(false);
+    const hasPrefetchedCategories = useRef(false);
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -33,6 +55,83 @@ export default function Signup() {
             [name]: value
         }));
     };
+
+    const handleRoleChange = (e) => {
+        const selectedRole = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            role: selectedRole,
+            category: selectedRole === 'officer' ? '' : prev.category, // Reset category if not officer
+            department_id: "", // Reset department when role changes
+            department_secret: "" // Reset department secret when role changes
+        }));
+        setIsSecretVerified(false); // Reset verification status
+    };
+
+    // Fetch all departments on component mount
+    useEffect(() => {
+        const fetchAllDepartments = async () => {
+            if (hasFetchedDepartments.current) return;
+            
+            try {
+                setIsDepartmentsLoading(true);
+                const response = await axiosInstance.get('/departments');
+                
+                if (response.data && response.data.data) {
+                    setAllDepartments(response.data.data);
+                    hasFetchedDepartments.current = true;
+                    console.log('✅ All departments fetched and cached:', response.data.data.length);
+                }
+            } catch (error) {
+                console.error('❌ Error fetching departments:', error);
+                // Don't show error toast as this is a background operation
+            } finally {
+                setIsDepartmentsLoading(false);
+            }
+        };
+
+        fetchAllDepartments();
+    }, []);
+
+    // Prefetch departments by category when officer role is selected
+    useEffect(() => {
+        const prefetchDepartmentsByCategory = async () => {
+            if (formData.role !== 'officer' || hasPrefetchedCategories.current) return;
+
+            try {
+                setCategoryDepartmentsLoading(true);
+                const categories = ['rail', 'road', 'fire', 'cyber', 'police', 'court'];
+                
+                // Fetch all categories in parallel
+                const promises = categories.map(category =>
+                    axiosInstance.get(`/departments/category/${category}`)
+                        .then(res => ({ category, data: res.data.data }))
+                        .catch(err => {
+                            console.warn(`⚠️ Failed to fetch ${category} departments:`, err.message);
+                            return { category, data: [] };
+                        })
+                );
+
+                const results = await Promise.all(promises);
+                
+                // Update state with fetched departments
+                const categorizedDepts = {};
+                results.forEach(({ category, data }) => {
+                    categorizedDepts[category] = data || [];
+                });
+
+                setDepartmentsByCategory(categorizedDepts);
+                hasPrefetchedCategories.current = true;
+                console.log('✅ Departments by category prefetched and cached');
+            } catch (error) {
+                console.error('❌ Error prefetching departments by category:', error);
+            } finally {
+                setCategoryDepartmentsLoading(false);
+            }
+        };
+
+        prefetchDepartmentsByCategory();
+    }, [formData.role]);
 
     const handleImageChange = (e) => {
         const file = e?.target?.files[0] || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png';
@@ -77,12 +176,57 @@ export default function Signup() {
         toast.success('Image removed successfully');
     };
 
+    const handleDepartmentSelect = (deptId) => {
+        setFormData(prev => ({ ...prev, department_id: deptId, department_secret: "" }));
+        setIsSecretVerified(false); // Reset verification when department changes
+    };
+
+    const handleVerifySecret = async () => {
+        if (!formData.department_id) {
+            toast.error('Please select a department first');
+            return;
+        }
+
+        if (!formData.department_secret) {
+            toast.error('Please enter department secret');
+            return;
+        }
+
+        setIsVerifyingSecret(true);
+        try {
+            const result = await dispatch(verifyDepartmentSecret({
+                department_id: formData.department_id,
+                department_secret: formData.department_secret
+            })).unwrap();
+
+            setIsSecretVerified(true);
+            toast.success('Department secret verified successfully!');
+        } catch (error) {
+            setIsSecretVerified(false);
+            toast.error(error || 'Failed to verify department secret');
+        } finally {
+            setIsVerifyingSecret(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         // Basic validation
         if (!formData.name || !formData.email || !formData.password || !formData.phone) {
             toast.error('Please fill in all required fields');
+            return;
+        }
+
+        // Category validation for officers
+        if (formData.role === 'officer' && !formData.category) {
+            toast.error('Please select a category for officer role');
+            return;
+        }
+
+        // Department validation for officers
+        if (formData.role === 'officer' && !formData.department_id) {
+            toast.error('Please select a department');
             return;
         }
 
@@ -109,78 +253,85 @@ export default function Signup() {
         setIsLoading(true);
 
         try {
+            // For officers: Verify department secret first if not already verified
+            if (formData.role === 'officer' && !isSecretVerified) {
+                if (!formData.department_secret) {
+                    toast.error('Please enter your department secret');
+                    setIsLoading(false);
+                    return;
+                }
+
+                toast.loading('Verifying department secret...');
+                try {
+                    await dispatch(verifyDepartmentSecret({
+                        department_id: formData.department_id,
+                        department_secret: formData.department_secret
+                    })).unwrap();
+                    
+                    setIsSecretVerified(true);
+                    toast.dismiss();
+                    toast.success('Department secret verified!');
+                } catch (error) {
+                    toast.dismiss();
+                    toast.error(error || 'Invalid department secret. Please verify before registering.');
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
             // Create FormData for multipart/form-data
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name);
             formDataToSend.append('email', formData.email);
             formDataToSend.append('password', formData.password);
             formDataToSend.append('phone', formData.phone);
+            formDataToSend.append('role', formData.role);
+            
+            // Add category and department if user is an officer
+            if (formData.role === 'officer' && formData.category) {
+                formDataToSend.append('category', formData.category);
+            }
+            
+            if (formData.role === 'officer' && formData.department_id) {
+                formDataToSend.append('department_id', formData.department_id);
+            }
             
             if (formData.profileImage) {
                 formDataToSend.append('profileImage', formData.profileImage);
             }
 
-            const response = await axiosInstance.post('/users/register', formDataToSend, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            console.log("Signup response = ", response);
+            // Register user using Redux
+            await dispatch(registerUser(formDataToSend)).unwrap();
             toast.success('Account created successfully!');
-            console.log('Signup successful:', response.data);
 
-            // After successful signup, try to log the user in automatically
+            // After successful signup, try to log the user in automatically using Redux
             try {
-                const loginData = {
+                const loginResult = await dispatch(loginUser({
                     email: formData.email,
                     password: formData.password
-                };
+                })).unwrap();
                 
-                const loginResponse = await axiosInstance.post('/users/login', loginData);
+                toast.success('Login successful! Redirecting...');
                 
-                if (loginResponse.status === 200) {
-                    if (loginResponse.data.data && loginResponse.data.data.accessToken) {
-                        // Store token in localStorage
-                        localStorage.setItem('token', loginResponse.data.data.accessToken);
-                        localStorage.setItem('isLoggedIn', 'true');
-                        
-                        // Update Redux state
-                        dispatch(loginSuccess({
-                            user: loginResponse.data.data.user,
-                            token: loginResponse.data.data.accessToken
-                        }));
-
-                        toast.success('Login successful! Redirecting...');
-                        
-                        // Reset form
-                        setFormData({
-                            name: "",
-                            email: "",
-                            password: "",
-                            phone: "",
-                            profileImage: null
-                        });
-                        setImagePreview(null);
-                        
-                        // Navigate to home after a brief delay
-                        setTimeout(() => {
-                            navigate("/");
-                        }, 1500);
-                    } else {
-                        // Registration successful but auto-login failed
-                        toast.success('Account created! Please login to continue.');
-                        setTimeout(() => {
-                            navigate("/login");
-                        }, 2000);
-                    }
-                } else {
-                    // Registration successful but auto-login failed
-                    toast.success('Account created! Please login to continue.');
-                    setTimeout(() => {
-                        navigate("/login");
-                    }, 2000);
-                }
+                // Reset form
+                setFormData({
+                    name: "",
+                    email: "",
+                    password: "",
+                    phone: "",
+                    role: "citizen",
+                    category: "",
+                    department_id: "",
+                    department_secret: "",
+                    profileImage: null
+                });
+                setImagePreview(null);
+                setIsSecretVerified(false);
+                
+                // Navigate to home after a brief delay
+                setTimeout(() => {
+                    navigate("/");
+                }, 1500);
             } catch (loginError) {
                 console.error('Auto-login after signup failed:', loginError);
                 // Don't show error, just redirect to login
@@ -193,7 +344,9 @@ export default function Signup() {
         } catch (error) {
             console.error('Signup error:', error);
             
-            if (error.response?.data?.message) {
+            if (typeof error === 'string') {
+                toast.error(error);
+            } else if (error.response?.data?.message) {
                 toast.error(error.response.data.message);
             } else if (error.response?.status === 400) {
                 toast.error('Invalid input data. Please check your information.');
@@ -209,6 +362,29 @@ export default function Signup() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 flex items-center justify-center py-4 px-4 relative overflow-hidden">
+            {/* Custom Scrollbar Styles */}
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 10px;
+                    backdrop-filter: blur(10px);
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.5);
+                }
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+                }
+            `}</style>
+            
             {/* Background Elements */}
             <div className="absolute inset-0">
                 <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -409,10 +585,457 @@ export default function Signup() {
                                                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                                     </button>
                                                 </div>
+                                                <p className="text-xs text-white/70 mt-1.5 drop-shadow-sm">Password must be at least 6 characters</p>
                                             </div>
                                         </div>
                                         
-                                        <p className="text-xs text-white/70 drop-shadow-sm">Password must be at least 6 characters</p>
+                                        {/* Role Selection */}
+                                        <div>
+                                            <label className="block text-sm font-semibold text-white/90 mb-2 drop-shadow-sm">
+                                                Select Your Role *
+                                            </label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {/* Citizen Radio */}
+                                                <label className={`relative flex flex-col items-center justify-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                    formData.role === 'citizen' 
+                                                        ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                        : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                }`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="role"
+                                                        value="citizen"
+                                                        checked={formData.role === 'citizen'}
+                                                        onChange={handleRoleChange}
+                                                        className="sr-only"
+                                                    />
+                                                    <User className={`h-5 w-5 mb-1.5 ${
+                                                        formData.role === 'citizen' ? 'text-white' : 'text-white/70'
+                                                    }`} />
+                                                    <span className={`text-sm font-medium ${
+                                                        formData.role === 'citizen' ? 'text-white' : 'text-white/80'
+                                                    }`}>
+                                                        Citizen
+                                                    </span>
+                                                </label>
+
+                                                {/* Officer Radio */}
+                                                <label className={`relative flex flex-col items-center justify-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                    formData.role === 'officer' 
+                                                        ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                        : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                }`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="role"
+                                                        value="officer"
+                                                        checked={formData.role === 'officer'}
+                                                        onChange={handleRoleChange}
+                                                        className="sr-only"
+                                                    />
+                                                    <Shield className={`h-5 w-5 mb-1.5 ${
+                                                        formData.role === 'officer' ? 'text-white' : 'text-white/70'
+                                                    }`} />
+                                                    <span className={`text-sm font-medium ${
+                                                        formData.role === 'officer' ? 'text-white' : 'text-white/80'
+                                                    }`}>
+                                                        Officer
+                                                    </span>
+                                                </label>
+
+                                                {/* Admin Radio */}
+                                                <label className={`relative flex flex-col items-center justify-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                    formData.role === 'admin' 
+                                                        ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                        : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                }`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="role"
+                                                        value="admin"
+                                                        checked={formData.role === 'admin'}
+                                                        onChange={handleRoleChange}
+                                                        className="sr-only"
+                                                    />
+                                                    <Lock className={`h-5 w-5 mb-1.5 ${
+                                                        formData.role === 'admin' ? 'text-white' : 'text-white/70'
+                                                    }`} />
+                                                    <span className={`text-sm font-medium ${
+                                                        formData.role === 'admin' ? 'text-white' : 'text-white/80'
+                                                    }`}>
+                                                        Admin
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* Category Selection - Only shown for officers */}
+                                        {formData.role === 'officer' && (
+                                            <div className="animate-fadeIn">
+                                                <label className="block text-sm font-semibold text-white/90 mb-2 drop-shadow-sm">
+                                                    Select Your Category *
+                                                </label>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                                    {/* Rail Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'rail' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="rail"
+                                                            checked={formData.category === 'rail'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <Train className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'rail' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'rail' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Rail
+                                                        </span>
+                                                    </label>
+
+                                                    {/* Road Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'road' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="road"
+                                                            checked={formData.category === 'road'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <Construction className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'road' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'road' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Road
+                                                        </span>
+                                                    </label>
+
+                                                    {/* Fire Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'fire' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="fire"
+                                                            checked={formData.category === 'fire'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <Flame className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'fire' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'fire' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Fire
+                                                        </span>
+                                                    </label>
+
+                                                    {/* Cyber Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'cyber' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="cyber"
+                                                            checked={formData.category === 'cyber'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <AlertTriangle className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'cyber' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'cyber' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Cyber
+                                                        </span>
+                                                    </label>
+
+                                                    {/* Police Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'police' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="police"
+                                                            checked={formData.category === 'police'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <Shield className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'police' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'police' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Police
+                                                        </span>
+                                                    </label>
+
+                                                    {/* Court Category */}
+                                                    <label className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                                                        formData.category === 'court' 
+                                                            ? 'bg-white/30 backdrop-blur-lg border border-white/50 shadow-lg' 
+                                                            : 'bg-white/20 backdrop-blur-lg border border-white/30 hover:bg-white/25 hover:border-white/40'
+                                                    }`}>
+                                                        <input
+                                                            type="radio"
+                                                            name="category"
+                                                            value="court"
+                                                            checked={formData.category === 'court'}
+                                                            onChange={handleInputChange}
+                                                            className="sr-only"
+                                                        />
+                                                        <Scale className={`h-5 w-5 mb-1.5 ${
+                                                            formData.category === 'court' ? 'text-white' : 'text-white/70'
+                                                        }`} />
+                                                        <span className={`text-xs font-medium ${
+                                                            formData.category === 'court' ? 'text-white' : 'text-white/80'
+                                                        }`}>
+                                                            Court
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Department Selection - Shown for officers (all departments initially, filtered by category when selected) */}
+                                        {formData.role === 'officer' && (
+                                            <div className="animate-fadeIn">
+                                                <label className="block text-sm font-semibold text-white/90 mb-2 drop-shadow-sm">
+                                                    Select Your Department *
+                                                </label>
+                                                
+                                                {/* Loading State */}
+                                                {(isDepartmentsLoading || (formData.category && categoryDepartmentsLoading)) ? (
+                                                    <div className="w-full px-4 py-8 bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl shadow-lg flex items-center justify-center">
+                                                        <div className="animate-spin rounded-full h-6 w-6 border-3 border-white/60 border-t-white mr-3"></div>
+                                                        <span className="text-white/80 text-sm">
+                                                            {isDepartmentsLoading 
+                                                                ? 'Loading departments...' 
+                                                                : 'Loading category departments...'}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {/* Department List Box - Shows max 5 departments with scroll */}
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: '300px',
+                                                            background: 'rgba(255, 255, 255, 0.2)',
+                                                            backdropFilter: 'blur(16px)',
+                                                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                                                            borderRadius: '12px',
+                                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                            <div className="custom-scrollbar" style={{
+                                                                height: '100%',
+                                                                overflowY: 'auto'
+                                                            }}>
+                                                                {/* Show category-filtered departments if category is selected, otherwise show all */}
+                                                                {formData.category ? (
+                                                                    // Category selected - show filtered departments
+                                                                    departmentsByCategory[formData.category]?.length > 0 ? (
+                                                                        departmentsByCategory[formData.category].map((dept, index) => (
+                                                                            <div
+                                                                                key={dept._id}
+                                                                                onClick={() => handleDepartmentSelect(dept._id)}
+                                                                                className={`px-4 py-3 cursor-pointer transition-all duration-200 ${
+                                                                                    formData.department_id === dept._id
+                                                                                        ? 'bg-white/40 backdrop-blur-lg border-l-4 border-white shadow-md'
+                                                                                        : 'bg-white/10 hover:bg-white/25 border-l-4 border-transparent'
+                                                                                } ${index !== 0 ? 'border-t border-white/20' : ''}`}
+                                                                            >
+                                                                                <div className="flex items-center justify-between gap-4">
+                                                                                    <div className="flex items-center gap-3 flex-1">
+                                                                                        <Building2 className="h-4 w-4 text-white/70 flex-shrink-0" />
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <p className="text-white font-medium text-sm drop-shadow-sm truncate">
+                                                                                                {dept.name}
+                                                                                            </p>
+                                                                                            <p className="text-white/60 text-xs">
+                                                                                                Level {dept.jurisdiction_level}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {formData.department_id === dept._id && (
+                                                                                        <div className="flex items-center justify-center w-5 h-5 bg-white/30 rounded-full flex-shrink-0">
+                                                                                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                            </svg>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <div className="px-4 py-8 text-center">
+                                                                            <p className="text-white/60 text-sm">
+                                                                                No departments available for {formData.category}
+                                                                            </p>
+                                                                        </div>
+                                                                    )
+                                                                ) : (
+                                                                    // No category selected - show all departments
+                                                                    allDepartments.length > 0 ? (
+                                                                        allDepartments.map((dept, index) => (
+                                                                            <div
+                                                                                key={dept._id}
+                                                                                onClick={() => handleDepartmentSelect(dept._id)}
+                                                                                className={`px-4 py-3 cursor-pointer transition-all duration-200 ${
+                                                                                    formData.department_id === dept._id
+                                                                                        ? 'bg-white/40 backdrop-blur-lg border-l-4 border-white shadow-md'
+                                                                                        : 'bg-white/10 hover:bg-white/25 border-l-4 border-transparent'
+                                                                                } ${index !== 0 ? 'border-t border-white/20' : ''}`}
+                                                                            >
+                                                                                <div className="flex items-center justify-between gap-4">
+                                                                                    <div className="flex items-center gap-3 flex-1">
+                                                                                        <Building2 className="h-4 w-4 text-white/70 flex-shrink-0" />
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <p className="text-white font-medium text-sm drop-shadow-sm truncate">
+                                                                                                {dept.name}
+                                                                                            </p>
+                                                                                            <p className="text-white/60 text-xs">
+                                                                                                {dept.category} • Level {dept.jurisdiction_level}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {formData.department_id === dept._id && (
+                                                                                        <div className="flex items-center justify-center w-5 h-5 bg-white/30 rounded-full flex-shrink-0">
+                                                                                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                            </svg>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <div className="px-4 py-8 text-center">
+                                                                            <p className="text-white/60 text-sm">
+                                                                                No departments available
+                                                                            </p>
+                                                                        </div>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Department count info */}
+                                                        {formData.category ? (
+                                                            departmentsByCategory[formData.category]?.length > 0 && (
+                                                                <p className="text-xs text-white/60 mt-2 drop-shadow-sm">
+                                                                    {departmentsByCategory[formData.category].length} {formData.category} department(s) available
+                                                                </p>
+                                                            )
+                                                        ) : (
+                                                            allDepartments.length > 0 && (
+                                                                <p className="text-xs text-white/60 mt-2 drop-shadow-sm">
+                                                                    {allDepartments.length} total department(s) available
+                                                                </p>
+                                                            )
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Department Secret Field - Only shown for officers after department selection */}
+                                        {formData.role === 'officer' && formData.department_id && (
+                                            <div className="animate-fadeIn">
+                                                <label htmlFor="department_secret" className="block text-sm font-semibold text-white/90 mb-2 drop-shadow-sm">
+                                                    Department Secret *
+                                                </label>
+                                                <div className="flex gap-3">
+                                                    <div className="relative flex-1">
+                                                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/70" />
+                                                        <input
+                                                            id="department_secret"
+                                                            name="department_secret"
+                                                            type={showDepartmentSecret ? "text" : "password"}
+                                                            required
+                                                            value={formData.department_secret}
+                                                            onChange={handleInputChange}
+                                                            disabled={isSecretVerified}
+                                                            className={`pl-10 pr-12 w-full px-3 py-3 bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 focus:bg-white/25 transition-all duration-300 text-sm text-white placeholder-white/60 shadow-lg ${
+                                                                isSecretVerified ? 'opacity-70 cursor-not-allowed' : ''
+                                                            }`}
+                                                            placeholder="Enter department secret"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowDepartmentSecret(!showDepartmentSecret)}
+                                                            disabled={isSecretVerified}
+                                                            className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white/90 hover:text-white hover:bg-white/15 rounded-lg border border-white/20 backdrop-blur-sm transition-colors duration-200 no-hover-transform ${
+                                                                isSecretVerified ? 'opacity-50 cursor-not-allowed' : ''
+                                                            }`}
+                                                        >
+                                                            {showDepartmentSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleVerifySecret}
+                                                        disabled={isVerifyingSecret || isSecretVerified || !formData.department_secret}
+                                                        className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 shadow-lg flex items-center gap-2 whitespace-nowrap ${
+                                                            isSecretVerified
+                                                                ? 'bg-green-500/30 border-2 border-green-400/60 text-green-100 cursor-not-allowed'
+                                                                : isVerifyingSecret || !formData.department_secret
+                                                                ? 'bg-white/10 border-2 border-white/20 text-white/50 cursor-not-allowed'
+                                                                : 'bg-blue-500/30 border-2 border-blue-400/60 text-white hover:bg-blue-500/40 hover:border-blue-400/80 hover:shadow-xl transform hover:scale-105'
+                                                        }`}
+                                                    >
+                                                        {isVerifyingSecret ? (
+                                                            <>
+                                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/60 border-t-white"></div>
+                                                                <span>Verifying...</span>
+                                                            </>
+                                                        ) : isSecretVerified ? (
+                                                            <>
+                                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                </svg>
+                                                                <span>Verified</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Shield className="h-4 w-4" />
+                                                                <span>Verify</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <p className="text-xs text-white/60 mt-1.5 drop-shadow-sm">
+                                                    Enter your department's secret code to verify authorization
+                                                </p>
+                                            </div>
+                                        )}
 
                                         {/* Glass Submit Button */}
                                         <div className="pt-6">

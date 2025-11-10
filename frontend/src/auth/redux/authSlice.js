@@ -228,6 +228,93 @@ export const changePassword = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to verify department secret
+export const verifyDepartmentSecret = createAsyncThunk(
+  'auth/verifyDepartmentSecret',
+  async ({ department_id, department_secret }, thunkAPI) => {
+    try {
+      console.log("Making API call to verify department secret...");
+      
+      const secretData = {
+        department_id,
+        department_secret
+      };
+
+      console.log("Department secret data being sent:", secretData);
+      const res = await axiosInstance.post('/departments/validate-secret', secretData);
+      console.log("Verify department secret API response:", res.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error("Verify department secret API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to verify department secret';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to register user
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (formDataToSend, thunkAPI) => {
+    try {
+      console.log("Making API call to register user...");
+      
+      const res = await axiosInstance.post('/users/register', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log("Register user API response:", res.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error("Register user API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to register user';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to login user
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async ({ email, password }, thunkAPI) => {
+    try {
+      console.log("Making API call to login user...");
+      
+      const loginData = { email, password };
+      
+      const res = await axiosInstance.post('/users/login', loginData);
+      console.log("Login user API response:", res.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error("Login user API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to login user';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -336,6 +423,51 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(changePassword.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(verifyDepartmentSecret.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyDepartmentSecret.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(verifyDepartmentSecret.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        // Extract user and token from response
+        const { user, accessToken } = action.payload?.data || {};
+        if (user && accessToken) {
+          state.isAuthenticated = true;
+          state.user = user;
+          state.token = accessToken;
+          localStorage.setItem('token', accessToken);
+          localStorage.setItem('isLoggedIn', 'true');
+        }
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },
