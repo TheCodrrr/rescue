@@ -38,14 +38,16 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler( async(req, res) => {
     // These are the 4 mandatory fields to create a new user
-    const {email, name, password, phone} = req.body;
+    const {email, name, password, phone, role} = req.body;
 
     // validation
     if (
-        [name, email, password, phone].some((field) => field?.trim() === "")
+        [name, email, password, phone, role].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required")
     }
+
+    console.log(name, email, password, phone, role);
 
     const existedUser = await User.findOne({
         $or: [
@@ -78,16 +80,22 @@ const registerUser = asyncHandler( async(req, res) => {
         .webp({ quality: 80 })
         .toFile(optimizedPath);
 
+    // Delete the original file only if it still exists
     try {
-        await fs.promises.unlink(profileLocalPath); // Delete the original file
+        if (fs.existsSync(profileLocalPath)) {
+            await fs.promises.unlink(profileLocalPath);
+        }
     } catch (error) {
         console.error("Error deleting original profile image:", error);
     }
 
     const profileImage = await uploadOnCloudinary(optimizedPath);
 
+    // Delete the optimized file only if it still exists
     try {
-        await fs.promises.unlink(optimizedPath); // Delete the optimized file
+        if (fs.existsSync(optimizedPath)) {
+            await fs.promises.unlink(optimizedPath);
+        }
     } catch (error) {
         console.error("Error deleting optimized profile image:", error);
     }
@@ -109,6 +117,7 @@ const registerUser = asyncHandler( async(req, res) => {
             email,
             password,
             phone,
+            role,
         })
         // console.log("This is the user created: ");
         // console.log(user);
