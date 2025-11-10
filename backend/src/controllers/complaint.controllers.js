@@ -326,9 +326,9 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
 
     // console.log("User ID:", userId);
 
-    if (!complaints || complaints.length === 0) {
-        throw new ApiError(404, "No complaints found for this user");
-    }
+    // if (!complaints || complaints.length === 0) {
+    //     throw new ApiError(404, "No complaints found for this user");
+    // }
 
     res.status(200).json({
         success: true,
