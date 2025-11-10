@@ -6,14 +6,30 @@ import mongoose from "mongoose";
 const allowedCategories = ['fire', 'police', 'rail', 'cyber', 'court', 'road'];
 
 const createDepartment = asyncHandler(async (req, res) => {
-    const { category, name, contact_email, contact_phone, jurisdiction_area } = req.body;
+    const { category, name, contact_email, contact_phone, jurisdiction_level, department_secret } = req.body;
 
     if (!allowedCategories.includes(category)) {
         throw new ApiError(400, "Invalid category value");
     }
     
-    if (!category || !name || !contact_email) {
+    if (!category || !name || !contact_email || !department_secret) {
         throw new ApiError(400, "All required fields must be provided");
+    }
+
+    const existingEmailDept = await Department.findOne({ contact_email });
+    if (existingEmailDept) {
+        throw new ApiError(409, "A department with this email already exists");
+    }
+
+    if (contact_phone) {
+        const conflictingPhoneDept = await Department.findOne({
+            contact_phone,
+            category: { $ne: category }
+        })
+
+        if (conflictingPhoneDept) {
+            throw new ApiError(409, `Phone number is already in use by a ${conflictingPhoneDept.category} department`)
+        }
     }
 
     const newDept = await Department.create({
@@ -21,13 +37,17 @@ const createDepartment = asyncHandler(async (req, res) => {
         name,
         contact_email,
         contact_phone,
-        jurisdiction_area
+        jurisdiction_level,
+        department_secret,
     });
 
     res.status(201).json({
         success: true,
         message: "Department created successfully",
-        data: newDept
+        data: {
+            ...newDept.toObject(),
+            department_secret: undefined,
+        }
     });
 })
 
@@ -127,6 +147,40 @@ const getDepartmentsByCategory = asyncHandler(async (req, res) => {
     });
 })
 
+const validateDepartmentSecret = asyncHandler(async (req, res) => {
+    const { department_id, department_secret } = req.body;
+
+    if (!department_id || !department_secret) {
+        throw new ApiError(400, "Department ID and department secret are required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(department_id)) {
+        throw new ApiError(400, "Invalid department ID format");
+    }
+
+    const dept = await Department.findById(department_id).select("+department_secret");
+
+    if (!dept) {
+        throw new ApiError(404, "Department not found");
+    }
+
+    const isValid = await dept.verifySecret(department_secret);
+    if (!isValid) {
+        throw new ApiError(401, "Invalid department secret code");
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Department secret verified successfully",
+        data: { 
+            department_id: dept._id,
+            category: dept.category, 
+            name: dept.name, 
+            jurisdiction_level: dept.jurisdiction_level 
+        },
+    });
+})
+
 export {
     createDepartment,
     getAllDepartments,
@@ -134,4 +188,5 @@ export {
     updateDepartment,
     deleteDepartment,
     getDepartmentsByCategory,
+    validateDepartmentSecret,
 }

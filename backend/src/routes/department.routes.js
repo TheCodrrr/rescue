@@ -1,4 +1,4 @@
-import { createDepartment, getAllDepartments, getDepartmentById, updateDepartment, deleteDepartment, getDepartmentsByCategory } from "../controllers/department.controllers.js";
+import { createDepartment, getAllDepartments, getDepartmentById, updateDepartment, deleteDepartment, getDepartmentsByCategory, validateDepartmentSecret } from "../controllers/department.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { Router } from "express";
 
@@ -16,5 +16,6 @@ router.route("/:departmentId")
 router.route("/category/:category")
     .get(getDepartmentsByCategory);
 
+router.post("/validate-secret", validateDepartmentSecret);
 
 export default router;
