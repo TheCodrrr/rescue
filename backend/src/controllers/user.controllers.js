@@ -41,9 +41,18 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const { category, department_id } = role === "officer" ? req.body : { category: "", department_id: "" };
 
-    let level = 0;
-    if (role === "officer") level = req.body.level;
-    else if (role === "admin") level = 5;
+    // Set user level based on role
+    let level = 0; // Default for citizens
+    if (role === "officer") {
+        // Officers can have levels 1-5, default to 1 if not provided
+        level = req.body.level ? parseInt(req.body.level) : 1;
+        // Validate officer level is between 1-5
+        if (level < 1 || level > 5) {
+            level = 1; // Reset to default if invalid
+        }
+    } else if (role === "admin") {
+        level = 5; // Admins always have level 5
+    }
 
     // Validation for empty fields (only for strings)
     if ([name, email, password, phone, role].some((field) => typeof field === "string" && field.trim() === "")) {
