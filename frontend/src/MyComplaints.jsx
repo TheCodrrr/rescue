@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
+import { useMyComplaintsCache } from "./hooks/useMyComplaintsCache.jsx";
 import { 
   FiThumbsUp, 
   FiThumbsDown, 
@@ -31,12 +33,27 @@ import {
     removeComment,
     clearError
 } from './auth/redux/complaintSlice';
+import './MyComplaintsPagination.css';
 
 function MyComplaints() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { complaints, isLoading, error } = useSelector((state) => state.complaints);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    
+    // Use the infinite query hook
+    const { 
+        data, 
+        fetchNextPage, 
+        hasNextPage, 
+        isFetchingNextPage, 
+        status, 
+        error,
+        interactionCount,
+        recordInteraction,
+        clearCacheAndRefetch,
+        isUsingCache,
+        interactionsRemaining
+    } = useMyComplaintsCache();
     
     // State for complaint management
     const [expandedComments, setExpandedComments] = useState({});
@@ -72,66 +89,32 @@ function MyComplaints() {
         { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
     ];
 
-    // Track successful data loading to prevent fluctuation
-    useEffect(() => {
-        if (complaints && complaints.length > 0 && !isLoading) {
-            setHasLoadedOnce(true);
-        }
-    }, [complaints, isLoading]);
+    // Intersection observer for infinite scrolling
+    const { ref } = useInView({
+        threshold: 1,
+        onChange: (inView) => {
+            if (inView && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        },
+    });
 
-    // Load user complaints when component mounts
-    useEffect(() => {
-        console.log('MyComplaints mounted - Auth state:', { isAuthenticated, userExists: !!user });
-        if (isAuthenticated && user) {
-            console.log('Loading user complaints...');
-            // Clear any previous errors before loading
-            dispatch(clearError());
-            dispatch(getUserComplaints());
-        }
-    }, [isAuthenticated, user, dispatch]);
+    // Get all complaints from pages
+    const allComplaints = data?.pages?.flatMap(page => page.complaints) || [];
 
-    // Fetch comments for all complaints when they are loaded
+    // Fetch comments for visible complaints when data loads
     useEffect(() => {
-        if (complaints && complaints.length > 0) {
-            console.log('Loading comments for all complaints...', complaints.length);
-            // Don't let comment loading errors affect the main UI
-            complaints.forEach((complaint) => {
+        if (allComplaints.length > 0) {
+            console.log('Loading comments for visible complaints...', allComplaints.length);
+            allComplaints.forEach((complaint) => {
                 if (complaint._id) {
-                    console.log(`Loading comments for complaint: ${complaint._id}`);
-                    // Dispatch comments fetch but don't let it affect main error state
                     dispatch(fetchComments(complaint._id)).catch((err) => {
                         console.warn(`Failed to load comments for complaint ${complaint._id}:`, err);
-                        // Silently handle comment loading errors - don't propagate to main UI
                     });
                 }
             });
         }
-    }, [complaints, dispatch]);
-
-    // Reset error state when component unmounts
-    useEffect(() => {
-        return () => {
-            if (error) {
-                dispatch(clearError());
-            }
-        };
-    }, [error, dispatch]);
-
-    // Handle retry function
-    const handleRetry = () => {
-        console.log('Retrying to load complaints...');
-        // Clear error state first
-        dispatch(clearError());
-        
-        // Add a small delay to prevent rapid state changes
-        setTimeout(() => {
-            if (isAuthenticated && user) {
-                dispatch(getUserComplaints());
-            } else {
-                console.warn('Cannot retry - user not authenticated or user data missing');
-            }
-        }, 100);
-    };
+    }, [data?.pages?.length]); // Only trigger when new pages are loaded
 
     // Handle ESC key to close modals
     useEffect(() => {
@@ -263,6 +246,7 @@ function MyComplaints() {
         setVotingInProgress(prev => ({ ...prev, [complaintId]: true }));
         try {
             await dispatch(upvoteComplaint(complaintId));
+            recordInteraction(); // Track interaction for cache management
         } finally {
             setVotingInProgress(prev => ({ ...prev, [complaintId]: false }));
         }
@@ -274,6 +258,7 @@ function MyComplaints() {
         setVotingInProgress(prev => ({ ...prev, [complaintId]: true }));
         try {
             await dispatch(downvoteComplaint(complaintId));
+            recordInteraction(); // Track interaction for cache management
         } finally {
             setVotingInProgress(prev => ({ ...prev, [complaintId]: false }));
         }
@@ -331,12 +316,14 @@ function MyComplaints() {
         }
     };
 
-    const handleVisitComplaint = (complaint) => {
+    const handleVisitComplaint = useCallback((complaint) => {
+        console.log('clicked');
         // Clear any potential state conflicts and navigate
         setTimeout(() => {
+            console.log(`/complaint/${complaint._id}`);
             navigate(`/complaint/${complaint._id}`, { replace: true });
         }, 0);
-    };
+    }, [navigate]);
 
     const renderStars = (rating) => {
         return Array.from({ length: 5 }, (_, i) => (
@@ -382,6 +369,7 @@ function MyComplaints() {
                 content: newComment,
                 rating: commentRating
             }));
+            recordInteraction(); // Track interaction for cache management
             setNewComment('');
             setCommentRating(5);
         } finally {
@@ -460,7 +448,7 @@ function MyComplaints() {
     };
 
     // Filter complaints based on search query and category
-    const filteredComplaints = complaints.filter(complaint => {
+    const filteredComplaints = allComplaints.filter(complaint => {
         const matchesSearch = searchQuery === '' || 
             complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -469,6 +457,50 @@ function MyComplaints() {
         
         return matchesSearch && matchesCategory;
     });
+
+    // Loading state
+    if (status === "pending") {
+        return (
+            <div className="profile-card">
+                <div className="my-complaints-loading-container">
+                    <div className="spinner"></div>
+                    <p>Loading your complaints...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (status === "error") {
+        return (
+            <div className="profile-card">
+                <div className="my-complaints-error-state">
+                    <div className="error-icon">⚠️</div>
+                    <h3>Error Loading Complaints</h3>
+                    <p>{error?.message || "Failed to load your complaints. Please try again."}</p>
+                    <button 
+                        className="my-complaints-retry-button"
+                        onClick={() => clearCacheAndRefetch()}
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // No data state
+    if (!data || !data.pages || data.pages.length === 0 || allComplaints.length === 0) {
+        return (
+            <div className="profile-card">
+                <div className="my-complaints-empty-state">
+                    <div className="empty-icon">📋</div>
+                    <h3>No Complaints Yet</h3>
+                    <p>You haven't submitted any complaints yet. Start by creating one!</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!isAuthenticated) {
         return (
@@ -491,7 +523,7 @@ function MyComplaints() {
 
             <div className="my-complaints-list">
                 {/* Search and Filter Section */}
-                {hasLoadedOnce && complaints.length > 0 && (
+                {allComplaints.length > 0 && (
                     <div className="search-filter-section">
                         <div className="search-bar-container">
                             <div className="search-input-wrapper">
@@ -535,7 +567,7 @@ function MyComplaints() {
                         {/* Results Summary */}
                         <div className="results-summary">
                             <span className="results-count">
-                                Showing {filteredComplaints.length} of {complaints.length} complaints
+                                Showing {filteredComplaints.length} of {allComplaints.length} complaints
                             </span>
                             {(searchQuery || selectedCategory !== 'all') && (
                                 <button 
@@ -552,37 +584,7 @@ function MyComplaints() {
                     </div>
                 )}
 
-                {isLoading && !hasLoadedOnce ? (
-                    <div className="loading-state">
-                        <div className="loading-spinner"></div>
-                        <p>Loading your complaints...</p>
-                    </div>
-                ) : error && !hasLoadedOnce ? (
-                    <div className="error-state">
-                        <div className="error-icon">❌</div>
-                        <h3>Error Loading Complaints</h3>
-                        <p>{error}</p>
-                        <button 
-                            className="retry-btn"
-                            onClick={handleRetry}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Retrying...' : 'Retry'}
-                        </button>
-                    </div>
-                ) : !isAuthenticated ? (
-                    <div className="error-state">
-                        <div className="error-icon">🔒</div>
-                        <h3>Authentication Required</h3>
-                        <p>Please log in to view your complaints.</p>
-                    </div>
-                ) : complaints.length === 0 && !isLoading ? (
-                    <div className="empty-state">
-                        <div className="empty-icon">📝</div>
-                        <h3>No Complaints Found</h3>
-                        <p>You haven't submitted any complaints yet.</p>
-                    </div>
-                ) : filteredComplaints.length === 0 && complaints.length > 0 ? (
+                {filteredComplaints.length === 0 && allComplaints.length > 0 ? (
                     <div className="empty-state">
                         <div className="empty-icon">🔍</div>
                         <h3>No Complaints Found</h3>
@@ -775,6 +777,29 @@ function MyComplaints() {
                         ))}
                     </div>
                 )}
+
+                {/* Infinite Scroll Loading Indicator */}
+                {hasNextPage && (
+                    <div ref={ref} className="my-complaints-loading-more-container">
+                        {isFetchingNextPage ? (
+                            <div className="my-complaints-loading-more">
+                                <div className="my-complaints-spinner-small"></div>
+                                <p>Loading more complaints...</p>
+                            </div>
+                        ) : (
+                            <div className="my-complaints-load-more-trigger">
+                                <p>Scroll to load more</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* End of list indicator */}
+                {!hasNextPage && allComplaints.length > 0 && (
+                    <div className="my-complaints-end-of-list">
+                        <p>You've reached the end of your complaints</p>
+                    </div>
+                )}
             </div>
 
             {/* Delete Confirmation Modal */}
@@ -850,12 +875,12 @@ function MyComplaints() {
                 onCommentDelete={handleModalCommentDelete}
                 comments={
                     selectedComplaintForComments 
-                        ? (complaints.find(c => c._id === selectedComplaintForComments._id)?.comments || [])
+                        ? (allComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments || [])
                         : []
                 }
                 totalComments={
                     selectedComplaintForComments 
-                        ? (complaints.find(c => c._id === selectedComplaintForComments._id)?.comments?.length || 0)
+                        ? (allComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments?.length || 0)
                         : 0
                 }
             />
