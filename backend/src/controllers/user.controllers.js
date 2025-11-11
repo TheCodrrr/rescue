@@ -38,7 +38,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler( async(req, res) => {
     // These are the 4 mandatory fields to create a new user
-    const {email, name, password, phone, role} = req.body;
+    const {email, name, password, phone, role, latitude, longitude, address} = req.body;
 
     const { category, department_id } = role === "officer" ? req.body : { category: "", department_id: "" };
 
@@ -84,10 +84,10 @@ const registerUser = asyncHandler( async(req, res) => {
     // console.log(req.files?.avatar[0]?.path)
     // console.log(req.files?.coverImage[0]?.path)
 
-    const profileLocalPath = req.files?.profileImage[0]?.path;
+    const profileLocalPath = req.files?.profileImage?.[0]?.path;
     
     if (!profileLocalPath) {
-        throw new ApiError(400, "Avatar image is mandatory!")
+        throw new ApiError(400, "Profile image is mandatory!")
     }
 
     const optimizedPath = path.join("public", "temp", `${Date.now()}-optimized.webp`);
@@ -139,8 +139,11 @@ const registerUser = asyncHandler( async(req, res) => {
             phone,
             role,
             user_level: level,
-            officer_category: category || "",
-            department_id: department_id || null,
+            ...(role === "officer" && { officer_category: category }),
+            ...(role === "officer" && department_id && { department_id }),
+            latitude: latitude || undefined,
+            longitude: longitude || undefined,
+            address: address || undefined,
         })
         // console.log("This is the user created: ");
         // console.log(user);
