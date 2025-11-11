@@ -272,22 +272,32 @@ const getComplaintById = asyncHandler(async (req, res) => {
 
 const getComplaintByUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
+    const { cursor, limit = 9 } = req.query;
 
-    // console.log(req.user);
+    // Build query with cursor-based pagination
+    const query = { user_id: userId };
+    if (cursor) {
+        query.createdAt = { $lt: new Date(cursor) };
+    }
 
-    let complaints = await Complaint.find({ user_id: userId })
+    // Fetch one extra to check if there are more pages
+    let complaints = await Complaint.find(query)
         .sort({ createdAt: -1 })
+        .limit(Number(limit) + 1)
         .populate("user_id", "name email")
         .populate("evidence_ids")
         .populate("votedUsers", "name email profileImage")
         .populate("assigned_officer_id", "name email profileImage")
         .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
-        .lean(); // 👈 makes results plain JS objects instead of Mongoose docs
+        .lean();
 
-    // console.log("These are the complaints, hello hello: ", complaints);
+    // Check if there are more pages
+    const hasNextPage = complaints.length > limit;
+    const results = complaints.slice(0, limit);
 
-    complaints = await Promise.all(
-        complaints.map(async complaint => {
+    // Process complaints with category-specific data
+    const processedComplaints = await Promise.all(
+        results.map(async complaint => {
             // Determine current user's vote status
             const userVote = complaint.votedUsers.find(vote => 
                 vote.user && vote.user._id.toString() === userId.toString()
@@ -300,40 +310,40 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
                     const stations = typeof train.stations === 'string' 
                         ? JSON.parse(train.stations) 
                         : train.stations;
-                    // add extra field safely with stations
                     return { 
                         ...complaint, 
                         category_specific_data: { ...train, stations },
                         userVote: userVote ? userVote.vote : null,
-                        comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+                        comments: complaint.feedback_ids || []
                     };
                 } else {
                     return { 
                         ...complaint, 
                         category_specific_data: train,
                         userVote: userVote ? userVote.vote : null,
-                        comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+                        comments: complaint.feedback_ids || []
                     };
                 }
             }
             return {
                 ...complaint,
                 userVote: userVote ? userVote.vote : null,
-                comments: complaint.feedback_ids || [] // Add comments field for frontend compatibility
+                comments: complaint.feedback_ids || []
             };
         })
     );
 
-    // console.log("User ID:", userId);
-
-    // if (!complaints || complaints.length === 0) {
-    //     throw new ApiError(404, "No complaints found for this user");
-    // }
+    // Get the next cursor from the last complaint
+    const nextCursor = hasNextPage && results.length > 0 
+        ? results[results.length - 1].createdAt.toISOString() 
+        : null;
 
     res.status(200).json({
         success: true,
-        count: complaints.length,
-        data: complaints
+        count: processedComplaints.length,
+        data: processedComplaints,
+        nextCursor,
+        hasNextPage
     });
 });
 
