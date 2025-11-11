@@ -556,7 +556,7 @@ function UserProfileContent({ activeSection, contentRef }) {
             "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
         department: user.department || "Emergency Response Team",
         badgeNumber: user.badgeNumber || `${user.role?.toUpperCase() || 'USER'}-${new Date(user.createdAt || Date.now()).getFullYear()}-${user._id?.slice(-3) || '001'}`,
-        clearanceLevel: user.clearanceLevel || `Level ${user.role === 'admin' ? '5 - Maximum' : user.role === 'authority' ? '4 - High Priority' : '3 - Standard Access'}`,
+        clearanceLevel: user.user_level !== undefined ? `Level ${user.user_level}` : `Level ${user.role === 'admin' ? '5' : user.role === 'officer' ? '3' : '1'}`,
         coordinates: user.latitude && user.longitude ? `${user.latitude}, ${user.longitude}` : null
     } : {
         name: "Loading...",

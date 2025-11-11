@@ -36,101 +36,76 @@ const generateAccessAndRefreshToken = async (userId) => {
     }
 }
 
-const registerUser = asyncHandler( async(req, res) => {
-    // These are the 4 mandatory fields to create a new user
-    const {email, name, password, phone, role, latitude, longitude, address} = req.body;
+const registerUser = asyncHandler(async (req, res) => {
+    const { email, name, password, phone, role, latitude, longitude, address, profileImage: profileImageUrlFromBody } = req.body;
 
     const { category, department_id } = role === "officer" ? req.body : { category: "", department_id: "" };
 
     let level = 0;
-    if (role === "officer") {
-        level = req.body.level;
-    }
-    else if (role === "admin") {
-        level = 5;
-    }
+    if (role === "officer") level = req.body.level;
+    else if (role === "admin") level = 5;
 
-    // validation
-    if (
-        [name, email, password, phone, role].some((field) => field?.trim() === "")
-    ) {
-        throw new ApiError(400, "All fields are required")
+    // Validation for empty fields (only for strings)
+    if ([name, email, password, phone, role].some((field) => typeof field === "string" && field.trim() === "")) {
+        throw new ApiError(400, "All fields are required");
     }
 
     // Additional validation for officers
     if (role === "officer") {
-        if (!category || category.trim() === "") {
-            throw new ApiError(400, "Category is required for officer role")
-        }
-        if (!department_id || department_id.trim() === "") {
-            throw new ApiError(400, "Department is required for officer role")
-        }
+        if (!category || category.trim() === "") throw new ApiError(400, "Category is required for officer role");
+        if (!department_id || department_id.trim() === "") throw new ApiError(400, "Department is required for officer role");
     }
 
-    console.log("The req.body is: ", req.body);
+    console.log("The req.body is:", req.body);
 
     const existedUser = await User.findOne({
-        $or: [
-            { email },
-            { phone: phone || null },
-        ],
+        $or: [{ email }, { phone: phone || null }],
     });
 
     if (existedUser) {
-        throw new ApiError(409, "User with this email or phone already exists!")
+        throw new ApiError(409, "User with this email or phone already exists!");
     }
-    
-    // console.log("FILES RECEIVED BY MULTER: ", req.files);
-    // console.log(req.files?.avatar[0]?.path)
-    // console.log(req.files?.coverImage[0]?.path)
 
+    // Handle profile image (file or string)
     const profileLocalPath = req.files?.profileImage?.[0]?.path;
-    
-    if (!profileLocalPath) {
-        throw new ApiError(400, "Profile image is mandatory!")
-    }
+    let imageUrl = null;
 
-    const optimizedPath = path.join("public", "temp", `${Date.now()}-optimized.webp`);
+    if (profileLocalPath) {
+        // Image uploaded as file
+        const optimizedPath = path.join("public", "temp", `${Date.now()}-optimized.webp`);
 
-    await sharp(profileLocalPath)
-        .resize(300, 300, {
-            fit: "cover",
-            position: "center",
-        })
-        .webp({ quality: 80 })
-        .toFile(optimizedPath);
+        await sharp(profileLocalPath)
+            .resize(300, 300, { fit: "cover", position: "center" })
+            .webp({ quality: 80 })
+            .toFile(optimizedPath);
 
-    // Delete the original file only if it still exists
-    try {
-        if (fs.existsSync(profileLocalPath)) {
-            await fs.promises.unlink(profileLocalPath);
+        // Delete the original uploaded file
+        try {
+            if (fs.existsSync(profileLocalPath)) await fs.promises.unlink(profileLocalPath);
+        } catch (error) {
+            console.error("Error deleting original profile image:", error);
         }
-    } catch (error) {
-        console.error("Error deleting original profile image:", error);
-    }
 
-    const profileImage = await uploadOnCloudinary(optimizedPath);
+        const profileImage = await uploadOnCloudinary(optimizedPath);
 
-    // Delete the optimized file only if it still exists
-    try {
-        if (fs.existsSync(optimizedPath)) {
-            await fs.promises.unlink(optimizedPath);
+        // Delete the optimized file
+        try {
+            if (fs.existsSync(optimizedPath)) await fs.promises.unlink(optimizedPath);
+        } catch (error) {
+            console.error("Error deleting optimized profile image:", error);
         }
-    } catch (error) {
-        console.error("Error deleting optimized profile image:", error);
+
+        imageUrl = profileImage?.secure_url || profileImage?.url || "../public/temp/profile.png";
+
+        imageUrl = imageUrl.replace("/upload/", "/upload/f_auto,q_auto,w_300,h_300,c_fill/");
+    } else if (profileImageUrlFromBody) {
+        // Image provided as URL string
+        imageUrl = profileImageUrlFromBody;
+    } else {
+        throw new ApiError(400, "Profile image is mandatory!");
     }
 
-    let imageUrl = profileImage?.secure_url || profileImage?.url || "../public/temp/profile.png";
-
-    imageUrl = imageUrl.replace(
-        '/upload/',
-        '/upload/f_auto,q_auto,w_300,h_300,c_fill/'
-    );
-
     try {
-        // console.log("This are the user details: ");
-        // console.log(name, email, password, profileImage);
-
         const user = await User.create({
             name,
             profileImage: imageUrl,
@@ -144,32 +119,22 @@ const registerUser = asyncHandler( async(req, res) => {
             latitude: latitude || undefined,
             longitude: longitude || undefined,
             address: address || undefined,
-        })
-        // console.log("This is the user created: ");
-        // console.log(user);
+        });
 
         const createdUser = await User.findById(user._id)
-                                    .select("-password -refreshToken")
-                                    .lean();
+            .select("-password -refreshToken")
+            .lean();
 
-        if (!createdUser) {
-            throw new ApiError(500, "Something went wrong while registering the user.")
-        }
+        if (!createdUser) throw new ApiError(500, "Something went wrong while registering the user.");
 
-        return res
-                .status(201)
-                .json( new ApiResponse(200, createdUser, "User registered successfully") )
+        return res.status(201).json(new ApiResponse(200, createdUser, "User registered successfully"));
     } catch (error) {
-        console.log("User creation failed.")
+        console.log("User creation failed.");
         console.error(error);
-
-        if (profileImage) await deleteFromCloudinary(profileImage.public_id);
-
-        console.log(error);
-        throw new ApiError(500, "Something went wrong while registering a user and the images were deleted.")
+        throw new ApiError(500, "Something went wrong while registering a user.");
     }
+});
 
-} )
 
 const loginUser = asyncHandler( async (req, res) => {
     const {email, password} = req.body;
