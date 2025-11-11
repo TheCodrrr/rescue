@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X, Shield, Train, Construction, Flame, AlertTriangle, Scale, Building2 } from "lucide-react";
+import { Eye, EyeOff, Upload, User, Mail, Phone, Lock, Camera, X, Shield, Train, Construction, Flame, AlertTriangle, Scale, Building2, MapPin, Navigation } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess, verifyDepartmentSecret, registerUser, loginUser } from "./redux/authSlice";
@@ -16,7 +16,10 @@ export default function Signup() {
         category: "",
         department_id: "",
         department_secret: "",
-        profileImage: null
+        profileImage: null,
+        latitude: null,
+        longitude: null,
+        address: ""
     });
     const [sendData, setSendData] = useState({
         email: "",
@@ -29,6 +32,7 @@ export default function Signup() {
     const [isSecretVerified, setIsSecretVerified] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFetchingLocation, setIsFetchingLocation] = useState(false);
     
     // Department caching state
     const [allDepartments, setAllDepartments] = useState([]);
@@ -132,6 +136,59 @@ export default function Signup() {
 
         prefetchDepartmentsByCategory();
     }, [formData.role]);
+
+    // Function to get user's current location
+    const handleGetCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error('Geolocation is not supported by your browser');
+            return;
+        }
+
+        setIsFetchingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                // Update form data with coordinates
+                setFormData(prev => ({
+                    ...prev,
+                    latitude,
+                    longitude
+                }));
+
+                // Reverse geocode to get address
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+                    const address = data.display_name || '';
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        address
+                    }));
+
+                    toast.success('Location fetched successfully!');
+                } catch (error) {
+                    console.error('Error getting address:', error);
+                    toast.error('Got coordinates but failed to get address');
+                } finally {
+                    setIsFetchingLocation(false);
+                }
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                setIsFetchingLocation(false);
+                toast.error('Failed to get location. Please enter manually or allow location access.');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    };
 
     const handleImageChange = (e) => {
         const file = e?.target?.files[0] || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png';
@@ -287,6 +344,15 @@ export default function Signup() {
             formDataToSend.append('phone', formData.phone);
             formDataToSend.append('role', formData.role);
             
+            // Add location data if available
+            if (formData.latitude !== null && formData.longitude !== null) {
+                formDataToSend.append('latitude', formData.latitude);
+                formDataToSend.append('longitude', formData.longitude);
+            }
+            if (formData.address) {
+                formDataToSend.append('address', formData.address);
+            }
+            
             // Add category and department if user is an officer
             if (formData.role === 'officer' && formData.category) {
                 formDataToSend.append('category', formData.category);
@@ -323,7 +389,10 @@ export default function Signup() {
                     category: "",
                     department_id: "",
                     department_secret: "",
-                    profileImage: null
+                    profileImage: null,
+                    latitude: null,
+                    longitude: null,
+                    address: ""
                 });
                 setImagePreview(null);
                 setIsSecretVerified(false);
@@ -587,6 +656,84 @@ export default function Signup() {
                                                 </div>
                                                 <p className="text-xs text-white/70 mt-1.5 drop-shadow-sm">Password must be at least 6 characters</p>
                                             </div>
+                                        </div>
+
+                                        {/* Location Section */}
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <label className="block text-sm font-semibold text-white/90 drop-shadow-sm">
+                                                    Location (Optional)
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleGetCurrentLocation}
+                                                    disabled={isFetchingLocation}
+                                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                                                        isFetchingLocation
+                                                            ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                                                            : 'bg-white/20 text-white hover:bg-white/30 border border-white/30 hover:border-white/50'
+                                                    }`}
+                                                >
+                                                    {isFetchingLocation ? (
+                                                        <>
+                                                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-white/60 border-t-white"></div>
+                                                            <span>Getting Location...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Navigation className="h-3 w-3" />
+                                                            <span>Use Current Location</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+
+                                            {/* Address Field */}
+                                            <div className="mb-3">
+                                                <div className="relative">
+                                                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/70" />
+                                                    <input
+                                                        id="address"
+                                                        name="address"
+                                                        type="text"
+                                                        value={formData.address}
+                                                        onChange={handleInputChange}
+                                                        className="pl-10 w-full px-3 py-3 bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 focus:bg-white/25 transition-all duration-300 text-sm text-white placeholder-white/60 shadow-lg"
+                                                        placeholder="Enter your address"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Latitude and Longitude Row */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="relative">
+                                                    <input
+                                                        id="latitude"
+                                                        name="latitude"
+                                                        type="number"
+                                                        step="any"
+                                                        value={formData.latitude || ''}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-3 bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 focus:bg-white/25 transition-all duration-300 text-sm text-white placeholder-white/60 shadow-lg"
+                                                        placeholder="Latitude"
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <input
+                                                        id="longitude"
+                                                        name="longitude"
+                                                        type="number"
+                                                        step="any"
+                                                        value={formData.longitude || ''}
+                                                        onChange={handleInputChange}
+                                                        className="w-full px-3 py-3 bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 focus:bg-white/25 transition-all duration-300 text-sm text-white placeholder-white/60 shadow-lg"
+                                                        placeholder="Longitude"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-white/60 mt-1.5 drop-shadow-sm">
+                                                Click "Use Current Location" or enter manually
+                                            </p>
                                         </div>
                                         
                                         {/* Role Selection */}
