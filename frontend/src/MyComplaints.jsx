@@ -52,7 +52,8 @@ function MyComplaints() {
         recordInteraction,
         clearCacheAndRefetch,
         isUsingCache,
-        interactionsRemaining
+        interactionsRemaining,
+        totalCount
     } = useMyComplaintsCache();
     
     // State for complaint management
@@ -567,7 +568,7 @@ function MyComplaints() {
                         {/* Results Summary */}
                         <div className="results-summary">
                             <span className="results-count">
-                                Showing {filteredComplaints.length} of {allComplaints.length} complaints
+                                Showing {filteredComplaints.length} of {totalCount} complaints
                             </span>
                             {(searchQuery || selectedCategory !== 'all') && (
                                 <button 

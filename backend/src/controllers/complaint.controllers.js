@@ -274,6 +274,9 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const { cursor, limit = 9 } = req.query;
 
+    // Get total count of user's complaints (only once, not on every pagination)
+    const totalCount = await Complaint.countDocuments({ user_id: userId });
+
     // Build query with cursor-based pagination
     const query = { user_id: userId };
     if (cursor) {
@@ -341,6 +344,7 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
     res.status(200).json({
         success: true,
         count: processedComplaints.length,
+        totalCount: totalCount,
         data: processedComplaints,
         nextCursor,
         hasNextPage

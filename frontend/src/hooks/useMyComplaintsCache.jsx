@@ -9,7 +9,7 @@ const INTERACTION_COUNT_KEY = "myComplaintsInteractionCount";
 
 const fetchMyComplaints = async ({ pageParam }) => {
   try {
-    const { data } = await axiosInstance.get("/complaints/my-complaints", {
+    const { data, totalCount } = await axiosInstance.get("/complaints/my-complaints", {
       params: {
         cursor: pageParam,
         limit: 9,
@@ -18,10 +18,12 @@ const fetchMyComplaints = async ({ pageParam }) => {
     
     console.log("My Complaints API Response:", data);
     
+
     return {
       complaints: data.data || [],
       nextCursor: data.nextCursor,
       hasNextPage: data.hasNextPage,
+      totalCount: totalCount || 0,
     };
   } catch (error) {
     console.error("Error fetching my complaints:", error);
@@ -163,6 +165,9 @@ export const useMyComplaintsCache = () => {
     }),
   } : undefined;
 
+  // Extract total count from the first page
+  const totalCount = query.data?.pages?.[0]?.totalCount || 0;
+
   return {
     data: mergedData,
     fetchNextPage: query.fetchNextPage,
@@ -176,5 +181,6 @@ export const useMyComplaintsCache = () => {
     clearCacheAndRefetch,
     isUsingCache,
     interactionsRemaining: Math.max(0, INTERACTION_THRESHOLD - interactionCount),
+    totalCount,
   };
 };
