@@ -556,7 +556,12 @@ function UserProfileContent({ activeSection, contentRef }) {
             "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
         department: user.department || "Emergency Response Team",
         badgeNumber: user.badgeNumber || `${user.role?.toUpperCase() || 'USER'}-${new Date(user.createdAt || Date.now()).getFullYear()}-${user._id?.slice(-3) || '001'}`,
-        clearanceLevel: user.user_level !== undefined ? `Level ${user.user_level}` : `Level ${user.role === 'admin' ? '5' : user.role === 'officer' ? '3' : '1'}`,
+        clearanceLevel: user.user_level !== undefined 
+            ? (user.user_level === 0 ? 'Basic Level' : `Level ${user.user_level}`)
+            : (user.role === 'admin' ? 'Level 5' : user.role === 'officer' ? 'Level 3' : 'Basic Level'),
+        clearanceLevelDescription: user.user_level !== undefined
+            ? (user.user_level === 0 ? 'Citizen Access' : user.user_level === 5 && user.role === 'admin' ? 'Administrator - Full System Access' : `Officer Level ${user.user_level}`)
+            : (user.role === 'admin' ? 'Administrator - Full System Access' : user.role === 'officer' ? 'Officer Level 3' : 'Citizen Access'),
         coordinates: user.latitude && user.longitude ? `${user.latitude}, ${user.longitude}` : null
     } : {
         name: "Loading...",
@@ -569,6 +574,7 @@ function UserProfileContent({ activeSection, contentRef }) {
         department: "Loading...",
         badgeNumber: "Loading...",
         clearanceLevel: "Loading...",
+        clearanceLevelDescription: "Loading...",
         coordinates: null
     };
 
@@ -846,7 +852,7 @@ function UserProfileContent({ activeSection, contentRef }) {
                         </div>
                         <div className="clearance-info">
                             <p className="clearance-level">{userData.clearanceLevel}</p>
-                            <p className="clearance-description">Access to critical emergency systems</p>
+                            <p className="clearance-description">{userData.clearanceLevelDescription}</p>
                         </div>
                     </div>
                     
