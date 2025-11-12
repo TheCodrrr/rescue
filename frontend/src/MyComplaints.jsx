@@ -40,22 +40,6 @@ function MyComplaints() {
     const navigate = useNavigate();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
-    // Use the infinite query hook
-    const { 
-        data, 
-        fetchNextPage, 
-        hasNextPage, 
-        isFetchingNextPage, 
-        status, 
-        error,
-        interactionCount,
-        recordInteraction,
-        clearCacheAndRefetch,
-        isUsingCache,
-        interactionsRemaining,
-        totalCount
-    } = useMyComplaintsCache();
-    
     // State for complaint management
     const [expandedComments, setExpandedComments] = useState({});
     const [votingInProgress, setVotingInProgress] = useState({});
@@ -80,6 +64,22 @@ function MyComplaints() {
     const [deletingComment, setDeletingComment] = useState(null);
     const [updatingComment, setUpdatingComment] = useState(null);
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+    
+    // Use the infinite query hook with selected category
+    const { 
+        data, 
+        fetchNextPage, 
+        hasNextPage, 
+        isFetchingNextPage, 
+        status, 
+        error,
+        interactionCount,
+        recordInteraction,
+        clearCacheAndRefetch,
+        isUsingCache,
+        interactionsRemaining,
+        totalCount
+    } = useMyComplaintsCache(selectedCategory);
 
     const categories = [
         { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
@@ -116,6 +116,11 @@ function MyComplaints() {
             });
         }
     }, [data?.pages?.length]); // Only trigger when new pages are loaded
+
+    // Scroll to top when category changes
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [selectedCategory]);
 
     // Handle ESC key to close modals
     useEffect(() => {
@@ -448,15 +453,13 @@ function MyComplaints() {
         );
     };
 
-    // Filter complaints based on search query and category
+    // Filter complaints based on search query only (category is now handled by backend)
     const filteredComplaints = allComplaints.filter(complaint => {
         const matchesSearch = searchQuery === '' || 
             complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
         
-        const matchesCategory = selectedCategory === 'all' || complaint.category === selectedCategory;
-        
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
     });
 
     // Loading state
@@ -569,6 +572,11 @@ function MyComplaints() {
                         <div className="results-summary">
                             <span className="results-count">
                                 Showing {filteredComplaints.length} of {totalCount} complaints
+                                {selectedCategory !== 'all' && (
+                                    <span className="category-indicator">
+                                        {' '}in {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                                    </span>
+                                )}
                             </span>
                             {(searchQuery || selectedCategory !== 'all') && (
                                 <button 
