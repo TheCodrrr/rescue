@@ -1,5 +1,5 @@
 import express from "express";
-import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, updateComplaintStatus, upvoteComplaint, getTrendingComplaints, getNearbyComplaints } from "../controllers/complaint.controllers.js";
+import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, getComplaintByUserAndCategory, updateComplaintStatus, upvoteComplaint, getTrendingComplaints, getNearbyComplaints } from "../controllers/complaint.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { pool } from "../config/postgres.js";
 import { io } from "../server.js";
@@ -22,6 +22,7 @@ router.route("/test-db").get(async (req, res) => {
 
 router.route("/create").post(verifyJWT, createComplaint);
 router.route("/my-complaints/").get(verifyJWT, getComplaintByUser);
+router.route("/my-complaints/category/:category").get(verifyJWT, getComplaintByUserAndCategory);
 router.route("/trending").get(getTrendingComplaints); // Move this before parameterized routes
 router.get("/nearby", verifyJWT, getNearbyComplaints);
 router.route("/:complaintId").get(verifyJWT, getComplaintById);

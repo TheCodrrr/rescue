@@ -351,6 +351,95 @@ const getComplaintByUser = asyncHandler(async (req, res) => {
     });
 });
 
+const getComplaintByUserAndCategory = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { category } = req.params;
+    const { cursor, limit = 9 } = req.query;
+
+    // Validate category
+    const validCategories = ['rail', 'road', 'fire', 'cyber', 'police', 'court'];
+    if (!validCategories.includes(category)) {
+        throw new ApiError(400, "Invalid category");
+    }
+
+    // Get total count of user's complaints for this category
+    const totalCount = await Complaint.countDocuments({ user_id: userId, category });
+
+    // Build query with cursor-based pagination and category filter
+    const query = { user_id: userId, category };
+    if (cursor) {
+        query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    // Fetch one extra to check if there are more pages
+    let complaints = await Complaint.find(query)
+        .sort({ createdAt: -1 })
+        .limit(Number(limit) + 1)
+        .populate("user_id", "name email")
+        .populate("evidence_ids")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean();
+
+    // Check if there are more pages
+    const hasNextPage = complaints.length > limit;
+    const results = complaints.slice(0, limit);
+
+    // Process complaints with category-specific data
+    const processedComplaints = await Promise.all(
+        results.map(async complaint => {
+            // Determine current user's vote status
+            const userVote = complaint.votedUsers.find(vote => 
+                vote.user && vote.user._id.toString() === userId.toString()
+            );
+            
+            if (complaint.category === "rail") {
+                const train = await getTrainByNumber(complaint.category_data_id);
+                if (train && train.stations) {
+                    // Parse stations if it's a JSON string
+                    const stations = typeof train.stations === 'string' 
+                        ? JSON.parse(train.stations) 
+                        : train.stations;
+                    return { 
+                        ...complaint, 
+                        category_specific_data: { ...train, stations },
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || []
+                    };
+                } else {
+                    return { 
+                        ...complaint, 
+                        category_specific_data: train,
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || []
+                    };
+                }
+            }
+            return {
+                ...complaint,
+                userVote: userVote ? userVote.vote : null,
+                comments: complaint.feedback_ids || []
+            };
+        })
+    );
+
+    // Get the next cursor from the last complaint
+    const nextCursor = hasNextPage && results.length > 0 
+        ? results[results.length - 1].createdAt.toISOString() 
+        : null;
+
+    res.status(200).json({
+        success: true,
+        count: processedComplaints.length,
+        totalCount: totalCount,
+        data: processedComplaints,
+        nextCursor,
+        hasNextPage,
+        category
+    });
+});
+
 const updateComplaintStatus = asyncHandler(async (req, res) => {
     const { complaintId } = req.params;
     const { status } = req.body;
@@ -547,6 +636,7 @@ export {
     createComplaint,
     getComplaintById,
     getComplaintByUser,
+    getComplaintByUserAndCategory,
     updateComplaintStatus,
     assignComplaintToDepartment,
     deleteComplaint,
