@@ -905,27 +905,8 @@ const nearbyComplaints = await Complaint.find({
 - [ ] SMS/Email Notifications
 - [ ] Mobile Apps (React Native)
 - [ ] Admin Dashboard
-- [ ] Advanced Analytics (Power BI integration)
-- [ ] Video Call Support for Officers
+- [ ] Advanced Analytics
 - [ ] AI Chatbot for Guidance
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the ISC License.
 
 ---
 
@@ -945,12 +926,6 @@ This project is licensed under the ISC License.
 - Cloudinary for media management
 - Leaflet for beautiful maps
 - All open-source contributors
-
----
-
-## 📞 Support
-
-For support, email support@rescue.com or create an issue in the GitHub repository.
 
 ---
 
