@@ -78,7 +78,9 @@ function MyComplaints() {
         clearCacheAndRefetch,
         isUsingCache,
         interactionsRemaining,
-        totalCount
+        totalCount,
+        isLoading,
+        isFetching
     } = useMyComplaintsCache(selectedCategory);
 
     const categories = [
@@ -462,8 +464,8 @@ function MyComplaints() {
         return matchesSearch;
     });
 
-    // Loading state
-    if (status === "pending") {
+    // Loading state - only show on initial load (when no data exists yet)
+    if (isLoading && !data) {
         return (
             <div className="profile-card">
                 <div className="my-complaints-loading-container">
@@ -493,8 +495,8 @@ function MyComplaints() {
         );
     }
 
-    // No data state
-    if (!data || !data.pages || data.pages.length === 0 || allComplaints.length === 0) {
+    // No data state - only show when we have data but it's empty (not while loading)
+    if (!isFetching && (!data || !data.pages || data.pages.length === 0 || allComplaints.length === 0)) {
         return (
             <div className="profile-card">
                 <div className="my-complaints-empty-state">
@@ -526,6 +528,28 @@ function MyComplaints() {
             </div>
 
             <div className="my-complaints-list">
+                {/* Loading overlay for category switching - only show when fetching but NOT fetching next page */}
+                {isFetching && data && !isFetchingNextPage && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10,
+                        borderRadius: '12px'
+                    }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div className="spinner"></div>
+                            <p style={{ marginTop: '1rem', color: '#666' }}>Loading complaints...</p>
+                        </div>
+                    </div>
+                )}
+                
                 {/* Search and Filter Section */}
                 {allComplaints.length > 0 && (
                     <div className="search-filter-section">

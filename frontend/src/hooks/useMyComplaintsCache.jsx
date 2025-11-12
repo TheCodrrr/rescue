@@ -190,5 +190,7 @@ export const useMyComplaintsCache = (category = 'all') => {
     isUsingCache,
     interactionsRemaining: Math.max(0, INTERACTION_THRESHOLD - interactionCount),
     totalCount,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
   };
 };
