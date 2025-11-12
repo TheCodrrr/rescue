@@ -7,18 +7,27 @@ const INTERACTION_THRESHOLD = 50; // Clear cache after 50 interactions
 const CACHE_KEY_PREFIX = "myComplaintsCache";
 const INTERACTION_COUNT_KEY_PREFIX = "myComplaintsInteractionCount";
 
-const fetchMyComplaints = async ({ pageParam, category }) => {
+const fetchMyComplaints = async ({ pageParam, category, searchTerm }) => {
   try {
-    const endpoint = category && category !== 'all' 
-      ? `/complaints/my-complaints/category/${category}`
-      : '/complaints/my-complaints';
+    let endpoint;
+    let params = {
+      cursor: pageParam,
+      limit: 9,
+    };
+
+    // If search term is provided, use search endpoint
+    if (searchTerm && searchTerm.trim() !== '') {
+      endpoint = '/complaints/my-complaints/search';
+      params.searchTerm = searchTerm.trim();
+    } 
+    // Otherwise use category-based or general endpoint
+    else if (category && category !== 'all') {
+      endpoint = `/complaints/my-complaints/category/${category}`;
+    } else {
+      endpoint = '/complaints/my-complaints';
+    }
     
-    const { data } = await axiosInstance.get(endpoint, {
-      params: {
-        cursor: pageParam,
-        limit: 9,
-      }
-    });
+    const { data } = await axiosInstance.get(endpoint, { params });
     
     console.log("My Complaints API Response:", data);
     
@@ -35,12 +44,12 @@ const fetchMyComplaints = async ({ pageParam, category }) => {
   }
 };
 
-export const useMyComplaintsCache = (category = 'all') => {
+export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
   const queryClient = useQueryClient();
   
-  // Generate cache keys based on category
-  const CACHE_KEY = `${CACHE_KEY_PREFIX}_${category}`;
-  const INTERACTION_COUNT_KEY = `${INTERACTION_COUNT_KEY_PREFIX}_${category}`;
+  // Generate cache keys based on category and search term
+  const CACHE_KEY = `${CACHE_KEY_PREFIX}_${category}_${searchTerm || 'none'}`;
+  const INTERACTION_COUNT_KEY = `${INTERACTION_COUNT_KEY_PREFIX}_${category}_${searchTerm || 'none'}`;
   
   // Get Redux complaints to merge with cached data for real-time updates
   const reduxComplaints = useSelector((state) => state.complaints.complaints || []);
@@ -62,14 +71,15 @@ export const useMyComplaintsCache = (category = 'all') => {
 
   // Main query
   const query = useInfiniteQuery({
-    queryKey: ["myComplaints", category],
-    queryFn: ({ pageParam }) => fetchMyComplaints({ pageParam, category }),
+    queryKey: ["myComplaints", category, searchTerm],
+    queryFn: ({ pageParam }) => fetchMyComplaints({ pageParam, category, searchTerm }),
     getNextPageParam: (lastPage) => {
       return lastPage.hasNextPage ? lastPage.nextCursor : undefined;
     },
     initialPageParam: undefined,
     staleTime: Infinity, // Keep data fresh since we're managing cache ourselves
     gcTime: Infinity, // Don't garbage collect (formerly cacheTime)
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching
   });
 
   // Initialize cache when data is first loaded
@@ -131,10 +141,10 @@ export const useMyComplaintsCache = (category = 'all') => {
     setInteractionCount(0);
     setIsUsingCache(false);
     
-    // Invalidate and refetch with category
-    queryClient.invalidateQueries({ queryKey: ["myComplaints", category] });
-    queryClient.refetchQueries({ queryKey: ["myComplaints", category] });
-  }, [queryClient, CACHE_KEY, INTERACTION_COUNT_KEY, category]);
+    // Invalidate and refetch with category and search term
+    queryClient.invalidateQueries({ queryKey: ["myComplaints", category, searchTerm] });
+    queryClient.refetchQueries({ queryKey: ["myComplaints", category, searchTerm] });
+  }, [queryClient, CACHE_KEY, INTERACTION_COUNT_KEY, category, searchTerm]);
 
   // Auto-clear cache when threshold is reached
   useEffect(() => {

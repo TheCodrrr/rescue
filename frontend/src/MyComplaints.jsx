@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import { useMyComplaintsCache } from "./hooks/useMyComplaintsCache.jsx";
+import toast from 'react-hot-toast';
 import { 
   FiThumbsUp, 
   FiThumbsDown, 
@@ -64,8 +65,20 @@ function MyComplaints() {
     const [deletingComment, setDeletingComment] = useState(null);
     const [updatingComment, setUpdatingComment] = useState(null);
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+    const [previousData, setPreviousData] = useState(null);
+    const [showingPreviousData, setShowingPreviousData] = useState(false);
     
-    // Use the infinite query hook with selected category
+    // Debounce search query to avoid too many API calls
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500); // 500ms debounce delay
+        
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+    
+    // Use the infinite query hook with selected category and search query
     const { 
         data, 
         fetchNextPage, 
@@ -81,7 +94,7 @@ function MyComplaints() {
         totalCount,
         isLoading,
         isFetching
-    } = useMyComplaintsCache(selectedCategory);
+    } = useMyComplaintsCache(selectedCategory, debouncedSearchQuery);
 
     const categories = [
         { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
@@ -105,6 +118,39 @@ function MyComplaints() {
     // Get all complaints from pages
     const allComplaints = data?.pages?.flatMap(page => page.complaints) || [];
 
+    // Handle search results - preserve previous data if new search returns empty
+    useEffect(() => {
+        if (data && data.pages && data.pages.length > 0) {
+            const currentComplaints = data.pages.flatMap(page => page.complaints);
+            
+            // If searching and got no results, show toast and keep previous data
+            if (debouncedSearchQuery && currentComplaints.length === 0 && previousData && previousData.length > 0) {
+                toast.error(`No complaints found matching "${debouncedSearchQuery}"`, {
+                    duration: 3000,
+                    position: 'top-center',
+                });
+                setShowingPreviousData(true);
+            } else {
+                // Update previous data with new results if we have data
+                if (currentComplaints.length > 0) {
+                    setPreviousData(currentComplaints);
+                    setShowingPreviousData(false);
+                }
+            }
+        }
+    }, [data, debouncedSearchQuery]);
+
+    // Use previous data if showing previous, otherwise use current data
+    const displayComplaints = showingPreviousData && previousData ? previousData : allComplaints;
+
+    // For display counts:
+    // - currentlyLoaded: number of complaints currently shown in the UI
+    // - totalAvailable: total matching complaints in database (from API)
+    const currentlyLoaded = displayComplaints.length;
+    const totalAvailable = showingPreviousData 
+        ? previousData.length  // When showing previous, that's all we have
+        : (totalCount || 0);    // Otherwise use the API total count
+
     // Fetch comments for visible complaints when data loads
     useEffect(() => {
         if (allComplaints.length > 0) {
@@ -119,10 +165,10 @@ function MyComplaints() {
         }
     }, [data?.pages?.length]); // Only trigger when new pages are loaded
 
-    // Scroll to top when category changes
+    // Scroll to top when category or search query changes
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [selectedCategory]);
+    }, [selectedCategory, debouncedSearchQuery]);
 
     // Handle ESC key to close modals
     useEffect(() => {
@@ -455,59 +501,10 @@ function MyComplaints() {
         );
     };
 
-    // Filter complaints based on search query only (category is now handled by backend)
-    const filteredComplaints = allComplaints.filter(complaint => {
-        const matchesSearch = searchQuery === '' || 
-            complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            complaint.description.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        return matchesSearch;
-    });
+    // Use display complaints (which may be previous data if search returned empty)
+    const filteredComplaints = displayComplaints;
 
-    // Loading state - only show on initial load (when no data exists yet)
-    if (isLoading && !data) {
-        return (
-            <div className="profile-card">
-                <div className="my-complaints-loading-container">
-                    <div className="spinner"></div>
-                    <p>Loading your complaints...</p>
-                </div>
-            </div>
-        );
-    }
-
-    // Error state
-    if (status === "error") {
-        return (
-            <div className="profile-card">
-                <div className="my-complaints-error-state">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Complaints</h3>
-                    <p>{error?.message || "Failed to load your complaints. Please try again."}</p>
-                    <button 
-                        className="my-complaints-retry-button"
-                        onClick={() => clearCacheAndRefetch()}
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // No data state - only show when we have data but it's empty (not while loading)
-    if (!isFetching && (!data || !data.pages || data.pages.length === 0 || allComplaints.length === 0)) {
-        return (
-            <div className="profile-card">
-                <div className="my-complaints-empty-state">
-                    <div className="empty-icon">📋</div>
-                    <h3>No Complaints Yet</h3>
-                    <p>You haven't submitted any complaints yet. Start by creating one!</p>
-                </div>
-            </div>
-        );
-    }
-
+    // Early returns for auth check
     if (!isAuthenticated) {
         return (
             <div className="profile-card">
@@ -527,31 +524,39 @@ function MyComplaints() {
                 <p className="section-subtitle">Track the status of your submitted complaints</p>
             </div>
 
-            <div className="my-complaints-list">
-                {/* Loading overlay for category switching - only show when fetching but NOT fetching next page */}
-                {isFetching && data && !isFetchingNextPage && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 10,
-                        borderRadius: '12px'
-                    }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div className="spinner"></div>
-                            <p style={{ marginTop: '1rem', color: '#666' }}>Loading complaints...</p>
-                        </div>
-                    </div>
-                )}
+            {/* Initial Loading State */}
+            {isLoading && !data ? (
+                <div className="my-complaints-loading-container">
+                    <div className="spinner"></div>
+                    <p>Loading your complaints...</p>
+                </div>
+            ) : status === "error" ? (
+                /* Error State */
+                <div className="my-complaints-error-state">
+                    <div className="error-icon">⚠️</div>
+                    <h3>Error Loading Complaints</h3>
+                    <p>{error?.message || "Failed to load your complaints. Please try again."}</p>
+                    <button 
+                        className="my-complaints-retry-button"
+                        onClick={() => clearCacheAndRefetch()}
+                    >
+                        Retry
+                    </button>
+                </div>
+            ) : (!isFetching && !showingPreviousData && (!data || !data.pages || data.pages.length === 0 || displayComplaints.length === 0)) ? (
+                /* Empty State - No complaints at all */
+                <div className="my-complaints-empty-state">
+                    <div className="empty-icon">📋</div>
+                    <h3>No Complaints Yet</h3>
+                    <p>You haven't submitted any complaints yet. Start by creating one!</p>
+                </div>
+            ) : (
+                /* Main Content - Complaints List */
+                <div className="my-complaints-list">
+                {/* Removed loading overlay - data updates seamlessly in background */}
                 
                 {/* Search and Filter Section */}
-                {allComplaints.length > 0 && (
+                {displayComplaints.length > 0 && (
                     <div className="search-filter-section">
                         <div className="search-bar-container">
                             <div className="search-input-wrapper">
@@ -568,7 +573,10 @@ function MyComplaints() {
                                 {searchQuery && (
                                     <button 
                                         className="clear-search-btn"
-                                        onClick={() => setSearchQuery('')}
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setShowingPreviousData(false);
+                                        }}
                                     >
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -595,7 +603,7 @@ function MyComplaints() {
                         {/* Results Summary */}
                         <div className="results-summary">
                             <span className="results-count">
-                                Showing {filteredComplaints.length} of {totalCount} complaints
+                                Showing {currentlyLoaded} of {totalAvailable} complaints
                                 {selectedCategory !== 'all' && (
                                     <span className="category-indicator">
                                         {' '}in {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
@@ -608,6 +616,7 @@ function MyComplaints() {
                                     onClick={() => {
                                         setSearchQuery('');
                                         setSelectedCategory('all');
+                                        setShowingPreviousData(false);
                                     }}
                                 >
                                     Clear Filters
@@ -617,30 +626,27 @@ function MyComplaints() {
                     </div>
                 )}
 
-                {filteredComplaints.length === 0 && allComplaints.length > 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-icon">🔍</div>
-                        <h3>No Complaints Found</h3>
-                        <p>
-                            {searchQuery && selectedCategory !== 'all' 
-                                ? `No complaints found matching "${searchQuery}" in ${categories.find(cat => cat.value === selectedCategory)?.label || selectedCategory} category.`
-                                : searchQuery 
-                                ? `No complaints found matching "${searchQuery}".`
-                                : `No complaints found in ${categories.find(cat => cat.value === selectedCategory)?.label || selectedCategory} category.`
-                            }
-                        </p>
-                        <button 
-                            className="clear-filters-btn"
-                            onClick={() => {
-                                setSearchQuery('');
-                                setSelectedCategory('all');
-                            }}
-                        >
-                            Clear Filters
-                        </button>
+                {/* Show notification banner if displaying previous data due to empty search */}
+                {showingPreviousData && (
+                    <div style={{
+                        padding: '1rem',
+                        margin: '1rem 0',
+                        backgroundColor: '#fff3cd',
+                        border: '1px solid #ffc107',
+                        borderRadius: '8px',
+                        color: '#856404',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                    }}>
+                        <svg style={{ width: '20px', height: '20px' }} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span>No results found for "{debouncedSearchQuery}". Showing previous results.</span>
                     </div>
-                ) : (
-                    <div className="my-complaints-grid">
+                )}
+
+                <div className="my-complaints-grid">
                         {filteredComplaints.map((complaint, index) => (
                             <div key={complaint._id || index} className="my-complaint-card">
                                 <div className="my-complaint-card-header">
@@ -808,8 +814,7 @@ function MyComplaints() {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                )}
+                </div>
 
                 {/* Infinite Scroll Loading Indicator */}
                 {hasNextPage && (
@@ -828,12 +833,13 @@ function MyComplaints() {
                 )}
 
                 {/* End of list indicator */}
-                {!hasNextPage && allComplaints.length > 0 && (
+                {!hasNextPage && displayComplaints.length > 0 && (
                     <div className="my-complaints-end-of-list">
                         <p>You've reached the end of your complaints</p>
                     </div>
                 )}
             </div>
+            )}
 
             {/* Delete Confirmation Modal */}
             {deleteModalOpen && selectedComplaintForDelete && (
@@ -908,12 +914,12 @@ function MyComplaints() {
                 onCommentDelete={handleModalCommentDelete}
                 comments={
                     selectedComplaintForComments 
-                        ? (allComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments || [])
+                        ? (displayComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments || [])
                         : []
                 }
                 totalComments={
                     selectedComplaintForComments 
-                        ? (allComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments?.length || 0)
+                        ? (displayComplaints.find(c => c._id === selectedComplaintForComments._id)?.comments?.length || 0)
                         : 0
                 }
             />
