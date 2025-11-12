@@ -632,6 +632,176 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
     });
 })
 
+const searchMyComplaints = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { searchTerm, cursor, limit = 9 } = req.query;
+
+    if (!searchTerm || searchTerm.trim() === '') {
+        return res.status(400).json({
+            success: false,
+            message: "Search term is required"
+        });
+    }
+
+    const trimmedSearchTerm = searchTerm.trim();
+    const parsedLimit = Number(limit);
+
+    // Build query with cursor-based pagination
+    const query = { user_id: userId };
+    if (cursor) {
+        query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    // Create MongoDB text search query for title and description
+    const textSearchQuery = {
+        ...query,
+        $or: [
+            { title: { $regex: trimmedSearchTerm, $options: 'i' } },
+            { description: { $regex: trimmedSearchTerm, $options: 'i' } }
+        ]
+    };
+
+    // First, get TOTAL count of text matches (without cursor or limit)
+    const textSearchQueryWithoutCursor = {
+        user_id: userId,
+        $or: [
+            { title: { $regex: trimmedSearchTerm, $options: 'i' } },
+            { description: { $regex: trimmedSearchTerm, $options: 'i' } }
+        ]
+    };
+    const totalTextMatches = await Complaint.countDocuments(textSearchQueryWithoutCursor);
+
+    // Fetch complaints matching text search with pagination
+    let textMatchComplaints = await Complaint.find(textSearchQuery)
+        .sort({ createdAt: -1 })
+        .limit(parsedLimit + 1)
+        .populate("user_id", "name email profileImage")
+        .populate("evidence_ids")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean();
+
+    // For rail complaints, we need to check train data as well
+    const railQuery = {
+        user_id: userId,
+        category: 'rail'
+    };
+
+    // Get total count of rail complaints
+    const totalRailComplaints = await Complaint.countDocuments(railQuery);
+
+    let railComplaints = await Complaint.find(railQuery)
+        .sort({ createdAt: -1 })
+        .populate("user_id", "name email profileImage")
+        .populate("evidence_ids")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean();
+
+    // Filter rail complaints by train data and add category_specific_data
+    const matchingRailComplaints = [];
+    const matchingRailComplaintIds = new Set(); // Track IDs to avoid duplicates
+    
+    for (const complaint of railComplaints) {
+        if (complaint.category_data_id) {
+            try {
+                const train = await getTrainByNumber(complaint.category_data_id);
+                if (train) {
+                    // Add train data to complaint
+                    const stations = typeof train.stations === 'string' 
+                        ? JSON.parse(train.stations) 
+                        : train.stations;
+                    complaint.category_specific_data = { ...train, stations };
+
+                    // Check if train number or name matches search term
+                    if (train.train_number && train.train_number.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
+                        matchingRailComplaints.push(complaint);
+                        matchingRailComplaintIds.add(complaint._id.toString());
+                    } else if (train.train_name && train.train_name.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
+                        matchingRailComplaints.push(complaint);
+                        matchingRailComplaintIds.add(complaint._id.toString());
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching train data for complaint ${complaint._id}:`, error);
+            }
+        }
+    }
+
+    // Add category_specific_data to text-matched rail complaints
+    for (const complaint of textMatchComplaints) {
+        if (complaint.category === 'rail' && complaint.category_data_id) {
+            try {
+                const train = await getTrainByNumber(complaint.category_data_id);
+                if (train) {
+                    const stations = typeof train.stations === 'string' 
+                        ? JSON.parse(train.stations) 
+                        : train.stations;
+                    complaint.category_specific_data = { ...train, stations };
+                }
+            } catch (error) {
+                console.error(`Error fetching train data for complaint ${complaint._id}:`, error);
+            }
+        }
+    }
+
+    // Merge and deduplicate results (text matches + rail train matches)
+    const complaintMap = new Map();
+    
+    // Add all text match complaints
+    textMatchComplaints.forEach(c => complaintMap.set(c._id.toString(), c));
+    
+    // Add rail complaints that matched by train data (if not already in map)
+    matchingRailComplaints.forEach(c => {
+        if (!complaintMap.has(c._id.toString())) {
+            complaintMap.set(c._id.toString(), c);
+        }
+    });
+
+    // Convert map to array and sort by createdAt
+    let allMatches = Array.from(complaintMap.values());
+    allMatches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Calculate TOTAL count properly:
+    // - Total text matches from DB count
+    // - Plus rail matches that are NOT already in text matches
+    const railMatchesNotInTextMatches = matchingRailComplaints.filter(rc => {
+        const rcId = rc._id.toString();
+        // Check if this rail complaint was also matched by text search
+        const wasTextMatched = textMatchComplaints.some(tc => tc._id.toString() === rcId);
+        return !wasTextMatched;
+    }).length;
+    
+    const totalMatchingComplaints = totalTextMatches + railMatchesNotInTextMatches;
+
+    // Apply cursor filter if needed (for pagination)
+    if (cursor) {
+        const cursorDate = new Date(cursor);
+        allMatches = allMatches.filter(c => new Date(c.createdAt) < cursorDate);
+    }
+
+    // Implement pagination
+    const hasNextPage = allMatches.length > parsedLimit;
+    const results = allMatches.slice(0, parsedLimit);
+
+    // Get the next cursor from the last complaint
+    const nextCursor = hasNextPage && results.length > 0 
+        ? results[results.length - 1].createdAt.toISOString() 
+        : null;
+
+    res.status(200).json({
+        success: true,
+        count: results.length,
+        totalCount: totalMatchingComplaints, // Use the total BEFORE cursor filter
+        data: results,
+        nextCursor,
+        hasNextPage,
+        searchTerm: trimmedSearchTerm
+    });
+});
+
 export {
     createComplaint,
     getComplaintById,
@@ -643,5 +813,6 @@ export {
     upvoteComplaint,
     downvoteComplaint,
     getTrendingComplaints,
-    getNearbyComplaints
+    getNearbyComplaints,
+    searchMyComplaints
 }
