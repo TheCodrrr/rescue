@@ -5,22 +5,28 @@ import { useNavigate, Link } from "react-router-dom";
 import { logout } from "./auth/redux/authSlice";
 
 // Memoized navigation links component
-const NavLinks = React.memo(({ links }) => {
+const NavLinks = React.memo(({ links, onLinkClick }) => {
     return (
         <>
             {links.map((link, index) => (
-                <Link
+                <a
                     key={link.name}
-                    to={link.href}
+                    href={link.href}
                     className="navbar-link"
                     style={{ animationDelay: `${index * 0.1}s` }}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        if (onLinkClick) {
+                            onLinkClick(link.href);
+                        }
+                    }}
                 >
                     <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                     </svg>
                     <span className="navbar-link-text">{link.name}</span>
                     <div className="navbar-link-hover-effect"></div>
-                </Link>
+                </a>
             ))}
         </>
     );
@@ -132,6 +138,13 @@ const Navbar = () => {
         setIsMobileMenuOpen(false);
     }, []);
 
+    // Handle navigation link clicks to ensure proper routing
+    const handleNavLinkClick = useCallback((href) => {
+        // Force navigation with page reload if needed
+        // This ensures the complaint page loads when clicking from user profile
+        window.location.href = href;
+    }, []);
+
     // Common navigation links accessible to both roles
     const commonNavLinks = useMemo(() => [
         { name: 'Home', href: '/home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -191,7 +204,7 @@ const Navbar = () => {
 
                 {/* Desktop Navigation */}
                 <div className="navbar-menu ml-3">
-                    <NavLinks links={displayNavLinks} />
+                    <NavLinks links={displayNavLinks} onLinkClick={handleNavLinkClick} />
                 </div>
 
                 {/* Authentication & Profile Section */}
@@ -219,18 +232,22 @@ const Navbar = () => {
             <div className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu-active' : ''}`}>
                 <div className="mobile-menu-content">
                     {displayNavLinks.map((link, index) => (
-                        <Link
+                        <a
                             key={link.name}
-                            to={link.href}
+                            href={link.href}
                             className="mobile-menu-link"
                             style={{ animationDelay: `${index * 0.1}s` }}
-                            onClick={closeMobileMenu}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                closeMobileMenu();
+                                handleNavLinkClick(link.href);
+                            }}
                         >
                             <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                             </svg>
                             <span className="mobile-menu-link-text">{link.name}</span>
-                        </Link>
+                        </a>
                     ))}
                 </div>
             </div>
