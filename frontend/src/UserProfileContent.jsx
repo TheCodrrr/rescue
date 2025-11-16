@@ -217,50 +217,70 @@ function UserProfileContent({ activeSection, contentRef }) {
         }));
     };
 
-    // Geocode address to get coordinates
+    // Geocode address to get coordinates using Nominatim (OpenStreetMap)
     const geocodeAddress = async (address) => {
         if (!address || address.trim().length < 5) {
             throw new Error('Address too short for geocoding');
         }
         
-        const response = await fetch(
-            `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=YOUR_API_KEY&limit=1`
-        );
-        
-        if (!response.ok) {
-            throw new Error('Geocoding service unavailable');
-        }
-        
-        const data = await response.json();
-        
-        if (data.results && data.results.length > 0) {
-            const result = data.results[0];
-            return {
-                latitude: result.geometry.lat,
-                longitude: result.geometry.lng,
-                formattedAddress: result.formatted
-            };
-        } else {
-            throw new Error('Address not found');
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+                {
+                    headers: {
+                        'User-Agent': 'RescueApp/1.0' // Required by Nominatim
+                    }
+                }
+            );
+            
+            if (!response.ok) {
+                throw new Error('Geocoding service unavailable');
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const result = data[0];
+                return {
+                    latitude: parseFloat(result.lat),
+                    longitude: parseFloat(result.lon),
+                    formattedAddress: result.display_name
+                };
+            } else {
+                throw new Error('Address not found');
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
+            throw error;
         }
     };
 
-    // Reverse geocode coordinates to get address
+    // Reverse geocode coordinates to get address using Nominatim
     const reverseGeocode = async (latitude, longitude) => {
-        const response = await fetch(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY&limit=1`
-        );
-        
-        if (!response.ok) {
-            throw new Error('Reverse geocoding service unavailable');
-        }
-        
-        const data = await response.json();
-        
-        if (data.results && data.results.length > 0) {
-            return data.results[0].formatted;
-        } else {
-            throw new Error('Could not determine address from coordinates');
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+                {
+                    headers: {
+                        'User-Agent': 'RescueApp/1.0' // Required by Nominatim
+                    }
+                }
+            );
+            
+            if (!response.ok) {
+                throw new Error('Reverse geocoding service unavailable');
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.display_name) {
+                return data.display_name;
+            } else {
+                throw new Error('Could not determine address from coordinates');
+            }
+        } catch (error) {
+            console.error('Reverse geocoding error:', error);
+            throw error;
         }
     };
 
