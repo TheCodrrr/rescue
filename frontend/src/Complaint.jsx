@@ -49,13 +49,17 @@ export default function Complaint() {
         },
         address: '',
         // Rail-specific optional field (required only when category === 'rail')
-        trainNumber: ''
+        trainNumber: '',
+        // Evidence files (images/videos)
+        evidenceFiles: []
     });
     
     const [locationMethod, setLocationMethod] = useState('map'); // 'map', 'manual', 'current'
     const [manualLocationMethod, setManualLocationMethod] = useState('type'); // 'type', 'current'
     const [mapReady, setMapReady] = useState(false);
     const [userCurrentLocation, setUserCurrentLocation] = useState(null);
+    const [evidencePreviews, setEvidencePreviews] = useState([]);
+    const fileInputRef = useRef(null);
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const mapInstanceRef = useRef(null);
@@ -278,6 +282,12 @@ export default function Complaint() {
                 position: 'top-right',
             });
             
+            // Cleanup evidence previews
+            evidencePreviews.forEach(preview => {
+                URL.revokeObjectURL(preview.url);
+            });
+            setEvidencePreviews([]);
+            
             // Reset form
             setFormData({
                 title: '',
@@ -289,7 +299,8 @@ export default function Complaint() {
                     longitude: null
                 },
                 address: '',
-                trainNumber: ''
+                trainNumber: '',
+                evidenceFiles: []
             });
             
             // Clear success state
@@ -351,6 +362,114 @@ export default function Complaint() {
             ...prev,
             [name]: value
         }));
+    };
+
+    // Handle evidence file upload
+    const handleEvidenceUpload = (e) => {
+        const files = Array.from(e.target.files);
+        
+        // Reset file input immediately to allow re-uploading same files or new files
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        
+        // If no files selected, return early
+        if (files.length === 0) {
+            return;
+        }
+        
+        // Check total number of files FIRST before validation
+        const currentFileCount = formData.evidenceFiles.length;
+        const maxFiles = 5;
+        
+        if (currentFileCount >= maxFiles) {
+            toast.error(`Maximum ${maxFiles} files reached. Please remove some files before uploading more.`);
+            return;
+        }
+        
+        if (currentFileCount + files.length > maxFiles) {
+            const remaining = maxFiles - currentFileCount;
+            toast.error(`You can only upload ${remaining} more file(s). Maximum is ${maxFiles} files total.`);
+            return;
+        }
+        
+        // Validate file types and sizes
+        const validFiles = [];
+        const maxSize = 50 * 1024 * 1024; // 50MB per file
+        const allowedTypes = [
+            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+            'video/mp4', 'video/webm', 'video/quicktime',
+            'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm', 'audio/aac', 'audio/m4a'
+        ];
+        
+        for (const file of files) {
+            // Check file type
+            if (!allowedTypes.includes(file.type)) {
+                toast.error(`${file.name} is not a supported format. Please upload images (JPEG, PNG, GIF, WebP), videos (MP4, WebM, MOV), or audio files (MP3, WAV, OGG, AAC, M4A)`);
+                continue;
+            }
+            
+            // Check file size
+            if (file.size > maxSize) {
+                toast.error(`${file.name} is too large. Maximum file size is 50MB`);
+                continue;
+            }
+            
+            validFiles.push(file);
+        }
+        
+        if (validFiles.length === 0) {
+            return;
+        }
+        
+        // Update form data with new files
+        setFormData(prev => ({
+            ...prev,
+            evidenceFiles: [...prev.evidenceFiles, ...validFiles]
+        }));
+        
+        // Create previews for the new files
+        const newPreviews = validFiles.map(file => {
+            const isVideo = file.type.startsWith('video/');
+            const isAudio = file.type.startsWith('audio/');
+            return {
+                file,
+                url: URL.createObjectURL(file),
+                type: isVideo ? 'video' : isAudio ? 'audio' : 'image',
+                name: file.name,
+                size: file.size
+            };
+        });
+        
+        setEvidencePreviews(prev => [...prev, ...newPreviews]);
+        
+        toast.success(`${validFiles.length} file(s) added successfully`);
+    };
+    
+    // Remove evidence file
+    const handleRemoveEvidence = (index) => {
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(evidencePreviews[index].url);
+        
+        // Remove from previews
+        setEvidencePreviews(prev => prev.filter((_, i) => i !== index));
+        
+        // Remove from form data
+        setFormData(prev => ({
+            ...prev,
+            evidenceFiles: prev.evidenceFiles.filter((_, i) => i !== index)
+        }));
+        
+        toast.success('Evidence removed');
+    };
+    
+    // Format file size for display
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     };
 
     const handleLocationChange = (e) => {
@@ -845,6 +964,102 @@ export default function Complaint() {
                                         className="form-input"
                                         placeholder="Street address, landmark, or nearby location"
                                     />
+                                </div>
+
+                                {/* Evidence Upload Section */}
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Evidence (Optional)
+                                    </label>
+                                    <p className="form-hint">Upload images or videos as evidence (Max 5 files, 50MB each)</p>
+                                    
+                                    {/* Upload Button */}
+                                    <div className="evidence-upload-container">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm,audio/aac,audio/m4a"
+                                            multiple
+                                            onChange={handleEvidenceUpload}
+                                            className="evidence-input-hidden"
+                                            id="evidence-upload"
+                                        />
+                                        <label htmlFor="evidence-upload" className="evidence-upload-button">
+                                            <svg className="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            </svg>
+                                            <span>Choose Images, Videos, or Audio</span>
+                                            <span className="upload-hint">or drag and drop</span>
+                                        </label>
+                                    </div>
+
+                                    {/* Evidence Previews */}
+                                    {evidencePreviews.length > 0 && (
+                                        <div className="evidence-previews">
+                                            <div className="evidence-grid">
+                                                {evidencePreviews.map((preview, index) => (
+                                                    <div key={index} className="evidence-item">
+                                                        <div className="evidence-preview">
+                                                            {preview.type === 'image' ? (
+                                                                <img 
+                                                                    src={preview.url} 
+                                                                    alt={`Evidence ${index + 1}`}
+                                                                    className="evidence-image"
+                                                                />
+                                                            ) : preview.type === 'video' ? (
+                                                                <video 
+                                                                    src={preview.url}
+                                                                    className="evidence-video"
+                                                                    controls
+                                                                >
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            ) : (
+                                                                <div className="evidence-audio-wrapper">
+                                                                    <div className="audio-icon-container">
+                                                                        <svg className="audio-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <audio 
+                                                                        src={preview.url}
+                                                                        className="evidence-audio"
+                                                                        controls
+                                                                    >
+                                                                        Your browser does not support the audio tag.
+                                                                    </audio>
+                                                                </div>
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveEvidence(index)}
+                                                                className="evidence-remove-btn"
+                                                                title="Remove this file"
+                                                            >
+                                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        <div className="evidence-info">
+                                                            <div className="evidence-name" title={preview.name}>
+                                                                {preview.type === 'image' ? '📷' : preview.type === 'video' ? '🎥' : '🎵'} {preview.name}
+                                                            </div>
+                                                            <div className="evidence-size">
+                                                                {formatFileSize(preview.size)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="evidence-count">
+                                                {evidencePreviews.length} of 5 files uploaded
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Submit Button */}

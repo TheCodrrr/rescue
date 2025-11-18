@@ -4106,3 +4106,218 @@ html.modal-open {
     transform: none;
     background: none;
 }
+
+/* Evidence Upload Styles */
+.form-hint {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.evidence-upload-container {
+    margin-bottom: 1.5rem;
+}
+
+.evidence-input-hidden {
+    display: none;
+}
+
+.evidence-upload-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.evidence-upload-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.evidence-upload-button .upload-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #60a5fa;
+    margin-bottom: 1rem;
+}
+
+.evidence-upload-button span {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.evidence-upload-button .upload-hint {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+    margin-top: 0.5rem;
+}
+
+/* Evidence Previews */
+.evidence-previews {
+    margin-top: 1.5rem;
+}
+
+.evidence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.evidence-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.evidence-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.evidence-preview {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.evidence-image,
+.evidence-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.evidence-video {
+    cursor: pointer;
+}
+
+.evidence-audio-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    padding: 1rem;
+}
+
+.audio-icon-container {
+    margin-bottom: 0.5rem;
+}
+
+.audio-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #60a5fa;
+    filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.5));
+}
+
+.evidence-audio {
+    width: 100%;
+    max-width: 180px;
+    height: 32px;
+    margin-top: 0.5rem;
+}
+
+.evidence-audio::-webkit-media-controls-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.evidence-remove-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.evidence-remove-btn:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+}
+
+.evidence-remove-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.evidence-info {
+    padding: 0.75rem;
+}
+
+.evidence-name {
+    font-size: 0.875rem;
+    color: #ffffff;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.evidence-size {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.evidence-count {
+    text-align: center;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Evidence Grid */
+@media (max-width: 768px) {
+    .evidence-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .evidence-preview {
+        height: 120px;
+    }
+    
+    .evidence-upload-button {
+        padding: 2rem 1rem;
+    }
+    
+    .evidence-upload-button .upload-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+}
