@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "./UserProfile.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { loadUser } from "./auth/redux/authSlice";
 import { ArrowLeft } from "lucide-react";
 import Navbar from './Navbar';
@@ -9,6 +9,7 @@ import UserProfileSidebar from './UserProfileSidebar';
 import UserProfileContent from './UserProfileContent';
 
 function UserProfile() {
+    const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeSection, setActiveSection] = useState(() => {
         return searchParams.get('tab') || 'profile';
@@ -18,6 +19,15 @@ function UserProfile() {
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
     const hasLoadedUser = useRef(false);
     const contentRef = useRef(null);
+    
+    // Check if we're actually on the user profile route
+    // If the pathname is not '/user', we shouldn't render this component
+    useEffect(() => {
+        if (location.pathname !== '/user') {
+            console.log("Not on /user route, pathname is:", location.pathname);
+            // Component will unmount naturally as router switches to the correct route
+        }
+    }, [location.pathname]);
     
     // Handle tab changes and update URL - memoized to prevent re-creation
     const handleSectionChange = useCallback((section) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import { useMyComplaintsCache } from "./hooks/useMyComplaintsCache.jsx";
 import toast from 'react-hot-toast';
@@ -682,13 +682,17 @@ function MyComplaints() {
                                                 </svg>
                                             )}
                                         </button>
-                                        <button
+                                        <Link
+                                            to={`/complaint/${complaint._id}`}
                                             className="my-visit-btn-icon"
-                                            onClick={() => handleVisitComplaint(complaint)}
                                             title="Visit Complaint Details"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                window.location.href = `/complaint/${complaint._id}`;
+                                            }}
                                         >
                                             <FiExternalLink className="my-delete-icon" />
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                                 
