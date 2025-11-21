@@ -19,6 +19,10 @@ const fetchMyComplaints = async ({ pageParam, category, searchTerm }) => {
     if (searchTerm && searchTerm.trim() !== '') {
       endpoint = '/complaints/my-complaints/search';
       params.searchTerm = searchTerm.trim();
+      // Include category filter in search if not 'all'
+      if (category && category !== 'all') {
+        params.category = category;
+      }
     } 
     // Otherwise use category-based or general endpoint
     else if (category && category !== 'all') {

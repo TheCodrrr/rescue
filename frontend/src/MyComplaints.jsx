@@ -69,6 +69,9 @@ function MyComplaints() {
     const [previousData, setPreviousData] = useState(null);
     const [showingPreviousData, setShowingPreviousData] = useState(false);
     
+    // Ref for search input to maintain focus
+    const searchInputRef = useRef(null);
+    
     // Debounce search query to avoid too many API calls
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -130,6 +133,13 @@ function MyComplaints() {
                     position: 'top-center',
                 });
                 setShowingPreviousData(true);
+                
+                // Restore focus to search input after showing error
+                setTimeout(() => {
+                    if (searchInputRef.current) {
+                        searchInputRef.current.focus();
+                    }
+                }, 100);
             } else {
                 // Update previous data with new results if we have data
                 if (currentComplaints.length > 0) {
@@ -564,6 +574,7 @@ function MyComplaints() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 <input
+                                    ref={searchInputRef}
                                     type="text"
                                     className="search-input"
                                     placeholder="Search complaints by title or description..."
@@ -576,6 +587,12 @@ function MyComplaints() {
                                         onClick={() => {
                                             setSearchQuery('');
                                             setShowingPreviousData(false);
+                                            // Restore focus to search input after clearing
+                                            setTimeout(() => {
+                                                if (searchInputRef.current) {
+                                                    searchInputRef.current.focus();
+                                                }
+                                            }, 0);
                                         }}
                                     >
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
