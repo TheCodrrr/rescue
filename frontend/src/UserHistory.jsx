@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useInView } from 'react-intersection-observer';
+import { useUserHistoryCache } from './hooks/useUserHistoryCache.jsx';
 import { 
-    fetchUserHistory, 
     setFilters, 
     clearError,
-    selectHistories,
-    selectHistoryLoading,
-    selectHistoryError,
     selectHistoryFilters
 } from './auth/redux/historySlice';
 import { 
@@ -29,14 +27,22 @@ import {
 import './UserHistory.css';
 
 const UserHistory = () => {
-    const [refreshing, setRefreshing] = useState(false);
-    
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
-    const histories = useSelector(selectHistories);
-    const loading = useSelector(selectHistoryLoading);
-    const error = useSelector(selectHistoryError);
     const filters = useSelector(selectHistoryFilters);
+
+    // Use the infinite query hook with filters
+    const { 
+        data, 
+        fetchNextPage, 
+        hasNextPage, 
+        isFetchingNextPage, 
+        status, 
+        error,
+        isLoading,
+        clearCacheAndRefetch,
+        totalCount
+    } = useUserHistoryCache(user?._id, filters);
 
     // Action type configurations
     const actionTypeConfig = {
@@ -100,28 +106,33 @@ const UserHistory = () => {
         court: { color: '#f57c00', label: 'Court' }
     };
 
-    const fetchHistory = useCallback(async (showRefresh = false) => {
-        if (showRefresh) setRefreshing(true);
-        
-        if (user?._id) {
-            await dispatch(fetchUserHistory({ 
-                userId: user._id, 
-                filters: filters
-            }));
-        }
-        
-        if (showRefresh) setRefreshing(false);
-    }, [user?._id, filters, dispatch]);
+    // Intersection observer for infinite scrolling at the bottom
+    const { ref } = useInView({
+        threshold: 1,
+        onChange: (inView) => {
+            if (inView && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        },
+    });
 
-    useEffect(() => {
-        if (user?._id) {
-            fetchHistory();
-        }
-    }, [fetchHistory]);
+    // Intersection observer for prefetching when 8th item is visible
+    const { ref: prefetchRef } = useInView({
+        threshold: 0.1,
+        onChange: (inView) => {
+            if (inView && hasNextPage && !isFetchingNextPage) {
+                console.log('8th record visible, prefetching next page...');
+                fetchNextPage();
+            }
+        },
+    });
+
+    // Get all histories from pages
+    const allHistories = data?.pages?.flatMap(page => page.histories) || [];
 
     const handleRefresh = useCallback(() => {
-        fetchHistory(true);
-    }, [fetchHistory]);
+        clearCacheAndRefetch();
+    }, [clearCacheAndRefetch]);
 
     const handleFilterChange = useCallback((filterType, value) => {
         dispatch(setFilters({ [filterType]: value }));
@@ -229,7 +240,7 @@ const UserHistory = () => {
         }
     };
 
-    // Memoized header component - won't re-render unless refreshing state changes
+    // Memoized header component - won't re-render unless status changes
     const headerComponent = useMemo(() => (
         <div className="history-header">
             <div className="header-content">
@@ -240,15 +251,16 @@ const UserHistory = () => {
                     </h2>
                     <p className="history-subtitle">
                         Track all your actions and interactions within the system
+                        {totalCount > 0 && ` • ${totalCount} total records`}
                     </p>
                 </div>
                 <button 
                     onClick={handleRefresh}
-                    className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
-                    disabled={refreshing}
+                    className={`refresh-btn ${status === 'pending' ? 'refreshing' : ''}`}
+                    disabled={status === 'pending'}
                 >
-                    <RefreshCw className={`refresh-icon ${refreshing ? 'spinning' : ''}`} />
-                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                    <RefreshCw className={`refresh-icon ${status === 'pending' ? 'spinning' : ''}`} />
+                    {status === 'pending' ? 'Refreshing...' : 'Refresh'}
                 </button>
             </div>
 
@@ -307,11 +319,11 @@ const UserHistory = () => {
                 </div>
             </div>
         </div>
-    ), [refreshing, filters, handleRefresh, handleFilterChange]);
+    ), [filters, handleRefresh, status, totalCount]);
 
     // Memoized content component - will only re-render when histories, loading, or error changes
     const contentComponent = useMemo(() => {
-        if (loading) {
+        if (isLoading) {
             return (
                 <div className="history-loading">
                     <div className="loading-spinner"></div>
@@ -322,7 +334,7 @@ const UserHistory = () => {
 
         return (
             <div className="history-content">
-                {histories.length === 0 ? (
+                {allHistories.length === 0 ? (
                     <div className="history-empty">
                         <Activity className="empty-icon" />
                         <h3>No History Found</h3>
@@ -334,68 +346,103 @@ const UserHistory = () => {
                         </p>
                     </div>
                 ) : (
-                    <div className="history-timeline">
-                        {histories.map((history, index) => {
-                            const ActionIcon = getActionIcon(history.actionType);
-                            const actionColor = getActionColor(history.actionType);
+                    <>
+                        <div className="history-timeline">
+                            {allHistories.map((history, index) => {
+                                const ActionIcon = getActionIcon(history.actionType);
+                                const actionColor = getActionColor(history.actionType);
+                                
+                                // Attach prefetch ref to every 8th item (index 7, 17, 27, etc.)
+                                // This triggers prefetch when user scrolls to 80% of each page
+                                const shouldPrefetch = (index + 1) % 10 === 8;
                             
-                            return (
-                                <div key={history._id} className="history-item" style={{'--delay': `${index * 0.1}s`}}>
-                                    <div className="history-marker">
-                                        <div 
-                                            className="marker-icon"
-                                            style={{ backgroundColor: actionColor }}
-                                        >
-                                            <ActionIcon size={16} />
-                                        </div>
-                                        {index < histories.length - 1 && <div className="marker-line"></div>}
-                                    </div>
-                                    
-                                    <div className="history-card">
-                                        <div className="card-header">
-                                            <div className="action-info">
-                                                <h4 className="action-title">
-                                                    {getActionLabel(history.actionType)}
-                                                </h4>
-                                                <p className="action-description">
-                                                    {getActionDescription(history.actionType)}
-                                                </p>
+                                return (
+                                    <div 
+                                        key={history._id} 
+                                        ref={shouldPrefetch ? prefetchRef : null}
+                                        className="history-item" 
+                                        style={{'--delay': `${index * 0.1}s`}}
+                                    >
+                                        <div className="history-marker">
+                                            <div 
+                                                className="marker-icon"
+                                                style={{ backgroundColor: actionColor }}
+                                            >
+                                                <ActionIcon size={16} />
                                             </div>
-                                            
-                                            {history.category && (
-                                                <div 
-                                                    className="category-badge"
-                                                    style={{ backgroundColor: getCategoryColor(history.category) }}
-                                                >
-                                                    {getCategoryLabel(history.category)}
-                                                </div>
-                                            )}
+                                            {index < allHistories.length - 1 && <div className="marker-line"></div>}
                                         </div>
                                         
-                                        {renderHistoryDetails(history)}
-                                        
-                                        <div className="card-footer">
-                                            <div className="timestamp">
-                                                <Clock size={14} />
-                                                {formatTimestamp(history.timestamp)}
+                                        <div className="history-card">
+                                            <div className="card-header">
+                                                <div className="action-info">
+                                                    <h4 className="action-title">
+                                                        {getActionLabel(history.actionType)}
+                                                    </h4>
+                                                    <p className="action-description">
+                                                        {getActionDescription(history.actionType)}
+                                                    </p>
+                                                </div>
+                                                
+                                                {history.category && (
+                                                    <div 
+                                                        className="category-badge"
+                                                        style={{ backgroundColor: getCategoryColor(history.category) }}
+                                                    >
+                                                        {getCategoryLabel(history.category)}
+                                                    </div>
+                                                )}
                                             </div>
                                             
-                                            {history.complaint_id && (
-                                                <div className="complaint-link">
-                                                    <FileText size={14} />
-                                                    Complaint: {history.complaint_id.substring(0, 8)}...
+                                            {renderHistoryDetails(history)}
+                                            
+                                            <div className="card-footer">
+                                                <div className="timestamp">
+                                                    <Clock size={14} />
+                                                    {formatTimestamp(history.timestamp)}
                                                 </div>
-                                            )}
+                                                
+                                                {history.complaint_id && (
+                                                    <div className="complaint-link">
+                                                        <FileText size={14} />
+                                                        Complaint: {history.complaint_id.substring(0, 8)}...
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Infinite Scroll Loading Indicator */}
+                        {hasNextPage && (
+                            <div ref={ref} className="history-loading-more-container">
+                                {isFetchingNextPage ? (
+                                    <div className="history-loading-more">
+                                        <div className="loading-spinner-small"></div>
+                                        <p>Loading more history...</p>
+                                    </div>
+                                ) : (
+                                    <div className="history-load-more-trigger">
+                                        <p>Scroll to load more</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* End of list indicator */}
+                        {!hasNextPage && allHistories.length > 0 && (
+                            <div className="history-end-of-list">
+                                <CheckCircle size={20} />
+                                <p>You've reached the end of your history</p>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         );
-    }, [histories, loading, filters.actionType, filters.category]);
+    }, [allHistories, isLoading, filters.actionType, filters.category, hasNextPage, isFetchingNextPage]);
 
     return (
         <div className="user-history">
