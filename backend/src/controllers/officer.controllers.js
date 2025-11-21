@@ -4,6 +4,9 @@ import { Complaint } from "../models/complaint.models.js";
 import { getTrainByNumber } from "../services/rail.service.js";
 import redisClient from "../../utils/redisClient.js";
 import { User } from "../models/user.models.js";
+import { Escalation } from "../models/escalation.models.js";
+// import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
+import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
 
 /**
  * Redis Key Structure:
@@ -121,6 +124,7 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
         .populate("user_id", "name email profileImage")
         .populate("evidence_ids")
         .populate("assigned_officer_id", "name email profileImage")
+        .populate("escalation_id")
         .sort({ createdAt: -1 })
         .lean();
 
@@ -137,6 +141,7 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
         .populate("user_id", "name email profileImage")
         .populate("evidence_ids")
         .populate("assigned_officer_id", "name email profileImage")
+        .populate("escalation_id")
         .sort({ createdAt: -1 })
         .lean();
 
@@ -153,6 +158,7 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
         .populate("user_id", "name email profileImage")
         .populate("evidence_ids")
         .populate("assigned_officer_id", "name email profileImage")
+        .populate("escalation_id")
         .sort({ createdAt: -1 })
         .lean();
 
@@ -236,14 +242,48 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Invalid officer ID or user is not an officer");
         }
 
+        // Update complaint status and assignment
         complaint.assigned_officer_id = officerId;
         complaint.status = "in_progress";
+        
+        // Move complaint from level 0 to level 1 when officer accepts
+        const previousLevel = complaint.level;
+        if (complaint.level === 0) {
+            complaint.level = 1;
+        }
+        
         await complaint.save();
 
+        // Update officer's complaint list
         if (!officer.complaints) officer.complaints = [];
         if (!officer.complaints.includes(complaint._id)) {
             officer.complaints.push(complaint._id);
             await officer.save();
+        }
+
+        // Handle escalation rescheduling
+        try {
+            // Find or create escalation record
+            let escalation = await Escalation.findOne({ complaint: complaint._id });
+            
+            if (escalation) {
+                // Add escalation event to history
+                escalation.history.push({
+                    from_level: previousLevel,
+                    to_level: complaint.level,
+                    reason: `Officer accepted complaint`,
+                    escalated_by: officerId,
+                    escalated_at: new Date()
+                });
+                await escalation.save();
+            }
+            
+            // Reschedule escalation with new level (level 1 -> 2 based on severity)
+            await scheduleEscalation(complaint);
+            console.log(`Rescheduled escalation for complaint ${complaint._id} after officer acceptance`);
+        } catch (escalationError) {
+            console.error("Error rescheduling escalation:", escalationError);
+            // Don't fail the assignment if escalation rescheduling fails
         }
 
         return res.status(200).json({

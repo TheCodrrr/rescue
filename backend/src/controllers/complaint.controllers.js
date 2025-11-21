@@ -7,6 +7,7 @@ import { calculateTrendingScore } from "../../utils/trendingScore.js";
 // import { Department } from "../models/department.models.js";
 import { io } from "../server.js";
 import { History } from "../models/history.models.js";
+import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -150,6 +151,15 @@ const createComplaint = asyncHandler(async (req, res) => {
   })
 
   if (complaint) {
+    // Schedule initial escalation (level 0 -> next level based on severity)
+    try {
+      await scheduleEscalation(complaint);
+      console.log(`Initial escalation scheduled for complaint ${complaint._id} with severity ${severity}`);
+    } catch (escalationError) {
+      console.error("Error scheduling initial escalation:", escalationError);
+      // Don't fail the complaint creation if escalation scheduling fails
+    }
+
     // Add history entry for complaint registration
     try {
       await History.create({
@@ -233,6 +243,13 @@ const getComplaintById = asyncHandler(async (req, res) => {
         .populate("votedUsers", "name email profileImage")
         .populate("assigned_officer_id", "name email profileImage")
         .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .populate({
+            path: "escalation_id",
+            populate: {
+                path: "history.escalated_by",
+                select: "name email"
+            }
+        })
         .lean();
 
     if (!complaint) {

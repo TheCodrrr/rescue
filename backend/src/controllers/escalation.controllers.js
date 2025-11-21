@@ -5,6 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import redisClient from "../../utils/redisClient.js";
 import { createNotification } from "./user.controllers.js";
 import { io } from "../server.js";
+import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
 
 // const createEscalationHistory = asyncHandler(async (req, res) => {
 //   const { complaintId } = req.params;
@@ -90,6 +91,15 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
     complaint.level = toLevelValue;
     await complaint.save();
     console.log("✅ Complaint level updated to:", complaint.level);
+
+    // Reschedule escalation timer with new level
+    try {
+      await scheduleEscalation(complaint);
+      console.log(`🔄 Rescheduled escalation timer for complaint ${complaintId} at level ${toLevelValue}`);
+    } catch (escalationError) {
+      console.error("⚠️ Failed to reschedule escalation:", escalationError);
+      // Continue even if scheduling fails - don't break the escalation event
+    }
 
     // Store notification in Redis for the user who registered the complaint
     try {
