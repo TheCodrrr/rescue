@@ -1,0 +1,366 @@
+/* Escalation Badge Styles */
+
+.escalation-badge-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Size variants */
+.escalation-badge-small {
+  font-size: 0.875rem;
+}
+
+.escalation-badge-medium {
+  font-size: 1rem;
+}
+
+.escalation-badge-large {
+  font-size: 1.125rem;
+}
+
+/* Level Badge */
+.escalation-level-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 2px solid;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.escalation-level-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.escalation-icon {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.escalation-level-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.escalation-level-label {
+  font-weight: 700;
+  font-size: 0.875em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #1f2937;
+}
+
+.escalation-level-description {
+  font-size: 0.8em;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Timer */
+.escalation-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.escalation-timer.overdue {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  animation: pulse-overdue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-overdue {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.timer-text {
+  font-weight: 700;
+}
+
+.timer-label {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+/* Progress Bar */
+.escalation-progress-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.escalation-progress-bar {
+  height: 100%;
+  transition: width 0.5s ease, background-color 0.3s ease;
+  border-radius: 12px;
+  position: relative;
+}
+
+.escalation-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.escalation-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #1f2937;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Status Badge */
+.escalation-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875em;
+}
+
+.escalation-status-badge.resolved {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.escalation-status-badge.rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Compact Badge (for cards/lists) */
+.escalation-badge-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  border: 2px solid;
+  background: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.escalation-badge-compact:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.compact-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.compact-label {
+  color: #1f2937;
+  letter-spacing: 0.5px;
+}
+
+.compact-status {
+  margin-left: 0.25rem;
+  font-size: 1.1em;
+}
+
+/* Escalation Timeline */
+.escalation-timeline {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-events {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.timeline-events::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #e5e7eb, transparent);
+}
+
+.timeline-event {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+}
+
+.event-marker {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  background: white;
+  border: 3px solid;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.event-content {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.event-levels {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.9375rem;
+}
+
+.event-date {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.event-reason {
+  margin: 0.5rem 0;
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.event-by {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.escalation-timeline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+}
+
+.escalation-timeline-empty svg {
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.escalation-timeline-empty p {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .escalation-level-badge {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .escalation-timer {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .event-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timeline-events::before {
+    left: 12px;
+  }
+
+  .event-marker {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+}
