@@ -289,6 +289,17 @@ html {
     border-bottom: 1px solid rgba(96, 165, 250, 0.3);
 }
 
+/* Escalation Section in Card Header */
+.cd-escalation-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cd-escalation-timeline-section {
+    margin: 2rem 0;
+}
+
 .cd-header-top-row {
     display: flex;
     justify-content: space-between;

@@ -66,6 +66,7 @@ import {
     addCommentHistory,
     addComplaintEscalatedHistory
 } from './auth/redux/historySlice';
+import EscalationBadge, { EscalationTimeline } from './EscalationBadge';
 import "./Complaint.css";
 import "./ComplaintDetail.css";
 import "./Toast.css";
@@ -1369,6 +1370,16 @@ export default function ComplaintDetail() {
                                     </span>
                                 </div>
                             </div>
+                            
+                            {/* Escalation Badge */}
+                            <div className="cd-escalation-section">
+                                <EscalationBadge 
+                                    complaint={selectedComplaint} 
+                                    showTimer={true} 
+                                    showProgress={true}
+                                    size="large"
+                                />
+                            </div>
                         </div>
 
                         {/* Card Body */}
@@ -1674,6 +1685,15 @@ export default function ComplaintDetail() {
                                     </div>
                                 );
                             })()}
+
+                            {/* Escalation Timeline Section */}
+                            {selectedComplaint.escalation_id && (
+                                <div className="cd-escalation-timeline-section">
+                                    <EscalationTimeline 
+                                        escalationHistory={selectedComplaint.escalation_id?.history || []} 
+                                    />
+                                </div>
+                            )}
 
                             {/* Status Update Section (for admins or complaint owner) */}
                             {canEdit && (

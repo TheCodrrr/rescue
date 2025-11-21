@@ -8,6 +8,7 @@ import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime, reje
 import { addComplaintEscalatedHistory } from '../auth/redux/historySlice';
 import useGeolocation from '../hooks/useGeolocation';
 import ComplaintMap from './ComplaintMap';
+import { CompactEscalationBadge } from '../EscalationBadge';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
@@ -653,6 +654,7 @@ const OfficerComplaint = () => {
                                 <div className="officer-complaint-card-header">
                                     <h3 className="officer-complaint-card-title">{complaint.title?.substring(0, 15) + (complaint.title?.length > 15 ? "..." : "")}</h3>
                                     <div className="officer-complaint-header-actions">
+                                        <CompactEscalationBadge complaint={complaint} />
                                         <span className={`officer-complaint-priority-badge officer-complaint-priority-${complaint.severity}`}>
                                             {complaint.severity}
                                         </span>
