@@ -64,17 +64,22 @@ const getHistory = asyncHandler( async(req, res) => {
         if (category && category !== 'all') filter.category = category;
         if (actionType && actionType !== 'all') filter.actionType = actionType;
 
+        // Determine sort order early to use in cursor logic
+        const sortOrder = sort === "asc" ? 1 : -1;
+
         // Add cursor-based pagination
+        // For descending (newest first), we want timestamps less than cursor
+        // For ascending (oldest first), we want timestamps greater than cursor
         if (cursor) {
-            filter.timestamp = { $lt: new Date(cursor) };
+            filter.timestamp = sortOrder === 1 
+                ? { $gt: new Date(cursor) }  // ascending: get records after cursor
+                : { $lt: new Date(cursor) }; // descending: get records before cursor
         }
 
         // Get total count of matching records (for UI display)
         const totalCount = await History.countDocuments(
             user_id ? { user_id, ...(category && category !== 'all' ? { category } : {}), ...(actionType && actionType !== 'all' ? { actionType } : {}) } : filter
         );
-
-        const sortOrder = sort === "asc" ? 1 : -1;
         const parsedLimit = Number(limit);
 
         // Fetch one extra record to determine if there's a next page
