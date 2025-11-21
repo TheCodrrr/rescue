@@ -634,7 +634,7 @@ const downvoteComplaint = asyncHandler(async (req, res) => {
 
 const searchMyComplaints = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const { searchTerm, cursor, limit = 9 } = req.query;
+    const { searchTerm, cursor, limit = 9, category } = req.query;
 
     if (!searchTerm || searchTerm.trim() === '') {
         return res.status(400).json({
@@ -643,13 +643,27 @@ const searchMyComplaints = asyncHandler(async (req, res) => {
         });
     }
 
+    // Validate category if provided
+    if (category) {
+        const validCategories = ['rail', 'road', 'fire', 'cyber', 'police', 'court'];
+        if (!validCategories.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category"
+            });
+        }
+    }
+
     const trimmedSearchTerm = searchTerm.trim();
     const parsedLimit = Number(limit);
 
-    // Build query with cursor-based pagination
+    // Build query with cursor-based pagination and optional category filter
     const query = { user_id: userId };
     if (cursor) {
         query.createdAt = { $lt: new Date(cursor) };
+    }
+    if (category) {
+        query.category = category;
     }
 
     // Create MongoDB text search query for title and description
@@ -669,6 +683,9 @@ const searchMyComplaints = asyncHandler(async (req, res) => {
             { description: { $regex: trimmedSearchTerm, $options: 'i' } }
         ]
     };
+    if (category) {
+        textSearchQueryWithoutCursor.category = category;
+    }
     const totalTextMatches = await Complaint.countDocuments(textSearchQueryWithoutCursor);
 
     // Fetch complaints matching text search with pagination
@@ -683,49 +700,54 @@ const searchMyComplaints = asyncHandler(async (req, res) => {
         .lean();
 
     // For rail complaints, we need to check train data as well
-    const railQuery = {
-        user_id: userId,
-        category: 'rail'
-    };
-
-    // Get total count of rail complaints
-    const totalRailComplaints = await Complaint.countDocuments(railQuery);
-
-    let railComplaints = await Complaint.find(railQuery)
-        .sort({ createdAt: -1 })
-        .populate("user_id", "name email profileImage")
-        .populate("evidence_ids")
-        .populate("votedUsers", "name email profileImage")
-        .populate("assigned_officer_id", "name email profileImage")
-        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
-        .lean();
-
-    // Filter rail complaints by train data and add category_specific_data
+    // Only search rail complaints if no category is specified or category is 'rail'
     const matchingRailComplaints = [];
-    const matchingRailComplaintIds = new Set(); // Track IDs to avoid duplicates
+    let totalRailComplaints = 0;
     
-    for (const complaint of railComplaints) {
-        if (complaint.category_data_id) {
-            try {
-                const train = await getTrainByNumber(complaint.category_data_id);
-                if (train) {
-                    // Add train data to complaint
-                    const stations = typeof train.stations === 'string' 
-                        ? JSON.parse(train.stations) 
-                        : train.stations;
-                    complaint.category_specific_data = { ...train, stations };
+    if (!category || category === 'rail') {
+        const railQuery = {
+            user_id: userId,
+            category: 'rail'
+        };
 
-                    // Check if train number or name matches search term
-                    if (train.train_number && train.train_number.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
-                        matchingRailComplaints.push(complaint);
-                        matchingRailComplaintIds.add(complaint._id.toString());
-                    } else if (train.train_name && train.train_name.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
-                        matchingRailComplaints.push(complaint);
-                        matchingRailComplaintIds.add(complaint._id.toString());
+        // Get total count of rail complaints
+        totalRailComplaints = await Complaint.countDocuments(railQuery);
+
+        let railComplaints = await Complaint.find(railQuery)
+            .sort({ createdAt: -1 })
+            .populate("user_id", "name email profileImage")
+            .populate("evidence_ids")
+            .populate("votedUsers", "name email profileImage")
+            .populate("assigned_officer_id", "name email profileImage")
+            .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+            .lean();
+
+        // Filter rail complaints by train data and add category_specific_data
+        const matchingRailComplaintIds = new Set(); // Track IDs to avoid duplicates
+        
+        for (const complaint of railComplaints) {
+            if (complaint.category_data_id) {
+                try {
+                    const train = await getTrainByNumber(complaint.category_data_id);
+                    if (train) {
+                        // Add train data to complaint
+                        const stations = typeof train.stations === 'string' 
+                            ? JSON.parse(train.stations) 
+                            : train.stations;
+                        complaint.category_specific_data = { ...train, stations };
+
+                        // Check if train number or name matches search term
+                        if (train.train_number && train.train_number.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
+                            matchingRailComplaints.push(complaint);
+                            matchingRailComplaintIds.add(complaint._id.toString());
+                        } else if (train.train_name && train.train_name.toLowerCase().includes(trimmedSearchTerm.toLowerCase())) {
+                            matchingRailComplaints.push(complaint);
+                            matchingRailComplaintIds.add(complaint._id.toString());
+                        }
                     }
+                } catch (error) {
+                    console.error(`Error fetching train data for complaint ${complaint._id}:`, error);
                 }
-            } catch (error) {
-                console.error(`Error fetching train data for complaint ${complaint._id}:`, error);
             }
         }
     }
