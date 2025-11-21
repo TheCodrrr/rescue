@@ -33,6 +33,14 @@ const escalationSchema = new Schema({
         unique: true,
     },
     history: [escalationEventSchema],
-})
+    escalationJobId: {
+        type: String,
+        default: null,
+    },
+    currentLevelStartedAt: {
+        type: Date,
+        default: Date.now,
+    }
+}, { timestamps: true })
 
 export const Escalation = mongoose.model("escalation", escalationSchema);
