@@ -49,32 +49,59 @@ const deleteHistory = asyncHandler( async(req, res) => {
 const getHistory = asyncHandler( async(req, res) => {
     try {
         const {
-        user_id,
-        complaint_id,
-        category,
-        actionType,
-        limit,
-        sort,
+            user_id,
+            complaint_id,
+            category,
+            actionType,
+            limit = 10,
+            sort,
+            cursor
         } = req.query;
 
         const filter = {};
         if (user_id) filter.user_id = user_id;
         if (complaint_id) filter.complaint_id = complaint_id;
-        if (category) filter.category = category;
-        if (actionType) filter.actionType = actionType;
+        if (category && category !== 'all') filter.category = category;
+        if (actionType && actionType !== 'all') filter.actionType = actionType;
+
+        // Add cursor-based pagination
+        if (cursor) {
+            filter.timestamp = { $lt: new Date(cursor) };
+        }
+
+        // Get total count of matching records (for UI display)
+        const totalCount = await History.countDocuments(
+            user_id ? { user_id, ...(category && category !== 'all' ? { category } : {}), ...(actionType && actionType !== 'all' ? { actionType } : {}) } : filter
+        );
 
         const sortOrder = sort === "asc" ? 1 : -1;
-        const histories = await History.find(filter)
+        const parsedLimit = Number(limit);
+
+        // Fetch one extra record to determine if there's a next page
+        let histories = await History.find(filter)
             .sort({ timestamp: sortOrder })
-            .limit(Number(limit) || 0); // 0 = no limit
+            .limit(parsedLimit + 1);
+
+        // Check if there are more pages
+        const hasNextPage = histories.length > parsedLimit;
+        const results = histories.slice(0, parsedLimit);
+
+        // Get the next cursor from the last record
+        const nextCursor = hasNextPage && results.length > 0 
+            ? results[results.length - 1].timestamp.toISOString() 
+            : null;
 
         return res.status(200).json({
-            count: histories.length,
-            histories,
+            success: true,
+            count: results.length,
+            totalCount: totalCount,
+            histories: results,
+            nextCursor,
+            hasNextPage,
         })
     } catch (error) {
         console.error("Error fetching history:", error);
-        return res.status(500).json({ message: "Server error", error: error.message });
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 } )
 
