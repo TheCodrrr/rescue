@@ -268,26 +268,38 @@ const officerSlice = createSlice({
       })
       .addCase(acceptComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        const { complaintId, complaint: updatedComplaint } = action.payload;
+        const { complaintId } = action.payload;
         
-        // Update complaint's assigned_officer_id and status in all severity levels
-        const updateComplaint = (complaint) => {
-          if (complaint._id === complaintId) {
-            return { 
-              ...complaint, 
-              assigned_officer_id: updatedComplaint?.assigned_officer_id,
-              status: updatedComplaint?.status || 'in_progress' // Update status to in_progress
-            };
-          }
-          return complaint;
-        };
+        // Find which severity level the complaint belongs to and remove it
+        const lowBefore = state.nearbyComplaints.low_severity.complaints.length;
+        const mediumBefore = state.nearbyComplaints.medium_severity.complaints.length;
+        const highBefore = state.nearbyComplaints.high_severity.complaints.length;
         
+        // Remove the accepted complaint from all severity levels since it's no longer active
+        // (backend sets active: false and filters by active: true)
         state.nearbyComplaints.low_severity.complaints = 
-          state.nearbyComplaints.low_severity.complaints.map(updateComplaint);
+          state.nearbyComplaints.low_severity.complaints.filter(c => c._id !== complaintId);
         state.nearbyComplaints.medium_severity.complaints = 
-          state.nearbyComplaints.medium_severity.complaints.map(updateComplaint);
+          state.nearbyComplaints.medium_severity.complaints.filter(c => c._id !== complaintId);
         state.nearbyComplaints.high_severity.complaints = 
-          state.nearbyComplaints.high_severity.complaints.map(updateComplaint);
+          state.nearbyComplaints.high_severity.complaints.filter(c => c._id !== complaintId);
+        
+        // Update individual counts based on which array changed
+        if (state.nearbyComplaints.low_severity.complaints.length < lowBefore) {
+          state.nearbyComplaints.low_severity.count = state.nearbyComplaints.low_severity.complaints.length;
+        }
+        if (state.nearbyComplaints.medium_severity.complaints.length < mediumBefore) {
+          state.nearbyComplaints.medium_severity.count = state.nearbyComplaints.medium_severity.complaints.length;
+        }
+        if (state.nearbyComplaints.high_severity.complaints.length < highBefore) {
+          state.nearbyComplaints.high_severity.count = state.nearbyComplaints.high_severity.complaints.length;
+        }
+        
+        // Update total count
+        state.totalComplaints = 
+          state.nearbyComplaints.low_severity.complaints.length +
+          state.nearbyComplaints.medium_severity.complaints.length +
+          state.nearbyComplaints.high_severity.complaints.length;
       })
       .addCase(acceptComplaint.rejected, (state, action) => {
         state.isLoading = false;
