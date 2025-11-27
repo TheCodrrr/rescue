@@ -5,8 +5,9 @@ import { getTrainByNumber } from "../services/rail.service.js";
 import redisClient from "../../utils/redisClient.js";
 import { User } from "../models/user.models.js";
 import { Escalation } from "../models/escalation.models.js";
-// import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
 import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
+import { createNotification } from "./user.controllers.js";
+import { io } from "../server.js";
 
 /**
  * Redis Key Structure:
@@ -283,6 +284,31 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
         } catch (escalationError) {
             console.error("Error rescheduling escalation:", escalationError);
             // Don't fail the assignment if escalation rescheduling fails
+        }
+
+        // Create notification for the citizen who registered the complaint
+        try {
+            const userId = complaint.user_id.toString();
+            
+            const notificationData = {
+                type: "officer_assigned",
+                complaint_id: complaintId,
+                complaint_title: complaint.title,
+                officer_name: officer.name || "Officer",
+                officer_id: officerId,
+                status: "in_progress",
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+
+            await createNotification(userId, notificationData);
+            
+            // Emit real-time notification to the specific user
+            io.emit(`notification:${userId}`, notificationData);
+            console.log(`🔔 Officer acceptance notification sent to user ${userId}`);
+        } catch (notificationError) {
+            console.error("⚠️ Failed to send notification:", notificationError);
+            // Continue even if notification fails - don't break the assignment
         }
 
         return res.status(200).json({

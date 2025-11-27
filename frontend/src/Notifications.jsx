@@ -74,12 +74,22 @@ const Notifications = () => {
             // Refresh notifications to get the latest from backend
             dispatch(fetchNotifications());
             
+            // Get notification message based on type
+            const getNotificationMessage = (data) => {
+                if (data.type === 'escalation') {
+                    return `${data.complaint_title} escalated to Level ${data.to_level}`;
+                } else if (data.type === 'officer_assigned') {
+                    return `Officer ${data.officer_name} assigned to "${data.complaint_title}"`;
+                }
+                return 'New notification received';
+            };
+            
             // Show toast notification
             toast.success(
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <strong>New Notification</strong>
                     <span style={{ fontSize: '0.9em' }}>
-                        {notificationData.complaint_title} escalated to Level {notificationData.to_level}
+                        {getNotificationMessage(notificationData)}
                     </span>
                 </div>,
                 {
@@ -198,6 +208,7 @@ const Notifications = () => {
         switch (type) {
             case 'escalation':
                 return <TrendingUp className="notification-type-icon escalation" />;
+            case 'officer_assigned':
             case 'assignment':
                 return <User className="notification-type-icon assignment" />;
             case 'status_update':
@@ -311,7 +322,9 @@ const Notifications = () => {
                             <div className="notification-content">
                                 <div className="notification-header-row">
                                     <h4 className="notification-title">
-                                        Complaint Escalated
+                                        {notification.type === 'escalation' ? 'Complaint Escalated' : 
+                                         notification.type === 'officer_assigned' ? 'Officer Assigned' : 
+                                         'Notification'}
                                     </h4>
                                     <div className="notification-actions">
                                         <span className="notification-time">
@@ -340,23 +353,36 @@ const Notifications = () => {
                                     <strong>{notification.complaint_title}</strong>
                                 </p>
                                 
-                                <div className="notification-escalation-info">
-                                    <div className="escalation-badge">
-                                        <span className="level-badge from">Level {notification.from_level}</span>
-                                        <TrendingUp className="arrow-icon" />
-                                        <span className="level-badge to">Level {notification.to_level}</span>
-                                    </div>
-                                </div>
-                                
-                                {notification.reason && (
-                                    <p className="notification-reason">
-                                        <em>"{notification.reason}"</em>
-                                    </p>
-                                )}
-                                
-                                <p className="notification-escalated-by">
-                                    Escalated by <strong>{notification.escalated_by}</strong>
-                                </p>
+                                {notification.type === 'escalation' ? (
+                                    <>
+                                        <div className="notification-escalation-info">
+                                            <div className="escalation-badge">
+                                                <span className="level-badge from">Level {notification.from_level}</span>
+                                                <TrendingUp className="arrow-icon" />
+                                                <span className="level-badge to">Level {notification.to_level}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {notification.reason && (
+                                            <p className="notification-reason">
+                                                <em>"{notification.reason}"</em>
+                                            </p>
+                                        )}
+                                        
+                                        <p className="notification-escalated-by">
+                                            Escalated by <strong>{notification.escalated_by}</strong>
+                                        </p>
+                                    </>
+                                ) : notification.type === 'officer_assigned' ? (
+                                    <>
+                                        <p className="notification-reason">
+                                            An officer has accepted your complaint and will begin working on it.
+                                        </p>
+                                        <p className="notification-escalated-by">
+                                            Assigned to <strong>{notification.officer_name}</strong>
+                                        </p>
+                                    </>
+                                ) : null}
                             </div>
                         </div>
                     ))
