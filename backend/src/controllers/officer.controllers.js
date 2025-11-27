@@ -105,9 +105,10 @@ const getNearbyComplaintsForOfficer = asyncHandler(async (req, res) => {
     }
 
     try {
-        // Base query filter to exclude rejected complaints
+        // Base query filter to exclude rejected complaints and only show active complaints
         const baseFilter = {
             createdAt: { $gte: twoHoursAgo },
+            active: true, // Only show complaints that haven't been accepted by other officers
             ...(rejectedComplaintIds.length > 0 && { _id: { $nin: rejectedComplaintIds } })
         };
 
@@ -245,12 +246,10 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
         // Update complaint status and assignment
         complaint.assigned_officer_id = officerId;
         complaint.status = "in_progress";
+        complaint.active = false; // Prevent other officers from accepting
         
-        // Move complaint from level 0 to level 1 when officer accepts
+        // Store previous level for escalation history
         const previousLevel = complaint.level;
-        if (complaint.level === 0) {
-            complaint.level = 1;
-        }
         
         await complaint.save();
 

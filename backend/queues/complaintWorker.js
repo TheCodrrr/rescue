@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import { Complaint } from "../src/models/complaint.models.js";
 import { escalationTimes } from "../utils/escalationTimes.js";
 import { scheduleEscalation } from "../utils/scheduleEscalation.js";
+import { io } from "../src/server.js";
+import { getTrainByNumber } from "../src/services/rail.service.js";
 
 dotenv.config();
 
@@ -96,14 +98,65 @@ const worker = new Worker(
             });
             await escalation.save();
             
-            // Update complaint level
+            // Update complaint level and reactivate for other officers
             complaint.level = nextLevel;
+            complaint.active = true; // Make complaint available for other officers to accept
+            complaint.assigned_officer_id = null; // Clear previous officer assignment
+            complaint.status = "pending"; // Reset status back to pending
             await complaint.save();
 
             // Schedule next escalation
             await scheduleEscalation(complaint);
             
             console.log(`Successfully escalated complaint ${complaintId} to level ${nextLevel}`);
+
+            // Emit socket event for escalated complaint (timer expired)
+            try {
+                // Populate complaint with full details
+                const populatedComplaint = await Complaint.findById(complaintId)
+                    .populate("user_id", "name email profileImage")
+                    .populate("evidence_ids")
+                    .populate("assigned_officer_id", "name email profileImage")
+                    .lean();
+
+                // Add train data if it's a rail complaint
+                let enrichedComplaint = populatedComplaint;
+                if (populatedComplaint.category === "rail" && populatedComplaint.category_data_id) {
+                    try {
+                        const train = await getTrainByNumber(populatedComplaint.category_data_id);
+                        if (train && train.stations) {
+                            const stations = typeof train.stations === 'string' 
+                                ? JSON.parse(train.stations) 
+                                : train.stations;
+                            enrichedComplaint = { ...populatedComplaint, category_specific_data: { ...train, stations } };
+                        } else {
+                            enrichedComplaint = { ...populatedComplaint, category_specific_data: train };
+                        }
+                    } catch (error) {
+                        console.error("Error fetching train data for socket emit:", error);
+                    }
+                }
+
+                // Emit general complaint event (same as registration)
+                io.emit("newComplaint", enrichedComplaint);
+                
+                // Emit specific event for officers with escalation info
+                io.emit("newComplaintForOfficer", {
+                    complaint: enrichedComplaint,
+                    location: enrichedComplaint.location,
+                    severity: enrichedComplaint.severity,
+                    category: enrichedComplaint.category,
+                    level: enrichedComplaint.level,
+                    escalated: true,
+                    previousLevel: level,
+                    timestamp: new Date()
+                });
+
+                console.log(`Socket events emitted for escalated complaint ${complaintId} (level ${level} -> ${nextLevel})`);
+            } catch (socketError) {
+                console.error("Error emitting socket events for escalated complaint:", socketError);
+                // Don't fail the escalation if socket emit fails
+            }
         } catch (error) {
             console.error(`Error processing escalation for complaint ${complaintId}:`, error);
             throw error;

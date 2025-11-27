@@ -151,7 +151,7 @@ const createComplaint = asyncHandler(async (req, res) => {
   })
 
   if (complaint) {
-    // Schedule initial escalation (level 0 -> next level based on severity)
+    // Schedule initial escalation (level 1 -> next level based on severity)
     try {
       await scheduleEscalation(complaint);
       console.log(`Initial escalation scheduled for complaint ${complaint._id} with severity ${severity}`);
