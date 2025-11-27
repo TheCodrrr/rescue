@@ -370,34 +370,8 @@ const OfficerComplaint = () => {
             }));
 
             if (acceptComplaint.fulfilled.match(acceptResult)) {
-                // Initialize escalation for the complaint (from level 0 to 1)
-                console.log('🔄 Initializing escalation for complaint:', complaintId);
-                
-                const escalationResult = await dispatch(addEscalationEvent({
-                    complaintId,
-                    from_level: 0,
-                    to_level: 1,
-                    reason: 'Complaint assigned to officer - Initial escalation'
-                }));
-
-                if (addEscalationEvent.fulfilled.match(escalationResult)) {
-                    console.log('✅ Escalation initialized for complaint:', complaintId);
-                    
-                    // Add escalation history entry
-                    dispatch(addComplaintEscalatedHistory({
-                        userId: user._id,
-                        complaintId: complaintId,
-                        category: complaintCategory,
-                        fromLevel: 0,
-                        toLevel: 1,
-                        reason: 'Complaint assigned to officer - Initial escalation'
-                    }));
-                } else {
-                    console.error('❌ Failed to initialize escalation:', escalationResult.payload);
-                    toast.error(`Warning: ${escalationResult.payload || 'Failed to initialize escalation'}`, {
-                        duration: 3000
-                    });
-                }
+                // Officer accepted complaint - complaint stays at level 1
+                console.log('✅ Complaint accepted by officer:', complaintId);
 
                 // Remove complaint from rejected list if it was there
                 setRejectedComplaintIds(prev => {

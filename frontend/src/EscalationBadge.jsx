@@ -43,7 +43,7 @@ const EscalationBadge = ({ complaint, showTimer = true, showProgress = false, si
     return null;
   }
 
-  const level = complaint.level || 0;
+  const level = complaint.level || 1;
   const escalationInfo = getEscalationInfo(level);
   const isResolved = complaint.status === 'resolved' || complaint.status === 'rejected';
 
@@ -117,7 +117,7 @@ const EscalationBadge = ({ complaint, showTimer = true, showProgress = false, si
 export const CompactEscalationBadge = ({ complaint }) => {
   if (!complaint) return null;
 
-  const level = complaint.level || 0;
+  const level = complaint.level || 1;
   const escalationInfo = getEscalationInfo(level);
   const isResolved = complaint.status === 'resolved' || complaint.status === 'rejected';
 

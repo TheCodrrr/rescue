@@ -137,7 +137,7 @@ export const acceptComplaint = createAsyncThunk(
 // Thunk to add escalation event
 export const addEscalationEvent = createAsyncThunk(
   'officer/addEscalationEvent',
-  async ({ complaintId, from_level = 0, to_level = 1, reason }, thunkAPI) => {
+  async ({ complaintId, from_level = 1, to_level = 2, reason }, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
       

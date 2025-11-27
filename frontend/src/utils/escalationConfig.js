@@ -5,23 +5,20 @@
 
 export const escalationTimes = {
   low: {
-    0: { next: 2, delay: 24 * 3600 * 1000, hours: 24 },     // 0 → 2 (24 hours)
     1: { next: 2, delay: 24 * 3600 * 1000, hours: 24 },     // 1 → 2 (24 hours)
     2: { next: 3, delay: 24 * 3600 * 1000, hours: 24 },     // 2 → 3 (24 hours)
     3: { next: "close", delay: 24 * 3600 * 1000, hours: 24 } // 3 → close (24 hours)
   },
   medium: {
-    0: { next: 2, delay: 12 * 3600 * 1000, hours: 12 },     // 0 → 2 (12 hours)
-    1: { next: 2, delay: 24 * 3600 * 1000, hours: 24 },     // 1 → 2 (24 hours)
-    2: { next: 3, delay: 36 * 3600 * 1000, hours: 36 },     // 2 → 3 (36 hours)
-    3: { next: 4, delay: 48 * 3600 * 1000, hours: 48 },     // 3 → 4 (48 hours)
+    1: { next: 2, delay: 12 * 3600 * 1000, hours: 12 },     // 1 → 2 (12 hours)
+    2: { next: 3, delay: 24 * 3600 * 1000, hours: 24 },     // 2 → 3 (24 hours)
+    3: { next: 4, delay: 36 * 3600 * 1000, hours: 36 },     // 3 → 4 (36 hours)
     4: { next: "close", delay: 48 * 3600 * 1000, hours: 48 } // 4 → close (48 hours)
   },
   high: {
-    0: { next: 2, delay: 2 * 3600 * 1000, hours: 2 },       // 0 → 2 (2 hours)
-    1: { next: 2, delay: 12 * 3600 * 1000, hours: 12 },     // 1 → 2 (12 hours)
-    2: { next: 3, delay: 20 * 3600 * 1000, hours: 20 },     // 2 → 3 (20 hours)
-    3: { next: 4, delay: 24 * 3600 * 1000, hours: 24 },     // 3 → 4 (24 hours)
+    1: { next: 2, delay: 2 * 3600 * 1000, hours: 2 },       // 1 → 2 (2 hours)
+    2: { next: 3, delay: 12 * 3600 * 1000, hours: 12 },     // 2 → 3 (12 hours)
+    3: { next: 4, delay: 20 * 3600 * 1000, hours: 20 },     // 3 → 4 (20 hours)
     4: { next: 5, delay: 24 * 3600 * 1000, hours: 24 },     // 4 → 5 (24 hours)
     5: { next: "close", delay: 30 * 3600 * 1000, hours: 30 } // 5 → close (30 hours)
   }
@@ -31,18 +28,11 @@ export const escalationTimes = {
  * UI Configuration for Escalation Levels
  */
 export const escalationLevelConfig = {
-  0: {
+  1: {
     label: 'Registered',
     description: 'Complaint registered, awaiting officer assignment',
     color: '#3b82f6', // Blue
     icon: '📝',
-    badge: 'Level 0'
-  },
-  1: {
-    label: 'Assigned',
-    description: 'Officer assigned, investigation in progress',
-    color: '#10b981', // Green
-    icon: '👮',
     badge: 'Level 1'
   },
   2: {
@@ -79,7 +69,7 @@ export const escalationLevelConfig = {
  * Get escalation info for a specific level
  */
 export const getEscalationInfo = (level) => {
-  return escalationLevelConfig[level] || escalationLevelConfig[0];
+  return escalationLevelConfig[level] || escalationLevelConfig[1];
 };
 
 /**
@@ -91,7 +81,7 @@ export const getTimeUntilEscalation = (complaint) => {
   }
 
   const severity = complaint.severity || 'medium';
-  const level = complaint.level || 0;
+  const level = complaint.level || 1;
   
   // Use currentLevelStartedAt from escalation_id if available, otherwise fall back to createdAt
   const levelStartTime = complaint.escalation_id?.currentLevelStartedAt 
@@ -156,7 +146,7 @@ export const getEscalationProgress = (complaint) => {
   }
 
   const severity = complaint.severity || 'medium';
-  const level = complaint.level || 0;
+  const level = complaint.level || 1;
   
   // Use currentLevelStartedAt from escalation_id if available, otherwise fall back to createdAt
   const levelStartTime = complaint.escalation_id?.currentLevelStartedAt 
