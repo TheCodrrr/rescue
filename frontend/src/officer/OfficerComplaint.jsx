@@ -28,7 +28,6 @@ const OfficerComplaint = () => {
 
     const { user } = useSelector((state) => state.auth);
 
-    const [filterStatus, setFilterStatus] = useState('all');
     const [filterSeverity, setFilterSeverity] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -234,17 +233,14 @@ const OfficerComplaint = () => {
     // Filter complaints based on status, severity, search query, and rejection status - Memoized
     const filteredComplaints = useMemo(() => {
         return allComplaints.filter(complaint => {
-            // Normalize status for comparison (backend uses underscore, frontend uses hyphen)
-            const normalizedComplaintStatus = complaint.status.replace('_', '-');
-            const matchesStatus = filterStatus === 'all' || normalizedComplaintStatus === filterStatus;
             const matchesSeverity = filterSeverity === 'all' || complaint.severity === filterSeverity;
             const matchesSearch = complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 complaint.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 complaint.description?.toLowerCase().includes(searchQuery.toLowerCase());
             const notRejected = !rejectedComplaintIds.has(complaint._id);
-            return matchesStatus && matchesSeverity && matchesSearch && notRejected;
+            return matchesSeverity && matchesSearch && notRejected;
         });
-    }, [allComplaints, filterStatus, filterSeverity, searchQuery, rejectedComplaintIds]);
+    }, [allComplaints, filterSeverity, searchQuery, rejectedComplaintIds]);
 
     // Masonry layout - adjust grid row spans based on card height
     useEffect(() => {
@@ -276,7 +272,7 @@ const OfficerComplaint = () => {
             window.removeEventListener('resize', resizeGridItems);
             clearTimeout(timer);
         };
-    }, [filterStatus, filterSeverity, searchQuery, nearbyComplaints]);
+    }, [filterSeverity, searchQuery, nearbyComplaints]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -485,36 +481,6 @@ const OfficerComplaint = () => {
                     </div>
 
                     <div className="officer-complaint-filter-section">
-                        <div className="officer-complaint-filter-group">
-                            <label>Status:</label>
-                            <div className="officer-complaint-filter-buttons">
-                                <button
-                                    className={`officer-complaint-filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('all')}
-                                >
-                                    All
-                                </button>
-                                <button
-                                    className={`officer-complaint-filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('pending')}
-                                >
-                                    Pending
-                                </button>
-                                <button
-                                    className={`officer-complaint-filter-btn ${filterStatus === 'in-progress' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('in-progress')}
-                                >
-                                    In Progress
-                                </button>
-                                <button
-                                    className={`officer-complaint-filter-btn ${filterStatus === 'resolved' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('resolved')}
-                                >
-                                    Resolved
-                                </button>
-                            </div>
-                        </div>
-
                         <div className="officer-complaint-filter-group">
                             <label>Severity:</label>
                             <div className="officer-complaint-filter-buttons">
