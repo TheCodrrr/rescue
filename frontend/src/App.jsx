@@ -114,7 +114,7 @@ function App() {
             {/* ========== CITIZEN-ONLY ROUTES ========== */}
             {/* Complaint routes for citizens */}
             <Route path="/complain" element={
-              <RoleProtectedRoute allowedRoles={['citizen', 'officer']}>
+              <RoleProtectedRoute allowedRoles={['citizen', 'officer', 'admin']}>
                 {/* Show different component based on role */}
                 <ComplaintRouter />
               </RoleProtectedRoute>

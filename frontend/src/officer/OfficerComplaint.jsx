@@ -129,13 +129,10 @@ const OfficerComplaint = () => {
 
         // Listen for new complaints specifically for officers
         socketRef.current.on('newComplaintForOfficer', (data) => {
-            console.log('🚨 New complaint for officer received:', data);
-            
-            const { complaint, location: complaintLocation, severity, category } = data;
+            const { complaint, location: complaintLocation, severity, category, escalated, level, previousLevel } = data;
             
             // Check if we've already processed this complaint
             if (processedComplaintIds.current.has(complaint._id)) {
-                console.log('⏭️ Complaint already processed, skipping:', complaint._id);
                 return;
             }
             
@@ -149,8 +146,6 @@ const OfficerComplaint = () => {
                     lng
                 );
                 
-                console.log(`Complaint distance: ${distance.toFixed(2)}km, Severity: ${severity}`);
-                
                 // Check if complaint is within the relevant radius for its severity
                 let isInRange = false;
                 if (severity === 'low' && distance <= 10) {
@@ -162,29 +157,35 @@ const OfficerComplaint = () => {
                 }
                 
                 if (isInRange) {
-                    console.log('✅ Complaint is in range, adding to list');
-                    
                     // Mark as processed
                     processedComplaintIds.current.add(complaint._id);
                     
                     // Dispatch to Redux (which now has duplicate check)
                     dispatch(addNewComplaintRealtime(complaint));
                     
-                    // Show notification
-                    toast.success(
-                        `New ${severity} priority ${category} complaint nearby!`,
-                        {
-                            duration: 5000,
-                            icon: severity === 'high' ? '🚨' : severity === 'medium' ? '⚠️' : 'ℹ️',
-                        }
-                    );
+                    // Show notification with escalation info if applicable
+                    if (escalated) {
+                        toast.error(
+                            `⬆️ ESCALATED: Level ${previousLevel}→${level} ${severity} priority ${category} complaint nearby!`,
+                            {
+                                duration: 7000,
+                                icon: '🔴',
+                            }
+                        );
+                    } else {
+                        toast.success(
+                            `New ${severity} priority ${category} complaint nearby!`,
+                            {
+                                duration: 5000,
+                                icon: severity === 'high' ? '🚨' : severity === 'medium' ? '⚠️' : 'ℹ️',
+                            }
+                        );
+                    }
                     
                     // Play notification sound (optional)
-                    if (severity === 'high') {
+                    if (severity === 'high' || escalated) {
                         playNotificationSound();
                     }
-                } else {
-                    console.log('⚠️ Complaint is out of range for its severity level');
                 }
             }
         });

@@ -16,7 +16,8 @@ export const escalationTimes = {
     4: { next: "close", delay: 48 * 3600 * 1000, hours: 48 } // 4 → close (48 hours)
   },
   high: {
-    1: { next: 2, delay: 2 * 3600 * 1000, hours: 2 },       // 1 → 2 (2 hours)
+    // 1: { next: 2, delay: 2 * 3600 * 1000, hours: 2 },       // 1 → 2 (2 hours)
+    1: { next: 2, delay: 60 * 1000, hours: 1 / 3600 },       // 1 → 2 (2 hours)
     2: { next: 3, delay: 12 * 3600 * 1000, hours: 12 },     // 2 → 3 (12 hours)
     3: { next: 4, delay: 20 * 3600 * 1000, hours: 20 },     // 3 → 4 (20 hours)
     4: { next: 5, delay: 24 * 3600 * 1000, hours: 24 },     // 4 → 5 (24 hours)
