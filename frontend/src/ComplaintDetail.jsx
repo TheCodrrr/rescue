@@ -67,6 +67,7 @@ import {
     addComplaintEscalatedHistory
 } from './auth/redux/historySlice';
 import EscalationBadge, { EscalationTimeline } from './EscalationBadge';
+import ComplaintProgress from './ComplaintProgress';
 import "./Complaint.css";
 import "./ComplaintDetail.css";
 import "./Toast.css";
@@ -1667,6 +1668,14 @@ export default function ComplaintDetail() {
                                     />
                                 </div>
                             )}
+
+                            {/* Progress & Evidence Section */}
+                            <ComplaintProgress 
+                                complaintId={selectedComplaint._id}
+                                category={selectedComplaint.category}
+                                currentUser={user}
+                                isOfficer={user?.role === 'officer'}
+                            />
 
                             {/* Status Update Section (for admins or complaint owner) */}
                             {canEdit && (

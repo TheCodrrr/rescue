@@ -22,7 +22,7 @@ const EscalationBadge = ({ complaint, showTimer = true, showProgress = false, si
       return;
     }
 
-    // Update time info every minute
+    // Update time info and progress
     const updateTimeInfo = () => {
       const info = getTimeUntilEscalation(complaint);
       setTimeInfo(info);
@@ -33,8 +33,11 @@ const EscalationBadge = ({ complaint, showTimer = true, showProgress = false, si
       }
     };
 
+    // Initial update
     updateTimeInfo();
-    const interval = setInterval(updateTimeInfo, 60000); // Update every minute
+    
+    // Update every second for smooth progress bar animation
+    const interval = setInterval(updateTimeInfo, 1000);
 
     return () => clearInterval(interval);
   }, [complaint, showProgress]);
