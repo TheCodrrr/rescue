@@ -7,7 +7,7 @@ const INTERACTION_THRESHOLD = 50; // Clear cache after 50 interactions
 const CACHE_KEY_PREFIX = "myComplaintsCache";
 const INTERACTION_COUNT_KEY_PREFIX = "myComplaintsInteractionCount";
 
-const fetchMyComplaints = async ({ pageParam, category, searchTerm }) => {
+const fetchMyComplaints = async ({ pageParam, category, searchTerm, isOfficer }) => {
   try {
     let endpoint;
     let params = {
@@ -15,20 +15,37 @@ const fetchMyComplaints = async ({ pageParam, category, searchTerm }) => {
       limit: 9,
     };
 
-    // If search term is provided, use search endpoint
-    if (searchTerm && searchTerm.trim() !== '') {
-      endpoint = '/complaints/my-complaints/search';
-      params.searchTerm = searchTerm.trim();
-      // Include category filter in search if not 'all'
+    // If user is an officer, fetch accepted complaints instead of registered complaints
+    if (isOfficer) {
+      endpoint = '/officer/accepted-complaints';
+      
+      // Add search parameter if provided
+      if (searchTerm && searchTerm.trim() !== '') {
+        params.search = searchTerm.trim();
+      }
+      
+      // Add category filter if not 'all'
       if (category && category !== 'all') {
         params.category = category;
       }
-    } 
-    // Otherwise use category-based or general endpoint
-    else if (category && category !== 'all') {
-      endpoint = `/complaints/my-complaints/category/${category}`;
-    } else {
-      endpoint = '/complaints/my-complaints';
+    }
+    // Otherwise use citizen's complaints endpoints
+    else {
+      // If search term is provided, use search endpoint
+      if (searchTerm && searchTerm.trim() !== '') {
+        endpoint = '/complaints/my-complaints/search';
+        params.searchTerm = searchTerm.trim();
+        // Include category filter in search if not 'all'
+        if (category && category !== 'all') {
+          params.category = category;
+        }
+      } 
+      // Otherwise use category-based or general endpoint
+      else if (category && category !== 'all') {
+        endpoint = `/complaints/my-complaints/category/${category}`;
+      } else {
+        endpoint = '/complaints/my-complaints';
+      }
     }
     
     const { data } = await axiosInstance.get(endpoint, { params });
@@ -51,9 +68,13 @@ const fetchMyComplaints = async ({ pageParam, category, searchTerm }) => {
 export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
   const queryClient = useQueryClient();
   
-  // Generate cache keys based on category and search term
-  const CACHE_KEY = `${CACHE_KEY_PREFIX}_${category}_${searchTerm || 'none'}`;
-  const INTERACTION_COUNT_KEY = `${INTERACTION_COUNT_KEY_PREFIX}_${category}_${searchTerm || 'none'}`;
+  // Check if user is an officer
+  const user = useSelector((state) => state.auth.user);
+  const isOfficer = user?.role === 'officer';
+  
+  // Generate cache keys based on category, search term, and user role
+  const CACHE_KEY = `${CACHE_KEY_PREFIX}_${isOfficer ? 'officer' : 'citizen'}_${category}_${searchTerm || 'none'}`;
+  const INTERACTION_COUNT_KEY = `${INTERACTION_COUNT_KEY_PREFIX}_${isOfficer ? 'officer' : 'citizen'}_${category}_${searchTerm || 'none'}`;
   
   // Get Redux complaints to merge with cached data for real-time updates
   const reduxComplaints = useSelector((state) => state.complaints.complaints || []);
@@ -75,8 +96,8 @@ export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
 
   // Main query
   const query = useInfiniteQuery({
-    queryKey: ["myComplaints", category, searchTerm],
-    queryFn: ({ pageParam }) => fetchMyComplaints({ pageParam, category, searchTerm }),
+    queryKey: ["myComplaints", isOfficer ? 'officer' : 'citizen', category, searchTerm],
+    queryFn: ({ pageParam }) => fetchMyComplaints({ pageParam, category, searchTerm, isOfficer }),
     getNextPageParam: (lastPage) => {
       return lastPage.hasNextPage ? lastPage.nextCursor : undefined;
     },
@@ -146,9 +167,9 @@ export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
     setIsUsingCache(false);
     
     // Invalidate and refetch with category and search term
-    queryClient.invalidateQueries({ queryKey: ["myComplaints", category, searchTerm] });
-    queryClient.refetchQueries({ queryKey: ["myComplaints", category, searchTerm] });
-  }, [queryClient, CACHE_KEY, INTERACTION_COUNT_KEY, category, searchTerm]);
+    queryClient.invalidateQueries({ queryKey: ["myComplaints", isOfficer ? 'officer' : 'citizen', category, searchTerm] });
+    queryClient.refetchQueries({ queryKey: ["myComplaints", isOfficer ? 'officer' : 'citizen', category, searchTerm] });
+  }, [queryClient, CACHE_KEY, INTERACTION_COUNT_KEY, category, searchTerm, isOfficer]);
 
   // Auto-clear cache when threshold is reached
   useEffect(() => {
