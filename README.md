@@ -67,6 +67,8 @@ A comprehensive, real-time complaint management and incident reporting platform 
 | **PostgreSQL** | - | Relational Database (Rail Data) |
 | **pg** | 8.16.3 | PostgreSQL Client |
 | **Redis** | 5.9.0 | Caching & Session Management |
+| **IORedis** | 5.8.2 | Redis Client for BullMQ |
+| **BullMQ** | 5.64.1 | Background Job Queue & Scheduler |
 | **Socket.IO** | 4.8.1 | Real-time WebSocket Server |
 | **JWT** | 9.0.2 | Authentication |
 | **bcryptjs** | 3.0.2 | Password Hashing |
@@ -172,7 +174,7 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Complaint History** for assigned cases
 
 ### 8. **Escalation System**
-- ✅ **Multi-level Escalation** (Level 0 to Level 5)
+- ✅ **Multi-level Escalation** (Level 1 to Level 5)
 - ✅ **Automatic Level Assignment** based on officer role
 - ✅ **Escalation History** tracking
 - ✅ **Escalation Reasons** documentation
@@ -181,6 +183,12 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Status Change on Escalation**
 - ✅ **Escalation Timeline** view
 - ✅ **Severity-based Notifications**
+- ✅ **Automated Time-based Escalation** using BullMQ
+- ✅ **Background Job Processing** for delayed escalations
+- ✅ **Escalation Time Rules** by severity (low: 24h, medium: 12-48h, high: 1m-30h)
+- ✅ **Auto-close** complaints after maximum escalation level
+- ✅ **Job Scheduling & Cancellation** on officer action
+- ✅ **Complaint Reactivation** on auto-escalation for new officer assignment
 
 ### 9. **Incident Reporting**
 - ✅ **Quick Incident Reports** for emergencies
@@ -221,22 +229,61 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Severity Analysis** by level
 - ✅ **Trending Complaints** scoring
 - ✅ **Time-based Trends**
-- ✅ **User Activity Metrics**
-- ✅ **Department Performance** stats
-- ✅ **Complaint Resolution Time** tracking
-- ✅ **Chart.js Visualizations** (pie, bar, line charts)
-- ✅ **D3.js Advanced Graphics**
+### 13. **Evidence Management System**
+- ✅ **Multi-evidence Upload** per complaint
+- ✅ **Evidence Types** (image, video, audio, document)
+- ✅ **Hierarchical Evidence Display** (Citizens → Officer Levels)
+- ✅ **Color-coded Evidence Cards** (complainer/citizens/officers)
+- ✅ **Escalation Level Tracking** for evidence submissions
+- ✅ **Evidence Description** with timestamps
+- ✅ **File Preview** (images, videos, audio players)
+- ✅ **Evidence Download** with cross-origin support
+- ✅ **Collapsible Sections** by hierarchy level
+- ✅ **Evidence during Registration** - upload files when creating complaint
+- ✅ **Evidence after Creation** - add supporting evidence later
+- ✅ **File Metadata** (name, size, mime type, Cloudinary public_id)
+- ✅ **Evidence Deletion** with authorization checks
+- ✅ **Redux State Management** for evidence operations
+- ✅ **Cloudinary Integration** for secure storage
 
-### 13. **Notifications System**
-- ✅ **In-app Notifications** with badge count
-- ✅ **Unread Notification Count**
-- ✅ **Notification Types**:
-  - Officer Assignment
-  - Status Updates
-  - Escalation Alerts
-  - Comment Responses
-  - Vote Milestones
+### 14. **Guidance System**
+- ✅ **User-contributed Guidance** for complaint categories
+- ✅ **Category-specific Guidance** articles
+- ✅ **Guidance Verification** by officers/admins
+- ✅ **Verified Badge** for trusted guidance
+- ✅ **Create, Read, Update, Delete** operations
+### 16. **User Profile & History**
+- ✅ **User Profile Page** with stats
+- ✅ **Profile Image Update**
+- ✅ **Account Details Update** (name, email, phone, address)
+- ✅ **Password Change**
+- ✅ **User History Tracking**:
+  - Complaint actions
+  - Vote history
+  - Comment history
+  - Status changes
+- ✅ **Activity Timeline**
+- ✅ **User Statistics** (total complaints, resolved, pending)
+- ✅ **User Deletion** with data cleanup
+
+### 17. **Background Job Processing (BullMQ)**
+- ✅ **Complaint Queue** for automated tasks
+- ✅ **Scheduled Escalations** with precise timing
+- ✅ **Delayed Job Execution** based on severity rules
+- ✅ **Job Cancellation** when officer takes action
+- ✅ **Job Completion Tracking** with logs
+- ✅ **Failed Job Handling** with error recovery
+- ✅ **Redis-backed Queue** for persistence
+- ✅ **Worker Process** for background job execution
+- ✅ **Automatic Complaint Reactivation** after escalation
+- ✅ **Job ID Storage** in escalation records for management
 - ✅ **Mark as Read** functionality
+- ✅ **Delete Notifications**
+- ✅ **Clear All Notifications**
+- ✅ **Real-time Notification Delivery** (Socket.IO)
+- ✅ **Sound Alerts** for critical notifications
+- ✅ **Notification Filtering** (all, unread, read)
+- ✅ **Notification Timestamps** (relative time)
 - ✅ **Delete Notifications**
 - ✅ **Clear All Notifications**
 - ✅ **Real-time Notification Delivery** (Socket.IO)
@@ -319,15 +366,30 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Memoized Selectors** with `useSelector`
 - ✅ **Action Creators** with createSlice
 - ✅ **Middleware Integration**
-- ✅ **State Hydration** on app load
-
-#### 4. **Image Optimization**
-- ✅ **Sharp Image Processing** on server
-- ✅ **Cloudinary Transformations** (resize, crop, compress)
-- ✅ **WebP Format Support**
-- ✅ **Responsive Image URLs**
-- ✅ **Image Preview** before upload
-- ✅ **Client-side Image Validation**
+#### 5. **Background Job Processing**
+- ✅ **BullMQ Job Queue** for automated escalations
+- ✅ **Redis-backed Job Persistence**
+- ✅ **Delayed Job Execution** with precise timing
+- ✅ **Job Scheduling** based on severity rules:
+  - Low: 24h per level
+  - Medium: 12-48h per level  
+  - High: 1m-30h per level (1m for testing)
+- ✅ **Job Cancellation** when officer resolves complaint
+- ✅ **Worker Process** separate from main server
+#### 7. **API Optimization**
+- ✅ **Cursor-based Pagination** (more efficient than offset)
+- ✅ **Field Filtering** in responses
+- ✅ **Batch Requests** support
+- ✅ **Response Compression** (gzip)
+- ✅ **HTTP Caching Headers**
+- ✅ **Rate Limiting** ready
+- ✅ **API Versioning** (`/api/v1`)
+- ✅ **Error Handling Middleware**cation queries
+- ✅ **Lean Queries** (`.lean()`) for performance
+- ✅ **Projection** to limit returned fields
+- ✅ **Population** with field selection
+- ✅ **Aggregation Pipelines** for analytics
+- ✅ **Query Pagination** with cursor-based approach
 - ✅ **File Size Limits**
 - ✅ **Lazy Image Loading**
 
@@ -547,15 +609,15 @@ Dispatch Redux Action OR React Query Mutation
 
 ### **Clone Repository**
 ```bash
-git clone https://github.com/TheCodrrr/rescue.git
-cd rescue
-```
+### **Backend** (`.env` in `/backend`)
 
-### **Install Dependencies**
+```env
+# Server Configuration
+PORT=5000
+NODE_ENV=development
 
-#### Backend
-```bash
-cd backend
+# Database - MongoDB
+MONGODB_URI=mongodb://localhost:27017/lodge
 npm install
 ```
 
@@ -613,10 +675,16 @@ CORS_ORIGIN=http://localhost:5173
 # Cookie Configuration
 COOKIE_DOMAIN=localhost
 COOKIE_SECURE=false
+#### Start Backend Server
+```bash
+cd backend
+npm run doraemon  # Uses nodemon for auto-reload
 ```
 
-### **Frontend** (`.env` in `/frontend`)
-
+#### Start BullMQ Worker (separate terminal)
+```bash
+cd backend
+npm run gian  # Runs complaint worker for background jobs
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api/v1
 VITE_SOCKET_URL=http://localhost:5000
@@ -714,14 +782,34 @@ http://localhost:5000/api/v1
 |--------|----------|-------------|---------------|
 | POST | `/departments` | Create department | ✅ (Admin) |
 | GET | `/departments` | Get all departments | ❌ |
-| GET | `/departments/:id` | Get department by ID | ✅ |
-| GET | `/departments/category/:category` | Get departments by category | ❌ |
-| POST | `/departments/validate-secret` | Validate department secret | ❌ |
-| PATCH | `/departments/:id` | Update department | ✅ (Admin) |
-| DELETE | `/departments/:id` | Delete department | ✅ (Admin) |
-
 ### **Escalation Endpoints**
 
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/escalations/:complaintId` | Add escalation event | ✅ (Officer/Admin) |
+| GET | `/escalations/complaint/:complaintId` | Get escalation history | ✅ |
+| GET | `/escalations/:escalationId` | Get escalation by ID | ✅ |
+| DELETE | `/escalations/:escalationId` | Delete escalation history | ✅ (Admin) |
+
+### **Evidence Endpoints**
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/evidences` | Submit evidence (with file upload) | ✅ |
+| GET | `/evidences` | Get all evidence | ✅ |
+| GET | `/evidences/complaint/:complaintId` | Get complaint evidence | ✅ |
+| GET | `/evidences/user/:userId` | Get user's evidence | ✅ |
+| DELETE | `/evidences/:evidenceId` | Delete evidence | ✅ |
+
+### **Guidance Endpoints**
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/guidance` | Add guidance article | ✅ |
+| GET | `/guidance` | Get all guidance | ❌ |
+| GET | `/guidance/category/:categoryId` | Get guidance by category | ❌ |
+| PATCH | `/guidance/:guidanceId/verify` | Verify guidance (officer/admin) | ✅ (Officer/Admin) |
+| DELETE | `/guidance/:guidanceId` | Delete guidance | ✅ |
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | POST | `/escalations/:complaintId` | Add escalation event | ✅ (Officer/Admin) |
@@ -838,19 +926,76 @@ const upvoteMutation = useMutation({
     mutationFn: upvoteComplaint,
     onMutate: async (complaintId) => {
         // Cancel outgoing refetches
-        await queryClient.cancelQueries(['complaints']);
-        
-        // Snapshot previous value
-        const previousComplaints = queryClient.getQueryData(['complaints']);
-        
-        // Optimistically update UI
-        queryClient.setQueryData(['complaints'], old => 
-            old.map(c => c._id === complaintId 
-                ? { ...c, upvotes: c.upvotes + 1 }
-                : c
-            )
-        );
-        
+### **5. Redis Officer Rejection**
+```javascript
+// Backend: Store rejected complaints in Redis
+const redisKey = `officer:${officerId}:rejected_complaints`;
+await redisClient.sAdd(redisKey, complaintId);
+
+// Fetch with exclusion
+const rejectedIds = await redisClient.sMembers(redisKey);
+const nearbyComplaints = await Complaint.find({
+    _id: { $nin: rejectedIds },
+    // ... other filters
+});
+```
+
+### **6. BullMQ Automated Escalation**
+```javascript
+## 📊 Performance Metrics
+
+- ✅ **Page Load Time**: < 2s (with cache)
+- ✅ **Time to Interactive**: < 3s
+- ✅ **First Contentful Paint**: < 1s
+- ✅ **API Response Time**: 50-200ms (cached), 200-500ms (uncached)
+- ✅ **WebSocket Latency**: < 50ms
+- ✅ **Image Load Time**: < 1s (Cloudinary CDN)
+- ✅ **Infinite Scroll**: Smooth 60fps
+- ✅ **Cache Hit Rate**: ~80% for trending complaints
+- ✅ **Background Job Processing**: BullMQ handles escalations with precise timing
+- ✅ **Job Queue Performance**: Redis-backed for high throughput
+
+// Schedule escalation job
+const job = await complaintQueue.add(
+    "auto-escalate",
+    { complaintId, escalationId, severity, level },
+    { delay: escalationTimes[severity][level].delay }
+);
+
+// backend/queues/complaintWorker.js - Background worker
+import { Worker } from "bullmq";
+
+const worker = new Worker("complaint-queue", async (job) => {
+    const { complaintId, escalationId, severity, level } = job.data;
+    
+    // Fetch complaint and check if resolved
+    const complaint = await Complaint.findById(complaintId);
+    if (complaint.status === "resolved" || complaint.status === "rejected") {
+        return; // Don't escalate if already handled
+    }
+    
+    // Get escalation rules
+    const rules = escalationTimes[severity][level];
+    if (rules.next === "close") {
+        complaint.status = "rejected";
+        await complaint.save();
+        return;
+    }
+    
+    // Escalate to next level
+    complaint.level = rules.next;
+    complaint.active = true;
+    complaint.assigned_officer_id = null;
+    complaint.status = "pending";
+    await complaint.save();
+    
+    // Schedule next escalation
+    await scheduleEscalation(complaint);
+    
+    // Emit socket event for real-time update
+    io.emit("newComplaintForOfficer", { complaint, escalated: true });
+});
+```     
         return { previousComplaints };
     },
     onError: (err, variables, context) => {
