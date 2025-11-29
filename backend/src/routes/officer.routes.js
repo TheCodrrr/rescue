@@ -3,7 +3,8 @@ import express from "express";
 import { 
     assignOfficerToComplaint,
     getNearbyComplaintsForOfficer,
-    rejectComplaint
+    rejectComplaint,
+    getOfficerAcceptedComplaints
 } from "../controllers/officer.controllers.js";
 
 const router = express.Router();
@@ -16,5 +17,8 @@ router.post("/reject-complaint", verifyJWT, rejectComplaint);
 
 // Route to assign a complaint
 router.put("/:officerId/assign-complaint/:complaintId", assignOfficerToComplaint);
+
+// Route to get complaints accepted by the officer
+router.get("/accepted-complaints", verifyJWT, getOfficerAcceptedComplaints);
 
 export default router;

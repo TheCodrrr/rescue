@@ -321,8 +321,110 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
     }
 })
 
+const getOfficerAcceptedComplaints = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const { cursor, limit = 9, search = '', category = 'all' } = req.query;
+
+    // Check if user is an officer
+    if (userRole !== 'officer') {
+        throw new ApiError(403, "Only officers can access this endpoint");
+    }
+
+    // Build base query for complaints assigned to this officer
+    const query = { assigned_officer_id: userId };
+    
+    // Add category filter if not 'all'
+    if (category !== 'all') {
+        query.category = category;
+    }
+
+    // Add search filter if provided
+    if (search && search.trim() !== '') {
+        query.$or = [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } }
+        ];
+    }
+
+    // Add cursor-based pagination
+    if (cursor) {
+        query.createdAt = { $lt: new Date(cursor) };
+    }
+
+    // Get total count for this query
+    const totalCount = await Complaint.countDocuments(query);
+
+    // Fetch one extra to check if there are more pages
+    let complaints = await Complaint.find(query)
+        .sort({ createdAt: -1 })
+        .limit(Number(limit) + 1)
+        .populate("user_id", "name email profileImage")
+        .populate("evidence_ids")
+        .populate("votedUsers", "name email profileImage")
+        .populate("assigned_officer_id", "name email profileImage")
+        .populate("feedback_ids", "complaint_id rating comment createdAt updatedAt")
+        .lean();
+
+    // Check if there are more pages
+    const hasNextPage = complaints.length > limit;
+    const results = complaints.slice(0, limit);
+
+    // Process complaints with category-specific data
+    const processedComplaints = await Promise.all(
+        results.map(async complaint => {
+            // Determine current user's vote status
+            const userVote = complaint.votedUsers.find(vote => 
+                vote.user && vote.user._id.toString() === userId.toString()
+            );
+            
+            if (complaint.category === "rail") {
+                const train = await getTrainByNumber(complaint.category_data_id);
+                if (train && train.stations) {
+                    const stations = typeof train.stations === 'string' 
+                        ? JSON.parse(train.stations) 
+                        : train.stations;
+                    return { 
+                        ...complaint, 
+                        category_specific_data: { ...train, stations },
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || []
+                    };
+                } else {
+                    return { 
+                        ...complaint, 
+                        category_specific_data: train,
+                        userVote: userVote ? userVote.vote : null,
+                        comments: complaint.feedback_ids || []
+                    };
+                }
+            }
+            return {
+                ...complaint,
+                userVote: userVote ? userVote.vote : null,
+                comments: complaint.feedback_ids || []
+            };
+        })
+    );
+
+    // Get the next cursor from the last complaint
+    const nextCursor = hasNextPage && results.length > 0 
+        ? results[results.length - 1].createdAt.toISOString() 
+        : null;
+
+    res.status(200).json({
+        success: true,
+        count: processedComplaints.length,
+        totalCount: totalCount,
+        data: processedComplaints,
+        nextCursor,
+        hasNextPage
+    });
+});
+
 export {
     getNearbyComplaintsForOfficer,
     rejectComplaint,
     assignOfficerToComplaint,
+    getOfficerAcceptedComplaints,
 };
