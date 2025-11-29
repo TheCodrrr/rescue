@@ -16,6 +16,10 @@ const evidenceSchema = new Schema({
         enum: ['citizen', 'officer', 'admin'],
         required: true,
     },
+    escalation_level: {
+        type: Number,
+        default: 0,
+    },
     category: {
         type: String,
         enum: ['rail', 'fire', 'cyber', 'police', 'court', 'road'],

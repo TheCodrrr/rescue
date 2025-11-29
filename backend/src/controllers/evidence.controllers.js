@@ -14,11 +14,14 @@ const submitEvidence = asyncHandler(async (req, res) => {
         throw new ApiError(400, "complaint_id, category, and evidence_type are required.");
     }
 
-    // Verify complaint exists
-    const complaint = await Complaint.findById(complaint_id);
+    // Verify complaint exists and get escalation level
+    const complaint = await Complaint.findById(complaint_id).populate('escalation_id');
     if (!complaint) {
         throw new ApiError(404, "Complaint not found.");
     }
+
+    // Get current escalation level from complaint
+    const escalation_level = complaint.escalation_id?.escalation_level || 0;
 
     const allowedTypes = ["image", "video", "text", "audio", "document"];
     if (!allowedTypes.includes(evidence_type)) {
@@ -54,6 +57,7 @@ const submitEvidence = asyncHandler(async (req, res) => {
         complaint_id,
         submitted_by,
         submitted_by_role,
+        escalation_level,
         category,
         evidence_type,
         evidence_url,
