@@ -23,7 +23,7 @@ import {
     clearSuccess, 
     clearError
 } from './auth/redux/complaintSlice';
-import { uploadEvidence } from './redux/evidenceSlice';
+import { uploadEvidence } from './auth/redux/evidenceSlice';
 
 export default function Complaint() {
     const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import {
     FiUpload,
     FiFile,
@@ -16,45 +16,45 @@ import {
     FiUser,
     FiClock,
     FiShield,
-    FiAlertCircle
+    FiAlertCircle,
+    FiChevronDown,
+    FiChevronUp
 } from 'react-icons/fi';
+import { 
+    uploadEvidence, 
+    fetchComplaintEvidence, 
+    deleteEvidence,
+    clearEvidenceError 
+} from './auth/redux/evidenceSlice';
 import './ComplaintProgress.css';
 
-const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) => {
+const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer, complainerId }) => {
+    const dispatch = useDispatch();
+    const { evidenceList, loading, uploading, deleting, error } = useSelector((state) => state.evidence);
+    
     const [activeTab, setActiveTab] = useState('view');
-    const [evidenceList, setEvidenceList] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
     const [evidenceType, setEvidenceType] = useState('');
     const [description, setDescription] = useState('');
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedEvidence, setSelectedEvidence] = useState(null);
-
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+    const [collapsedSections, setCollapsedSections] = useState({});
 
     // Fetch evidence on component mount
     useEffect(() => {
         if (complaintId) {
-            fetchEvidence();
+            dispatch(fetchComplaintEvidence(complaintId));
         }
-    }, [complaintId]);
+    }, [complaintId, dispatch]);
 
-    const fetchEvidence = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`${API_URL}/evidence/complaint/${complaintId}`, {
-                withCredentials: true
-            });
-            setEvidenceList(response.data.data || []);
-        } catch (error) {
-            console.error('Error fetching evidence:', error);
-            toast.error('Failed to load evidence');
-        } finally {
-            setLoading(false);
+    // Handle errors
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearEvidenceError());
         }
-    };
+    }, [error, dispatch]);
 
     const getFileIcon = (type) => {
         switch (type) {
@@ -117,36 +117,24 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
             return;
         }
 
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('complaint_id', complaintId);
-        formData.append('category', category);
-        formData.append('evidence_type', evidenceType);
-        formData.append('description', description);
-
         try {
-            const response = await axios.post(`${API_URL}/evidence`, formData, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            await dispatch(uploadEvidence({
+                file: selectedFile,
+                complaintId,
+                evidenceType,
+                description,
+                category
+            })).unwrap();
 
-            if (response.data.success) {
-                toast.success('Evidence uploaded successfully!');
-                setSelectedFile(null);
-                setFilePreview(null);
-                setDescription('');
-                setEvidenceType('');
-                fetchEvidence(); // Refresh evidence list
-                setActiveTab('view'); // Switch to view tab
-            }
+            toast.success('Evidence uploaded successfully!');
+            setSelectedFile(null);
+            setFilePreview(null);
+            setDescription('');
+            setEvidenceType('');
+            setActiveTab('view'); // Switch to view tab
         } catch (error) {
             console.error('Error uploading evidence:', error);
-            toast.error(error.response?.data?.message || 'Failed to upload evidence');
-        } finally {
-            setUploading(false);
+            // Error toast handled by useEffect
         }
     };
 
@@ -156,20 +144,43 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
         }
 
         try {
-            await axios.delete(`${API_URL}/evidence/${evidenceId}`, {
-                withCredentials: true
-            });
+            await dispatch(deleteEvidence(evidenceId)).unwrap();
             toast.success('Evidence deleted successfully');
-            fetchEvidence(); // Refresh evidence list
         } catch (error) {
             console.error('Error deleting evidence:', error);
-            toast.error(error.response?.data?.message || 'Failed to delete evidence');
+            // Error toast handled by useEffect
         }
     };
 
     const handleViewEvidence = (evidence) => {
         setSelectedEvidence(evidence);
         setViewModalOpen(true);
+    };
+
+    const handleDownload = async (evidence) => {
+        try {
+            const response = await fetch(evidence.evidence_url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = evidence.file_name || 'evidence-file';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            toast.success('Download started');
+        } catch (error) {
+            console.error('Download error:', error);
+            toast.error('Failed to download file');
+        }
+    };
+
+    const toggleSection = (sectionKey) => {
+        setCollapsedSections(prev => ({
+            ...prev,
+            [sectionKey]: !prev[sectionKey]
+        }));
     };
 
     const formatFileSize = (bytes) => {
@@ -199,6 +210,122 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
             default:
                 return { icon: <FiUser />, label: 'Citizen', class: 'role-citizen' };
         }
+    };
+
+    // Group evidence by role and escalation level
+    const groupEvidenceByHierarchy = () => {
+        const groups = {
+            citizens: [],
+            officers: {}
+        };
+
+        evidenceList.forEach((evidence) => {
+            if (evidence.submitted_by_role === 'citizen') {
+                groups.citizens.push(evidence);
+            } else if (evidence.submitted_by_role === 'officer' || evidence.submitted_by_role === 'admin') {
+                // Extract escalation level from evidence metadata or default to 0
+                const level = evidence.escalation_level || 0;
+                if (!groups.officers[level]) {
+                    groups.officers[level] = [];
+                }
+                groups.officers[level].push(evidence);
+            }
+        });
+
+        return groups;
+    };
+
+    const renderEvidenceCard = (evidence, isComplainer = false) => {
+        const roleBadge = getRoleBadge(evidence.submitted_by_role);
+        const canDelete = currentUser && 
+            (evidence.submitted_by._id === currentUser._id || currentUser.role === 'admin');
+
+        // Determine card class based on submitter type
+        let cardClass = 'evidence-card';
+        if (evidence.submitted_by_role === 'citizen') {
+            if (isComplainer) {
+                cardClass += ' complainer-evidence';
+            } else {
+                cardClass += ' other-citizen-evidence';
+            }
+        }
+
+        return (
+            <motion.div
+                key={evidence._id}
+                className={cardClass}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <div className="evidence-preview">
+                    {evidence.evidence_type === 'image' ? (
+                        <img src={evidence.evidence_url} alt={evidence.file_name} />
+                    ) : (
+                        <div className="evidence-icon-large">
+                            {getFileIcon(evidence.evidence_type)}
+                        </div>
+                    )}
+                </div>
+                
+                <div className="evidence-info">
+                    <div className="evidence-header">
+                        <span className="evidence-type-badge">
+                            {getFileIcon(evidence.evidence_type)}
+                            {evidence.evidence_type}
+                        </span>
+                        <span className={`role-badge ${roleBadge.class}`}>
+                            {roleBadge.icon}
+                            {roleBadge.label}
+                        </span>
+                    </div>
+                    
+                    <h4 className="evidence-filename">{evidence.file_name}</h4>
+                    
+                    {evidence.description && (
+                        <p className="evidence-description">{evidence.description}</p>
+                    )}
+                    
+                    <div className="evidence-meta">
+                        <div className="meta-item">
+                            <FiUser />
+                            <span>{evidence.submitted_by?.name || 'Unknown'}</span>
+                        </div>
+                        <div className="meta-item">
+                            <FiClock />
+                            <span>{formatDate(evidence.createdAt)}</span>
+                        </div>
+                        <div className="meta-item">
+                            <FiFile />
+                            <span>{formatFileSize(evidence.file_size)}</span>
+                        </div>
+                    </div>
+                    
+                    <div className="evidence-actions">
+                        <button
+                            className="evidence-action-btn view-btn"
+                            onClick={() => handleViewEvidence(evidence)}
+                        >
+                            <FiEye /> View
+                        </button>
+                        <button
+                            className="evidence-action-btn download-btn"
+                            onClick={() => handleDownload(evidence)}
+                        >
+                            <FiDownload /> Download
+                        </button>
+                        {canDelete && (
+                            <button
+                                className="evidence-action-btn delete-btn"
+                                onClick={() => handleDelete(evidence._id)}
+                            >
+                                <FiTrash2 /> Delete
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+        );
     };
 
     return (
@@ -247,92 +374,78 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
                                 <span>Be the first to contribute evidence to this complaint</span>
                             </div>
                         ) : (
-                            <div className="evidence-grid">
-                                {evidenceList.map((evidence) => {
-                                    const roleBadge = getRoleBadge(evidence.submitted_by_role);
-                                    const canDelete = currentUser && 
-                                        (evidence.submitted_by._id === currentUser._id || currentUser.role === 'admin');
-
+                            <div className="evidence-hierarchy">
+                                {(() => {
+                                    const grouped = groupEvidenceByHierarchy();
+                                    
                                     return (
-                                        <motion.div
-                                            key={evidence._id}
-                                            className="evidence-card"
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <div className="evidence-preview">
-                                                {evidence.evidence_type === 'image' ? (
-                                                    <img src={evidence.evidence_url} alt={evidence.file_name} />
-                                                ) : (
-                                                    <div className="evidence-icon-large">
-                                                        {getFileIcon(evidence.evidence_type)}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            <div className="evidence-info">
-                                                <div className="evidence-header">
-                                                    <span className="evidence-type-badge">
-                                                        {getFileIcon(evidence.evidence_type)}
-                                                        {evidence.evidence_type}
-                                                    </span>
-                                                    <span className={`role-badge ${roleBadge.class}`}>
-                                                        {roleBadge.icon}
-                                                        {roleBadge.label}
-                                                    </span>
-                                                </div>
-                                                
-                                                <h4 className="evidence-filename">{evidence.file_name}</h4>
-                                                
-                                                {evidence.description && (
-                                                    <p className="evidence-description">{evidence.description}</p>
-                                                )}
-                                                
-                                                <div className="evidence-meta">
-                                                    <div className="meta-item">
-                                                        <FiUser />
-                                                        <span>{evidence.submitted_by?.name || 'Unknown'}</span>
-                                                    </div>
-                                                    <div className="meta-item">
-                                                        <FiClock />
-                                                        <span>{formatDate(evidence.createdAt)}</span>
-                                                    </div>
-                                                    <div className="meta-item">
-                                                        <FiFile />
-                                                        <span>{formatFileSize(evidence.file_size)}</span>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="evidence-actions">
-                                                    <button
-                                                        className="evidence-action-btn view-btn"
-                                                        onClick={() => handleViewEvidence(evidence)}
+                                        <>
+                                            {/* Citizens Evidence Section */}
+                                            {grouped.citizens.length > 0 && (
+                                                <div className="evidence-section">
+                                                    <div 
+                                                        className="section-header clickable"
+                                                        onClick={() => toggleSection('citizens')}
                                                     >
-                                                        <FiEye /> View
-                                                    </button>
-                                                    <a
-                                                        href={evidence.evidence_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="evidence-action-btn download-btn"
-                                                        download
-                                                    >
-                                                        <FiDownload /> Download
-                                                    </a>
-                                                    {canDelete && (
-                                                        <button
-                                                            className="evidence-action-btn delete-btn"
-                                                            onClick={() => handleDelete(evidence._id)}
+                                                        <FiUser className="section-icon" />
+                                                        <h3>Citizens Evidence</h3>
+                                                        <span className="evidence-count">{grouped.citizens.length}</span>
+                                                        {collapsedSections['citizens'] ? <FiChevronDown /> : <FiChevronUp />}
+                                                    </div>
+                                                    {!collapsedSections['citizens'] && (
+                                                        <motion.div 
+                                                            className="evidence-grid"
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            exit={{ opacity: 0 }}
+                                                            transition={{ duration: 0.3 }}
                                                         >
-                                                            <FiTrash2 /> Delete
-                                                        </button>
+                                                            {grouped.citizens.map((evidence) => 
+                                                                renderEvidenceCard(
+                                                                    evidence, 
+                                                                    evidence.submitted_by?._id === complainerId
+                                                                )
+                                                            )}
+                                                        </motion.div>
                                                     )}
                                                 </div>
-                                            </div>
-                                        </motion.div>
+                                            )}
+
+                                            {/* Officers Evidence by Level */}
+                                            {Object.keys(grouped.officers)
+                                                .sort((a, b) => parseInt(a) - parseInt(b))
+                                                .map((level) => (
+                                                    <div key={`level-${level}`} className="evidence-section">
+                                                        <div 
+                                                            className="section-header officer-level clickable"
+                                                            onClick={() => toggleSection(`officer-${level}`)}
+                                                        >
+                                                            <FiShield className="section-icon" />
+                                                            <h3>
+                                                                {level === '0' ? 'Officer Evidence (Initial)' : `Officer Evidence (Level ${level})`}
+                                                            </h3>
+                                                            <span className="evidence-count">{grouped.officers[level].length}</span>
+                                                            {collapsedSections[`officer-${level}`] ? <FiChevronDown /> : <FiChevronUp />}
+                                                        </div>
+                                                        {!collapsedSections[`officer-${level}`] && (
+                                                            <motion.div 
+                                                                className="evidence-grid"
+                                                                initial={{ opacity: 0 }}
+                                                                animate={{ opacity: 1 }}
+                                                                exit={{ opacity: 0 }}
+                                                                transition={{ duration: 0.3 }}
+                                                            >
+                                                                {grouped.officers[level].map((evidence) => 
+                                                                    renderEvidenceCard(evidence, false)
+                                                                )}
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            }
+                                        </>
                                     );
-                                })}
+                                })()}
                             </div>
                         )}
                     </motion.div>
@@ -392,12 +505,12 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
 
                             {selectedFile && (
                                 <div className="upload-form">
-                                    <div className="form-group">
+                                    <div className="evidence-form-group">
                                         <label>Evidence Type</label>
                                         <select
                                             value={evidenceType}
                                             onChange={(e) => setEvidenceType(e.target.value)}
-                                            className="form-select"
+                                            className="evidence-form-select"
                                         >
                                             <option value="">Select type</option>
                                             <option value="image">Image</option>
@@ -408,12 +521,12 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer }) =>
                                         </select>
                                     </div>
 
-                                    <div className="form-group">
+                                    <div className="evidence-form-group">
                                         <label>Description (Optional)</label>
                                         <textarea
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
-                                            className="form-textarea"
+                                            className="evidence-form-textarea"
                                             placeholder="Add a description for this evidence..."
                                             rows="3"
                                         />

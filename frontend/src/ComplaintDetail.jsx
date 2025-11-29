@@ -1675,6 +1675,7 @@ export default function ComplaintDetail() {
                                 category={selectedComplaint.category}
                                 currentUser={user}
                                 isOfficer={user?.role === 'officer'}
+                                complainerId={selectedComplaint.user_id?._id}
                             />
 
                             {/* Status Update Section (for admins or complaint owner) */}

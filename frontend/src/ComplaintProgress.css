@@ -69,6 +69,84 @@
     min-height: 400px;
 }
 
+/* Evidence Hierarchy */
+.evidence-hierarchy {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.evidence-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* background-color: red; */
+}
+
+.evidence-section:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    margin-bottom: 0;
+    padding: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.section-header.clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.section-header.clickable:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.section-header.officer-level {
+    border-bottom-color: rgba(96, 165, 250, 0.3);
+}
+
+.section-header .section-icon {
+    font-size: 24px;
+    color: #60a5fa;
+}
+
+.section-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+}
+
+.section-header .evidence-count {
+    background: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.section-header svg:last-child {
+    margin-left: auto;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: transform 0.3s ease;
+}
+
 .progress-loading,
 .progress-empty {
     display: flex;
@@ -112,8 +190,9 @@
 /* Evidence Grid */
 .evidence-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr); /* always 3 columns */
+    gap: 15px;
+    padding: 20px;
 }
 
 .evidence-card {
@@ -124,6 +203,39 @@
     transition: all 0.3s ease;
 }
 
+/* Complainer Evidence - Gold/Amber Theme */
+.evidence-card.complainer-evidence {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.evidence-card.complainer-evidence:hover {
+    transform: translateY(-5px);
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.25);
+}
+
+.evidence-card.complainer-evidence .evidence-preview {
+    background: rgba(251, 191, 36, 0.1);
+}
+
+/* Other Citizen Evidence - Green Theme */
+.evidence-card.other-citizen-evidence {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.evidence-card.other-citizen-evidence:hover {
+    transform: translateY(-5px);
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
+}
+
+.evidence-card.other-citizen-evidence .evidence-preview {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+/* Officer Evidence - Default Blue Theme */
 .evidence-card:hover {
     transform: translateY(-5px);
     border-color: rgba(96, 165, 250, 0.5);
@@ -132,7 +244,7 @@
 
 .evidence-preview {
     width: 100%;
-    height: 200px;
+    height: 140px;
     background: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
@@ -147,30 +259,30 @@
 }
 
 .evidence-icon-large {
-    font-size: 60px;
+    font-size: 40px;
     color: rgba(255, 255, 255, 0.4);
 }
 
 .evidence-info {
-    padding: 20px;
+    padding: 14px;
 }
 
 .evidence-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .evidence-type-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 4px 8px;
     background: rgba(96, 165, 250, 0.2);
     border: 1px solid rgba(96, 165, 250, 0.3);
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #60a5fa;
     text-transform: capitalize;
@@ -179,10 +291,10 @@
 .role-badge {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
+    gap: 3px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
     font-weight: 600;
 }
 
@@ -205,20 +317,20 @@
 }
 
 .evidence-filename {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .evidence-description {
-    font-size: 13px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
-    margin: 0 0 15px 0;
-    line-height: 1.6;
+    margin: 0 0 10px 0;
+    line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -227,28 +339,28 @@
 
 .evidence-meta {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-    padding-top: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .meta-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11px;
     color: rgba(255, 255, 255, 0.6);
 }
 
 .meta-item svg {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .evidence-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .evidence-action-btn {
@@ -256,11 +368,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 10px 16px;
+    gap: 4px;
+    padding: 7px 10px;
     border: none;
-    border-radius: 10px;
-    font-size: 13px;
+    border-radius: 8px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -411,21 +523,21 @@
     gap: 20px;
 }
 
-.form-group {
+.evidence-form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.form-group label {
+.evidence-form-group label {
     font-size: 14px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
 }
 
-.form-select,
-.form-textarea {
-    background: rgba(255, 255, 255, 0.05);
+.evidence-form-select,
+.evidence-form-textarea {
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     padding: 12px 16px;
@@ -434,14 +546,19 @@
     transition: all 0.3s ease;
 }
 
-.form-select:focus,
-.form-textarea:focus {
+.evidence-form-select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.evidence-form-select:focus,
+.evidence-form-textarea:focus {
     outline: none;
     border-color: rgba(96, 165, 250, 0.5);
     background: rgba(255, 255, 255, 0.08);
 }
 
-.form-textarea {
+.evidence-form-textarea {
     resize: vertical;
     min-height: 80px;
     font-family: inherit;
