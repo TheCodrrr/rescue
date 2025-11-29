@@ -23,6 +23,7 @@ import {
     clearSuccess, 
     clearError
 } from './auth/redux/complaintSlice';
+import { uploadEvidence } from './redux/evidenceSlice';
 
 export default function Complaint() {
     const dispatch = useDispatch();
@@ -577,7 +578,32 @@ export default function Complaint() {
         console.log("Complaint data being submitted:", complaintData);
         
         try {
-            await dispatch(submitComplaint(complaintData)).unwrap();
+            const result = await dispatch(submitComplaint(complaintData)).unwrap();
+            const createdComplaint = result.complaint;
+            
+            // Upload evidence files if any
+            if (formData.evidenceFiles && formData.evidenceFiles.length > 0) {
+                console.log("Uploading evidence files for complaint:", createdComplaint._id);
+                
+                for (const file of formData.evidenceFiles) {
+                    try {
+                        await dispatch(uploadEvidence({
+                            file: file,
+                            complaintId: createdComplaint._id,
+                            evidenceType: file.type.startsWith('image/') ? 'image' : 
+                                         file.type.startsWith('video/') ? 'video' : 
+                                         file.type.startsWith('audio/') ? 'audio' : 'document',
+                            description: `Evidence for ${formData.title}`,
+                            category: formData.category
+                        })).unwrap();
+                    } catch (evidenceError) {
+                        console.error("Failed to upload evidence:", evidenceError);
+                        // Continue uploading other files even if one fails
+                    }
+                }
+                
+                console.log("All evidence files uploaded successfully");
+            }
         } catch (err) {
             // Error handling is done in useEffect
         }
