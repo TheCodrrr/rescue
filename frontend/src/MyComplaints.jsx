@@ -527,11 +527,20 @@ function MyComplaints() {
         );
     }
 
+    // Check if user is an officer
+    const isOfficer = user?.role === 'officer';
+
     return (
         <div className="profile-card">
             <div className="section-header">
-                <h2 className="section-title">My Complaints</h2>
-                <p className="section-subtitle">Track the status of your submitted complaints</p>
+                <h2 className="section-title">
+                    {isOfficer ? 'My Accepted Cases' : 'My Complaints'}
+                </h2>
+                <p className="section-subtitle">
+                    {isOfficer 
+                        ? 'Manage and track complaints you have accepted' 
+                        : 'Track the status of your submitted complaints'}
+                </p>
             </div>
 
             {/* Initial Loading State */}
@@ -557,8 +566,12 @@ function MyComplaints() {
                 /* Empty State - No complaints at all */
                 <div className="my-complaints-empty-state">
                     <div className="empty-icon">📋</div>
-                    <h3>No Complaints Yet</h3>
-                    <p>You haven't submitted any complaints yet. Start by creating one!</p>
+                    <h3>{isOfficer ? 'No Accepted Cases' : 'No Complaints Yet'}</h3>
+                    <p>
+                        {isOfficer 
+                            ? 'You haven\'t accepted any complaints yet. Check nearby complaints to get started!' 
+                            : 'You haven\'t submitted any complaints yet. Start by creating one!'}
+                    </p>
                 </div>
             ) : (
                 /* Main Content - Complaints List */
@@ -620,7 +633,7 @@ function MyComplaints() {
                         {/* Results Summary */}
                         <div className="results-summary">
                             <span className="results-count">
-                                Showing {currentlyLoaded} of {totalAvailable} complaints
+                                Showing {currentlyLoaded} of {totalAvailable} {isOfficer ? 'cases' : 'complaints'}
                                 {selectedCategory !== 'all' && (
                                     <span className="category-indicator">
                                         {' '}in {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
@@ -856,7 +869,7 @@ function MyComplaints() {
                 {/* End of list indicator */}
                 {!hasNextPage && displayComplaints.length > 0 && (
                     <div className="my-complaints-end-of-list">
-                        <p>You've reached the end of your complaints</p>
+                        <p>You've reached the end of your {isOfficer ? 'accepted cases' : 'complaints'}</p>
                     </div>
                 )}
             </div>
