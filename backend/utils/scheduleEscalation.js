@@ -56,5 +56,5 @@ export const scheduleEscalation = async (complaint) => {
     escalation.escalationJobId = job.id;
     await escalation.save();
     
-    console.log(`Scheduled escalation job ${job.id} for complaint ${complaint._id} (level ${level} -> ${rules.next}) starting from ${escalation.currentLevelStartedAt}`);
+    console.log(`Scheduled escalation job ${job.id} for complaint ${complaint._id} (level ${level} -> ${rules.next})`);
 }

@@ -12,8 +12,8 @@ dotenv.config();
 // Connect to MongoDB
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("MongoDB connected for complaint worker");
+        await mongoose.connect(`${process.env.MONGODB_URI}/lodge`);
+        console.log("MongoDB connected for complaint worker to database: lodge");
     } catch (error) {
         console.error("MongoDB connection error:", error);
         process.exit(1);
@@ -25,7 +25,6 @@ await connectDB();
 const worker = new Worker(
     "complaint-queue",
     async (job) => {
-        console.log("Running scheduled escalation for complaint:", job.data);
         
         const { complaintId, escalationId, severity, level } = job.data;
 
@@ -34,14 +33,12 @@ const worker = new Worker(
             const complaint = await Complaint.findById(complaintId);
             
             if (!complaint) {
-                console.error(`Complaint ${complaintId} not found`);
+                console.error(`Complaint ${complaintId} not found in database`);
                 return;
             }
 
             // Check if complaint is resolved or rejected - don't escalate
             if (complaint.status === "resolved" || complaint.status === "rejected") {
-                console.log(`Complaint ${complaintId} is ${complaint.status}, skipping escalation`);
-                
                 // Clear the job ID from escalation
                 const escalation = await mongoose.model("escalation").findById(escalationId);
                 if (escalation) {
@@ -68,8 +65,6 @@ const worker = new Worker(
 
             // Check if we should close the complaint
             if (rules.next === "close") {
-                console.log(`Closing complaint ${complaintId} - reached final escalation level`);
-                
                 // Add final escalation event to history
                 escalation.history.push({
                     from_level: level,
@@ -87,7 +82,6 @@ const worker = new Worker(
 
             // Escalate to next level
             const nextLevel = rules.next;
-            console.log(`Escalating complaint ${complaintId} from level ${level} to level ${nextLevel}`);
             
             // Add escalation event to history
             escalation.history.push({
@@ -107,8 +101,6 @@ const worker = new Worker(
 
             // Schedule next escalation
             await scheduleEscalation(complaint);
-            
-            console.log(`Successfully escalated complaint ${complaintId} to level ${nextLevel}`);
 
             // Emit socket event for escalated complaint (timer expired)
             try {
@@ -116,7 +108,6 @@ const worker = new Worker(
                 const populatedComplaint = await Complaint.findById(complaintId)
                     .populate("user_id", "name email profileImage")
                     .populate("evidence_ids")
-                    .populate("assigned_officer_id", "name email profileImage")
                     .lean();
 
                 // Add train data if it's a rail complaint
@@ -141,7 +132,7 @@ const worker = new Worker(
                 io.emit("newComplaint", enrichedComplaint);
                 
                 // Emit specific event for officers with escalation info
-                io.emit("newComplaintForOfficer", {
+                const officerEventData = {
                     complaint: enrichedComplaint,
                     location: enrichedComplaint.location,
                     severity: enrichedComplaint.severity,
@@ -150,15 +141,15 @@ const worker = new Worker(
                     escalated: true,
                     previousLevel: level,
                     timestamp: new Date()
-                });
-
-                console.log(`Socket events emitted for escalated complaint ${complaintId} (level ${level} -> ${nextLevel})`);
+                };
+                
+                io.emit("newComplaintForOfficer", officerEventData);
             } catch (socketError) {
                 console.error("Error emitting socket events for escalated complaint:", socketError);
                 // Don't fail the escalation if socket emit fails
             }
         } catch (error) {
-            console.error(`Error processing escalation for complaint ${complaintId}:`, error);
+            console.error("Error processing escalation:", error);
             throw error;
         }
     },
@@ -172,9 +163,21 @@ const worker = new Worker(
 )
 
 worker.on("completed", (job) => {
-    console.log(`Job completed: ${job.id}`);
+    console.log("\n");
+    console.log("✅".repeat(40));
+    console.log(`✅ BullMQ Job COMPLETED: ${job.id}`);
+    console.log(`✅ Complaint: ${job.data.complaintId}`);
+    console.log(`✅ Completed at: ${new Date().toISOString()}`);
+    console.log("✅".repeat(40));
+    console.log("\n");
 })
 
 worker.on("failed", (job, err) => {
-    console.error(`Job failed: ${job.id}`, err);
+    console.log("\n");
+    console.error("❌".repeat(40));
+    console.error(`❌ BullMQ Job FAILED: ${job?.id}`);
+    console.error(`❌ Complaint: ${job?.data?.complaintId}`);
+    console.error(`❌ Error:`, err);
+    console.error("❌".repeat(40));
+    console.error("\n");
 })

@@ -13,7 +13,8 @@ export const escalationTimes = {
   },
 
   high: {
-    1: { next: 2, delay: 2 * 3600 * 1000 },      // 1 → 2
+    // 1: { next: 2, delay: 2 * 3600 * 1000 },      // 1 → 2
+    1: { next: 2, delay: 60 * 1000 },      // 1 → 2
     2: { next: 3, delay: 12 * 3600 * 1000 },     // 2 → 3
     3: { next: 4, delay: 20 * 3600 * 1000 },     // 3 → 4
     4: { next: 5, delay: 24 * 3600 * 1000 },     // 4 → 5
