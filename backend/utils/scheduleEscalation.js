@@ -58,3 +58,40 @@ export const scheduleEscalation = async (complaint) => {
     
     console.log(`Scheduled escalation job ${job.id} for complaint ${complaint._id} (level ${level} -> ${rules.next})`);
 }
+
+/**
+ * Cancel/remove escalation job for a complaint
+ * This should be called when complaint is resolved, rejected, or no longer needs escalation
+ */
+export const cancelEscalation = async (complaintId) => {
+    try {
+        const escalation = await Escalation.findOne({ complaint: complaintId });
+        
+        if (!escalation) {
+            console.log(`No escalation record found for complaint ${complaintId}`);
+            return { success: false, message: 'No escalation found' };
+        }
+
+        if (escalation.escalationJobId) {
+            try {
+                await complaintQueue.remove(escalation.escalationJobId);
+                console.log(`✅ Cancelled escalation job ${escalation.escalationJobId} for complaint ${complaintId}`);
+                
+                // Clear the job ID from escalation record
+                escalation.escalationJobId = null;
+                await escalation.save();
+                
+                return { success: true, message: 'Escalation cancelled successfully' };
+            } catch (error) {
+                console.error(`Error removing escalation job ${escalation.escalationJobId}:`, error);
+                return { success: false, message: error.message };
+            }
+        } else {
+            console.log(`No active escalation job for complaint ${complaintId}`);
+            return { success: false, message: 'No active escalation job' };
+        }
+    } catch (error) {
+        console.error(`Error cancelling escalation for complaint ${complaintId}:`, error);
+        return { success: false, message: error.message };
+    }
+}
