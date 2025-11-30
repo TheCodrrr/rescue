@@ -5,7 +5,7 @@ import { getTrainByNumber } from "../services/rail.service.js";
 import redisClient from "../../utils/redisClient.js";
 import { User } from "../models/user.models.js";
 import { Escalation } from "../models/escalation.models.js";
-import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
+import { scheduleEscalation, cancelEscalation } from "../../utils/scheduleEscalation.js";
 import { createNotification } from "./user.controllers.js";
 import { io } from "../server.js";
 
@@ -16,18 +16,22 @@ import { io } from "../server.js";
  */
 
 /**
- * Add a complaint to officer's rejected list in Redis
+ * Add a complaint to officer's rejected list in Redis and store rejection data
  * 
  * @route POST /api/v1/officer/reject-complaint
  * @access Protected (requires authentication)
- * @body { complaintId: string }
+ * @body { complaintId: string, reason: string }
  */
 const rejectComplaint = asyncHandler(async (req, res) => {
-    const { complaintId } = req.body;
+    const { complaintId, reason } = req.body;
     const officerId = req.user._id.toString();
 
     if (!complaintId) {
         throw new ApiError(400, "Complaint ID is required");
+    }
+
+    if (!reason || reason.trim() === '') {
+        throw new ApiError(400, "Rejection reason is required");
     }
 
     // Verify complaint exists
@@ -36,7 +40,52 @@ const rejectComplaint = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Complaint not found");
     }
 
+    // Check if officer already rejected this complaint
+    const alreadyRejected = complaint.rejections.some(
+        rejection => rejection.officer_id.toString() === officerId
+    );
+
+    if (alreadyRejected) {
+        throw new ApiError(400, "You have already rejected this complaint");
+    }
+
     try {
+        // Add rejection data to complaint schema
+        complaint.rejections.push({
+            officer_id: officerId,
+            reason: reason.trim(),
+            rejected_at: new Date()
+        });
+
+        // Check if 3 or more distinct officers have rejected this complaint
+        const distinctOfficerRejections = new Set(
+            complaint.rejections.map(rejection => rejection.officer_id.toString())
+        );
+
+        let statusChanged = false;
+        if (distinctOfficerRejections.size >= 3 && complaint.status === 'pending') {
+            // Change status to rejected if 3 or more distinct officers rejected it
+            complaint.status = 'rejected';
+            complaint.active = false; // Also mark as inactive so it doesn't appear in queries
+            statusChanged = true;
+            console.log(`Complaint ${complaintId} status changed to 'rejected' after ${distinctOfficerRejections.size} officer rejections`);
+            
+            // Cancel the escalation job for this complaint
+            try {
+                const cancelResult = await cancelEscalation(complaintId);
+                if (cancelResult.success) {
+                    console.log(`✅ Escalation timer cancelled for rejected complaint ${complaintId}`);
+                } else {
+                    console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
+                }
+            } catch (escalationError) {
+                console.error(`Error cancelling escalation for complaint ${complaintId}:`, escalationError);
+                // Continue even if escalation cancellation fails
+            }
+        }
+
+        await complaint.save();
+
         // Redis key for this officer's rejected complaints
         const redisKey = `officer:${officerId}:rejected_complaints`;
         
@@ -46,12 +95,50 @@ const rejectComplaint = asyncHandler(async (req, res) => {
         // Set expiry to 2 hours (matching complaint fetch time window)
         await redisClient.expire(redisKey, 2 * 60 * 60);
 
+        // Get officer details for notification
+        const officer = await User.findById(officerId).select('name');
+
+        // If status changed to rejected, notify the complaint owner
+        if (statusChanged) {
+            try {
+                const userId = complaint.user_id.toString();
+                
+                const notificationData = {
+                    type: "complaint_rejected",
+                    complaint_id: complaintId,
+                    complaint_title: complaint.title,
+                    message: `Your complaint has been rejected by multiple officers`,
+                    rejection_count: distinctOfficerRejections.size,
+                    status: "rejected",
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+
+                await createNotification(userId, notificationData);
+                
+                // Emit real-time notification to the specific user
+                io.emit(`notification:${userId}`, notificationData);
+                console.log(`🔔 Rejection notification sent to user ${userId}`);
+            } catch (notificationError) {
+                console.error("⚠️ Failed to send rejection notification:", notificationError);
+                // Continue even if notification fails
+            }
+        }
+
         res.status(200).json({
             success: true,
-            message: "Complaint rejected successfully",
+            message: statusChanged 
+                ? "Complaint rejected by multiple officers and status updated" 
+                : "Complaint rejected successfully",
             data: {
                 complaint_id: complaintId,
-                officer_id: officerId
+                officer_id: officerId,
+                officer_name: officer?.name || 'Officer',
+                reason: reason.trim(),
+                rejected_at: new Date(),
+                total_rejections: distinctOfficerRejections.size,
+                status_changed: statusChanged,
+                new_status: complaint.status
             }
         });
     } catch (error) {
@@ -303,9 +390,19 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
 
             await createNotification(userId, notificationData);
             
-            // Emit real-time notification to the specific user
+            // Emit real-time notification to the specific user (complaint owner)
             io.emit(`notification:${userId}`, notificationData);
             console.log(`🔔 Officer acceptance notification sent to user ${userId}`);
+            
+            // Emit real-time event to inform that complaint is now accepted (for other officers)
+            io.emit('complaintAccepted', {
+                complaint_id: complaintId,
+                officer_id: officerId,
+                officer_name: officer.name || "Officer",
+                timestamp: new Date().toISOString()
+            });
+            console.log(`🔔 Complaint accepted event broadcasted to all officers for complaint ${complaintId}`);
+            
         } catch (notificationError) {
             console.error("⚠️ Failed to send notification:", notificationError);
             // Continue even if notification fails - don't break the assignment
