@@ -54,10 +54,10 @@ export const fetchNearbyComplaints = createAsyncThunk(
   }
 );
 
-// Thunk to reject/ignore a complaint
+// Thunk to reject a complaint with reason
 export const rejectComplaint = createAsyncThunk(
   'officer/rejectComplaint',
-  async (complaintId, thunkAPI) => {
+  async ({ complaintId, reason }, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
       
@@ -69,10 +69,15 @@ export const rejectComplaint = createAsyncThunk(
         return thunkAPI.rejectWithValue('Complaint ID is required');
       }
 
-      console.log(`Rejecting complaint: ${complaintId}`);
+      if (!reason || reason.trim() === '') {
+        return thunkAPI.rejectWithValue('Rejection reason is required');
+      }
+
+      console.log(`Rejecting complaint: ${complaintId} with reason: ${reason}`);
       
       const response = await axiosInstance.post('/officer/reject-complaint', {
-        complaintId
+        complaintId,
+        reason: reason.trim()
       });
 
       console.log("Reject complaint API response:", response.data);
@@ -214,6 +219,29 @@ const officerSlice = createSlice({
         
         state.totalComplaints++;
       }
+    },
+    removeComplaintRealtime: (state, action) => {
+      // Remove complaint when it's accepted by another officer
+      const complaintId = action.payload;
+      
+      // Remove from all severity levels
+      state.nearbyComplaints.low_severity.complaints = 
+        state.nearbyComplaints.low_severity.complaints.filter(c => c._id !== complaintId);
+      state.nearbyComplaints.medium_severity.complaints = 
+        state.nearbyComplaints.medium_severity.complaints.filter(c => c._id !== complaintId);
+      state.nearbyComplaints.high_severity.complaints = 
+        state.nearbyComplaints.high_severity.complaints.filter(c => c._id !== complaintId);
+      
+      // Update counts
+      state.nearbyComplaints.low_severity.count = state.nearbyComplaints.low_severity.complaints.length;
+      state.nearbyComplaints.medium_severity.count = state.nearbyComplaints.medium_severity.complaints.length;
+      state.nearbyComplaints.high_severity.count = state.nearbyComplaints.high_severity.complaints.length;
+      
+      // Update total count
+      state.totalComplaints = 
+        state.nearbyComplaints.low_severity.complaints.length +
+        state.nearbyComplaints.medium_severity.complaints.length +
+        state.nearbyComplaints.high_severity.complaints.length;
     }
   },
   extraReducers: (builder) => {
@@ -319,6 +347,6 @@ const officerSlice = createSlice({
   },
 });
 
-export const { clearOfficerError, updateOfficerLocation, addNewComplaintRealtime } = officerSlice.actions;
+export const { clearOfficerError, updateOfficerLocation, addNewComplaintRealtime, removeComplaintRealtime } = officerSlice.actions;
 
 export default officerSlice.reducer;
