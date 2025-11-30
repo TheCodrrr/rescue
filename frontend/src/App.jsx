@@ -120,7 +120,7 @@ function App() {
               </RoleProtectedRoute>
             } />
             <Route path="/complaint/:id" element={
-              <RoleProtectedRoute allowedRoles={['citizen', 'officer']}>
+              <RoleProtectedRoute allowedRoles={['citizen', 'officer', 'admin']}>
                 <ComplaintDetail />
               </RoleProtectedRoute>
             } />
