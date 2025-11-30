@@ -7,7 +7,7 @@ import { calculateTrendingScore } from "../../utils/trendingScore.js";
 // import { Department } from "../models/department.models.js";
 import { io } from "../server.js";
 import { History } from "../models/history.models.js";
-import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
+import { scheduleEscalation, cancelEscalation } from "../../utils/scheduleEscalation.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -476,7 +476,24 @@ const updateComplaintStatus = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Complaint not found");
     }
 
+    const oldStatus = complaint.status;
     complaint.status = status;
+    
+    // Cancel escalation if complaint is being resolved or rejected
+    if ((status === 'resolved' || status === 'rejected') && oldStatus !== status) {
+        try {
+            const cancelResult = await cancelEscalation(complaintId);
+            if (cancelResult.success) {
+                console.log(`✅ Escalation timer cancelled for ${status} complaint ${complaintId}`);
+            } else {
+                console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
+            }
+        } catch (escalationError) {
+            console.error(`Error cancelling escalation for complaint ${complaintId}:`, escalationError);
+            // Continue even if escalation cancellation fails
+        }
+    }
+    
     await complaint.save();
 
     res.status(200).json({
