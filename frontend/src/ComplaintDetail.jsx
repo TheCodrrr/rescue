@@ -108,20 +108,20 @@ export default function ComplaintDetail() {
     const [deleteInProgress, setDeleteInProgress] = useState(false);
     const [assignmentInProgress, setAssignmentInProgress] = useState(false);
     const [complaintIgnored, setComplaintIgnored] = useState(false);
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
     const socketRef = useRef(null);
 
-    // Socket.io connection for real-time notifications (when viewing complaint as owner)
+    // Socket.io connection for real-time notifications (when viewing complaint as owner or as officer)
     useEffect(() => {
-        // Only setup socket if user is authenticated and is the complaint owner
-        if (!user || !selectedComplaint || selectedComplaint.user_id?._id !== user._id) {
+        // Setup socket if user is authenticated
+        if (!user) {
             return;
         }
 
         const socketURL = import.meta.env.VITE_SOCKET_URL || 
                           import.meta.env.REACT_APP_SOCKET_URL || 
                           'http://localhost:5000';
-
-        console.log("🔌 ComplaintDetail connecting to socket for user:", user._id);
 
         socketRef.current = io(socketURL, {
             reconnection: true,
@@ -130,25 +130,9 @@ export default function ComplaintDetail() {
             reconnectionDelay: 1000,
         });
 
-        socketRef.current.on('connect', () => {
-            console.log('✅ ComplaintDetail socket connected:', socketRef.current.id);
-        });
-
-        socketRef.current.on('disconnect', (reason) => {
-            console.log('❌ ComplaintDetail socket disconnected:', reason);
-        });
-
-        socketRef.current.on('connect_error', (error) => {
-            console.error('🔴 ComplaintDetail socket connection error:', error);
-        });
-
-        // Listen for notifications specific to this user
+        // Listen for notifications specific to this user (if owner)
         const notificationEvent = `notification:${user._id}`;
-        console.log('👂 ComplaintDetail listening for notifications on event:', notificationEvent);
-
         socketRef.current.on(notificationEvent, (notificationData) => {
-            console.log('🔔 ComplaintDetail received real-time notification:', notificationData);
-            
             // Show toast notification if it's related to the current complaint
             if (notificationData.complaint_id === id) {
                 toast.success(
@@ -176,15 +160,44 @@ export default function ComplaintDetail() {
             }
         });
 
+        // Listen for complaint acceptance (for both officers and complaint owner)
+        socketRef.current.on('complaintAccepted', (data) => {
+            const { complaint_id, officer_id, officer_name } = data;
+            
+            console.log('ComplaintDetail received complaintAccepted:', complaint_id, 'current:', id);
+            
+            // If this is the current complaint, refresh the data
+            if (complaint_id === id) {
+                console.log('Match! Refreshing complaint data...');
+                
+                // Show appropriate toast
+                if (user.role === 'officer' && officer_id !== user._id) {
+                    toast(`This complaint was accepted by ${officer_name}`, {
+                        duration: 4000,
+                        icon: 'ℹ️',
+                    });
+                } else if (user.role !== 'officer') {
+                    toast.success(`Your complaint was accepted by ${officer_name}`, {
+                        duration: 4000,
+                    });
+                }
+                
+                // Refresh complaint to update UI immediately
+                dispatch(fetchComplaintById(id)).then(() => {
+                    console.log('Complaint data refreshed successfully');
+                });
+            }
+        });
+
         // Cleanup on unmount
         return () => {
             if (socketRef.current) {
-                console.log('🔌 Disconnecting ComplaintDetail socket');
-                socketRef.current.off(notificationEvent);
+                socketRef.current.off(`notification:${user._id}`);
+                socketRef.current.off('complaintAccepted');
                 socketRef.current.disconnect();
             }
         };
-    }, [user, selectedComplaint, id, dispatch]);
+    }, [user, id, dispatch]);
 
     // Fetch complaint details on component mount
     useEffect(() => {
@@ -1047,7 +1060,7 @@ export default function ComplaintDetail() {
         }
     };
 
-    const handleIgnoreComplaint = async () => {
+    const handleIgnoreComplaint = () => {
         if (!isAuthenticated || user?.role !== 'officer') {
             toast.error('🔐 Only officers can ignore complaints', {
                 duration: 3000,
@@ -1056,12 +1069,44 @@ export default function ComplaintDetail() {
             return;
         }
 
+        // Just set the complaint as ignored locally - no backend action
+        setComplaintIgnored(true);
+        toast.success('Complaint ignored - it will remain visible to other officers', {
+            duration: 2000,
+            position: 'top-center',
+        });
+        console.log('Complaint ignored (no action taken):', id);
+    };
+
+    const handleRejectComplaint = () => {
+        if (!isAuthenticated || user?.role !== 'officer') {
+            toast.error('🔐 Only officers can reject complaints', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        // Open rejection modal
+        setRejectionReason('');
+        setRejectModalOpen(true);
+    };
+
+    const handleRejectSubmit = async () => {
+        if (!rejectionReason.trim()) {
+            toast.error('Please provide a reason for rejection');
+            return;
+        }
+
         try {
             // Show loading toast
             const loadingToast = toast.loading('Rejecting complaint...');
             
-            // Use Redux thunk to reject complaint
-            const result = await dispatch(rejectComplaint(id));
+            // Use Redux thunk to reject complaint with reason
+            const result = await dispatch(rejectComplaint({ 
+                complaintId: id, 
+                reason: rejectionReason 
+            }));
             
             // Dismiss loading toast
             toast.dismiss(loadingToast);
@@ -1073,7 +1118,9 @@ export default function ComplaintDetail() {
                     position: 'top-center',
                 });
                 
-                // Set the complaint as ignored to show disclaimer
+                // Close modal and set complaint as ignored
+                setRejectModalOpen(false);
+                setRejectionReason('');
                 setComplaintIgnored(true);
                 
                 console.log('✅ Complaint rejected:', id);
@@ -1087,6 +1134,11 @@ export default function ComplaintDetail() {
                 position: 'top-center',
             });
         }
+    };
+
+    const handleRejectCancel = () => {
+        setRejectModalOpen(false);
+        setRejectionReason('');
     };
 
     const openCommentModal = () => {
@@ -1265,8 +1317,26 @@ export default function ComplaintDetail() {
                         )}
                     </div>
 
-                    {/* Officer Assignment Section - Show Accept/Ignore buttons for officers on unassigned complaints */}
-                    {isAuthenticated && user?.role === 'officer' && !selectedComplaint.assigned_officer_id && (
+                    {/* Officer Assignment Section - Show Accept/Ignore/Reject buttons for officers on unassigned, active, pending complaints */}
+                    {(() => {
+                        const shouldShowButtons = isAuthenticated && 
+                            user?.role === 'officer' && 
+                            !selectedComplaint.assigned_officer_id && 
+                            selectedComplaint.active !== false &&
+                            selectedComplaint.status !== 'rejected' &&
+                            selectedComplaint.status !== 'resolved';
+                        
+                        console.log('Button visibility check:', {
+                            isAuthenticated,
+                            role: user?.role,
+                            assigned_officer_id: selectedComplaint.assigned_officer_id,
+                            active: selectedComplaint.active,
+                            status: selectedComplaint.status,
+                            shouldShowButtons
+                        });
+                        
+                        return shouldShowButtons;
+                    })() && (
                         <motion.div 
                             className="cd-officer-assignment-section"
                             initial={{ opacity: 0, y: -20 }}
@@ -1281,6 +1351,20 @@ export default function ComplaintDetail() {
                                     </div>
                                     <div className="cd-assignment-actions">
                                         <button
+                                            className="cd-ignore-btn"
+                                            onClick={handleIgnoreComplaint}
+                                            disabled={assignmentInProgress}
+                                        >
+                                            <FiArrowLeft /> Ignore
+                                        </button>
+                                        <button
+                                            className="cd-reject-btn"
+                                            onClick={handleRejectComplaint}
+                                            disabled={assignmentInProgress}
+                                        >
+                                            <FiAlertTriangle /> Reject
+                                        </button>
+                                        <button
                                             className="cd-accept-btn"
                                             onClick={handleAcceptComplaint}
                                             disabled={assignmentInProgress}
@@ -1292,13 +1376,6 @@ export default function ComplaintDetail() {
                                                     <FiCheckCircle /> Accept
                                                 </>
                                             )}
-                                        </button>
-                                        <button
-                                            className="cd-ignore-btn"
-                                            onClick={handleIgnoreComplaint}
-                                            disabled={assignmentInProgress}
-                                        >
-                                            <FiArrowLeft /> Ignore
                                         </button>
                                     </div>
                                 </>
@@ -1738,6 +1815,43 @@ export default function ComplaintDetail() {
                     },
                 }}
             />
+
+            {/* Rejection Modal */}
+            {rejectModalOpen && (
+                <div className="reject-modal-overlay" onClick={handleRejectCancel}>
+                    <div className="reject-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="reject-modal-header">
+                            <h2>Reject Complaint</h2>
+                            <button className="reject-modal-close" onClick={handleRejectCancel}>
+                                <FiAlertTriangle />
+                            </button>
+                        </div>
+                        <div className="reject-modal-body">
+                            <p>Please provide a reason for rejecting this complaint:</p>
+                            <textarea
+                                className="reject-modal-textarea"
+                                placeholder="Enter rejection reason..."
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                rows={4}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="reject-modal-footer">
+                            <button className="reject-modal-cancel-btn" onClick={handleRejectCancel}>
+                                Cancel
+                            </button>
+                            <button 
+                                className="reject-modal-submit-btn" 
+                                onClick={handleRejectSubmit}
+                                disabled={!rejectionReason.trim()}
+                            >
+                                Submit Rejection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
