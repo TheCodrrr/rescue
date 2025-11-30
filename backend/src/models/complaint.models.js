@@ -74,6 +74,23 @@ const complaintSchema = new mongoose.Schema({
             enum: ["upvote", "downvote"],
         }
     }],
+    rejections: [
+        {
+            officer_id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'user',
+                required: true,
+            },
+            reason: {
+                type: String,
+                required: true,
+            },
+            rejected_at: {
+                type: Date,
+                default: Date.now,
+            },
+        }
+    ],
     priority: {
         type: Number,
         min: 1,
