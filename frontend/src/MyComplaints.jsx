@@ -676,7 +676,37 @@ function MyComplaints() {
                     </div>
                 )}
 
+                <button
+                    className="btn-create-complaint-user-profile my-complaint-card"
+                    style={{
+                        width: '100%',
+                        height: '8rem',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        border: 'none',
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        color: '#fff',
+                        transition: 'all 0.3s ease'
+                    }}
+                    onClick={() => {
+                        window.location.href = '/complain';
+                    }}
+                >
+                    <svg 
+                        style={{ width: '2rem', height: '2rem', marginRight: '0.5rem' }} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create New Complaint
+                </button>
                 <div className="my-complaints-grid">
+
                         {filteredComplaints.map((complaint, index) => (
                             <div key={complaint._id || index} className="my-complaint-card">
                                 <div className="my-complaint-card-header">
