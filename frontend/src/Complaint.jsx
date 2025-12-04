@@ -626,9 +626,9 @@ export default function Complaint() {
             <div className="complaint-page">
                 <div className="complaint-container">
                     {/* Tab Navigation */}
-                    {/* <div className="tab-navigation">
+                    {/* <div className="complaint-tab-navigation">
                         <button 
-                            className={`tab-button ${activeTab === 'register' ? 'active' : ''}`}
+                            className={`complaint-tab-button ${activeTab === 'register' ? 'active' : ''}`}
                             onClick={() => handleTabChange('register')}
                         >
                             <svg className="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,7 +644,7 @@ export default function Complaint() {
                             <div className="section-header">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                                     <div>
-                                        <h2 className="section-title">Report an Incident</h2>
+                                        <h2 className="complaint-section-title">Report an Incident</h2>
                                         <p className="section-subtitle">Help us help you by providing detailed information about the incident</p>
                                     </div>
                                     {isAuthenticated && (
@@ -653,28 +653,28 @@ export default function Complaint() {
                                             onClick={() => navigate('/user?tab=my-complaint')}
                                             style={{
                                                 padding: '0.75rem 1.5rem',
-                                                backgroundColor: '#667eea',
-                                                color: 'white',
-                                                border: 'none',
+                                                background: 'linear-gradient(135deg, var(--color3), var(--color8))',
+                                                color: 'var(--color1)',
+                                                border: '2px solid var(--color6)',
                                                 borderRadius: '12px',
                                                 fontSize: '1rem',
-                                                fontWeight: '600',
+                                                fontWeight: '700',
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '0.5rem',
                                                 transition: 'all 0.3s ease',
-                                                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                                                boxShadow: '0 4px 12px color-mix(in srgb, var(--color3) 30%, transparent)',
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.target.style.backgroundColor = '#5568d3';
+                                                e.target.style.background = 'linear-gradient(135deg, var(--color8), var(--color3))';
                                                 e.target.style.transform = 'translateY(-2px)';
-                                                e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+                                                e.target.style.boxShadow = '0 6px 20px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 30%, transparent)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.target.style.backgroundColor = '#667eea';
+                                                e.target.style.background = 'linear-gradient(135deg, var(--color3), var(--color8))';
                                                 e.target.style.transform = 'translateY(0)';
-                                                e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                                                e.target.style.boxShadow = '0 4px 12px color-mix(in srgb, var(--color3) 30%, transparent)';
                                             }}
                                         >
                                             <svg 
@@ -791,9 +791,9 @@ export default function Complaint() {
                                         Severity Level
                                     </label>
                                     <div className="severity-container">
-                                        <div className="severity-options">
+                                        <div className="complaint-severity-options">
                                             {['low', 'medium', 'high'].map((severity) => (
-                                                <label key={severity} className={`severity-option severity-${severity} ${formData.severity === severity ? 'selected' : ''}`}>
+                                                <label key={severity} className={`complaint-severity-option severity-${severity} ${formData.severity === severity ? 'selected' : ''}`}>
                                                     <input
                                                         type="radio"
                                                         name="severity"
