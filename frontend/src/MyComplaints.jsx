@@ -506,7 +506,7 @@ function MyComplaints() {
         
         return parts.map((part, index) => 
             regex.test(part) ? (
-                <mark key={index} className="search-highlight">{part}</mark>
+                <mark key={index} className="my-complaints-search-highlight">{part}</mark>
             ) : part
         );
     };
@@ -517,9 +517,9 @@ function MyComplaints() {
     // Early returns for auth check
     if (!isAuthenticated) {
         return (
-            <div className="profile-card">
-                <div className="empty-state">
-                    <div className="empty-icon">🔐</div>
+            <div className="my-complaints-profile-card">
+                <div className="my-complaints-empty-state">
+                    <div className="my-complaints-empty-icon">🔐</div>
                     <h3>Authentication Required</h3>
                     <p>Please log in to view your complaints</p>
                 </div>
@@ -531,12 +531,12 @@ function MyComplaints() {
     const isOfficer = user?.role === 'officer';
 
     return (
-        <div className="profile-card">
-            <div className="section-header">
-                <h2 className="section-title">
+        <div className="my-complaints-profile-card">
+            <div className="my-complaints-section-header">
+                <h2 className="my-complaints-section-title">
                     {isOfficer ? 'My Accepted Cases' : 'My Complaints'}
                 </h2>
-                <p className="section-subtitle">
+                <p className="my-complaints-section-subtitle">
                     {isOfficer 
                         ? 'Manage and track complaints you have accepted' 
                         : 'Track the status of your submitted complaints'}
@@ -552,7 +552,7 @@ function MyComplaints() {
             ) : status === "error" ? (
                 /* Error State */
                 <div className="my-complaints-error-state">
-                    <div className="error-icon">⚠️</div>
+                    <div className="my-complaints-error-icon">⚠️</div>
                     <h3>Error Loading Complaints</h3>
                     <p>{error?.message || "Failed to load your complaints. Please try again."}</p>
                     <button 
@@ -565,7 +565,7 @@ function MyComplaints() {
             ) : (!isFetching && !showingPreviousData && (!data || !data.pages || data.pages.length === 0 || displayComplaints.length === 0)) ? (
                 /* Empty State - No complaints at all */
                 <div className="my-complaints-empty-state">
-                    <div className="empty-icon">📋</div>
+                    <div className="my-complaints-empty-icon">📋</div>
                     <h3>{isOfficer ? 'No Accepted Cases' : 'No Complaints Yet'}</h3>
                     <p>
                         {isOfficer 
@@ -580,23 +580,23 @@ function MyComplaints() {
                 
                 {/* Search and Filter Section */}
                 {displayComplaints.length > 0 && (
-                    <div className="search-filter-section">
-                        <div className="search-bar-container">
-                            <div className="search-input-wrapper">
-                                <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="my-complaints-search-filter-section">
+                        <div className="my-complaints-search-bar-container">
+                            <div className="my-complaints-search-input-wrapper">
+                                <svg className="my-complaints-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 <input
                                     ref={searchInputRef}
                                     type="text"
-                                    className="search-input"
+                                    className="my-complaints-search-input"
                                     placeholder="Search complaints by title or description..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                                 {searchQuery && (
                                     <button 
-                                        className="clear-search-btn"
+                                        className="my-complaints-clear-search-btn"
                                         onClick={() => {
                                             setSearchQuery('');
                                             setShowingPreviousData(false);
@@ -614,9 +614,9 @@ function MyComplaints() {
                                     </button>
                                 )}
                             </div>
-                            <div className="category-filter-wrapper">
+                            <div className="my-complaints-category-filter-wrapper">
                                 <select
-                                    className="category-filter"
+                                    className="my-complaints-category-filter"
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                 >
@@ -631,18 +631,18 @@ function MyComplaints() {
                         </div>
                         
                         {/* Results Summary */}
-                        <div className="results-summary">
-                            <span className="results-count">
+                        <div className="my-complaints-results-summary">
+                            <span className="my-complaints-results-count">
                                 Showing {currentlyLoaded} of {totalAvailable} {isOfficer ? 'cases' : 'complaints'}
                                 {selectedCategory !== 'all' && (
-                                    <span className="category-indicator">
+                                    <span className="my-complaints-category-indicator">
                                         {' '}in {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
                                     </span>
                                 )}
                             </span>
                             {(searchQuery || selectedCategory !== 'all') && (
                                 <button 
-                                    className="clear-filters-btn"
+                                    className="my-complaints-clear-filters-btn"
                                     onClick={() => {
                                         setSearchQuery('');
                                         setSelectedCategory('all');
