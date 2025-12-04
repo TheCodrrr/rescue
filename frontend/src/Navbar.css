@@ -6,20 +6,20 @@
     right: 0;
     z-index: 1000;
     padding: 1rem 0;
-    background: rgba(30, 58, 138, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color18) 25%, transparent), color-mix(in srgb, var(--color13) 20%, transparent));
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-bottom: 2px solid color-mix(in srgb, var(--color3) 40%, transparent);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: slideDown 1s ease-out;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 25px color-mix(in srgb, var(--color3) 20%, transparent), 0 0 30px color-mix(in srgb, var(--color8) 10%, transparent);
 }
 
 .navbar-scrolled {
     padding: 0.5rem 0;
-    background: rgba(30, 58, 138, 0.25);
-    border-bottom: 1px solid rgba(59, 130, 246, 0.4);
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color18) 35%, transparent), color-mix(in srgb, var(--color13) 30%, transparent));
+    border-bottom: 2px solid color-mix(in srgb, var(--color3) 50%, transparent);
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--color3) 30%, transparent), 0 0 40px color-mix(in srgb, var(--color8) 15%, transparent);
 }
 
 /* Remove all scrolled-specific overrides to maintain consistency */
@@ -39,7 +39,7 @@
     align-items: center;
     gap: 1rem;
     padding-left: 1.5rem;
-    border-left: 1px solid rgba(59, 130, 246, 0.2);
+    border-left: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
     margin-left: 0.8rem;
 }
 
@@ -63,20 +63,20 @@
 .lodge-icon {
     width: 2rem;
     height: 2rem;
-    color: #ffffff;
+    color: var(--color3);
     transition: all 0.3s ease;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--color3) 50%, transparent));
 }
 
 .lodge-text {
     font-size: 2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 80%, #e0f2fe 100%);
+    background: linear-gradient(135deg, var(--color3), var(--color8), var(--color6));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: textGlow 2s ease-in-out infinite alternate;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 4px 15px color-mix(in srgb, var(--color3) 50%, transparent));
 }
 
 /* Desktop Navigation */
@@ -94,27 +94,27 @@
     gap: 0.6rem;
     padding: 0.8rem 1.6rem;
     text-decoration: none;
-    color: #ffffff;
-    font-weight: 600;
+    color: var(--color9);
+    font-weight: 700;
     border-radius: 50px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 25%, transparent), color-mix(in srgb, var(--color18) 20%, transparent));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid color-mix(in srgb, var(--color6) 30%, transparent);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
     transform: translateY(30px) scale(0.9);
     overflow: hidden;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 15%, transparent);
 }
 
 .navbar-link:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 15px 50px rgba(59, 130, 246, 0.3);
-    color: #e0f2fe;
+    transform: translateY(-4px) scale(1.08);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 35%, transparent), color-mix(in srgb, var(--color8) 30%, transparent));
+    border: 2px solid var(--color3);
+    box-shadow: 0 18px 60px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 40px color-mix(in srgb, var(--color8) 30%, transparent);
+    color: var(--color1);
 }
 
 .navbar-link-icon {
@@ -127,8 +127,8 @@
 
 .navbar-link:hover .navbar-link-icon {
     transform: rotate(15deg) scale(1.3);
-    color: #e0f2fe;
-    filter: drop-shadow(0 0 8px rgba(224, 242, 254, 0.6));
+    color: var(--color1);
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--color3) 70%, transparent));
 }
 
 .navbar-link-text {
@@ -142,7 +142,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color3) 40%, transparent), transparent);
     transition: left 0.6s ease;
     border-radius: 50px;
 }
@@ -172,10 +172,10 @@
 .hamburger span {
     width: 2rem;
     height: 0.2rem;
-    background: linear-gradient(135deg, #ffffff, #e0f2fe);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     border-radius: 1rem;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .hamburger-active span:nth-child(1) {
@@ -197,9 +197,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(30, 58, 138, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color18) 95%, transparent), color-mix(in srgb, var(--color13) 92%, transparent));
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     transform: translateX(-100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
@@ -225,26 +225,27 @@
     gap: 1rem;
     padding: 1.2rem 2.5rem;
     text-decoration: none;
-    color: #ffffff;
-    font-weight: 600;
+    color: var(--color9);
+    font-weight: 700;
     font-size: 1.5rem;
     border-radius: 50px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 30%, transparent), color-mix(in srgb, var(--color18) 25%, transparent));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     transition: all 0.4s ease;
     animation: slideInFromLeft 0.6s ease-out forwards;
     opacity: 0;
     transform: translateX(-50px) scale(0.9);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .mobile-menu-link:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05) translateX(0);
-    color: #e0f2fe;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 40%, transparent), color-mix(in srgb, var(--color8) 35%, transparent));
+    transform: scale(1.08) translateX(0);
+    color: var(--color1);
+    border-color: var(--color3);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 35px color-mix(in srgb, var(--color8) 30%, transparent);
 }
 
 .mobile-menu-link-icon {
@@ -256,7 +257,8 @@
 
 .mobile-menu-link:hover .mobile-menu-link-icon {
     transform: rotate(15deg) scale(1.2);
-    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+    color: var(--color1);
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--color3) 60%, transparent));
 }
 
 /* Authentication Buttons */
@@ -291,7 +293,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color3) 30%, transparent), transparent);
     transition: left 0.5s ease;
 }
 
@@ -300,49 +302,50 @@
 }
 
 .login-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    color: #ffffff;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 25%, transparent), color-mix(in srgb, var(--color15) 20%, transparent));
+    border: 2px solid color-mix(in srgb, var(--color6) 40%, transparent);
+    color: var(--color13);
     animation-delay: 0.6s;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .login-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
-    color: #e0f2fe;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 40%, transparent), color-mix(in srgb, var(--color9) 35%, transparent));
+    border: 2px solid var(--color3);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--color3) 35%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 25%, transparent);
+    color: var(--color3);
 }
 
 .signup-btn {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border: 2px solid transparent;
-    color: white;
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    border: 2px solid var(--color3);
+    color: var(--color1);
     animation-delay: 0.7s;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 6px 25px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .signup-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8, #1e40af);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, var(--color6), var(--color3));
+    border-color: var(--color6);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 35px color-mix(in srgb, var(--color3) 50%, transparent), 0 0 30px color-mix(in srgb, var(--color8) 35%, transparent);
 }
 
 .signout-btn {
-    background: rgba(239, 68, 68, 0.15);
-    border: 2px solid rgba(239, 68, 68, 0.4);
-    color: #ffffff;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 30%, transparent), color-mix(in srgb, var(--color18) 25%, transparent));
+    border: 2px solid color-mix(in srgb, var(--color3) 35%, transparent);
+    color: var(--color9);
     animation-delay: 0.6s;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color13) 25%, transparent);
 }
 
 .signout-btn:hover {
-    background: rgba(239, 68, 68, 0.3);
-    border: 2px solid rgba(239, 68, 68, 0.6);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
-    color: #fef2f2;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color18) 50%, transparent), color-mix(in srgb, var(--color13) 45%, transparent));
+    border: 2px solid var(--color3);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--color3) 30%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 20%, transparent);
+    color: var(--color6);
 }
 
 .auth-btn-icon {
@@ -358,31 +361,32 @@
 /* Profile Button */
 .profile-btn {
     position: relative;
+
     width: 3.2rem;
     height: 3.2rem;
     border: none;
     border-radius: 50%;
     padding: 0;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.15);
-    border: 3px solid rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 25%, transparent), color-mix(in srgb, var(--color18) 20%, transparent));
+    border: 3px solid color-mix(in srgb, var(--color3) 50%, transparent);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: slideInFromRight 0.8s ease-out forwards;
     opacity: 0;
     transform: translateX(30px);
     animation-delay: 0.8s;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    /* overflow: hidden; */
+    box-shadow: 0 6px 25px color-mix(in srgb, var(--color3) 30%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .profile-btn:hover {
-    border: 3px solid rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+    border: 3px solid var(--color3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 30%, transparent), color-mix(in srgb, var(--color8) 25%, transparent));
+    transform: translateY(-4px) scale(1.08);
+    box-shadow: 0 10px 35px color-mix(in srgb, var(--color3) 45%, transparent), 0 0 30px color-mix(in srgb, var(--color8) 30%, transparent);
 }
 
 .profile-avatar {
@@ -405,9 +409,10 @@
     right: 2px;
     width: 0.8rem;
     height: 0.8rem;
-    background: #10b981;
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     border-radius: 50%;
-    border: 2px solid white;
+    border: 2px solid var(--color9);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color3) 60%, transparent);
     animation: pulse 2s ease-in-out infinite;
 }
 
@@ -455,12 +460,10 @@
 
 @keyframes textGlow {
     from {
-        filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4));
-        text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        filter: drop-shadow(0 0 15px color-mix(in srgb, var(--color3) 50%, transparent));
     }
     to {
-        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
-        text-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+        filter: drop-shadow(0 0 25px color-mix(in srgb, var(--color3) 80%, transparent));
     }
 }
 
