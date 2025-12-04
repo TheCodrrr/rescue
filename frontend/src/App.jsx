@@ -16,6 +16,8 @@ import ComplaintDetail from './ComplaintDetail.jsx'
 import Help from './Help.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+import './constants.css'
+
 // Officer components
 import OfficerComplaint from './officer/OfficerComplaint'
 import OfficerQueue from './officer/OfficerQueue'
