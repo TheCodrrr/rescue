@@ -642,8 +642,53 @@ export default function Complaint() {
                     {/* {activeTab === 'register' && ( */}
                         <div className="tab-content">
                             <div className="section-header">
-                                <h2 className="section-title">Report an Incident</h2>
-                                <p className="section-subtitle">Help us help you by providing detailed information about the incident</p>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <div>
+                                        <h2 className="section-title">Report an Incident</h2>
+                                        <p className="section-subtitle">Help us help you by providing detailed information about the incident</p>
+                                    </div>
+                                    {isAuthenticated && (
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate('/user?tab=my-complaint')}
+                                            style={{
+                                                padding: '0.75rem 1.5rem',
+                                                backgroundColor: '#667eea',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '12px',
+                                                fontSize: '1rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                transition: 'all 0.3s ease',
+                                                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.backgroundColor = '#5568d3';
+                                                e.target.style.transform = 'translateY(-2px)';
+                                                e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.backgroundColor = '#667eea';
+                                                e.target.style.transform = 'translateY(0)';
+                                                e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                                            }}
+                                        >
+                                            <svg 
+                                                style={{ width: '1.25rem', height: '1.25rem' }} 
+                                                fill="none" 
+                                                stroke="currentColor" 
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                            </svg>
+                                            {user?.role === 'officer' ? 'My Accepted Cases' : 'My Complaints'}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <form onSubmit={handleSubmit} className="complaint-form">
