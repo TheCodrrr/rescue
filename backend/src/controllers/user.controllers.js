@@ -314,7 +314,7 @@ const updateUserProfileImage = asyncHandler( async (req, res) => {
         req.user?._id,
         {
             $set: {
-                profile_image: profileImage.url
+                profileImage: profileImage.url
             }
         },
         {new: true}
