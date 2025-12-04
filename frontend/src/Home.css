@@ -21,7 +21,8 @@ html, body {
 .home-page {
     min-height: 100vh !important; /* Allow page to grow beyond viewport */
     height: auto !important; /* Force auto height */
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    /* background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%); */
+    background: linear-gradient(135deg, var(--color12) 0%, var(--color18) 25%, var(--color13) 50%, var(--color2) 100%);
     position: relative;
     overflow-x: hidden; /* Only hide horizontal overflow */
     padding-top: 5rem; /* Add padding to account for fixed navbar */
@@ -85,11 +86,11 @@ html, body {
     font-weight: 900;
     margin-bottom: 1.5rem;
     animation: slideInFromBottom 1s ease-out 0.3s both;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
+    background: linear-gradient(135deg, var(--color9) 0%, var(--color6) 30%, var(--color3) 70%, var(--color8) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 30px var(--color3);
     line-height: 1.1;
 }
 
@@ -99,56 +100,72 @@ html, body {
     opacity: 0.95;
     margin-bottom: 3rem;
     animation: slideInFromBottom 1s ease-out 0.6s both;
-    color: #e0f2fe;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    color: var(--color9);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     line-height: 1.6;
 }
 
 .report-incident-btn {
-    display: inline-flex;
-    align-items: center;
+    display: flex;
     justify-content: center;
-    gap: 0.8rem;
-    padding: 1.2rem 2.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    align-items: center;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInFromBottom 1s ease-out 0.9s both;
+    margin: auto;
     position: relative;
+    padding: 10px 24px;
+    font-size: 1.4rem;
+    /* color: rgb(193, 163, 98);
+    border: 2px solid rgb(193, 163, 98); */
+    color: var(--color3);
+    border: 3px solid var(--color3);
+    background-color: transparent;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
     overflow: hidden;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.report-incident-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 100px;
+    height: 50px;
+    scale: 0;
+    z-index: -1;
+    /* background-color: rgb(193, 163, 98); */
+    background-color: var(--color13);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.report-incident-btn:hover::before {
+    scale: 3;
 }
 
 .report-incident-btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 255, 255, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+    color: var(--color9);
+    scale: 1.1;
+    box-shadow: 0 0px 30px var(--color3), 0 0px 60px var(--color8);
+    text-shadow: 0 0 4px var(--color1);
+    filter: drop-shadow(0 0 8px var(--color6));
 }
 
 .report-incident-btn:active {
-    transform: translateY(-1px) scale(1.02);
+    scale: 1;
 }
 
 .btn-icon {
     width: 1.4rem;
     height: 1.4rem;
+    margin-right: 4px;
     transition: all 0.3s ease;
 }
 
 .report-incident-btn:hover .btn-icon {
     transform: rotate(15deg) scale(1.2);
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
+    /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); */
+    filter: drop-shadow(0 0 10px var(--color6));
+    color: var(--color9);
 }
 
 .btn-glow {
@@ -157,9 +174,8 @@ html, body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(90deg, transparent, var(--color6), transparent);
     transition: left 0.6s ease;
-    border-radius: 50px;
 }
 
 .report-incident-btn:hover .btn-glow {
@@ -183,11 +199,11 @@ html, body {
 
 .floating-element {
     position: absolute;
-    background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
+    background: color-mix(in srgb, var(--color3) 10%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid color-mix(in srgb, var(--color7) 30%, transparent);
 }
 
 .element-1 {
@@ -222,30 +238,6 @@ html, body {
     right: 25%;
     animation: float 9s ease-in-out infinite reverse;
     animation-delay: -4s;
-}
-
-.content-section {
-    padding: 5rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.content-section h2 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.content-section p {
-    font-size: 1.2rem;
-    color: #666;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 /* Animations */
@@ -309,14 +301,6 @@ html, body {
         display: none;
     }
 
-    .content-section {
-        padding: 3rem 1rem;
-    }
-
-    .content-section h2 {
-        font-size: 2rem;
-    }
-
     .map-glass {
         padding: 1.5rem;
         max-width: 98vw; /* Increased from 95vw */
@@ -362,10 +346,6 @@ html, body {
         height: 1.2rem;
     }
 
-    .content-section h2 {
-        font-size: 1.8rem;
-    }
-
     .hero-content {
         padding: 0 0.5rem;
     }
@@ -382,12 +362,11 @@ html, body {
 
 .map-container {
     flex: 1;
-    background: rgba(30, 58, 138, 0.15);
-    border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1.5px solid rgba(59, 130, 246, 0.18);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--color13) 25%, transparent), color-mix(in srgb, var(--color18) 30%, transparent));
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--color8) 30%, transparent), inset 0 1px 2px color-mix(in srgb, var(--color6) 15%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid color-mix(in srgb, var(--color8) 35%, transparent);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -396,12 +375,11 @@ html, body {
 
 .complaint-sidebar {
     width: 400px;
-    background: rgba(30, 58, 138, 0.15);
-    border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1.5px solid rgba(59, 130, 246, 0.18);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--color9) 15%, transparent), color-mix(in srgb, var(--color13) 20%, transparent));
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--color6) 25%, transparent), inset 0 1px 2px color-mix(in srgb, var(--color9) 20%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid color-mix(in srgb, var(--color6) 40%, transparent);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -409,18 +387,19 @@ html, body {
 }
 
 .complaint-sidebar h3 {
-    color: white;
+    color: var(--color9);
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0 0 1rem 0;
     text-align: center;
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 50%, transparent);
 }
 
 .complaints-list {
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scrollbar-color: var(--color7) transparent;
 }
 
 .complaints-list::-webkit-scrollbar {
@@ -432,27 +411,28 @@ html, body {
 }
 
 .complaints-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+    background: linear-gradient(180deg, var(--color3), var(--color8));
+    border-radius: 10px;
 }
 
 .complaints-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: linear-gradient(180deg, var(--color8), var(--color3));
 }
 
 .complaint-item {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 12%, transparent), color-mix(in srgb, var(--color15) 10%, transparent));
     padding: 1rem;
     margin-bottom: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    border: 1.5px solid color-mix(in srgb, var(--color6) 35%, transparent);
     transition: all 0.3s ease;
 }
 
 .complaint-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 25%, transparent), color-mix(in srgb, var(--color3) 20%, transparent));
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 35%, transparent), 0 0 15px color-mix(in srgb, var(--color8) 20%, transparent);
+    border-color: var(--color3);
 }
 
 .complaint-header {
@@ -468,16 +448,17 @@ html, body {
     gap: 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: white;
+    color: var(--color3);
 }
 
 .complaint-time {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color6);
+    font-weight: 500;
 }
 
 .complaint-title {
-    color: white;
+    color: var(--color9);
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0 0 0.5rem 0;
@@ -485,7 +466,7 @@ html, body {
 }
 
 .complaint-description {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color14);
     font-size: 0.8rem;
     line-height: 1.4;
     margin: 0 0 0.5rem 0;
@@ -497,21 +478,22 @@ html, body {
 }
 
 .complaint-location {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color8);
     font-size: 0.75rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.25rem;
 }
 
 .map-glass {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--color9) 12%, transparent), color-mix(in srgb, var(--color13) 18%, transparent));
+    backdrop-filter: blur(25px);
+    border: 2px solid color-mix(in srgb, var(--color3) 45%, transparent);
+    border-radius: 16px;
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 25px 50px -12px color-mix(in srgb, var(--color13) 50%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color6) 25%, transparent);
     padding: 1.5rem;
     max-width: none;
     width: 100%;
@@ -524,7 +506,7 @@ html, body {
 .map-title {
     font-size: 2.2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 40%, var(--color6) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -534,10 +516,10 @@ html, body {
 
 .map-subtitle {
     font-size: 1rem;
-    color: #64748b;
+    color: var(--color14);
     text-align: center;
     margin-bottom: 1.5rem;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .incident-legend {
@@ -547,30 +529,33 @@ html, body {
     gap: 1rem;
     margin-bottom: 1.5rem;
     padding: 1rem;
-    background: rgba(59, 130, 246, 0.05);
-    border-radius: 1rem;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 15px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 15%, transparent), color-mix(in srgb, var(--color6) 10%, transparent));
+    border: 2px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 20px;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color15), var(--color9));
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1e40af;
+    color: var(--color13);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 2px solid color-mix(in srgb, var(--color6) 45%, transparent);
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 15%, transparent);
 }
 
 .legend-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, var(--color9), var(--color6));
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 50%, transparent), 0 0 20px color-mix(in srgb, var(--color8) 30%, transparent);
+    border-color: var(--color3);
 }
 
 .legend-icon {
@@ -580,25 +565,25 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
-.rail-icon { background: rgba(245, 158, 11, 0.2); }
-.fire-icon { background: rgba(239, 68, 68, 0.2); }
-.cyber-icon { background: rgba(139, 92, 246, 0.2); }
-.police-icon { background: rgba(59, 130, 246, 0.2); }
-.court-icon { background: rgba(16, 185, 129, 0.2); }
+.rail-icon { background: color-mix(in srgb, var(--color3) 25%, transparent); }
+.fire-icon { background: color-mix(in srgb, #ef4444 25%, transparent); }
+.cyber-icon { background: color-mix(in srgb, #8b5cf6 25%, transparent); }
+.police-icon { background: color-mix(in srgb, var(--color3) 30%, transparent); }
+.court-icon { background: color-mix(in srgb, #10b981 25%, transparent); }
 
 .home-live-map-container {
     width: 100%;
     flex: 1;
     min-height: 300px;
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--color3) 35%, transparent), 0 0 20px color-mix(in srgb, var(--color8) 20%, transparent);
     overflow: hidden;
-    border: 1px solid rgba(59, 130, 246, 0.18);
-    background: rgba(255,255,255,0.15);
+    border: 2px solid color-mix(in srgb, var(--color6) 40%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--color9) 10%, transparent), color-mix(in srgb, var(--color15) 8%, transparent));
     position: relative;
     transition: all 0.3s ease;
     cursor: pointer; /* Pointer cursor when inactive to indicate clickable */
@@ -612,8 +597,8 @@ html, body {
 
 /* Map active state - remove blur and change cursor */
 .home-live-map-container.map-active {
-    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3), 0 0 0 3px rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 35px color-mix(in srgb, var(--color3) 60%, transparent), 0 0 40px color-mix(in srgb, var(--color8) 40%, transparent), 0 0 0 3px var(--color3);
+    border-color: var(--color3);
     filter: blur(0px);
     cursor: grab;
 }
@@ -655,7 +640,6 @@ html, body {
     cursor: pointer;
     pointer-events: all;
     transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
-    border-radius: 25px;
 }
 
 /* Toggle detector overlay - detects clicks to deactivate when map is active */
@@ -684,7 +668,7 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.03);
+    background: color-mix(in srgb, var(--color1) 8%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -700,7 +684,6 @@ html, body {
     padding: 1rem 1.5rem;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-size: 0.9rem;
     font-weight: 600;
@@ -733,7 +716,7 @@ html, body {
     gap: 0.5rem;
     margin: 0.5rem 0; /* Balanced margin top and bottom */
     font-size: 0.9rem;
-    color: #059669;
+    color: black;
     font-weight: 600;
     flex-shrink: 0; /* Prevent shrinking */
     height: 30px; /* Fixed height for consistency */
@@ -742,8 +725,8 @@ html, body {
 .home-live-indicator .pulse-dot {
     width: 8px;
     height: 8px;
-    background: #10b981;
     border-radius: 50%;
+    background: black;
     animation: livePulse 2s ease-in-out infinite;
 }
 
@@ -763,9 +746,6 @@ html, body {
 .home-map-loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top: 3px solid #60a5fa;
-    border-radius: 50%;
     animation: mapSpinnerRotate 1s linear infinite;
     margin-bottom: 1rem;
 }
@@ -773,8 +753,7 @@ html, body {
 .pulse-dot {
     width: 8px;
     height: 8px;
-    background: #10b981;
-    border-radius: 50%;
+    background: black;
     animation: livePulse 2s ease-in-out infinite;
 }
 
@@ -802,10 +781,9 @@ html, body {
     position: absolute;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    background: solid rgba(59, 130, 246, 0.8);
+    background: solid color-mix(in srgb, var(--color3) 80%, transparent);
     /* animation: userPulse 1.5s ease-in-out infinite; */
-    /* box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); */
+    /* box-shadow: 0 0 20px var(--color3); */
 }
 
 .user-pulse::before {
@@ -815,8 +793,7 @@ html, body {
     left: -10px;
     right: -10px;
     bottom: -10px;
-    border-radius: 50%;
-    background: solid rgba(59, 130, 246, 0.5);
+    background: solid color-mix(in srgb, var(--color3) 50%, transparent);
     /* animation: userPulseOuter 2s ease-in-out infinite reverse; */
     z-index: -1;
 }
@@ -830,10 +807,9 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
-    border: 4px solid #3b82f6;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    background: linear-gradient(135deg, var(--color4) 0%, var(--color6) 100%);
+    border: 4px solid var(--color3);
+    box-shadow: 0 0 15px var(--color3), inset 0 2px 4px color-mix(in srgb, var(--color4) 90%, transparent);
     animation: userRotate 4s linear infinite;
 }
 
@@ -850,7 +826,6 @@ html, body {
     position: absolute;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     /* animation: markerPulse 2s ease-in-out infinite; */
 }
 
@@ -863,8 +838,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
+    background: color-mix(in srgb, var(--color4) 90%, transparent);
     border: 2px solid;
     /* Keep subtle animation on inner icon only */
     animation: markerBounce 3s ease-in-out infinite;
@@ -899,12 +873,12 @@ html, body {
 
 .real-complaint .marker-pulse {
     /* animation: realComplaintPulse 1.5s ease-in-out infinite; */
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    border: 2px solid color-mix(in srgb, var(--color4) 80%, transparent);
 }
 
 .real-complaint .marker-icon {
-    background: rgba(255, 255, 255, 1);
-    /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.4); */
+    background: var(--color4);
+    /* box-shadow: 0 0 15px var(--color4), 0 0 25px var(--color5); */
     border-width: 3px;
     font-size: 1.6rem;
     /* animation: realComplaintBounce 2s ease-in-out infinite; */
@@ -912,7 +886,7 @@ html, body {
 }
 
 .real-complaint.incident-marker:hover .marker-icon {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 35px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 20px var(--color4), 0 0 35px var(--color5);
 }
 
 /* Real complaint marker type-specific enhancements */
@@ -939,17 +913,17 @@ html, body {
 
 /* Real Complaint Popup Styles */
 .real-complaint-popup {
-    border-left: 4px solid #ef4444;
-    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+    border-left: 4px solid var(--color3);
+    background: linear-gradient(135deg, var(--color9) 0%, var(--color4) 100%);
     min-width: 280px;
 }
 
 .real-complaint-popup h3 {
-    color: #dc2626;
+    color: var(--color1);
     font-weight: 700;
     margin-bottom: 0.75rem;
     font-size: 1.2rem;
-    border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+    border-bottom: 1px solid color-mix(in srgb, var(--color1) 20%, transparent);
     padding-bottom: 0.5rem;
 }
 
@@ -957,10 +931,9 @@ html, body {
 .floating-complaint-popup {
     position: fixed;
     width: 350px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 16px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2), 0 15px 35px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, var(--color4) 0%, var(--color9) 100%);
+    box-shadow: 0 25px 60px color-mix(in srgb, var(--color1) 30%, transparent), 0 15px 35px color-mix(in srgb, var(--color1) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color7) 50%, transparent);
     overflow: hidden;
     z-index: 10000;
     backdrop-filter: blur(20px);
@@ -976,7 +949,7 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color4) 90%, transparent) 0%, color-mix(in srgb, var(--color9) 90%, transparent) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: -1;
@@ -993,10 +966,9 @@ html, body {
 }
 
 .custom-popup .leaflet-popup-content-wrapper {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 10px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, var(--color4) 0%, var(--color9) 100%);
+    box-shadow: 0 20px 50px color-mix(in srgb, var(--color1) 20%, transparent), 0 10px 25px color-mix(in srgb, var(--color1) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color7) 40%, transparent);
     overflow: hidden;
     padding: 0;
     max-height: 400px;
@@ -1011,18 +983,17 @@ html, body {
 }
 
 .custom-popup .leaflet-popup-tip {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--color4) 0%, var(--color9) 100%);
+    border: 1px solid color-mix(in srgb, var(--color7) 40%, transparent);
+    box-shadow: 0 4px 8px color-mix(in srgb, var(--color1) 15%, transparent);
 }
 
 .custom-popup .leaflet-popup-close-button {
-    color: #64748b;
+    color: var(--color2);
     font-size: 18px;
     font-weight: bold;
     padding: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
+    background: color-mix(in srgb, var(--color4) 90%, transparent);
     width: 30px;
     height: 30px;
     display: flex;
@@ -1033,8 +1004,8 @@ html, body {
 }
 
 .custom-popup .leaflet-popup-close-button:hover {
-    background: #ef4444;
-    color: white;
+    background: var(--color3);
+    color: var(--color4);
     transform: scale(1.1);
 }
 
@@ -1045,13 +1016,12 @@ html, body {
 }
 
 .popup-header {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--color1) 0%, var(--color2) 100%);
+    color: var(--color4);
     padding: 16px 20px 12px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    border-radius: 16px 16px 0 0;
     position: relative;
     overflow: hidden;
 }
@@ -1077,8 +1047,8 @@ html, body {
     margin: 0 0 6px 0;
     font-size: 16px;
     font-weight: 700;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: var(--color4);
+    text-shadow: 0 1px 2px color-mix(in srgb, var(--color1) 30%, transparent);
     line-height: 1.3;
     max-width: 200px;
     overflow: hidden;
@@ -1087,46 +1057,43 @@ html, body {
 }
 
 .incident-category {
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--color4) 25%, transparent);
     padding: 4px 10px;
-    border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
-    color: white;
+    color: var(--color4);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color4) 40%, transparent);
 }
 
 .live-badge {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 100%);
+    color: var(--color4);
     padding: 6px 12px;
-    border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
     animation: liveBadgePulse 2s ease-in-out infinite;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 40%, transparent);
     position: relative;
     z-index: 1;
 }
 
 .popup-body {
     padding: 20px;
-    background: white;
+    background: var(--color4);
 }
 
 .incident-details .description {
     margin: 0 0 16px 0;
-    color: #374151;
+    color: var(--color1);
     font-size: 14px;
     line-height: 1.6;
     max-height: 60px;
     overflow-y: auto;
     padding: 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    border-left: 3px solid #e5e7eb;
+    background: var(--color9);
+    border-left: 3px solid var(--color7);
 }
 
 .status-row {
@@ -1138,7 +1105,6 @@ html, body {
 
 .severity-badge, .status-badge {
     padding: 4px 10px;
-    border-radius: 8px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1146,63 +1112,61 @@ html, body {
 }
 
 .severity-low {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
+    color: var(--color8);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .severity-medium {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
+    color: var(--color3);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .severity-high {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: color-mix(in srgb, var(--color13) 15%, transparent);
+    color: var(--color13);
+    border: 1px solid color-mix(in srgb, var(--color13) 25%, transparent);
 }
 
 .status-pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: color-mix(in srgb, var(--color7) 15%, transparent);
+    color: var(--color13);
+    border: 1px solid color-mix(in srgb, var(--color7) 25%, transparent);
 }
 
 .status-in_progress {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
+    color: var(--color3);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .status-resolved {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
+    color: var(--color8);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .status-rejected {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: color-mix(in srgb, var(--color13) 15%, transparent);
+    color: var(--color13);
+    border: 1px solid color-mix(in srgb, var(--color13) 25%, transparent);
 }
 
 .address {
     margin: 0 0 16px 0;
-    color: #6b7280;
+    color: var(--color2);
     font-size: 13px;
     padding: 8px 12px;
-    background: #f3f4f6;
-    border-radius: 6px;
-    border-left: 3px solid #9ca3af;
+    background: var(--color9);
+    border-left: 3px solid var(--color7);
 }
 
 .user-section {
     margin: 16px 0;
     padding: 16px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, var(--color9) 0%, var(--color5) 100%);
+    border: 1px solid var(--color7);
 }
 
 .user-info {
@@ -1216,23 +1180,23 @@ html, body {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--color7);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color1) 15%, transparent);
 }
 
 .user-avatar-placeholder {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 100%);
+    color: var(--color4);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 16px;
-    border: 2px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--color7);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color1) 15%, transparent);
 }
 
 .user-details {
@@ -1242,20 +1206,20 @@ html, body {
 .user-name {
     margin: 0 0 4px 0;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--color1);
     font-size: 14px;
 }
 
 .user-email {
     margin: 0;
-    color: #6b7280;
+    color: var(--color2);
     font-size: 12px;
 }
 
 .incident-meta {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--color7);
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -1273,26 +1237,26 @@ html, body {
 
 .meta-label {
     font-size: 11px;
-    color: #6b7280;
+    color: var(--color2);
     font-weight: 500;
     margin-bottom: 2px;
 }
 
 .meta-value {
     font-size: 13px;
-    color: #1f2937;
+    color: var(--color1);
     font-weight: 600;
 }
 
 .popup-footer {
     padding: 12px 20px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-top: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, var(--color9) 0%, var(--color5) 100%);
+    border-top: 1px solid var(--color7);
     text-align: center;
 }
 
 .live-indicator {
-    color: #059669;
+    color: var(--color3);
     font-size: 12px;
     font-weight: 600;
     display: inline-flex;
@@ -1304,7 +1268,7 @@ html, body {
     content: '';
     width: 8px;
     height: 8px;
-    background: #10b981;
+    background: var(--color3);
     border-radius: 50%;
     animation: livePulse 2s ease-in-out infinite;
 }
@@ -1315,25 +1279,23 @@ html, body {
 }
 
 .custom-popup .leaflet-popup-content::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: var(--color9);
 }
 
 .custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 2px;
+    background: var(--color7);
 }
 
 .custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--color8);
 }
 
 /* Enhanced Real Complaint Popup Styles */
 .real-complaint-popup {
     min-width: 320px;
     max-width: 400px;
-    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--color1) 20%, transparent);
 }
 
 .popup-header {
@@ -1351,16 +1313,15 @@ html, body {
 }
 
 .live-badge {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 100%);
+    color: var(--color4);
     padding: 2px 8px;
-    border-radius: 12px;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     animation: liveBadgePulse 2s ease-in-out infinite;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .popup-content {
@@ -1370,7 +1331,7 @@ html, body {
 
 .complaint-details p {
     margin: 0.5rem 0;
-    color: #374151;
+    color: var(--color1);
 }
 
 .user-details {
@@ -1380,7 +1341,7 @@ html, body {
 
 .user-details h4 {
     margin: 0 0 0.5rem 0;
-    color: #6b7280;
+    color: var(--color2);
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -1392,9 +1353,8 @@ html, body {
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem;
-    background: rgba(59, 130, 246, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    background: color-mix(in srgb, var(--color3) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color3) 15%, transparent);
 }
 
 .user-avatar {
@@ -1402,20 +1362,20 @@ html, body {
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(59, 130, 246, 0.2);
+    border: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .user-avatar-placeholder {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color4);
     font-size: 1rem;
-    border: 2px solid rgba(59, 130, 246, 0.2);
+    border: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .user-text {
@@ -1425,14 +1385,14 @@ html, body {
 .user-name {
     margin: 0;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--color1);
     font-size: 0.9rem;
 }
 
 .user-email {
     margin: 0;
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--color2);
 }
 
 .incident-meta {
@@ -1448,23 +1408,22 @@ html, body {
 .incident-id {
     font-family: 'Courier New', monospace;
     font-size: 0.75rem !important;
-    color: #9ca3af;
-    background: rgba(156, 163, 175, 0.1);
+    color: var(--color2);
+    background: color-mix(in srgb, var(--color7) 15%, transparent);
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
     margin-top: 0.75rem !important;
 }
 
 .popup-divider {
     border: none;
-    border-top: 1px solid rgba(156, 163, 175, 0.2);
+    border-top: 1px solid color-mix(in srgb, var(--color7) 30%, transparent);
     margin: 0.75rem 0;
 }
 
 .popup-footer {
     margin-top: 1rem;
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(156, 163, 175, 0.2);
+    border-top: 1px solid color-mix(in srgb, var(--color7) 30%, transparent);
 }
 
 .real-time-indicator {
@@ -1472,12 +1431,11 @@ html, body {
     align-items: center;
     gap: 0.5rem;
     font-size: 0.8rem;
-    color: #059669;
+    color: var(--color3);
     font-weight: 600;
-    background: rgba(5, 150, 105, 0.1);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
     padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    border: 1px solid rgba(5, 150, 105, 0.2);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 /* Hover effects for markers */
@@ -1493,30 +1451,30 @@ html, body {
 /* Popup Styles */
 .incident-popup h3 {
     margin: 0 0 0.5rem 0;
-    color: #1e40af;
+    color: var(--color1);
     font-size: 1.1rem;
 }
 
 .incident-popup p {
     margin: 0.25rem 0;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--color2);
 }
 
 .user-popup h3 {
     margin: 0 0 0.5rem 0;
-    color: #3b82f6;
+    color: var(--color3);
     font-size: 1.1rem;
 }
 
 .user-popup p {
     margin: 0.25rem 0;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--color2);
 }
 
 .status-active {
-    color: #10b981;
+    color: var(--color3);
     font-weight: 600;
 }
 
@@ -1526,9 +1484,10 @@ html, body {
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1rem; /* Reduced padding */
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 1rem;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--color3) 0%, var(--color8) 50%, var(--color6) 100%);
+    border: 2px solid color-mix(in srgb, var(--color9) 50%, transparent);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 30px color-mix(in srgb, var(--color8) 25%, transparent);
     margin-bottom: 0.5rem; /* Minimal bottom margin */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -1540,8 +1499,9 @@ html, body {
 .location-icon {
     width: 2rem;
     height: 2rem;
-    color: #f59e0b;
+    color: var(--color9);
     flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
 .permission-text {
@@ -1553,28 +1513,30 @@ html, body {
 
 .permission-text p {
     margin: 0;
-    color: #92400e;
-    font-weight: 500;
+    color: var(--color1);
+    font-weight: 600;
     font-size: 0.95rem;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
 }
 
 .retry-location-btn {
-    padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    background: var(--color1);
+    color: var(--color9);
+    border: 2px solid var(--color9);
+    font-weight: 700;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
 }
 
 .retry-location-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 20px color-mix(in srgb, var(--color9) 40%, transparent);
+    background: var(--color9);
+    color: var(--color1);
 }
 
 /* Map Loading State */
@@ -1582,10 +1544,9 @@ html, body {
     width: 100%;
     flex: 1;
     min-height: 300px;
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
-    border: 1px solid rgba(59, 130, 246, 0.18);
-    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 24px color-mix(in srgb, var(--color3) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
+    background: color-mix(in srgb, var(--color4) 5%, transparent);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1598,14 +1559,14 @@ html, body {
 .map-loading-spinner {
     width: 3rem;
     height: 3rem;
-    border: 3px solid rgba(59, 130, 246, 0.2);
-    border-top: 3px solid #3b82f6;
+    border: 3px solid color-mix(in srgb, var(--color3) 30%, transparent);
+    border-top: 3px solid var(--color3);
     border-radius: 50%;
     animation: mapSpinnerRotate 1s linear infinite;
 }
 
 .map-loading p {
-    color: #64748b;
+    color: var(--color2);
     font-weight: 500;
     text-align: center;
     margin: 0;
@@ -1640,7 +1601,7 @@ html, body {
     }
     50% {
         opacity: 0.5;
-        transform: scale(1.2);
+        transform: scale(1.6);
     }
 }
 
@@ -1708,12 +1669,12 @@ html, body {
     0% {
         opacity: 0.8;
         transform: scale(1);
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 10px var(--color4);
     }
     50% {
         opacity: 0.4;
         transform: scale(1.8);
-        box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 25px var(--color4);
     }
     100% {
         opacity: 0.8;
@@ -1755,7 +1716,7 @@ html, body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #7c3aed 100%);
+    background: linear-gradient(135deg, var(--color18) 0%, var(--color13) 40%, var(--color12) 70%, var(--color1) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1790,29 +1751,30 @@ html, body {
 }
 
 .spinner-ring:nth-child(1) {
-    border-top-color: #ffffff;
+    border-top-color: var(--color9);
     animation-delay: -0.45s;
 }
 
 .spinner-ring:nth-child(2) {
-    border-top-color: #93c5fd;
+    border-top-color: var(--color6);
     animation-delay: -0.3s;
 }
 
 .spinner-ring:nth-child(3) {
-    border-top-color: #60a5fa;
+    border-top-color: var(--color8);
     animation-delay: -0.15s;
 }
 
 .spinner-ring:nth-child(4) {
-    border-top-color: #3b82f6;
+    border-top-color: var(--color3);
+    border-width: 8px;
 }
 
 .home-loading-text h2 {
     font-size: 1.8rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
-    background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
+    background: linear-gradient(135deg, var(--color9) 0%, var(--color6) 50%, var(--color3) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1822,7 +1784,8 @@ html, body {
 .home-loading-text p {
     font-size: 1rem;
     margin: 0;
-    opacity: 0.8;
+    color: var(--color6);
+    opacity: 0.9;
     font-weight: 400;
 }
 
@@ -1834,10 +1797,11 @@ html, body {
 }
 
 .home-loading-dots span {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color3) 50%, transparent);
     animation: loadingDots 1.4s ease-in-out infinite both;
 }
 
@@ -1956,14 +1920,16 @@ html, body {
     display: flex;
     justify-content: center;
     gap: 0.5rem; /* Add gap between tabs */
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 15%, transparent), color-mix(in srgb, var(--color15) 12%, transparent));
+    backdrop-filter: blur(25px);
+    /* box-sizing: ; */
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     padding: 0.5rem;
-    max-width: 900px; /* Increase max width to accommodate gaps */
+    /* max-width: 700px; Increase max width to accommodate gaps */
+    width: fit-content;
     margin: 0 auto;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 25px color-mix(in srgb, var(--color3) 25%, transparent), 0 0 30px color-mix(in srgb, var(--color8) 15%, transparent);
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1978,17 +1944,18 @@ html, body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.8rem 1.2rem; /* Increase padding for better spacing */
-    border: none;
+    border-radius: 14px;
+    border: 2px solid transparent;
     background: transparent;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color14);
     font-size: 0.9rem;
-    font-weight: 500;
-    border-radius: 40px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     position: relative;
     overflow: hidden;
+    margin: 10px;
     min-width: fit-content; /* Ensure tabs don't shrink too much */
 }
 
@@ -1999,10 +1966,9 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    /* background: var(--color8); */
     opacity: 0;
     transition: opacity 0.3s ease;
-    border-radius: 40px;
 }
 
 .tab:hover::before {
@@ -2010,19 +1976,24 @@ html, body {
 }
 
 .tab:hover {
-    color: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
+    /* color: var(--color2); */
+    background: linear-gradient(135deg, var(--color6), var(--color3));
+    color: var(--color1);
+    border-color: var(--color3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .tab.active {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
-    color: white;
-    font-weight: 600;
+    color: var(--color1);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    font-weight: 700;
+    border-color: var(--color3);
     box-shadow: 
-        0 4px 15px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        0 2px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+        0 6px 20px color-mix(in srgb, var(--color3) 50%, transparent),
+        0 0 30px color-mix(in srgb, var(--color8) 30%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color9) 25%, transparent);
+    transform: translateY(-2px) scale(1.02);
     animation: tabActivate 0.3s ease-out;
 }
 
@@ -2030,18 +2001,21 @@ html, body {
     0% {
         transform: translateY(0) scale(1);
         box-shadow: 
-            0 2px 8px rgba(255, 255, 255, 0.05),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 2px 8px color-mix(in srgb, var(--color3) 15%, transparent),
+            0 0 15px color-mix(in srgb, var(--color8) 8%, transparent);
     }
     50% {
-        transform: translateY(-2px) scale(1.02);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 
+            0 8px 25px color-mix(in srgb, var(--color3) 40%, transparent),
+            0 0 35px color-mix(in srgb, var(--color8) 25%, transparent);
     }
     100% {
-        transform: translateY(-1px) scale(1);
+        transform: translateY(-2px) scale(1.02);
         box-shadow: 
-            0 4px 15px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            0 2px 8px rgba(0, 0, 0, 0.1);
+            0 6px 20px color-mix(in srgb, var(--color3) 50%, transparent),
+            0 0 30px color-mix(in srgb, var(--color8) 30%, transparent),
+            inset 0 2px 4px color-mix(in srgb, var(--color9) 25%, transparent);
     }
 }
 
@@ -2055,7 +2029,7 @@ html, body {
     align-items: center;
     justify-content: center;
     line-height: 1;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color1) 15%, transparent));
 }
 
 /* Responsive tabs */
@@ -2106,19 +2080,20 @@ html, body {
     height: 100%; /* Match complaints section */
     display: flex;
     flex-direction: column;
+    border-radius: 24px;
     overflow: hidden; /* Prevent overflow from children */
     /* height: 100%; */
-    border-radius: 25px;
 }
 
 .home-map-glass-container {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color15) 12%, transparent), color-mix(in srgb, var(--color13) 18%, transparent));
+    backdrop-filter: blur(25px);
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
+    border-radius: 24px;
     box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 30px 60px -12px color-mix(in srgb, var(--color3) 30%, transparent),
+    0 0 40px color-mix(in srgb, var(--color8) 20%, transparent),
+    inset 0 2px 4px color-mix(in srgb, var(--color9) 15%, transparent);
     padding: 1.5rem;
     /* Use flex instead of height to properly fit within parent */
     flex: 1;
@@ -2137,11 +2112,11 @@ html, body {
     height: calc(100% - 80px); /* Reserve 80px for indicator and banner */
     flex-shrink: 0; /* Don't shrink */
     width: 100%;
-    border-radius: 1.5rem;
-    box-shadow: 0 4px 24px rgba(59, 130, 246, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--color3) 35%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 15%, transparent);
     overflow: hidden;
-    border: 1px solid rgba(59, 130, 246, 0.18);
-    background: rgba(255,255,255,0.15);
+    border: 2px solid color-mix(in srgb, var(--color3) 40%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color18) 20%, transparent), color-mix(in srgb, var(--color13) 15%, transparent));
 }
 
 /* Map loading container should have same constraints */
@@ -2158,14 +2133,19 @@ html, body {
 .map-panel .map-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
-    color: white;
-    font-weight: 600;
+    background: linear-gradient(90deg, var(--color3), var(--color8), var(--color6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    text-shadow: 0 2px 10px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .map-panel .map-subtitle {
     font-size: 0.9rem;
     margin-bottom: 1rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color9);
+    font-weight: 500;
 }
 
 .map-panel .incident-legend {
@@ -2195,27 +2175,30 @@ html, body {
     padding: 10px 0;
     flex-direction: column;
     justify-content: space-around;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border-radius: 25px 25px 0 0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px 24px 0 0;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 12%, transparent), color-mix(in srgb, var(--color15) 18%, transparent));
+    backdrop-filter: blur(25px);
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     border-bottom: none;
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 30px 60px -12px color-mix(in srgb, var(--color3) 25%, transparent),
+        0 0 35px color-mix(in srgb, var(--color8) 15%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color9) 15%, transparent);
+    color: var(--color3);
     /* padding: 1.5rem 1.5rem 1rem; */
 }
 
 .home-complaints-panel {
     flex: 1;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    border-radius: 0 0 25px 25px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0 0 24px 24px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color15) 10%, transparent), color-mix(in srgb, var(--color13) 15%, transparent));
+    backdrop-filter: blur(25px);
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     border-top: none;
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 30px 60px -12px color-mix(in srgb, var(--color3) 25%, transparent),
+        0 0 35px color-mix(in srgb, var(--color8) 15%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color9) 15%, transparent);
     /* padding: 0 1.5rem 1.5rem; */
     display: flex;
     flex-direction: column;
@@ -2224,42 +2207,48 @@ html, body {
     overflow-x: hidden;
     min-height: 0; /* Allow flex shrinking */
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scrollbar-color: var(--color7) transparent;
 }
 
 /* Custom scrollbar for complaints panel */
 .home-complaints-panel::-webkit-scrollbar {
-    width: 8px; /* Slightly wider for better visibility */
+    width: 10px; /* Slightly wider for better visibility */
 }
 
 .home-complaints-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.15); /* More visible track */
-    border-radius: 4px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color13) 20%, transparent), color-mix(in srgb, var(--color18) 15%, transparent)); /* More visible track */
+    border-radius: 10px;
 }
 
 .home-complaints-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.4); /* More visible thumb */
-    border-radius: 4px;
+    background: linear-gradient(180deg, var(--color3), var(--color8)); /* More visible thumb */
+    border-radius: 10px;
+    border: 2px solid color-mix(in srgb, var(--color6) 20%, transparent);
 }
 
 .home-complaints-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.6); /* Even more visible on hover */
+    background: linear-gradient(180deg, var(--color6), var(--color3)); /* Even more visible on hover */
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color3) 50%, transparent);
 }
 
 .home-complaints-title {
     font-size: 1.6rem;
-    font-weight: 700;
-    color: white;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--color3), var(--color8), var(--color6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     /* margin: 0 0 0.5rem; */
     padding-left: 1.5rem;
     display: flex;
     align-items: flex-end;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 10px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .home-complaints-subtitle {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color9);
     font-size: 0.95rem;
+    font-weight: 500;
     margin: 0;
     text-align: start;
     padding-left: 1.55rem;
@@ -2279,14 +2268,15 @@ html, body {
 
 /* Simplified Live Complaint Card - Home page specific */
 .home-live-complaint-card {
-    background: rgba(255, 255, 255, 0.15); /* Much more transparent, matching glassmorphism */
-    backdrop-filter: blur(15px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 8%, transparent), color-mix(in srgb, var(--color15) 12%, transparent)); /* Much more transparent, matching glassmorphism */
+    backdrop-filter: blur(20px);
+    border: 2px solid color-mix(in srgb, var(--color6) 30%, transparent);
     padding: 1.25rem;
     box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 10px 30px color-mix(in srgb, var(--color3) 20%, transparent),
+        0 0 20px color-mix(in srgb, var(--color8) 10%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color9) 12%, transparent);
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out;
     /* Fixed height for consistent card sizing */
@@ -2297,16 +2287,17 @@ html, body {
     flex-direction: column;
     overflow: visible; /* Allow content to show fully */
     flex-shrink: 0; /* Prevent cards from shrinking - let container scroll instead */
-    color: white; /* Ensure text is visible on transparent background */
+    color: var(--color4); /* Ensure text is visible on transparent background */
 }
 
 .home-live-complaint-card:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
-    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-4px) scale(1.01);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 12%, transparent), color-mix(in srgb, var(--color9) 18%, transparent)); /* Slightly more opaque on hover */
+    border-color: var(--color3);
     box-shadow: 
-        0 15px 40px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        0 18px 45px color-mix(in srgb, var(--color3) 35%, transparent),
+        0 0 35px color-mix(in srgb, var(--color8) 25%, transparent),
+        inset 0 2px 6px color-mix(in srgb, var(--color9) 20%, transparent);
 }
 
 /* Simplified Card Header */
@@ -2331,41 +2322,49 @@ html, body {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.1);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    color: var(--color1);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 40%, transparent);
+    border: 2px solid color-mix(in srgb, var(--color6) 30%, transparent);
 }
 
 .home-incident-type {
     font-size: 0.75rem;
-    font-weight: 700;
-    color: #1e40af;
+    font-weight: 800;
+    color: var(--color3);
     letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .home-time-badge {
     font-size: 0.75rem;
-    color: #64748b;
-    background: rgba(100, 116, 139, 0.1);
-    padding: 0.25rem 0.75rem;
     border-radius: 12px;
-    font-weight: 500;
+    background: linear-gradient(135deg, var(--color13), var(--color1));
+    color: var(--color9);
+    padding: 0.25rem 0.75rem;
+    font-weight: 600;
+    border: 1px solid color-mix(in srgb, var(--color3) 20%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color1) 30%, transparent);
 }
 
 /* Simplified Card Content */
 .home-card-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--color3);
     margin: 0 0 0.5rem 0;
     line-height: 1.3;
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 20%, transparent);
     /* Remove line clamping to show full titles */
     flex-shrink: 0;
 }
 
 .home-card-description {
     font-size: 0.9rem;
-    color: #475569;
+    color: var(--color14);
     line-height: 1.5;
     margin: 0 0 1rem 0;
+    font-weight: 500;
     /* Remove line clamping to show full content */
     flex-shrink: 0;
 }
@@ -2395,10 +2394,12 @@ html, body {
     align-items: center;
     gap: 0.3rem;
     font-size: 0.75rem;
-    color: #64748b;
-    background: rgba(248, 250, 252, 0.8);
+    border-radius: 10px;
+    color: var(--color13);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 60%, transparent), color-mix(in srgb, var(--color15) 50%, transparent));
+    border: 1px solid color-mix(in srgb, var(--color6) 25%, transparent);
     padding: 0.25rem 0.5rem;
-    border-radius: 8px;
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -2411,9 +2412,10 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border-radius: 12px;
     padding: 0.5rem;
-    background: rgba(248, 250, 252, 0.8);
-    border-radius: 8px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 40%, transparent), color-mix(in srgb, var(--color6) 30%, transparent));
+    border: 1px solid color-mix(in srgb, var(--color3) 20%, transparent);
     margin-bottom: 0.75rem;
     flex-shrink: 0;
 }
@@ -2423,7 +2425,7 @@ html, body {
     height: 24px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid rgba(59, 130, 246, 0.3);
+    border: 2px solid color-mix(in srgb, var(--color3) 40%, transparent);
     flex-shrink: 0;
 }
 
@@ -2436,7 +2438,7 @@ html, body {
 .home-avatar-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    background: linear-gradient(135deg, var(--color3), var(--color13));
     color: white;
     font-size: 0.7rem;
     font-weight: 700;
@@ -2455,8 +2457,8 @@ html, body {
 
 .home-reporter-name {
     font-size: 0.8rem;
-    font-weight: 600;
-    color: #1e293b;
+    font-weight: 700;
+    color: var(--color13);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2464,17 +2466,19 @@ html, body {
 
 .home-reporter-email {
     font-size: 0.65rem;
-    color: rgba(100, 116, 139, 0.8);
+    color: var(--color14);
     margin: 0;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 500;
 }
 
 .home-reporter-label {
     font-size: 0.65rem;
-    color: #64748b;
+    color: var(--color8);
+    font-weight: 600;
 }
 
 /* Simplified Actions - Fixed at bottom */
@@ -2484,7 +2488,7 @@ html, body {
     margin-top: auto; /* Push to bottom */
     flex-shrink: 0; /* Prevent shrinking */
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 2px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .home-action-btn {
@@ -2493,36 +2497,41 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 0.3rem;
+    border-radius: 12px;
     padding: 0.6rem 0.5rem;
-    border: none;
-    border-radius: 8px;
+    border: 2px solid transparent;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     white-space: nowrap;
 }
 
 .home-view-btn {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    color: var(--color1);
+    border-color: var(--color3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .home-view-btn:hover {
-    background: rgba(59, 130, 246, 0.2);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, var(--color6), var(--color3));
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 50%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 30%, transparent);
 }
 
 .home-help-btn {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 50%, transparent), color-mix(in srgb, var(--color15) 40%, transparent));
+    color: var(--color13);
+    border-color: var(--color6);
 }
 
 .home-help-btn:hover {
-    background: rgba(16, 185, 129, 0.2);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 60%, transparent), color-mix(in srgb, var(--color9) 50%, transparent));
+    color: var(--color3);
+    border-color: var(--color3);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .home-action-btn span {
@@ -2551,10 +2560,11 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 20%, transparent), color-mix(in srgb, var(--color8) 15%, transparent));
     padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 2px solid color-mix(in srgb, var(--color3) 35%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .incident-badge .incident-icon {
@@ -2563,19 +2573,21 @@ html, body {
 
 .incident-badge .incident-type {
     font-size: 0.7rem;
-    font-weight: 600;
-    color: #1d4ed8;
+    font-weight: 800;
+    color: var(--color3);
     letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .time-badge {
-    background: rgba(34, 197, 94, 0.1);
-    color: #15803d;
+    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 60%, transparent), color-mix(in srgb, var(--color6) 50%, transparent));
+    color: var(--color13);
     padding: 0.3rem 0.7rem;
-    border-radius: 15px;
     font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    font-weight: 700;
+    border: 2px solid color-mix(in srgb, var(--color6) 30%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 15%, transparent);
 }
 
 .complaint-content {
@@ -2589,13 +2601,13 @@ html, body {
 
 .complaint-actions .action-btn {
     flex: 1;
+    border-radius: 12px;
     padding: 0.6rem 1rem;
-    border: none;
-    border-radius: 8px;
+    border: 2px solid transparent;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2603,25 +2615,30 @@ html, body {
 }
 
 .complaint-actions .view-btn {
-    background: rgba(59, 130, 246, 0.1);
-    color: #1d4ed8;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    color: var(--color1);
+    border-color: var(--color3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .complaint-actions .view-btn:hover {
-    background: rgba(59, 130, 246, 0.2);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, var(--color6), var(--color3));
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 50%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 30%, transparent);
 }
 
 .complaint-actions .help-btn {
-    background: rgba(34, 197, 94, 0.1);
-    color: #15803d;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 50%, transparent), color-mix(in srgb, var(--color15) 40%, transparent));
+    color: var(--color13);
+    border-color: var(--color6);
 }
 
 .complaint-actions .help-btn:hover {
-    background: rgba(34, 197, 94, 0.2);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 60%, transparent), color-mix(in srgb, var(--color9) 50%, transparent));
+    color: var(--color3);
+    border-color: var(--color3);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .complaint-actions .action-btn span {
@@ -2642,21 +2659,26 @@ html, body {
 .home-no-complaints-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
-    opacity: 0.7;
+    color: var(--color8);
+    filter: drop-shadow(0 4px 15px color-mix(in srgb, var(--color3) 40%, transparent));
 }
 
 .home-no-complaints h3 {
-    color: white;
+    background: linear-gradient(90deg, var(--color3), var(--color6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 1.2rem;
     margin: 0 0 0.5rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .home-no-complaints p {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color9);
     font-size: 0.9rem;
     line-height: 1.5;
     max-width: 300px;
+    font-weight: 500;
 }
 
 /* Responsive Design */
@@ -2750,7 +2772,6 @@ html, body {
     .home-complaints-panel,
     .home-complaints-header {
         padding: 0.75rem;
-        border-radius: 20px; /* Smaller border radius */
     }
     
     .home-complaints-title {
@@ -2764,7 +2785,6 @@ html, body {
     
     .home-live-complaint-card {
         padding: 0.75rem;
-        border-radius: 12px;
     }
 }
 
@@ -2775,14 +2795,14 @@ html, body {
 .complaint-modal {
     width: 380px;
     max-width: 90vw;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color15) 95%, transparent), color-mix(in srgb, var(--color9) 92%, transparent));
+    backdrop-filter: blur(30px);
+    border: 3px solid color-mix(in srgb, var(--color3) 40%, transparent);
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        0 0 0 1px rgba(255, 255, 255, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        0 30px 60px -12px color-mix(in srgb, var(--color3) 40%, transparent),
+        0 0 40px color-mix(in srgb, var(--color8) 30%, transparent),
+        inset 0 2px 4px color-mix(in srgb, var(--color6) 30%, transparent);
     overflow: hidden;
     opacity: 0;
     transform: scale(0.9) translateY(10px);
@@ -2804,18 +2824,20 @@ html, body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 20px 15px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px 24px 0 0;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 15%, transparent), color-mix(in srgb, var(--color8) 12%, transparent));
+    border-bottom: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .incident-type-badge {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 80%, transparent), color-mix(in srgb, var(--color6) 70%, transparent));
     padding: 6px 12px;
-    border-radius: 50px;
-    backdrop-filter: blur(10px);
+    border: 2px solid color-mix(in srgb, var(--color3) 25%, transparent);
+    backdrop-filter: blur(15px);
 }
 
 .incident-icon {
@@ -2825,8 +2847,8 @@ html, body {
 
 .incident-type-text {
     font-size: 0.75rem;
-    font-weight: 600;
-    color: #1f2937;
+    font-weight: 800;
+    color: var(--color13);
     letter-spacing: 0.5px;
 }
 
@@ -2836,7 +2858,6 @@ html, body {
 
 .severity {
     padding: 4px 10px;
-    border-radius: 50px;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -2844,21 +2865,24 @@ html, body {
 }
 
 .severity.low {
-    background: rgba(34, 197, 94, 0.2);
-    color: #166534;
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 10px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 60%, transparent), color-mix(in srgb, var(--color15) 50%, transparent));
+    color: var(--color13);
+    border: 2px solid color-mix(in srgb, var(--color6) 40%, transparent);
 }
 
 .severity.medium {
-    background: rgba(251, 191, 36, 0.2);
-    color: #92400e;
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 10px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 60%, transparent), color-mix(in srgb, var(--color3) 50%, transparent));
+    color: var(--color13);
+    border: 2px solid color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .severity.high {
-    background: rgba(239, 68, 68, 0.2);
-    color: #991b1b;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 70%, transparent), color-mix(in srgb, var(--color18) 60%, transparent));
+    color: var(--color3);
+    border: 2px solid color-mix(in srgb, var(--color3) 50%, transparent);
 }
 
 .modal-content {
@@ -2867,19 +2891,21 @@ html, body {
 
 .complaint-title {
     font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
+    font-weight: 800;
+    color: var(--color13);
     margin: 0 0 10px;
     line-height: 1.4;
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .complaint-description {
-    color: #4b5563;
+    color: var(--color2);
     font-size: 0.9rem;
     line-height: 1.5;
     margin: 0 0 20px;
     max-height: 80px;
     overflow-y: auto;
+    font-weight: 500;
 }
 
 .complaint-meta {
@@ -2887,10 +2913,11 @@ html, body {
     flex-direction: column;
     gap: 8px;
     margin-bottom: 20px;
+    border-radius: 16px;
     padding: 15px;
-    background: rgba(249, 250, 251, 0.8);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color15) 85%, transparent), color-mix(in srgb, var(--color9) 80%, transparent));
+    border: 1px solid color-mix(in srgb, var(--color6) 30%, transparent);
+    backdrop-filter: blur(15px);
 }
 
 .meta-item {
@@ -2898,7 +2925,8 @@ html, body {
     align-items: center;
     gap: 8px;
     font-size: 0.85rem;
-    color: #374151;
+    color: var(--color13);
+    font-weight: 600;
 }
 
 .meta-icon {
@@ -2911,11 +2939,12 @@ html, body {
     display: flex;
     align-items: center;
     gap: 12px;
+    border-radius: 16px;
     padding: 15px;
-    background: rgba(243, 244, 246, 0.8);
-    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 75%, transparent), color-mix(in srgb, var(--color6) 65%, transparent));
+    border: 2px solid color-mix(in srgb, var(--color3) 25%, transparent);
     margin-bottom: 15px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
 }
 
 .reporter-avatar {
@@ -2923,8 +2952,8 @@ html, body {
     height: 40px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 3px solid var(--color3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .reporter-avatar img {
@@ -2951,54 +2980,56 @@ html, body {
 }
 
 .reporter-name {
-    font-weight: 600;
-    color: #111827;
+    font-weight: 700;
+    color: var(--color13);
     font-size: 0.9rem;
 }
 
 .reporter-label {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--color8);
+    font-weight: 600;
 }
 
 .evidence-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 14px;
     padding: 12px 15px;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.2);
-    border-radius: 10px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color9) 50%, transparent), color-mix(in srgb, var(--color15) 45%, transparent));
+    border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     margin-bottom: 15px;
 }
 
 .evidence-label {
     font-size: 0.85rem;
-    color: #92400e;
-    font-weight: 500;
+    color: var(--color13);
+    font-weight: 700;
 }
 
 .evidence-count {
     font-size: 0.8rem;
-    color: #92400e;
-    background: rgba(251, 191, 36, 0.2);
+    border-radius: 8px;
+    color: var(--color3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color6) 70%, transparent), color-mix(in srgb, var(--color9) 60%, transparent));
     padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: 500;
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
+    font-weight: 700;
 }
 
 .modal-actions {
     display: flex;
     gap: 10px;
     padding: 15px 20px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0 0 24px 24px;
+    border-top: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .action-btn {
     flex: 1;
     padding: 10px 15px;
     border: none;
-    border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -3095,7 +3126,6 @@ html, body {
     .map-container,
     .complaint-sidebar {
         padding: 1rem;
-        border-radius: 1rem;
     }
     
     .complaint-sidebar {
@@ -3136,7 +3166,6 @@ html, body {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     padding: 0.15rem 0.4rem;
-    border-radius: 0.5rem;
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -3158,8 +3187,8 @@ html, body {
     gap: 0.4rem;
     margin: 0.5rem 0;
     padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.5rem;
+    background: var(--color7);
+    color: var(--color1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
 }
@@ -3172,7 +3201,8 @@ html, body {
 
 .home-address-text {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.9);
+    /* color: rgba(255, 255, 255, 0.9); */
+    color: var(--color1);
     line-height: 1.3;
     word-break: break-word;
     /* Remove line clamping to show full address */
@@ -3217,7 +3247,6 @@ html, body {
     margin: 0.5rem 0;
     padding: 0.4rem;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
 }
@@ -3248,7 +3277,6 @@ html, body {
     margin: 0.5rem 0;
     padding: 0.4rem;
     background: rgba(59, 130, 246, 0.1);
-    border-radius: 0.5rem;
     border: 1px solid rgba(59, 130, 246, 0.2);
     flex-shrink: 0;
 }
@@ -3298,7 +3326,6 @@ html, body {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     padding: 0.2rem 0.5rem;
-    border-radius: 0.75rem;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -3312,7 +3339,6 @@ html, body {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     padding: 0.2rem 0.5rem;
-    border-radius: 0.75rem;
     font-size: 0.7rem;
     font-weight: 600;
 }
@@ -3333,7 +3359,6 @@ html, body {
     margin: 1rem 0;
     padding: 0.75rem;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -3369,7 +3394,6 @@ html, body {
 .evidence-count, .feedback-count {
     background: rgba(255, 255, 255, 0.1);
     padding: 0.3rem 0.6rem;
-    border-radius: 0.5rem;
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 600;

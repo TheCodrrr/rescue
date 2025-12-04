@@ -1029,7 +1029,7 @@ export default function Home() {
                                 className={`tab ${selectedCategory === 'all' ? 'active' : ''}`}
                                 onClick={() => setSelectedCategory('all')}
                             >
-                                <span className="tab-icon" style={{color: '#ffffff'}}><FiAlertTriangle /></span>
+                                <span className="tab-icon"><FiAlertTriangle /></span>
                                 All Reports
                             </button>
                             <button 
@@ -1135,7 +1135,7 @@ export default function Home() {
                                     <span>
                                         {complaintsLoading ? 'Loading complaints...' : 
                                          mapReady ? 'Live Updates' : 'Preparing map...'}
-                                        {mapReady && !complaintsLoading ? <FiAlertTriangle /> : '...'}
+                                        {mapReady && !complaintsLoading ? '' : '...'}
                                     </span>
                                 </div>
                             </div>
