@@ -97,7 +97,7 @@ const Analytics = () => {
 
     // Chart configurations
     const categoryColors = {
-        rail: '#3b82f6',
+        rail: '#00ADB5',
         road: '#10b981',
         fire: '#ef4444',
         cyber: '#8b5cf6',
@@ -107,7 +107,7 @@ const Analytics = () => {
 
     const statusColors = {
         pending: '#f59e0b',
-        in_progress: '#3b82f6',
+        in_progress: '#00ADB5',
         resolved: '#10b981',
         rejected: '#ef4444'
     };
@@ -149,11 +149,11 @@ const Analytics = () => {
         datasets: [{
             label: 'Complaints',
             data: analyticsData.timeSeriesData.map(t => t.count),
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderColor: '#00ADB5',
+            backgroundColor: 'rgba(0, 173, 181, 0.1)',
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: '#3b82f6',
+            pointBackgroundColor: '#00ADB5',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 6,
