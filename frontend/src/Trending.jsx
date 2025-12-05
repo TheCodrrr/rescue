@@ -816,13 +816,42 @@ const Trending = () => {
 
   const handleModalCommentSubmit = async (commentData) => {
     try {
+      console.log('Received commentData in handleModalCommentSubmit:', commentData);
+      
+      // CommentModal sends 'content' not 'comment'
+      const commentText = commentData.content || commentData.comment;
+      
+      // Validate comment data
+      if (!commentText || !commentText.trim()) {
+        toast.error('Please enter a comment', {
+          duration: 3000,
+          position: 'top-center',
+        });
+        throw new Error('Comment text is required');
+      }
+      
+      // Record interaction for cache management
+      recordInteraction();
+      
       const result = await dispatch(addComment({
         complaintId: commentData.complaintId,
-        content: commentData.comment,
-        rating: commentData.rating
+        content: commentText.trim(),
+        rating: commentData.rating || 5
       }));
 
       if (addComment.fulfilled.match(result)) {
+        // Add history entry for comment added
+        if (user && selectedComplaintForComments) {
+          dispatch(addCommentHistory({
+            userId: user._id,
+            complaintId: selectedComplaintForComments._id,
+            commentId: result.payload?.comment?._id || 'unknown',
+            commentText: commentData.comment,
+            category: selectedComplaintForComments.category,
+            actionType: 'COMMENT_ADDED'
+          }));
+        }
+        
         // Fetch updated comments for the modal
         const fetchResult = await dispatch(fetchComments(selectedComplaintForComments._id));
         
@@ -841,12 +870,33 @@ const Trending = () => {
             ...prevComplaint,
             comments: newComments
           }));
+          
+          console.log('Comment added successfully, updated comment count:', newComments.length);
         }
+        
+        toast.success('Comment added successfully!', {
+          duration: 3000,
+          position: 'top-center',
+          icon: <FiMessageCircle />,
+          style: {
+            background: 'rgba(16, 185, 129, 0.2)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            color: '#fff',
+            fontWeight: '600',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
+          },
+        });
       } else {
         throw new Error(result.payload || 'Failed to add comment');
       }
     } catch (error) {
       console.error('Error adding comment:', error);
+      toast.error('❌ Failed to add comment. Please try again.', {
+        duration: 3000,
+        position: 'top-center',
+      });
       throw error;
     }
   };

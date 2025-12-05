@@ -18,11 +18,11 @@
 }
 
 .comment-modal {
-    background: rgba(30, 58, 138, 0.95);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 95%, transparent), color-mix(in srgb, var(--color18) 90%, transparent));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid color-mix(in srgb, var(--color3) 20%, transparent);
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     width: 100%;
     max-width: 900px;
@@ -89,13 +89,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    background: rgba(96, 165, 250, 0.2);
-    color: #60a5fa;
+    background: color-mix(in srgb, var(--color3) 20%, transparent);
+    color: var(--color3);
     padding: 0.2rem 0.6rem;
     border-radius: 1rem;
     font-size: 0.75rem;
     font-weight: 500;
-    border: 1px solid rgba(96, 165, 250, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
     flex-shrink: 0;
 }
 
@@ -248,20 +248,20 @@
     }
     25% {
         transform: scale(1.02);
-        background: rgba(96, 165, 250, 0.2);
-        border-color: rgba(96, 165, 250, 0.4);
-        box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+        background: color-mix(in srgb, var(--color3) 20%, transparent);
+        border-color: color-mix(in srgb, var(--color3) 40%, transparent);
+        box-shadow: 0 0 15px color-mix(in srgb, var(--color3) 30%, transparent);
     }
     50% {
         transform: scale(1.01);
-        background: rgba(96, 165, 250, 0.15);
-        border-color: rgba(96, 165, 250, 0.3);
+        background: color-mix(in srgb, var(--color3) 15%, transparent);
+        border-color: color-mix(in srgb, var(--color3) 30%, transparent);
     }
     75% {
         transform: scale(1.02);
-        background: rgba(96, 165, 250, 0.2);
-        border-color: rgba(96, 165, 250, 0.4);
-        box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+        background: color-mix(in srgb, var(--color3) 20%, transparent);
+        border-color: color-mix(in srgb, var(--color3) 40%, transparent);
+        box-shadow: 0 0 15px color-mix(in srgb, var(--color3) 30%, transparent);
     }
     100% {
         transform: scale(1);
@@ -288,7 +288,7 @@
     gap: 0.25rem;
 }
 
-.comment-action-btn {
+.comment-modal .comment-action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,48 +302,58 @@
     padding: 0;
 }
 
-.comment-action-btn svg {
+.comment-modal .comment-action-btn svg {
     width: 0.75rem;
     height: 0.75rem;
+    display: block;
 }
 
-.edit-btn {
-    color: #60a5fa;
+.comment-modal .edit-btn {
+    color: var(--color3);
 }
 
-.edit-btn:hover {
-    background: rgba(96, 165, 250, 0.2);
-    color: #3b82f6;
+.comment-modal .edit-btn:hover {
+    background: color-mix(in srgb, var(--color3) 20%, transparent);
+    color: var(--color8);
 }
 
-.delete-btn {
-    color: #f87171;
+.comment-modal .delete-btn {
+    color: #f87171 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
 }
 
-.delete-btn:hover {
-    background: rgba(248, 113, 113, 0.2);
-    color: #ef4444;
+.comment-modal .delete-btn:hover {
+    background: rgba(248, 113, 113, 0.2) !important;
+    color: #ef4444 !important;
 }
 
-.save-btn {
+.comment-modal .delete-btn::before {
+    display: none !important;
+}
+
+.comment-modal .save-btn {
     color: #10b981;
 }
 
-.save-btn:hover:not(:disabled) {
+.comment-modal .save-btn:hover:not(:disabled) {
     background: rgba(16, 185, 129, 0.2);
     color: #10b981;
 }
 
-.cancel-btn {
+.comment-modal .cancel-btn {
     color: #f59e0b;
 }
 
-.cancel-btn:hover:not(:disabled) {
+.comment-modal .cancel-btn:hover:not(:disabled) {
     background: rgba(245, 158, 11, 0.2);
     color: #d97706;
 }
 
-.comment-action-btn:disabled {
+.comment-modal .comment-action-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -363,8 +373,8 @@
 }
 
 .edit-comment-input:focus {
-    border-color: rgba(96, 165, 250, 0.6);
-    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+    border-color: color-mix(in srgb, var(--color3) 60%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .edit-comment-input::placeholder {
@@ -411,7 +421,7 @@
 .user-icon {
     width: 1rem;
     height: 1rem;
-    color: #60a5fa;
+    color: var(--color3);
 }
 
 .user-profile-image {
@@ -419,13 +429,13 @@
     height: 1.5rem;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(96, 165, 250, 0.5);
+    border: 1px solid color-mix(in srgb, var(--color3) 50%, transparent);
     background: rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
 .user-profile-image:hover {
-    border-color: rgba(96, 165, 250, 0.8);
+    border-color: color-mix(in srgb, var(--color3) 80%, transparent);
     transform: scale(1.05);
 }
 
@@ -508,8 +518,8 @@
 }
 
 .input-with-rating:focus-within {
-    border-color: rgba(96, 165, 250, 0.6);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    border-color: color-mix(in srgb, var(--color3) 60%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .comment-input {
@@ -588,7 +598,7 @@
     justify-content: center;
     margin-top: 0.75rem;
     padding: 0.6rem 1.5rem;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     border: none;
     border-radius: 0.8rem;
     color: #ffffff;
@@ -599,9 +609,9 @@
 }
 
 .submit-comment-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    background: linear-gradient(135deg, var(--color8), var(--color3));
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .submit-comment-btn:disabled {
@@ -672,7 +682,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     border: none;
     border-radius: 0.6rem;
     color: #ffffff;
@@ -684,9 +694,9 @@
 }
 
 .submit-comment-btn-rating:hover:not(:disabled) {
-    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    background: linear-gradient(135deg, var(--color8), var(--color3));
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 40%, transparent);
 }
 
 .submit-comment-btn-rating:disabled {

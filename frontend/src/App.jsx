@@ -39,15 +39,6 @@ function ComplaintRouter() {
   return <Complaint />;
 }
 
-// Component to redirect based on user role
-function RoleBasedRedirect() {
-  const user = useSelector((state) => state.auth.user);
-  const role = user?.role || 'citizen';
-  
-  // Both roles redirect to /home
-  return <Navigate to="/home" replace />;
-}
-
 // Protected route wrapper that checks user role
 function RoleProtectedRoute({ children, allowedRoles = ['citizen', 'officer'] }) {
   const user = useSelector((state) => state.auth.user);
@@ -80,7 +71,7 @@ function App() {
           <ProgrammaticOnlyRouteDefinitions />
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<RoleBasedRedirect />} />
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             
