@@ -20,7 +20,7 @@ import './constants.css'
 
 // Officer components
 import OfficerComplaint from './officer/OfficerComplaint'
-import OfficerQueue from './officer/OfficerQueue'
+import OfficerDepartment from './officer/OfficerDepartment'
 import OfficerEscalations from './officer/OfficerEscalations'
 import OfficerAnalytics from './officer/OfficerAnalytics'
 import OfficerTeams from './officer/OfficerTeams'
@@ -119,10 +119,10 @@ function App() {
             } />
             
             {/* ========== OFFICER ROUTES ========== */}
-            {/* Officer Department Queue */}
-            <Route path="/officer/queue" element={
+            {/* Officer Department Management */}
+            <Route path="/officer/department" element={
               <RoleProtectedRoute allowedRoles={['officer']}>
-                <OfficerQueue />
+                <OfficerDepartment />
               </RoleProtectedRoute>
             } />
             
