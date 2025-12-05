@@ -74,38 +74,51 @@ export default function Home() {
     const socketRef = useRef(null);
     const incidentMarkersRef = useRef([]);
 
-    // Function to request location permission
+    // Function to request location permission with faster timeout
     const requestLocationPermission = () => {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
                 console.log('Geolocation is not supported by this browser');
                 setLocationPermission('denied');
-                resolve({ lat: 51.505, lng: -0.09 }); // London fallback
+                const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
+                setUserLocation(fallbackLocation);
+                resolve(fallbackLocation);
                 return;
             }
 
+            // Set a manual timeout to ensure we don't wait forever
+            const timeoutId = setTimeout(() => {
+                console.log('⏱️ Location request timed out after 5 seconds');
+                setLocationPermission('denied');
+                const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
+                setUserLocation(fallbackLocation);
+                resolve(fallbackLocation);
+            }, 5000); // 5 second timeout
+
             navigator.geolocation.getCurrentPosition(
                 (position) => {
+                    clearTimeout(timeoutId); // Clear the manual timeout
                     const location = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
-                    console.log('Location permission granted:', location);
+                    console.log('✅ Location permission granted:', location);
                     setLocationPermission('granted');
                     setUserLocation(location);
                     resolve(location);
                 },
                 (error) => {
-                    console.log('Location access denied or failed:', error);
+                    clearTimeout(timeoutId); // Clear the manual timeout
+                    console.log('❌ Location access denied or failed:', error.message);
                     setLocationPermission('denied');
-                    const fallbackLocation = { lat: 51.505, lng: -0.09 }; // London fallback
+                    const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
                     setUserLocation(fallbackLocation);
                     resolve(fallbackLocation);
                 },
                 {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 300000 // 5 minutes
+                    enableHighAccuracy: false, // Use false for faster response
+                    timeout: 5000, // Reduced from 10000 to 5000
+                    maximumAge: 300000 // 5 minutes - can use cached position
                 }
             );
         });
@@ -550,8 +563,17 @@ export default function Home() {
         }
     };
 
+    // Request location immediately when component mounts
     useEffect(() => {
-        console.log("Home component mounted - checking authentication");
+        console.log("🚀 Home component mounted - requesting location immediately");
+        if (!userLocation && !locationPermission) {
+            console.log("📍 Initiating location request...");
+            requestLocationPermission();
+        }
+    }, []); // Run only once on mount
+
+    useEffect(() => {
+        console.log("Home component - checking authentication");
         const token = localStorage.getItem("token");
         console.log("Token exists:", !!token);
         console.log("Current user:", user);
@@ -567,15 +589,10 @@ export default function Home() {
             dispatch(loadUser())
                 .unwrap()
                 .then((userData) => {
-                    console.log("User loaded successfully:", userData);
-                    // Request location permission after successful login
-                    if (!userLocation) {
-                        console.log("Requesting location permission after login...");
-                        requestLocationPermission();
-                    }
+                    console.log("✅ User loaded successfully:", userData);
                 })
                 .catch((error) => {
-                    console.error("Failed to load user:", error);
+                    console.error("❌ Failed to load user:", error);
                     hasLoadedUser.current = false; // Reset on error
                     // Token might be invalid, clear it
                     localStorage.removeItem('token');
@@ -584,13 +601,8 @@ export default function Home() {
         } else if (!token) {
             console.log("No token found, user not authenticated");
             hasLoadedUser.current = false; // Reset
-            // Still request location for non-authenticated users
-            if (!userLocation) {
-                console.log("Requesting location permission for non-authenticated user...");
-                requestLocationPermission();
-            }
         }
-    }, [dispatch, user, loading, userLocation]);
+    }, [dispatch, user, loading, isAuthenticated]);
 
     // Periodic refresh of nearby complaints every 5 minutes
     useEffect(() => {
@@ -966,8 +978,8 @@ export default function Home() {
         };
     }, [userLocation, isAuthenticated, user, locationPermission]); // Dependencies: userLocation, auth state
 
-    // Show loading while authentication is loading OR when location is not available yet
-    if (loading || !userLocation) return (
+    // Show loading only while authentication is loading, not for location
+    if (loading) return (
         <div className="home-loading-container">
             <div className="home-loading-content">
                 <div className="home-loading-spinner">
@@ -978,7 +990,7 @@ export default function Home() {
                 </div>
                 <div className="home-loading-text">
                     <h2>Loading Rescue</h2>
-                    <p>{loading ? 'Preparing your dashboard...' : 'Getting your location...'}</p>
+                    <p>Preparing your dashboard...</p>
                 </div>
                 <div className="home-loading-dots">
                     <span></span>

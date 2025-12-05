@@ -626,6 +626,7 @@ html, body {
     position: absolute;
     top: 0;
     left: 0;
+    border-radius: 16px;
     right: 0;
     bottom: 0;
     width: 100%;
@@ -638,6 +639,7 @@ html, body {
     justify-content: center;
     z-index: 1000;
     cursor: pointer;
+
     pointer-events: all;
     transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
 }
