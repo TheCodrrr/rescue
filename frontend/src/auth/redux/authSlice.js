@@ -16,7 +16,7 @@ const initialState = {
   isAuthenticated: storedIsLoggedIn && !!storedToken,
   user: null, // User data will only be in Redux store, not localStorage
   token: storedToken || null,
-  loading: false,
+  loading: storedIsLoggedIn && !!storedToken, // Start with loading true if token exists
   error: null,
 };
 
@@ -354,6 +354,10 @@ const authSlice = createSlice({
       .addCase(loadUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        // Keep isAuthenticated true during loading if token exists
+        if (state.token) {
+          state.isAuthenticated = true;
+        }
       })
       .addCase(loadUser.fulfilled, (state, action) => {
         state.loading = false;
