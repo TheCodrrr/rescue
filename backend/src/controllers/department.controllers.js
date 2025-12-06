@@ -2,6 +2,9 @@ import { Department } from "../models/department.models.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import mongoose from "mongoose";
+import { Complaint } from "../models/complaint.models.js";
+import { User } from "../models/user.models.js";
+import { complaintPipeline, officerPipeline, statsPipeline } from "../pipelines/department.pipeline.js";
 
 const allowedCategories = ['fire', 'police', 'rail', 'cyber', 'court', 'road'];
 
@@ -147,6 +150,84 @@ const getDepartmentsByCategory = asyncHandler(async (req, res) => {
     });
 })
 
+const getDepartmentDetailsById = asyncHandler(async (req, res) => {
+    let { departmentId } = req.params;
+    departmentId = new mongoose.Types.ObjectId(departmentId);
+
+    if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+        throw new ApiError(400, "Invalid department ID format");
+    }
+
+    const department = await Department.findById(departmentId);
+
+    if (!department) {
+        throw new ApiError(404, "Department not found");
+    }
+
+    const [complaintsData, officerData, statsData] = await Promise.all([
+        Complaint.aggregate(complaintPipeline(department.category)),
+        User.aggregate(officerPipeline(department.category)),
+        Complaint.aggregate(statsPipeline(department.category))
+    ]);
+
+    // Format statistics data
+    const stats = statsData[0] || {};
+    const statusBreakdown = {};
+    const severityBreakdown = {};
+    const levelBreakdown = {};
+
+    (stats.statusCounts || []).forEach(item => {
+        statusBreakdown[item._id] = item.count;
+    });
+
+    (stats.severityCounts || []).forEach(item => {
+        severityBreakdown[item._id] = item.count;
+    });
+
+    (stats.levelCounts || []).forEach(item => {
+        levelBreakdown[`level_${item._id}`] = item.count;
+    });
+
+    const totalStats = stats.totalStats?.[0] || {};
+
+    return res.status(200).json({
+        success: true,
+        message: "Department details fetched successfully.",
+        data: {
+            department: {
+                _id: department._id,
+                name: department.name,
+                category: department.category,
+                contact_email: department.contact_email,
+                contact_phone: department.contact_phone,
+                jurisdiction_level: department.jurisdiction_level
+            },
+            statistics: {
+                total_complaints: totalStats.total || 0,
+                active_complaints: totalStats.activeComplaints || 0,
+                avg_upvotes: Math.round((totalStats.avgUpvotes || 0) * 10) / 10,
+                avg_downvotes: Math.round((totalStats.avgDownvotes || 0) * 10) / 10,
+                by_status: {
+                    pending: statusBreakdown.pending || 0,
+                    in_progress: statusBreakdown.in_progress || 0,
+                    resolved: statusBreakdown.resolved || 0,
+                    rejected: statusBreakdown.rejected || 0
+                },
+                by_severity: {
+                    low: severityBreakdown.low || 0,
+                    medium: severityBreakdown.medium || 0,
+                    high: severityBreakdown.high || 0
+                },
+                by_level: levelBreakdown,
+                recent_complaints: stats.recentComplaints || []
+            },
+            complaints: complaintsData,
+            officers: officerData,
+            total_officers: officerData.length
+        }
+    });
+})
+
 const validateDepartmentSecret = asyncHandler(async (req, res) => {
     const { department_id, department_secret } = req.body;
 
@@ -188,5 +269,6 @@ export {
     updateDepartment,
     deleteDepartment,
     getDepartmentsByCategory,
+    getDepartmentDetailsById,
     validateDepartmentSecret,
 }
