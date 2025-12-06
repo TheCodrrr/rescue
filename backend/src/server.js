@@ -16,7 +16,6 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 import complaintRouter from "./routes/complaint.routes.js";
-import incidentRouter from "./routes/incident.routes.js";
 import escalationRouter from "./routes/escalation.routes.js";
 import departmentRouter from "./routes/department.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
@@ -57,7 +56,6 @@ io.on("connection", (socket) => {
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/complaints", complaintRouter);
-app.use("/api/v1/incidents", incidentRouter);
 app.use("/api/v1/escalations", escalationRouter);
 app.use("/api/v1/departments", departmentRouter);
 app.use("/api/v1/feedbacks", feedbackRouter);
