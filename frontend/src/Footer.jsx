@@ -141,7 +141,7 @@ export default function Footer() {
                         </p>
                     </div>
                     <div className="footer-status">
-                        <div className="status-indicator">
+                        <div className="footer-status-indicator">
                             <div className="status-dot"></div>
                             <span>System Operational</span>
                         </div>
