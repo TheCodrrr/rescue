@@ -238,48 +238,22 @@ const OfficerDepartment = () => {
                 return [parseFloat(lat), parseFloat(lng), intensity];
             });
 
-            // Add heatmap layer
+            // Add heatmap layer with increased radius and blur for better area coverage
             L.heatLayer(heatData, {
-                radius: 25,
-                blur: 15,
-                maxZoom: 17,
+                radius: 50,
+                blur: 35,
+                maxZoom: 13,
                 max: 1.0,
+                minOpacity: 0.4,
                 gradient: {
-                    0.0: '#4caf50',
-                    0.5: '#ffc107',
-                    1.0: '#f44336'
+                    0.0: 'rgba(0, 255, 0, 0)',
+                    0.2: '#00ff00',
+                    0.4: '#ffff00',
+                    0.6: '#ffa500',
+                    0.8: '#ff4500',
+                    1.0: '#ff0000'
                 }
             }).addTo(map);
-
-            // Add markers for individual complaints
-            complaintsWithCoords.forEach(complaint => {
-                const lat = complaint.location?.coordinates?.[1] ?? complaint.latitude;
-                const lng = complaint.location?.coordinates?.[0] ?? complaint.longitude;
-
-                const severityColor = 
-                    complaint.severity === 'high' ? '#f44336' :
-                    complaint.severity === 'medium' ? '#ffc107' : '#4caf50';
-
-                const markerIcon = L.divIcon({
-                    html: `<div style="background: ${severityColor}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
-                    className: 'custom-marker',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                });
-
-                const marker = L.marker([parseFloat(lat), parseFloat(lng)], { icon: markerIcon }).addTo(map);
-
-                marker.bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h4 style="margin: 0 0 8px 0; color: #333;">${complaint.title}</h4>
-                        <p style="margin: 4px 0; font-size: 12px;"><strong>Status:</strong> ${complaint.status.replace('_', ' ')}</p>
-                        <p style="margin: 4px 0; font-size: 12px;"><strong>Severity:</strong> <span style="color: ${severityColor}; font-weight: bold;">${complaint.severity.toUpperCase()}</span></p>
-                        <p style="margin: 4px 0; font-size: 12px;"><strong>Level:</strong> ${complaint.level}</p>
-                        ${complaint.address ? `<p style="margin: 4px 0; font-size: 12px;"><strong>Location:</strong> ${complaint.address}</p>` : ''}
-                        <p style="margin: 4px 0; font-size: 11px; color: #666;">${new Date(complaint.createdAt).toLocaleDateString()}</p>
-                    </div>
-                `);
-            });
 
             // Add legend
             const legend = L.control({ position: 'bottomright' });
