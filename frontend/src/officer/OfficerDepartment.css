@@ -48,12 +48,6 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.officer-dept-header-icon:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
 }
 
 .officer-dept-header-icon svg {
@@ -100,12 +94,6 @@
   color: var(--color9);
   font-size: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.officer-dept-contact-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateX(3px);
 }
 
 .officer-dept-contact-item svg {
@@ -134,15 +122,7 @@
   gap: 1rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
               0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.officer-dept-metric-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-              0 0 30px var(--color3);
 }
 
 .officer-dept-metric-icon {
@@ -155,12 +135,6 @@
   flex-shrink: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.officer-dept-metric-card:hover .officer-dept-metric-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .officer-dept-metric-icon svg {
@@ -285,15 +259,7 @@
   padding: 2rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
               0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
   border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.officer-dept-chart-container:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-              0 0 20px var(--color3);
-  transform: translateY(-5px) scale(1.01);
 }
 
 .officer-dept-chart-container.full-width {
@@ -331,13 +297,6 @@
   position: relative;
   z-index: 1;
   overflow-x: auto;
-  transition: all 0.3s ease;
-}
-
-.officer-dept-d3-visualization:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transform: translateY(-2px);
 }
 
 .officer-dept-d3-container {
@@ -364,13 +323,6 @@
   position: relative;
   z-index: 1;
   margin-bottom: 2rem;
-  transition: all 0.3s ease;
-}
-
-.officer-dept-map-visualization:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transform: translateY(-2px);
 }
 
 .officer-dept-leaflet-map {
@@ -401,13 +353,6 @@
   position: relative;
   z-index: 1;
   margin-bottom: 2rem;
-  transition: all 0.3s ease;
-}
-
-.officer-dept-officers-table-container:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transform: translateY(-2px);
 }
 
 .officer-dept-section-title {
@@ -587,13 +532,6 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease;
-}
-
-.officer-dept-recent-complaints:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  transform: translateY(-2px);
 }
 
 .officer-dept-complaints-grid {
@@ -609,16 +547,13 @@
   border-radius: 15px;
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  transition: transform 0.2s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .officer-dept-complaint-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(31, 38, 135, 0.25),
-              0 0 20px var(--color3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: #667eea;
+  transform: translateY(-3px);
 }
 
 .officer-dept-complaint-header {
