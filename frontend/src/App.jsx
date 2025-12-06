@@ -41,7 +41,41 @@ function ComplaintRouter() {
 
 // Protected route wrapper that checks user role
 function RoleProtectedRoute({ children, allowedRoles = ['citizen', 'officer'] }) {
-  const user = useSelector((state) => state.auth.user);
+  const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const token = localStorage.getItem('token');
+  
+  // Show loading spinner while user data is being fetched
+  if (token && !user && loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #2C3333 0%, #31363F 25%, #395B64 50%, #393E46 100%)'
+      }}>
+        <div style={{ textAlign: 'center', color: 'white' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid rgba(255, 255, 255, 0.3)',
+            borderTop: '4px solid white',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p style={{ fontSize: '1.2rem', fontWeight: '600' }}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Check authentication first
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
   const role = user?.role || 'citizen';
   
   if (!allowedRoles.includes(role)) {
@@ -49,7 +83,7 @@ function RoleProtectedRoute({ children, allowedRoles = ['citizen', 'officer'] })
     return <Navigate to={role === 'officer' ? '/officer/dashboard' : '/'} replace />;
   }
   
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  return children;
 }
 
 function App() {

@@ -1,575 +1,1016 @@
-.officer-department-container {
-    min-height: 100vh;
-    padding: 8rem 2rem 4rem;
-    background: linear-gradient(135deg, var(--color13) 0%, var(--color18) 100%);
-    position: relative;
+.officer-dept-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color12) 0%, var(--color18) 25%, var(--color13) 50%, var(--color2) 100%);
+  padding: 2rem;
+  padding-top: 7rem;
+  padding-bottom: 6rem;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.officer-department-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(0, 173, 181, 0.2), transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(113, 201, 206, 0.2), transparent 50%);
-    pointer-events: none;
+
+
+.officer-dept-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 24px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
-.officer-department-header {
-    max-width: 1400px;
-    margin: 0 auto 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
+.officer-dept-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
-.officer-department-header-content {
-    flex: 1;
+.officer-dept-header-content > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.officer-department-title {
-    font-size: 3rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+.officer-dept-header-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.title-icon {
-    width: 3rem;
-    height: 3rem;
-    color: var(--color3);
-    filter: drop-shadow(0 0 10px rgba(0, 173, 181, 0.5));
+.officer-dept-header-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
 }
 
-.officer-department-subtitle {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 300;
+.officer-dept-header-icon svg {
+  width: 40px;
+  height: 40px;
+  color: white;
 }
 
-.officer-department-search {
-    position: relative;
-    min-width: 350px;
+.officer-dept-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--color9) 0%, var(--color6) 30%, var(--color3) 70%, var(--color8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 0 30px var(--color3);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    color: var(--color3);
-    pointer-events: none;
+.officer-dept-subtitle {
+  font-size: 1rem;
+  color: var(--color9);
+  margin: 0;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  opacity: 0.95;
 }
 
-.officer-department-search-input {
-    width: 100%;
-    padding: 0.875rem 1rem 0.875rem 3rem;
-    border: none;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    font-size: 1rem;
-    color: #333;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.officer-dept-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.officer-department-search-input:focus {
-    outline: none;
-    background: white;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+.officer-dept-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  color: var(--color9);
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
-.officer-department-overview-stats {
-    max-width: 1400px;
-    margin: 0 auto 3rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    position: relative;
-    z-index: 1;
+.officer-dept-contact-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(3px);
 }
 
-.overview-stat-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+.officer-dept-contact-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
-.overview-stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+/* Key Metrics */
+.officer-dept-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
-.overview-stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+.officer-dept-metric-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.overview-stat-icon svg {
-    width: 30px;
-    height: 30px;
-    color: white;
+.officer-dept-metric-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+              0 0 30px var(--color3);
 }
 
-.overview-stat-details {
-    flex: 1;
+.officer-dept-metric-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.overview-stat-details h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
+.officer-dept-metric-card:hover .officer-dept-metric-icon {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
-.overview-stat-details p {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
+.officer-dept-metric-icon svg {
+  width: 30px;
+  height: 30px;
+  color: white;
 }
 
-.officer-departments-grid {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 1.5rem;
-    position: relative;
-    z-index: 1;
+.officer-dept-metric-details {
+  flex: 1;
 }
 
-.officer-department-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    cursor: pointer;
+.officer-dept-metric-details h3 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color9);
+  margin: 0 0 0.25rem 0;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.officer-department-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+.officer-dept-metric-details p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.officer-department-card.selected {
-    border: 3px solid var(--color3);
-    box-shadow: 0 12px 40px rgba(0, 173, 181, 0.4);
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 1);
+/* View Selector */
+.officer-dept-view-selector {
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.department-card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+.officer-dept-view-selector button {
+  padding: 0.875rem 1.5rem;
+  border: 2px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.department-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+.officer-dept-view-selector button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color13);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  z-index: -1;
 }
 
-.department-icon svg {
-    width: 32px;
-    height: 32px;
-    color: white;
+.officer-dept-view-selector button svg {
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease;
 }
 
-.department-header-info h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 0.25rem 0;
+.officer-dept-view-selector button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color9);
+  border-color: var(--color3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px var(--color3);
 }
 
-.department-header-info p {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
+.officer-dept-view-selector button:hover::before {
+  transform: scaleX(1);
 }
 
-.department-card-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(0, 173, 181, 0.05);
-    border-radius: 12px;
-    margin-bottom: 1rem;
+.officer-dept-view-selector button:hover svg {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px var(--color6));
 }
 
-.department-stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
+.officer-dept-view-selector button.officer-dept-view-active {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+  color: var(--color9);
+  border-color: var(--color3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2),
+              0 0 20px var(--color3),
+              0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  transform: scale(1.05);
+  pointer-events: none;
+  cursor: default;
 }
 
-.stat-label {
-    font-size: 0.75rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* Charts Grid */
+.officer-dept-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
+.officer-dept-chart-container {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.stat-value.active {
-    color: var(--color3);
+.officer-dept-chart-container:hover {
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+              0 0 20px var(--color3);
+  transform: translateY(-5px) scale(1.01);
 }
 
-.stat-value.resolved {
-    color: #51CF66;
+.officer-dept-chart-container.full-width {
+  grid-column: 1 / -1;
 }
 
-.stat-value.time {
-    color: #FFD93D;
-    font-size: 1rem;
+.officer-dept-chart-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color9);
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.department-expanded-content {
-    margin-top: 1.5rem;
-    animation: slideDown 0.3s ease-out;
+.officer-dept-chart-wrapper {
+  position: relative;
+  height: 300px;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.officer-dept-chart-wrapper canvas {
+  max-height: 300px;
 }
 
-.department-section {
-    margin-bottom: 1.5rem;
+/* D3 Visualizations */
+.officer-dept-d3-visualization {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  transition: all 0.3s ease;
 }
 
-.department-section h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.officer-dept-d3-visualization:hover {
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transform: translateY(-2px);
 }
 
-.department-section h4 svg {
-    width: 20px;
-    height: 20px;
-    color: var(--color3);
+.officer-dept-d3-container {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.officers-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.officer-dept-d3-container svg {
+  max-width: 100%;
+  height: auto;
 }
 
-.officer-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: rgba(0, 173, 181, 0.05);
-    border-radius: 10px;
-    transition: all 0.2s ease;
+/* Leaflet Map Visualization */
+.officer-dept-map-visualization {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
 }
 
-.officer-item:hover {
-    background: rgba(0, 173, 181, 0.1);
-    transform: translateX(5px);
+.officer-dept-map-visualization:hover {
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transform: translateY(-2px);
 }
 
-.officer-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color3), var(--color8));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-    flex-shrink: 0;
+.officer-dept-leaflet-map {
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-.officer-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+.leaflet-heatmap-legend {
+  z-index: 1000;
 }
 
-.officer-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #333;
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
 }
 
-.officer-complaints {
-    font-size: 0.8rem;
-    color: #666;
+/* Officers Performance Table */
+.officer-dept-officers-table-container {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
 }
 
-.officer-status {
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.officer-dept-officers-table-container:hover {
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transform: translateY(-2px);
 }
 
-.officer-status.active {
-    background: rgba(81, 207, 102, 0.2);
-    color: #51CF66;
+.officer-dept-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color9);
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.officer-status.busy {
-    background: rgba(255, 217, 61, 0.2);
-    color: #FFD93D;
+.officer-dept-officers-table-wrapper {
+  overflow-x: auto;
 }
 
-.activity-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.officer-dept-officers-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.activity-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: rgba(0, 173, 181, 0.05);
-    border-radius: 10px;
-    border-left: 3px solid var(--color3);
+.officer-dept-officers-table thead {
+  background: linear-gradient(135deg, var(--color13) 0%, var(--color18) 100%);
 }
 
-.activity-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color3);
-    margin-top: 0.5rem;
-    flex-shrink: 0;
-    animation: pulse 2s infinite;
+.officer-dept-officers-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: white;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 0 0 rgba(0, 173, 181, 0.7);
-    }
-    50% {
-        opacity: 0.8;
-        box-shadow: 0 0 0 6px rgba(0, 173, 181, 0);
-    }
+.officer-dept-officers-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.activity-details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+.officer-dept-officers-table tbody tr {
+  transition: all 0.2s ease;
 }
 
-.activity-action {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #333;
+.officer-dept-officers-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
 }
 
-.activity-meta {
-    font-size: 0.8rem;
-    color: #666;
+.officer-dept-officer-cell {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.department-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(0, 173, 181, 0.1);
+.officer-dept-officer-cell img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.dept-action-btn {
-    flex: 1;
-    padding: 0.875rem 1.25rem;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+.officer-dept-officer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
-.dept-action-btn svg {
-    width: 18px;
-    height: 18px;
+.officer-dept-officer-name {
+  font-weight: 600;
+  color: var(--color9);
+  margin-bottom: 0.25rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.dept-action-btn.primary {
-    background: linear-gradient(135deg, var(--color3), var(--color8));
-    color: white;
+.officer-dept-officer-email {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.dept-action-btn.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 173, 181, 0.4);
+.officer-dept-level-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: inline-block;
 }
 
-.dept-action-btn.secondary {
-    background: rgba(0, 173, 181, 0.1);
-    color: var(--color3);
-    border: 1px solid rgba(0, 173, 181, 0.3);
+.officer-dept-status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
 }
 
-.dept-action-btn.secondary:hover {
-    background: rgba(0, 173, 181, 0.2);
-    transform: translateY(-2px);
+.officer-dept-status-badge.pending {
+  background: rgba(255, 193, 7, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #ffc107;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-badge.progress {
+  background: rgba(3, 169, 244, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(3, 169, 244, 0.4);
+  color: #03a9f4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-badge.resolved {
+  background: rgba(76, 175, 80, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4caf50;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-badge.rejected {
+  background: rgba(244, 67, 54, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #f44336;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-activity-status {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.officer-dept-activity-status.active {
+  background: rgba(76, 175, 80, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4caf50;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-activity-status.inactive {
+  background: rgba(244, 67, 54, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #f44336;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Recent Complaints Section */
+.officer-dept-recent-complaints {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.officer-dept-recent-complaints:hover {
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transform: translateY(-2px);
+}
+
+.officer-dept-complaints-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.officer-dept-complaint-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.officer-dept-complaint-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(31, 38, 135, 0.25),
+              0 0 20px var(--color3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.officer-dept-complaint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.officer-dept-complaint-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--color9);
+  font-weight: 600;
+  flex: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.officer-dept-severity-tag {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.officer-dept-severity-tag.low {
+  background: rgba(76, 175, 80, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4caf50;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-severity-tag.medium {
+  background: rgba(255, 193, 7, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #ffc107;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-severity-tag.high {
+  background: rgba(244, 67, 54, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #f44336;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-complaint-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.officer-dept-status-tag {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.officer-dept-status-tag.pending {
+  background: rgba(255, 193, 7, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #ffc107;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-tag.in_progress {
+  background: rgba(3, 169, 244, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(3, 169, 244, 0.4);
+  color: #03a9f4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-tag.resolved {
+  background: rgba(76, 175, 80, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4caf50;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-status-tag.rejected {
+  background: rgba(244, 67, 54, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #f44336;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-level-tag {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(138, 43, 226, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  color: #ba68c8;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-dept-date-tag {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--color9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading and Error States */
+.officer-department-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, #2C3333 0%, #31363F 25%, #395B64 50%, #393E46 100%);
+}
+
+.officer-department-loading .loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(0, 173, 181, 0.3);
+  border-top-color: #00ADB5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.officer-department-loading p {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.officer-department-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.officer-department-error svg {
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.officer-department-error h2 {
+  color: white;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.officer-department-error p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .officer-department-empty {
-    max-width: 1400px;
-    margin: 0 auto;
-    text-align: center;
-    padding: 4rem 2rem;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
 }
 
 .officer-department-empty svg {
-    width: 80px;
-    height: 80px;
-    color: var(--color3);
-    margin-bottom: 1rem;
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.officer-department-empty h3 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 0.5rem;
+.officer-department-empty h2 {
+  color: white;
+  font-size: 2rem;
+  margin: 0;
 }
 
 .officer-department-empty p {
-    color: #666;
-    font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* D3 Tooltip Styles */
+.d3-tooltip {
+  position: absolute;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.d3-tooltip strong {
+  color: #667eea;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .officer-departments-grid {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    }
+  .officer-dept-charts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-    .officer-department-container {
-        padding: 6rem 1rem 2rem;
-    }
+  .officer-dept-dashboard {
+    padding: 1rem;
+  }
 
-    .officer-department-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .officer-dept-header {
+    padding: 1.5rem;
+  }
 
-    .officer-department-title {
-        font-size: 2rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
+  .officer-dept-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .title-icon {
-        width: 2rem;
-        height: 2rem;
-    }
+  .officer-dept-header-content > div:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .officer-department-search {
-        width: 100%;
-        min-width: 100%;
-    }
+  .officer-dept-title {
+    font-size: 2rem;
+  }
 
-    .officer-department-overview-stats {
-        grid-template-columns: 1fr;
-    }
+  .officer-dept-subtitle {
+    font-size: 0.9rem;
+  }
 
-    .officer-departments-grid {
-        grid-template-columns: 1fr;
-    }
+  .officer-dept-contact {
+    width: 100%;
+  }
 
-    .department-card-stats {
-        grid-template-columns: 1fr;
-    }
+  .officer-dept-contact-item {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
 
-    .department-actions {
-        flex-direction: column;
-    }
+  .officer-dept-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .officer-dept-view-selector {
+    padding: 0.5rem;
+  }
+
+  .officer-dept-view-selector button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .officer-dept-view-selector button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .officer-dept-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .officer-dept-chart-container {
+    padding: 1.5rem;
+  }
+
+  .officer-dept-chart-title {
+    font-size: 1.1rem;
+  }
+
+  .officer-dept-officers-table-container {
+    padding: 1.5rem;
+  }
+
+  .officer-dept-officers-table th,
+  .officer-dept-officers-table td {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .officer-dept-officer-cell {
+    gap: 0.75rem;
+  }
+
+  .officer-dept-officer-cell img,
+  .officer-dept-officer-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 0.95rem;
+  }
+
+  .officer-dept-complaints-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .officer-dept-recent-complaints {
+    padding: 1.5rem;
+  }
+
+  .officer-dept-d3-visualization {
+    padding: 1rem;
+    overflow-x: scroll;
+  }
+
+  .officer-dept-d3-container {
+    min-height: 400px;
+  }
 }
 
 @media (max-width: 480px) {
-    .officer-department-title {
-        font-size: 1.5rem;
-    }
+  .officer-dept-title {
+    font-size: 1.5rem;
+  }
 
-    .overview-stat-details h3 {
-        font-size: 1.5rem;
-    }
+  .officer-dept-header-icon {
+    width: 50px;
+    height: 50px;
+  }
 
-    .department-header-info h3 {
-        font-size: 1.1rem;
-    }
+  .officer-dept-header-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .officer-dept-metric-card {
+    padding: 1rem;
+  }
+
+  .officer-dept-metric-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .officer-dept-metric-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  .officer-dept-metric-details h3 {
+    font-size: 1.5rem;
+  }
+
+  .officer-dept-metric-details p {
+    font-size: 0.8rem;
+  }
+
+  .officer-dept-view-selector button {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  .officer-dept-section-title {
+    font-size: 1.25rem;
+  }
+
+  .officer-dept-complaint-card {
+    padding: 1rem;
+  }
 }
