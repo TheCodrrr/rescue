@@ -16,7 +16,8 @@ const createTeam = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Only officers can create teams");
     }
 
-    if (!creator.officer_category !== category) {
+    if (creator.officer_category !== category) {
+        // console.log(creator.officer_category, category);
         throw new ApiError(400, "Officer category mismatch");
     }
 
@@ -37,12 +38,22 @@ const createTeam = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Some members are not valid officers for this category");
     }
 
+    const levels = [
+        creator.user_level,
+        ...officers.map(o => o.user_level)
+    ];
+
+    const teamLevel = levels.reduce((sum, lvl) => sum + lvl, 0) / levels.length;
+
+    const finalTeamLevel = Math.round(teamLevel * 100) / 100;
+
     const team = await Team.create({
         name,
         category,
         department_id,
         head: req.user._id,
-        members
+        members,
+        team_level: finalTeamLevel
     });
 
     res.status(201).json({
@@ -52,22 +63,45 @@ const createTeam = asyncHandler(async (req, res) => {
     })
 })
 
+// Need to be worked on
 const updateTeam = asyncHandler(async (req, res) => {
     const { teamId } = req.params;
+    const user = req.user;
     const updates = req.body;
 
-    const team = await Team.findByIdAndUpdate(teamId, updates, {
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Access denied. Only officers can update a team.");
+    }
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+        throw new ApiError(404, "Team not found");
+    }
+
+    const isMember = team.members.some(
+        memberId => memberId.toString() === user._id.toString()
+    );
+
+    if (!isMember) {
+        throw new ApiError(403, "You must be a member of this team to update it.")
+    }
+
+    const updateTeam = await Team.findByIdAndUpdate(teamId, updates, {
         new: true,
-        runValidators: true
+        runValidators: true,
     })
 
-    if (!team) throw new ApiError(404, "Team not found");
-    res.status(200).json({ success: true, data: team });
+    res.status(200).json({ success: true, data: updateTeam });
 })
 
 const getTeamById = asyncHandler(async (req, res) => {
     const { teamId } = req.params;
-    
+    const user = req.user;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Access denied. Only officers can view team details.");
+    }
+
     const team = await Team.findById(teamId)
         .populate("members", "name email officer_category")
         .populate("head", "name email officer_category")
@@ -76,14 +110,35 @@ const getTeamById = asyncHandler(async (req, res) => {
 
     if (!team) throw new ApiError(404, "Team not found");
 
+    if (user.department_id.toString() !== team.department_id._id.toString()) {
+        throw new ApiError(403, "You cannot access teams outside your department.")
+    }
+
+    const isMember = team.members.some(
+        (m) => m._id.toString() === user._id.toString()
+    );
+
+    if (!isMember && team.head._id.toString() !== user._id.toString()) {
+        throw new ApiError(403, "Only team members or team head can view this team.");
+    }
+
     res.status(200).json({ success: true, data: team });
 })
 
 const deleteTeam = asyncHandler(async(req, res) => {
     const { teamId } = req.params;
+    const user = req.user;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Access denied. Only officers can delete a team.")
+    }
 
     const team = await Team.findById(teamId);
     if (!team) throw new ApiError(404, "Team not found");
+
+    if (team.head.toString() !== user._id.toString()) {
+        throw new ApiError(403, "Only the team head can delete a team.");
+    }
 
     await team.deleteOne();
 
@@ -120,9 +175,28 @@ const addMemberToTeam = asyncHandler(async (req, res) => {
 const removeMemberFromTeam = asyncHandler(async(req, res) => {
     const { teamId } = req.params;
     const { memberId } = req.body;
+    const user = req.user;
 
-    const team = Team.findById(teamId);
-    if (!team) throw new ApiError(404, "Team not found");
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Only officers can remove members from a team.");
+    }
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+        throw new ApiError(404, "Team not found");
+    }
+
+    const isMember = team.members.some(
+        memberId => memberId.toString() === user._id.toString()
+    );
+
+    if (!isMember) {
+        throw new ApiError(403, "You must be a member of this team to update it.")
+    }
+
+    if (team.head.toString() !== user._id.toString()) {
+        throw new ApiError(403, "Only team head can remove members from a team.");
+    }
 
     team.members = team.members.filter((m) => m.toString() !== memberId);
     await team.save();
@@ -133,9 +207,22 @@ const removeMemberFromTeam = asyncHandler(async(req, res) => {
 const addComplaintToTeam = asyncHandler(async (req, res) => {
     const { teamId } = req.params;
     const { complaintId } = req.body;
+    const user = req.user;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Only officers can assign complaints to a team.");
+    }
 
     const team = await Team.findById(teamId);
     if (!team) throw new ApiError(404, "Team not found");
+
+    const isMember = team.members.some(
+        (memberId) => memberId.toString() === user._id.toString()
+    );
+
+    if (!isMember) {
+        throw new ApiError(403, "Only team members can add complaints to this team.");
+    }
 
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) throw new ApiError(404, "Complaint not found");
@@ -155,9 +242,22 @@ const addComplaintToTeam = asyncHandler(async (req, res) => {
 const removeComplaintFromTeam = asyncHandler(async (req, res) => {
     const { teamId } = req.params;
     const { complaintId } = req.body;
+    const user = req.user;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Only officers can remove complaints");
+    }
 
     const team = await Team.findById(teamId);
     if (!team) throw new ApiError(404, "Team not found");
+
+    const isMember = team.members.some(
+        (memberId) => memberId.toString() === user._id.toString()
+    );
+
+    if (!isMember) {
+        throw new ApiError(403, "Only team members can remove complaints.");
+    }
 
     team.assigned_complaints = team.assigned_complaints.filter(
         (c) => c.toString() !== complaintId
@@ -171,6 +271,11 @@ const removeComplaintFromTeam = asyncHandler(async (req, res) => {
 const getTeamDetails = asyncHandler(async (req, res) => {
     try {
         const { teamId } = req.params;
+        const user = req.user;
+
+        if (!user || user.role !== "officer") {
+            throw new ApiError(403, "Access denied. Only officers can view team details.")
+        }
 
         if (!mongoose.Types.ObjectId.isValid(teamId)) {
             throw new ApiError(400, "Invalid team ID");

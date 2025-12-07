@@ -4,7 +4,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "user",
+            from: "users",
             localField: "head",
             foreignField: "_id",
             as: "head_info",
@@ -12,7 +12,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "department",
+            from: "departments",
             localField: "department_id",
             foreignField: "_id",
             as: "department_info",
@@ -20,7 +20,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "user",
+            from: "users",
             localField: "members",
             foreignField: "_id",
             as: "members_info"
@@ -28,7 +28,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "complaint",
+            from: "complaints",
             localField: "assigned_complaints",
             foreignField: "_id",
             as: "complaints_info"
@@ -36,7 +36,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "user",
+            from: "users",
             localField: "complaints_info.user_id",
             foreignField: "_id",
             as: "reporters"
@@ -44,7 +44,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "user",
+            from: "users",
             localField: "complaints_info.assigned_officer_id",
             foreignField: "_id",
             as: "officers"
@@ -52,7 +52,7 @@ export const teamPipeline = (teamId) => [
     },
     {
         $lookup: {
-            from: "escalation",
+            from: "escalations",
             localField: "complaints_info.escalation_id",
             foreignField: "_id",
             as: "escalations"
