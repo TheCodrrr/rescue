@@ -8,6 +8,7 @@ import { Escalation } from "../models/escalation.models.js";
 import { scheduleEscalation, cancelEscalation } from "../../utils/scheduleEscalation.js";
 import { createNotification } from "./user.controllers.js";
 import { io } from "../server.js";
+import { officersByCategoryPipeline } from "../pipelines/officer.pipeline.js";
 
 /**
  * Redis Key Structure:
@@ -519,9 +520,70 @@ const getOfficerAcceptedComplaints = asyncHandler(async (req, res) => {
     });
 });
 
+const getOfficersByCategory = asyncHandler(async (req, res) => {
+    const user = req.user;
+    const { category } = req.params;
+    const { page = 1, limit = 10, latitude, longitude } = req.query;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Access denied. Only officers can view officers lists.");
+    }
+
+    const validCategories = ["rail", "fire", "cyber", "police", "court", "road"];
+    if (!validCategories.includes(category)) {
+        throw new ApiError(400, "Invalid category provided.");
+    }
+
+    // Validate latitude and longitude if provided
+    if (latitude && longitude) {
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            throw new ApiError(400, "Invalid latitude or longitude");
+        }
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Build pipeline for count
+    const countPipeline = officersByCategoryPipeline(category, latitude, longitude, 0, 0);
+    countPipeline.pop(); // Remove projection
+    countPipeline.pop(); // Remove limit
+    countPipeline.pop(); // Remove skip
+    countPipeline.push({ $count: "total" });
+    
+    const countResult = await User.aggregate(countPipeline);
+    const totalCount = countResult.length > 0 ? countResult[0].total : 0;
+
+    // Execute aggregation with pagination
+    const pipeline = officersByCategoryPipeline(category, latitude, longitude, skip, parseInt(limit));
+    let officers = await User.aggregate(pipeline);
+
+    // Populate department_id manually
+    if (officers.length > 0) {
+        await User.populate(officers, { path: "department_id", select: "name category" });
+    }
+
+    // Calculate if there's a next page
+    const hasNextPage = skip + officers.length < totalCount;
+
+    res.status(200).json({
+        success: true,
+        count: officers.length,
+        totalCount: totalCount,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        hasNextPage: hasNextPage,
+        data: officers
+    })
+})
+
 export {
     getNearbyComplaintsForOfficer,
     rejectComplaint,
     assignOfficerToComplaint,
     getOfficerAcceptedComplaints,
+    getOfficersByCategory,
 };

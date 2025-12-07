@@ -4,7 +4,8 @@ import {
     assignOfficerToComplaint,
     getNearbyComplaintsForOfficer,
     rejectComplaint,
-    getOfficerAcceptedComplaints
+    getOfficerAcceptedComplaints,
+    getOfficersByCategory
 } from "../controllers/officer.controllers.js";
 
 const router = express.Router();
@@ -20,5 +21,7 @@ router.put("/:officerId/assign-complaint/:complaintId", assignOfficerToComplaint
 
 // Route to get complaints accepted by the officer
 router.get("/accepted-complaints", verifyJWT, getOfficerAcceptedComplaints);
+
+router.get("/:category", verifyJWT, getOfficersByCategory);
 
 export default router;
