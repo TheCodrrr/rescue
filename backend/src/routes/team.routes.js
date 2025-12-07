@@ -8,7 +8,8 @@ import {
     removeMemberFromTeam,
     addComplaintToTeam,
     removeComplaintFromTeam,
-    getTeamDetails
+    getTeamDetails,
+    getTeamByCategory
 } from "../controllers/team.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
@@ -40,5 +41,8 @@ router.post("/:teamId/remove-complaint", verifyJWT, removeComplaintFromTeam);
 
 // GET deep complete structured team details (AGGREGATION)
 router.get("/:teamId/details", verifyJWT, getTeamDetails);
+
+// GET team details by category
+router.get("/:category/category", verifyJWT, getTeamByCategory);
 
 export default router;

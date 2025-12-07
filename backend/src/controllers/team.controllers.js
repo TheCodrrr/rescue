@@ -301,6 +301,44 @@ const getTeamDetails = asyncHandler(async (req, res) => {
     }
 })
 
+const getTeamByCategory = asyncHandler(async (req, res) => {
+    const user = req.user;
+    const { category } = req.params;
+
+    if (!user || user.role !== "officer") {
+        throw new ApiError(403, "Access denied. Only officers can access team details.");
+    }
+
+    const validCategories = ["rail", "fire", "cyber", "police", "court", "road"];
+    if (!validCategories.includes(category)) {
+        throw new ApiError(400, "Invalid category provided");
+    }
+
+    const teams = await Team.find({ category })
+        .populate("head", "name email officer_category")
+        .populate("department_id", "name category")
+        .select("name head members assigned_complaints team_level department_id category createdAt updatedAt")
+        .lean();
+
+    const briefTeams = teams.map(team => ({
+        _id: team._id,
+        name: team.name,
+        category: team.category,
+        department: team.department_id?.name || null,
+        team_level: team.team_level,
+        head: team.head,
+        total_members: team.members.length,
+        total_assigned_complaints: team.assigned_complaints.length,
+        createdAt: team.createdAt,
+    }))
+
+    res.status(200).json({
+        success: true,
+        count: briefTeams.length,
+        data: briefTeams,
+    });
+})
+
 export {
     createTeam,
     updateTeam,
@@ -311,4 +349,5 @@ export {
     addComplaintToTeam,
     removeComplaintFromTeam,
     getTeamDetails,
+    getTeamByCategory,
 }
