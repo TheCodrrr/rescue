@@ -99,6 +99,13 @@ export default function UserScreen() {
   };
 
   const handleSectionChange = (sectionId: string) => {
+    // Navigate to dedicated pages for some sections
+    if (sectionId === 'complaints') {
+      closeSidebar();
+      router.push('/my-complaints');
+      return;
+    }
+    
     setActiveSection(sectionId);
     closeSidebar();
   };
@@ -121,23 +128,9 @@ export default function UserScreen() {
       case 'profile':
         return <ProfileContent />;
       case 'complaints':
-        return (
-          <View className="flex-1 items-center justify-center px-6">
-            <View className="bg-[#393E46] p-8 rounded-3xl items-center">
-              <Ionicons name="alert-circle" size={64} color="#00ADB5" />
-              <Text className="text-white text-xl font-bold mt-4">My Complaints</Text>
-              <Text className="text-[#EEEEEE]/60 text-center mt-2">
-                View and manage your filed complaints
-              </Text>
-              <TouchableOpacity 
-                onPress={() => router.push('/')}
-                className="mt-6 bg-[#00ADB5] px-6 py-3 rounded-full"
-              >
-                <Text className="text-white font-semibold">Go to Home</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
+        // This should navigate to my-complaints page instead
+        router.push('/my-complaints');
+        return null;
       case 'analytics':
         return (
           <View className="flex-1 items-center justify-center px-6">

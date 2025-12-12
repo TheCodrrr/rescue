@@ -445,19 +445,13 @@ export default function ComplainScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#222831]">
+    <SafeAreaView className="flex-1 bg-[#222831] pt-7">
       <StatusBar barStyle="light-content" backgroundColor="#222831" />
 
       {/* Header */}
       <View className="px-4 py-3 pt-8 border-b border-[#393E46]">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.back()} className="p-2">
-            <Ionicons name="arrow-back" size={24} color="#EEEEEE" />
-          </TouchableOpacity>
-          <Text className="text-white text-lg font-bold">Report Incident</Text>
-          <TouchableOpacity onPress={() => router.push('/user')} className="p-2">
-            <Ionicons name="list" size={24} color="#00ADB5" />
-          </TouchableOpacity>
+        <View className="flex-row items-center justify-center">
+          <Text className="text-white text-xl font-bold">Report Incident</Text>
         </View>
         <Text className="text-[#EEEEEE]/60 text-sm text-center mt-1">
           Help us help you by providing detailed information
