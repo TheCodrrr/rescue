@@ -210,11 +210,11 @@ export default function MyComplaintsScreen() {
   const handleScroll = useCallback(
     (event: any) => {
       const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-      const paddingToBottom = 100;
-      const isCloseToBottom =
-        layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
+      // Trigger loading when user has scrolled 60% of the content (around 7 items)
+      const scrollPercentage = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
+      const shouldLoadMore = scrollPercentage >= 0.6;
 
-      if (isCloseToBottom) {
+      if (shouldLoadMore) {
         loadMore();
       }
     },
