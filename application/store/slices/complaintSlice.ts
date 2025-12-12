@@ -391,6 +391,49 @@ export const getAllComplaints = createAsyncThunk(
   }
 );
 
+// Get complaint by ID
+export const getComplaintById = createAsyncThunk(
+  'complaints/getById',
+  async (complaintId: string, thunkAPI) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required');
+      }
+
+      const response = await axiosInstance.get(`/complaints/${complaintId}`);
+      const complaint = response.data.data || response.data;
+      
+      // Get current user ID from auth state to determine userVote
+      const state = thunkAPI.getState() as { auth: { user: { _id: string } | null } };
+      const currentUserId = state.auth.user?._id;
+      
+      // Calculate userVote from votedUsers array
+      let userVote: 'upvote' | 'downvote' | null = null;
+      if (currentUserId && complaint.votedUsers && Array.isArray(complaint.votedUsers)) {
+        const userVoteEntry = complaint.votedUsers.find(
+          (v: any) => {
+            // Handle both populated and non-populated user field
+            const voterId = typeof v.user === 'object' ? v.user?._id : v.user;
+            return voterId?.toString() === currentUserId.toString();
+          }
+        );
+        if (userVoteEntry) {
+          userVote = userVoteEntry.vote;
+        }
+      }
+      
+      return { ...complaint, userVote };
+    } catch (error: any) {
+      console.error('Get complaint by ID error:', error);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch complaint details'
+      );
+    }
+  }
+);
+
 // Upload evidence
 export const uploadEvidence = createAsyncThunk(
   'complaints/uploadEvidence',
@@ -594,6 +637,22 @@ const complaintSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Get complaint by ID
+    builder
+      .addCase(getComplaintById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.selectedComplaint = null;
+      })
+      .addCase(getComplaintById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedComplaint = action.payload;
+      })
+      .addCase(getComplaintById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
     // Upvote complaint
     builder
       .addCase(upvoteComplaint.pending, (state, action) => {
@@ -606,6 +665,15 @@ const complaintSlice = createSlice({
         if (index !== -1) {
           state.userComplaints[index] = {
             ...state.userComplaints[index],
+            upvote: action.payload.upvote,
+            downvote: action.payload.downvote,
+            userVote: action.payload.userVote,
+          };
+        }
+        // Also update selectedComplaint if it matches
+        if (state.selectedComplaint?._id === action.payload.complaintId) {
+          state.selectedComplaint = {
+            ...state.selectedComplaint,
             upvote: action.payload.upvote,
             downvote: action.payload.downvote,
             userVote: action.payload.userVote,
@@ -629,6 +697,15 @@ const complaintSlice = createSlice({
         if (index !== -1) {
           state.userComplaints[index] = {
             ...state.userComplaints[index],
+            upvote: action.payload.upvote,
+            downvote: action.payload.downvote,
+            userVote: action.payload.userVote,
+          };
+        }
+        // Also update selectedComplaint if it matches
+        if (state.selectedComplaint?._id === action.payload.complaintId) {
+          state.selectedComplaint = {
+            ...state.selectedComplaint,
             upvote: action.payload.upvote,
             downvote: action.payload.downvote,
             userVote: action.payload.userVote,

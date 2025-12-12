@@ -568,7 +568,7 @@ export default function MyComplaintsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#222831]">
+    <SafeAreaView className="flex-1 bg-[#222831] pt-7">
       <StatusBar barStyle="light-content" backgroundColor="#222831" />
 
       {/* Header */}
