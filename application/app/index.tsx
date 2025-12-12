@@ -1,11 +1,13 @@
-import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar } from "react-native";
+import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar, ActivityIndicator } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { logout } from '../store/slices/authSlice';
 import BottomNavigation from '../components/BottomNavigation';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,6 +17,87 @@ export default function Index() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+
+  // Default fallback location (India - New Delhi)
+  const defaultLocation = {
+    coords: {
+      latitude: 28.6139,
+      longitude: 77.2090,
+      altitude: null,
+      accuracy: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    },
+    timestamp: Date.now(),
+  } as Location.LocationObject;
+
+  // Get user's current location
+  const fetchLocation = async () => {
+    try {
+      setIsLoadingLocation(true);
+      setLocationError(null);
+      
+      // Check if location services are enabled
+      const isEnabled = await Location.hasServicesEnabledAsync();
+      if (!isEnabled) {
+        console.log('Location services disabled, using default location');
+        setLocation(defaultLocation);
+        setLocationError('Location services disabled. Showing default location.');
+        setIsLoadingLocation(false);
+        return;
+      }
+      
+      // Check if permission is already granted
+      let { status } = await Location.getForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        // Request permission if not granted
+        const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+        if (newStatus !== 'granted') {
+          setLocation(defaultLocation);
+          setLocationError('Location permission denied. Showing default location.');
+          setIsLoadingLocation(false);
+          return;
+        }
+      }
+
+      // Try to get last known location first (faster)
+      let currentLocation = await Location.getLastKnownPositionAsync();
+      
+      if (currentLocation) {
+        setLocation(currentLocation);
+        setLocationError(null);
+      } else {
+        // Fall back to getting current position with timeout
+        try {
+          currentLocation = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Low, // Lower accuracy is faster
+            timeInterval: 10000,
+          });
+          setLocation(currentLocation);
+          setLocationError(null);
+        } catch (posError) {
+          console.log('getCurrentPositionAsync failed, using default:', posError);
+          setLocation(defaultLocation);
+          setLocationError('Could not get current location. Showing default location.');
+        }
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+      setLocation(defaultLocation);
+      setLocationError('Location unavailable. Showing default location.');
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocation();
+  }, []);
 
   const categories = [
     { id: 'all', name: 'All Reports', icon: 'apps', color: '#00ADB5' },
@@ -23,6 +106,28 @@ export default function Index() {
     { id: 'cyber', name: 'Cyber', icon: 'shield-checkmark', color: '#8b5cf6' },
     { id: 'police', name: 'Police', icon: 'shield', color: '#00ADB5' },
     { id: 'court', name: 'Court', icon: 'business', color: '#10b981' },
+  ];
+
+  // Dark map style to match app theme
+  const mapStyle = [
+    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+    { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+    { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#263c3f' }] },
+    { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#6b9a76' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
+    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
+    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
+    { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
+    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
+    { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
+    { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
+    { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
   ];
 
   return (
@@ -130,25 +235,64 @@ export default function Index() {
         {/* Map Section */}
         <View className="px-6 mb-8">
           <View className="bg-[#393E46] rounded-3xl overflow-hidden border border-[#00ADB5]/20" style={{ height: 300 }}>
-            {/* Map Placeholder */}
-            <View className="flex-1 items-center justify-center">
-              <View className="bg-[#00ADB5]/10 p-6 rounded-full mb-4">
-                <Ionicons name="location" size={48} color="#00ADB5" />
+            {/* Map View */}
+            {isLoadingLocation ? (
+              <View className="flex-1 items-center justify-center">
+                <ActivityIndicator size="large" color="#00ADB5" />
+                <Text className="text-white font-semibold text-base mt-4">Finding your location...</Text>
               </View>
-              <Text className="text-white font-semibold text-base mb-2">Finding your location...</Text>
-              <Text className="text-[#EEEEEE]/60 text-sm">Map will load here</Text>
-            </View>
+            ) : locationError ? (
+              <View className="flex-1 items-center justify-center">
+                <View className="bg-[#ef4444]/10 p-6 rounded-full mb-4">
+                  <Ionicons name="location-outline" size={48} color="#ef4444" />
+                </View>
+                <Text className="text-white font-semibold text-base mb-2">Location Error</Text>
+                <Text className="text-[#EEEEEE]/60 text-sm text-center px-4">{locationError}</Text>
+              </View>
+            ) : location ? (
+              <MapView
+                style={{ flex: 1 }}
+                initialRegion={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                showsUserLocation={true}
+                showsMyLocationButton={false}
+                showsCompass={false}
+                customMapStyle={mapStyle}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  }}
+                  title="You are here"
+                  description="Your current location"
+                >
+                  <View className="bg-[#00ADB5] p-2 rounded-full border-2 border-white">
+                    <Ionicons name="person" size={16} color="white" />
+                  </View>
+                </Marker>
+              </MapView>
+            ) : (
+              <View className="flex-1 items-center justify-center">
+                <View className="bg-[#00ADB5]/10 p-6 rounded-full mb-4">
+                  <Ionicons name="location" size={48} color="#00ADB5" />
+                </View>
+                <Text className="text-white font-semibold text-base mb-2">Map unavailable</Text>
+                <Text className="text-[#EEEEEE]/60 text-sm">Could not load map</Text>
+              </View>
+            )}
             
             {/* Map Controls */}
             <View className="absolute top-4 right-4">
-              <TouchableOpacity className="bg-[#222831]/80 p-3 rounded-full mb-2">
+              <TouchableOpacity 
+                className="bg-[#222831]/80 p-3 rounded-full mb-2"
+                onPress={fetchLocation}
+              >
                 <Ionicons name="locate" size={20} color="#00ADB5" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-[#222831]/80 p-3 rounded-full mb-2">
-                <Ionicons name="add" size={20} color="#EEEEEE" />
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-[#222831]/80 p-3 rounded-full">
-                <Ionicons name="remove" size={20} color="#EEEEEE" />
               </TouchableOpacity>
             </View>
 
