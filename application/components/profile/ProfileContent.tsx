@@ -463,7 +463,7 @@ export default function ProfileContent() {
         </View>
 
         {/* Danger Zone Card */}
-        <View className="px-4 mb-6">
+        <View className="px-4 mb-[90px]">
           <View className="bg-[#393E46] rounded-3xl p-5 border border-[#ef4444]/30">
             <View className="flex-row items-center mb-4">
               <Ionicons name="warning" size={20} color="#ef4444" style={{ marginRight: 8 }} />
