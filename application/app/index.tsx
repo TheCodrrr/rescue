@@ -2,10 +2,12 @@ import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar } from 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Index() {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
@@ -41,10 +43,16 @@ export default function Index() {
               <Text className="text-[#00ADB5] text-sm font-medium">Citizens Safety Portal</Text>
             </View>
             <View className="flex-row gap-2">
-              <TouchableOpacity className="bg-[#393E46] px-4 py-2 rounded-full border border-[#00ADB5]">
+              <TouchableOpacity 
+                onPress={() => router.push('/login')}
+                className="bg-[#393E46] px-4 py-2 rounded-full border border-[#00ADB5]"
+              >
                 <Text className="text-[#00ADB5] font-semibold text-sm">Login</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-[#00ADB5] px-4 py-2 rounded-full">
+              <TouchableOpacity 
+                onPress={() => router.push('/signup')}
+                className="bg-[#00ADB5] px-4 py-2 rounded-full"
+              >
                 <Text className="text-white font-semibold text-sm">Signup</Text>
               </TouchableOpacity>
             </View>
