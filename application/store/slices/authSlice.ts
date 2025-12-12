@@ -185,6 +185,126 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+// 👇 Thunk to upload profile image
+export const uploadProfileImage = createAsyncThunk(
+  'auth/uploadProfileImage',
+  async (imageUri: string, thunkAPI) => {
+    try {
+      console.log("Making API call to upload profile image...");
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in AsyncStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      // Create form data for image upload
+      const formData = new FormData();
+      const filename = imageUri.split('/').pop() || 'profile.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      formData.append('profileImage', {
+        uri: imageUri,
+        name: filename,
+        type: type,
+      } as any);
+
+      console.log("Uploading image with filename:", filename);
+      const res = await axiosInstance.patch('/users/update-profile-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log("Upload profile image API response:", res.data);
+      
+      const userData = res.data.data;
+      console.log("Updated user data with new image:", userData);
+      
+      return userData;
+    } catch (error: any) {
+      console.error("Upload profile image API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to upload profile image';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to change password
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }, thunkAPI) => {
+    try {
+      console.log("Making API call to change password...");
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in AsyncStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      const res = await axiosInstance.patch('/users/change-password', {
+        oldPassword,
+        newPassword
+      });
+      console.log("Change password API response:", res.data);
+      
+      return res.data;
+    } catch (error: any) {
+      console.error("Change password API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to change password';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// 👇 Thunk to delete user account
+export const deleteUserAccount = createAsyncThunk(
+  'auth/deleteUserAccount',
+  async (_, thunkAPI) => {
+    try {
+      console.log("Making API call to delete user account...");
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        console.log("No token found in AsyncStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      const res = await axiosInstance.delete('/users/delete');
+      console.log("Delete user API response:", res.data);
+      
+      // Clear AsyncStorage after successful deletion
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('isLoggedIn');
+      
+      return res.data;
+    } catch (error: any) {
+      console.error("Delete user API error:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to delete account';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -311,6 +431,43 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Upload profile image
+      .addCase(uploadProfileImage.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(uploadProfileImage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      // Change password
+      .addCase(changePassword.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      // Delete user account
+      .addCase(deleteUserAccount.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteUserAccount.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.error = null;
+      })
+      .addCase(deleteUserAccount.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

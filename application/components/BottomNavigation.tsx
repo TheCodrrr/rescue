@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
+import { useAppSelector } from '../store/hooks';
 
 type TabName = 'home' | 'complaints' | 'analytics' | 'teams' | 'complaint' | 'trending' | 'help' | 'profile' | 'login';
 
@@ -12,7 +11,6 @@ interface BottomNavigationProps {
 
 export default function BottomNavigation({ activeTab = 'home' }: BottomNavigationProps) {
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const userRole = user?.role || 'citizen';
 
