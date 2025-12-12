@@ -9,7 +9,46 @@ const initialState = {
   token: null as string | null,
   loading: false,
   error: null as string | null,
+  initialized: false, // Track if auth has been initialized
 };
+
+// 👇 Thunk to initialize auth state from AsyncStorage on app start
+export const initializeAuth = createAsyncThunk(
+  'auth/initialize',
+  async (_, thunkAPI) => {
+    try {
+      console.log("Initializing auth state from AsyncStorage...");
+      const token = await AsyncStorage.getItem('token');
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      
+      if (!token || isLoggedIn !== 'true') {
+        console.log("No valid token found in AsyncStorage");
+        return thunkAPI.rejectWithValue('No authentication token found');
+      }
+
+      console.log("Token found, fetching user data from /users/me");
+      const res = await axiosInstance.get('/users/me');
+      console.log("Initialize auth API response:", res.data);
+      
+      const userData = res.data.data;
+      console.log("User data loaded:", userData);
+      
+      return { user: userData, token };
+    } catch (error: any) {
+      console.error("Initialize auth error:", error);
+      // Clear invalid token
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('isLoggedIn');
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Failed to initialize auth';
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
 
 // 👇 Thunk to load user
 export const loadUser = createAsyncThunk(
@@ -184,6 +223,29 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Initialize auth state
+      .addCase(initializeAuth.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(initializeAuth.fulfilled, (state, action) => {
+        state.loading = false;
+        state.initialized = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        console.log("Auth initialized successfully");
+      })
+      .addCase(initializeAuth.rejected, (state, action) => {
+        state.loading = false;
+        state.initialized = true;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.error = action.payload as string;
+        console.log("Auth initialization failed, user needs to login");
+      })
+      // Load user
       .addCase(loadUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -205,12 +267,14 @@ const authSlice = createSlice({
         AsyncStorage.removeItem('token');
         AsyncStorage.removeItem('isLoggedIn');
       })
+      // Login user
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
+        state.initialized = true;
         const { user, accessToken } = action.payload?.data || {};
         if (user && accessToken) {
           state.isAuthenticated = true;
