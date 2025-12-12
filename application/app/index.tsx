@@ -1,13 +1,19 @@
-import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar } from "react-native";
+import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar, Image } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { logout } from '../store/slices/authSlice';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Index() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const userRole = user?.role || 'citizen';
+  
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
@@ -42,20 +48,32 @@ export default function Index() {
               <Text className="text-white text-2xl font-bold">Rescue</Text>
               <Text className="text-[#00ADB5] text-sm font-medium">Citizens Safety Portal</Text>
             </View>
-            <View className="flex-row gap-2">
+            {!isAuthenticated ? (
+              <View className="flex-row gap-2">
+                <TouchableOpacity 
+                  onPress={() => router.push('/login')}
+                  className="bg-[#393E46] px-4 py-2 rounded-full border border-[#00ADB5]"
+                >
+                  <Text className="text-[#00ADB5] font-semibold text-sm">Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => router.push('/signup')}
+                  className="bg-[#00ADB5] px-4 py-2 rounded-full"
+                >
+                  <Text className="text-white font-semibold text-sm">Signup</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
               <TouchableOpacity 
-                onPress={() => router.push('/login')}
-                className="bg-[#393E46] px-4 py-2 rounded-full border border-[#00ADB5]"
+                onPress={() => {
+                  dispatch(logout());
+                }}
+                className="bg-[#ef4444] px-4 py-2 rounded-full flex-row items-center"
               >
-                <Text className="text-[#00ADB5] font-semibold text-sm">Login</Text>
+                <Ionicons name="log-out" size={16} color="white" style={{ marginRight: 6 }} />
+                <Text className="text-white font-semibold text-sm">Logout</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => router.push('/signup')}
-                className="bg-[#00ADB5] px-4 py-2 rounded-full"
-              >
-                <Text className="text-white font-semibold text-sm">Signup</Text>
-              </TouchableOpacity>
-            </View>
+            )}
           </View>
         </View>
 
@@ -198,24 +216,115 @@ export default function Index() {
       {/* Bottom Navigation Bar - Sticky */}
       <View className="absolute bottom-0 left-0 right-0 bg-[#222831]/95 border-t-2 border-[#393E46]">
         <View className="flex-row justify-around py-3 px-4">
+          {/* Home - Always visible */}
           <TouchableOpacity className="items-center flex-1">
             <View className="bg-[#00ADB5] p-3 rounded-full">
               <Ionicons name="home" size={24} color="white" />
             </View>
             <Text className="text-[#00ADB5] text-xs font-semibold mt-1">Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center flex-1">
-            <View className="p-3 rounded-full">
-              <Ionicons name="document-text" size={24} color="#EEEEEE" />
-            </View>
-            <Text className="text-[#EEEEEE]/60 text-xs mt-1">Complaint</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center flex-1">
-            <View className="p-3 rounded-full">
-              <Ionicons name="trending-up" size={24} color="#EEEEEE" />
-            </View>
-            <Text className="text-[#EEEEEE]/60 text-xs mt-1">Trending</Text>
-          </TouchableOpacity>
+          
+          {/* Officer-specific tabs */}
+          {userRole === 'officer' ? (
+            <>
+              <TouchableOpacity 
+                className="items-center flex-1"
+                onPress={() => router.push('/complain')}
+              >
+                <View className="p-3 rounded-full">
+                  <Ionicons name="list" size={24} color="#EEEEEE" />
+                </View>
+                <Text className="text-[#EEEEEE]/60 text-xs mt-1">Complaints</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="items-center flex-1"
+                onPress={() => router.push('/officer/analytics')}
+              >
+                <View className="p-3 rounded-full">
+                  <Ionicons name="stats-chart" size={24} color="#EEEEEE" />
+                </View>
+                <Text className="text-[#EEEEEE]/60 text-xs mt-1">Analytics</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="items-center flex-1"
+                onPress={() => router.push('/officer/teams')}
+              >
+                <View className="p-3 rounded-full">
+                  <Ionicons name="people" size={24} color="#EEEEEE" />
+                </View>
+                <Text className="text-[#EEEEEE]/60 text-xs mt-1">Teams</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              {/* Citizen tabs - Complaint only if authenticated */}
+              {isAuthenticated && (
+                <TouchableOpacity 
+                  className="items-center flex-1"
+                  onPress={() => router.push('/complain')}
+                >
+                  <View className="p-3 rounded-full">
+                    <Ionicons name="document-text" size={24} color="#EEEEEE" />
+                  </View>
+                  <Text className="text-[#EEEEEE]/60 text-xs mt-1">Complaint</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity 
+                className="items-center flex-1"
+                onPress={() => router.push('/trending')}
+              >
+                <View className="p-3 rounded-full">
+                  <Ionicons name="trending-up" size={24} color="#EEEEEE" />
+                </View>
+                <Text className="text-[#EEEEEE]/60 text-xs mt-1">Trending</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                className="items-center flex-1"
+                onPress={() => router.push('/help')}
+              >
+                <View className="p-3 rounded-full">
+                  <Ionicons name="help-circle" size={24} color="#EEEEEE" />
+                </View>
+                <Text className="text-[#EEEEEE]/60 text-xs mt-1">Help</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          
+          {/* Profile - Always visible as last tab */}
+          {isAuthenticated ? (
+            <TouchableOpacity 
+              className="items-center flex-1"
+              onPress={() => router.push('/user')}
+            >
+              <View className="p-1 rounded-full relative">
+                <View className="w-10 h-10 rounded-full border-2 border-[#00ADB5] overflow-hidden bg-[#393E46]">
+                  {user?.profileImage ? (
+                    <Image 
+                      source={{ uri: user.profileImage }} 
+                      style={{ width: '100%', height: '100%' }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View className="w-full h-full items-center justify-center">
+                      <Ionicons name="person" size={20} color="#00ADB5" />
+                    </View>
+                  )}
+                </View>
+                <View className="absolute bottom-1 right-1 w-2.5 h-2.5 bg-[#10b981] rounded-full border border-[#222831]" />
+              </View>
+              <Text className="text-[#EEEEEE]/60 text-xs mt-1">Profile</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              className="items-center flex-1"
+              onPress={() => router.push('/login')}
+            >
+              <View className="p-3 rounded-full">
+                <Ionicons name="person-circle-outline" size={24} color="#EEEEEE" />
+              </View>
+              <Text className="text-[#EEEEEE]/60 text-xs mt-1">Login</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
