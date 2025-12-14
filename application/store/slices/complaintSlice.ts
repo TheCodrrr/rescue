@@ -81,6 +81,7 @@ export interface PaginatedResponse {
 interface ComplaintState {
   complaints: Complaint[];
   userComplaints: Complaint[];
+  trendingComplaints: Complaint[];
   selectedComplaint: Complaint | null;
   isSubmitting: boolean;
   isLoading: boolean;
@@ -96,11 +97,17 @@ interface ComplaintState {
   totalCount: number;
   currentCategory: string;
   searchQuery: string;
+  // Trending pagination state
+  trendingNextCursor: string | null;
+  trendingHasNextPage: boolean;
+  isFetchingTrending: boolean;
+  isFetchingMoreTrending: boolean;
 }
 
 const initialState: ComplaintState = {
   complaints: [],
   userComplaints: [],
+  trendingComplaints: [],
   selectedComplaint: null,
   isSubmitting: false,
   isLoading: false,
@@ -116,6 +123,11 @@ const initialState: ComplaintState = {
   totalCount: 0,
   currentCategory: 'all',
   searchQuery: '',
+  // Trending pagination state
+  trendingNextCursor: null,
+  trendingHasNextPage: false,
+  isFetchingTrending: false,
+  isFetchingMoreTrending: false,
 };
 
 // Submit a new complaint
@@ -391,6 +403,55 @@ export const getAllComplaints = createAsyncThunk(
   }
 );
 
+// Get trending complaints with pagination
+export const fetchTrendingComplaints = createAsyncThunk(
+  'complaints/fetchTrending',
+  async ({ cursor, limit = 10 }: { cursor?: string | null; limit?: number }, thunkAPI) => {
+    try {
+      let url = `/complaints/trending?limit=${limit}`;
+      if (cursor) {
+        url += `&cursor=${cursor}`;
+      }
+
+      const response = await axiosInstance.get(url);
+      const data = response.data;
+      
+      // Get current user ID from auth state to determine userVote
+      const state = thunkAPI.getState() as { auth: { user: { _id: string } | null } };
+      const currentUserId = state.auth.user?._id;
+      
+      // Process complaints to add userVote
+      const complaintsWithVote = (data.data || []).map((complaint: any) => {
+        let userVote: 'upvote' | 'downvote' | null = null;
+        if (currentUserId && complaint.votedUsers && Array.isArray(complaint.votedUsers)) {
+          const userVoteEntry = complaint.votedUsers.find(
+            (v: any) => {
+              const voterId = typeof v.user === 'object' ? v.user?._id : v.user;
+              return voterId?.toString() === currentUserId.toString();
+            }
+          );
+          if (userVoteEntry) {
+            userVote = userVoteEntry.vote;
+          }
+        }
+        return { ...complaint, userVote };
+      });
+
+      return {
+        complaints: complaintsWithVote,
+        nextCursor: data.nextCursor,
+        hasNextPage: data.hasNextPage,
+        isLoadMore: !!cursor,
+      };
+    } catch (error: any) {
+      console.error('Fetch trending complaints error:', error);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch trending complaints'
+      );
+    }
+  }
+);
+
 // Get complaint by ID
 export const getComplaintById = createAsyncThunk(
   'complaints/getById',
@@ -519,6 +580,11 @@ const complaintSlice = createSlice({
     },
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
+    },
+    resetTrendingComplaints: (state) => {
+      state.trendingComplaints = [];
+      state.trendingNextCursor = null;
+      state.trendingHasNextPage = false;
     },
   },
   extraReducers: (builder) => {
@@ -660,11 +726,21 @@ const complaintSlice = createSlice({
       })
       .addCase(upvoteComplaint.fulfilled, (state, action) => {
         state.isVoting[action.payload.complaintId] = false;
-        // Update the complaint in the list
+        // Update the complaint in userComplaints list
         const index = state.userComplaints.findIndex(c => c._id === action.payload.complaintId);
         if (index !== -1) {
           state.userComplaints[index] = {
             ...state.userComplaints[index],
+            upvote: action.payload.upvote,
+            downvote: action.payload.downvote,
+            userVote: action.payload.userVote,
+          };
+        }
+        // Update in trendingComplaints list
+        const trendingIndex = state.trendingComplaints.findIndex(c => c._id === action.payload.complaintId);
+        if (trendingIndex !== -1) {
+          state.trendingComplaints[trendingIndex] = {
+            ...state.trendingComplaints[trendingIndex],
             upvote: action.payload.upvote,
             downvote: action.payload.downvote,
             userVote: action.payload.userVote,
@@ -692,11 +768,21 @@ const complaintSlice = createSlice({
       })
       .addCase(downvoteComplaint.fulfilled, (state, action) => {
         state.isVoting[action.payload.complaintId] = false;
-        // Update the complaint in the list
+        // Update the complaint in userComplaints list
         const index = state.userComplaints.findIndex(c => c._id === action.payload.complaintId);
         if (index !== -1) {
           state.userComplaints[index] = {
             ...state.userComplaints[index],
+            upvote: action.payload.upvote,
+            downvote: action.payload.downvote,
+            userVote: action.payload.userVote,
+          };
+        }
+        // Update in trendingComplaints list
+        const trendingIndex = state.trendingComplaints.findIndex(c => c._id === action.payload.complaintId);
+        if (trendingIndex !== -1) {
+          state.trendingComplaints[trendingIndex] = {
+            ...state.trendingComplaints[trendingIndex],
             upvote: action.payload.upvote,
             downvote: action.payload.downvote,
             userVote: action.payload.userVote,
@@ -738,6 +824,37 @@ const complaintSlice = createSlice({
       .addCase(uploadEvidence.rejected, (state, action) => {
         state.error = action.payload as string;
       });
+
+    // Fetch trending complaints
+    builder
+      .addCase(fetchTrendingComplaints.pending, (state, action) => {
+        if (action.meta.arg.cursor) {
+          state.isFetchingMoreTrending = true;
+        } else {
+          state.isFetchingTrending = true;
+        }
+        state.error = null;
+      })
+      .addCase(fetchTrendingComplaints.fulfilled, (state, action) => {
+        state.isFetchingTrending = false;
+        state.isFetchingMoreTrending = false;
+        
+        if (action.payload.isLoadMore) {
+          // Append to existing complaints
+          state.trendingComplaints = [...state.trendingComplaints, ...action.payload.complaints];
+        } else {
+          // Replace complaints
+          state.trendingComplaints = action.payload.complaints;
+        }
+        
+        state.trendingNextCursor = action.payload.nextCursor;
+        state.trendingHasNextPage = action.payload.hasNextPage;
+      })
+      .addCase(fetchTrendingComplaints.rejected, (state, action) => {
+        state.isFetchingTrending = false;
+        state.isFetchingMoreTrending = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
@@ -749,6 +866,7 @@ export const {
   resetUserComplaints,
   setCurrentCategory,
   setSearchQuery,
+  resetTrendingComplaints,
 } = complaintSlice.actions;
 
 export default complaintSlice.reducer;
