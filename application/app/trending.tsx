@@ -410,10 +410,8 @@ export default function TrendingScreen() {
     const categoryColor = getCategoryColor(complaint.category);
 
     return (
-      <TouchableOpacity
+      <View
         key={`trending-${complaint._id}-${index}`}
-        onPress={() => openCommentModal(complaint)}
-        activeOpacity={0.9}
         className="bg-[#393E46] rounded-2xl mb-4 overflow-hidden"
         style={{
           borderWidth: 1,
@@ -586,7 +584,7 @@ export default function TrendingScreen() {
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
