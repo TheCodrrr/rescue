@@ -12,6 +12,7 @@ import {
   Dimensions,
   Linking,
   Share,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -491,9 +492,17 @@ export default function ComplaintDetailScreen() {
             <View className="px-4 py-4 border-b border-[#222831]">
               <Text className="text-[#EEEEEE]/60 text-xs mb-2">Submitted by</Text>
               <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-[#00ADB5]/20 items-center justify-center mr-3">
-                  <Ionicons name="person" size={20} color="#00ADB5" />
-                </View>
+                {selectedComplaint.user_id.profileImage ? (
+                  <Image
+                    source={{ uri: selectedComplaint.user_id.profileImage }}
+                    className="w-10 h-10 rounded-full mr-3"
+                    style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)' }}
+                  />
+                ) : (
+                  <View className="w-10 h-10 rounded-full bg-[#00ADB5]/20 items-center justify-center mr-3">
+                    <Ionicons name="person" size={20} color="#00ADB5" />
+                  </View>
+                )}
                 <View>
                   <Text className="text-white font-medium">
                     {selectedComplaint.user_id.name || 'Anonymous'}
