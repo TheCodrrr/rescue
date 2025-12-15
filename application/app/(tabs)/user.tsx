@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import ProfileContent from '../../components/profile/ProfileContent';
+import MyComplaints from '../../components/profile/my-complaints';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.75;
@@ -98,13 +99,6 @@ export default function UserScreen() {
   };
 
   const handleSectionChange = (sectionId: string) => {
-    // Navigate to dedicated pages for some sections
-    if (sectionId === 'complaints') {
-      closeSidebar();
-      router.push('/my-complaints');
-      return;
-    }
-    
     setActiveSection(sectionId);
     closeSidebar();
   };
@@ -127,9 +121,7 @@ export default function UserScreen() {
       case 'profile':
         return <ProfileContent />;
       case 'complaints':
-        // This should navigate to my-complaints page instead
-        router.push('/my-complaints');
-        return null;
+        return <MyComplaints />;
       case 'analytics':
         return (
           <View className="flex-1 items-center justify-center px-6">

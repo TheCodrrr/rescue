@@ -4,13 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   Modal,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -26,8 +23,6 @@ import {
   searchUserComplaints,
   upvoteComplaint,
 } from '../../store/slices/complaintSlice';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Categories matching the website
 const categories = [
@@ -114,13 +109,13 @@ const getCategoryLabel = (category: string) => {
   return cat?.label || category;
 };
 
-export default function MyComplaintsScreen() {
+export default function MyComplaints() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const scrollViewRef = useRef<ScrollView>(null);
-  const isLoadingMoreRef = useRef(false); // Ref to track if a load is already in progress
+  const isLoadingMoreRef = useRef(false);
   
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const {
     userComplaints,
     isLoading,
@@ -163,23 +158,8 @@ export default function MyComplaintsScreen() {
     }
   }, [isAuthenticated, selectedCategory, debouncedSearch]);
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      Alert.alert(
-        'Authentication Required',
-        'Please log in to view your complaints.',
-        [
-          { text: 'Cancel', onPress: () => router.back() },
-          { text: 'Login', onPress: () => router.push('/login') },
-        ]
-      );
-    }
-  }, [isAuthenticated]);
-
   // Load more complaints
   const loadMore = useCallback(() => {
-    // Prevent multiple simultaneous loads using ref
     if (isLoadingMoreRef.current) return;
     
     if (hasNextPage && !isFetchingMore && !isLoading && nextCursor) {
@@ -220,7 +200,6 @@ export default function MyComplaintsScreen() {
   const handleScroll = useCallback(
     (event: any) => {
       const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-      // Trigger loading when user has scrolled 85% of the content (around 8-9 items)
       const scrollPercentage = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
       const shouldLoadMore = scrollPercentage >= 0.85;
 
@@ -274,7 +253,6 @@ export default function MyComplaintsScreen() {
 
   // Handle visit complaint detail
   const handleVisitComplaint = (complaintId: string) => {
-    // TODO: Navigate to complaint detail page
     router.push(`/complaint/${complaintId}` as any);
   };
 
@@ -557,47 +535,24 @@ export default function MyComplaintsScreen() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView className="flex-1 bg-[#222831]">
-        <StatusBar barStyle="light-content" backgroundColor="#222831" />
-        <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="lock-closed" size={64} color="#00ADB5" />
-          <Text className="text-white text-xl font-bold mt-4">Authentication Required</Text>
-          <Text className="text-[#EEEEEE]/60 text-center mt-2">
-            Please log in to view your complaints.
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/login')}
-            className="mt-6 bg-[#00ADB5] px-8 py-3 rounded-full"
-          >
-            <Text className="text-white font-semibold text-lg">Login</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 items-center justify-center px-6">
+        <Ionicons name="lock-closed" size={64} color="#00ADB5" />
+        <Text className="text-white text-xl font-bold mt-4">Authentication Required</Text>
+        <Text className="text-[#EEEEEE]/60 text-center mt-2">
+          Please log in to view your complaints.
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          className="mt-6 bg-[#00ADB5] px-8 py-3 rounded-full"
+        >
+          <Text className="text-white font-semibold text-lg">Login</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#222831] pt-7">
-      <StatusBar barStyle="light-content" backgroundColor="#222831" />
-
-      {/* Header */}
-      <View className="px-4 py-3 pt-8 border-b border-[#393E46]">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.back()} className="p-2">
-            <Ionicons name="arrow-back" size={24} color="#EEEEEE" />
-          </TouchableOpacity>
-          <View className="items-center flex-1">
-            <Text className="text-white text-lg font-bold">My Complaints</Text>
-            <Text className="text-[#EEEEEE]/60 text-xs">
-              Track the status of your submitted complaints
-            </Text>
-          </View>
-          <TouchableOpacity onPress={() => router.push('/complain')} className="p-2">
-            <Ionicons name="add-circle" size={28} color="#00ADB5" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
+    <View className="flex-1">
       {/* Search and Filter Section */}
       <View className="px-4 py-3 bg-[#393E46]/30 border-b border-[#393E46]">
         {/* Search Bar */}
@@ -706,7 +661,7 @@ export default function MyComplaintsScreen() {
         )}
 
         {/* Bottom Spacer */}
-        <View className="h-24" />
+        <View className="h-8" />
       </ScrollView>
 
       {/* Category Picker Modal */}
@@ -836,6 +791,6 @@ export default function MyComplaintsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }

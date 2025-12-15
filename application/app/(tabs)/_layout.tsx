@@ -188,13 +188,6 @@ export default function TabsLayout() {
 
       {/* Hidden screens - these won't appear in tab bar but are still accessible */}
       <Tabs.Screen
-        name="my-complaints"
-        options={{
-          href: null, // Hide from tab bar
-        }}
-      />
-
-      <Tabs.Screen
         name="signup"
         options={{
           href: null, // Hide from tab bar
