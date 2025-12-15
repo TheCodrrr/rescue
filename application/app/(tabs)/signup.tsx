@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { registerUser } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { registerUser } from '../../store/slices/authSlice';
 
 const { width } = Dimensions.get('window');
 

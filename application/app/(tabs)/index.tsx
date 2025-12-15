@@ -5,9 +5,8 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from 'react-native-maps';
-import BottomNavigation from '../components/BottomNavigation';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { logout } from '../../store/slices/authSlice';
 
 const { width, height } = Dimensions.get('window');
 
@@ -367,8 +366,6 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
-
-      <BottomNavigation activeTab="home" />
     </View>
   );
 }

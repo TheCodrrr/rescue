@@ -16,8 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import BottomNavigation from '../components/BottomNavigation';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   Complaint,
   deleteComplaint,
@@ -26,7 +25,7 @@ import {
   resetUserComplaints,
   searchUserComplaints,
   upvoteComplaint,
-} from '../store/slices/complaintSlice';
+} from '../../store/slices/complaintSlice';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -573,7 +572,6 @@ export default function MyComplaintsScreen() {
             <Text className="text-white font-semibold text-lg">Login</Text>
           </TouchableOpacity>
         </View>
-        <BottomNavigation activeTab="profile" />
       </SafeAreaView>
     );
   }
@@ -838,9 +836,6 @@ export default function MyComplaintsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation activeTab="profile" />
     </SafeAreaView>
   );
 }

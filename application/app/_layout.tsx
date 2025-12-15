@@ -15,8 +15,12 @@ function RootLayoutContent() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: 'none', // Disable slide animation
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="complaint/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+    </Stack>
   );
 }
 

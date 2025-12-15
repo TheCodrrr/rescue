@@ -209,7 +209,7 @@ export default function ProfileContent() {
     try {
       await dispatch(deleteUserAccount()).unwrap();
       dispatch(logout());
-      router.replace('/');
+      router.replace('/(tabs)/index');
     } catch (error: any) {
       Alert.alert('Error', error || 'Failed to delete account');
       setIsDeleting(false);

@@ -25,7 +25,6 @@ import {
   setSelectedComplaint,
   Complaint,
 } from '../../store/slices/complaintSlice';
-import BottomNavigation from '../../components/BottomNavigation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -224,7 +223,6 @@ export default function ComplaintDetailScreen() {
           <ActivityIndicator size="large" color="#00ADB5" />
           <Text className="text-[#EEEEEE]/60 mt-4">Loading complaint details...</Text>
         </View>
-        <BottomNavigation activeTab="profile" />
       </SafeAreaView>
     );
   }
@@ -253,7 +251,6 @@ export default function ComplaintDetailScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        <BottomNavigation activeTab="profile" />
       </SafeAreaView>
     );
   }
@@ -276,7 +273,6 @@ export default function ComplaintDetailScreen() {
             <Text className="text-white font-semibold">Go Back</Text>
           </TouchableOpacity>
         </View>
-        <BottomNavigation activeTab="profile" />
       </SafeAreaView>
     );
   }
@@ -658,11 +654,8 @@ export default function ComplaintDetailScreen() {
         )}
 
         {/* Bottom Spacer */}
-        <View className="h-24" />
+        <View className="h-8" />
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation activeTab="profile" />
     </SafeAreaView>
   );
 }

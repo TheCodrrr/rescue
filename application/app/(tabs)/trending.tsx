@@ -17,16 +17,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import axiosInstance from '../api/axiosInstance';
-import BottomNavigation from '../components/BottomNavigation';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import axiosInstance from '../../api/axiosInstance';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   Complaint,
   downvoteComplaint,
   fetchTrendingComplaints,
   resetTrendingComplaints,
   upvoteComplaint,
-} from '../store/slices/complaintSlice';
+} from '../../store/slices/complaintSlice';
 
 // Categories matching the website
 const categories = [
@@ -812,9 +811,6 @@ export default function TrendingScreen() {
         {/* Bottom Spacer */}
         <View className="h-24" />
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation activeTab="trending" />
 
       {/* Comment Modal */}
       {renderCommentModal()}

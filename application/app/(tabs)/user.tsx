@@ -13,10 +13,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
-import BottomNavigation from '../components/BottomNavigation';
-import ProfileContent from '../components/profile/ProfileContent';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { logout } from '../../store/slices/authSlice';
+import ProfileContent from '../../components/profile/ProfileContent';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.75;
@@ -113,7 +112,7 @@ export default function UserScreen() {
   const handleLogout = async () => {
     closeSidebar();
     dispatch(logout());
-    router.replace('/');
+    router.replace('/(tabs)/index');
   };
 
   // Get section title
@@ -207,9 +206,6 @@ export default function UserScreen() {
       <View className="flex-1">
         {renderContent()}
       </View>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation activeTab="profile" />
 
       {/* Sidebar Overlay */}
       {sidebarOpen && (

@@ -18,14 +18,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   submitComplaint,
   uploadEvidence,
   clearError,
   resetComplaintState,
-} from '../store/slices/complaintSlice';
-import BottomNavigation from '../components/BottomNavigation';
+} from '../../store/slices/complaintSlice';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -439,7 +438,6 @@ export default function ComplainScreen() {
             <Text className="text-white font-semibold text-lg">Login</Text>
           </TouchableOpacity>
         </View>
-        <BottomNavigation activeTab="complaint" />
       </SafeAreaView>
     );
   }
@@ -831,9 +829,6 @@ export default function ComplainScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation activeTab="complaint" />
     </SafeAreaView>
   );
 }

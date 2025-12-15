@@ -3,8 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginUser } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { loginUser } from '../../store/slices/authSlice';
 
 export default function Login() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function Login() {
       
       console.log('Login successful:', result);
       Alert.alert('Success', 'Login successful!');
-      router.replace('/');
+      router.replace('/(tabs)/index');
     } catch (error: any) {
       console.error('Login error:', error);
       Alert.alert('Login Failed', error || 'Please check your credentials and try again.');
