@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 import './OfficerComplaint.css';
-import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime, removeComplaintRealtime, rejectComplaint, acceptComplaint, addEscalationEvent } from '../auth/redux/officerSlice';
+import { fetchNearbyComplaints, clearOfficerError, addNewComplaintRealtime, updateComplaintRealtime, removeComplaintRealtime, rejectComplaint, acceptComplaint, addEscalationEvent } from '../auth/redux/officerSlice';
 import { addComplaintEscalatedHistory } from '../auth/redux/historySlice';
 import useGeolocation from '../hooks/useGeolocation';
 import ComplaintMap from './ComplaintMap';
@@ -134,8 +134,9 @@ const OfficerComplaint = () => {
         socketRef.current.on('newComplaintForOfficer', (data) => {
             const { complaint, location: complaintLocation, severity, category, escalated, level, previousLevel } = data;
             
-            // Check if we've already processed this complaint
-            if (processedComplaintIds.current.has(complaint._id)) {
+            // For escalated complaints, we should update existing ones, not skip them
+            // Only check processedComplaintIds for non-escalated complaints
+            if (!escalated && processedComplaintIds.current.has(complaint._id)) {
                 return;
             }
             
@@ -163,11 +164,12 @@ const OfficerComplaint = () => {
                     // Mark as processed
                     processedComplaintIds.current.add(complaint._id);
                     
-                    // Dispatch to Redux (which now has duplicate check)
-                    dispatch(addNewComplaintRealtime(complaint));
-                    
-                    // Show notification with escalation info if applicable
                     if (escalated) {
+                        // For escalated complaints, update the existing complaint or add if not exists
+                        dispatch(updateComplaintRealtime(complaint));
+                        // Also try to add in case it doesn't exist yet (e.g., officer just opened the page)
+                        dispatch(addNewComplaintRealtime(complaint));
+                        
                         toast.error(
                             `⬆️ ESCALATED: Level ${previousLevel}→${level} ${severity} priority ${category} complaint nearby!`,
                             {
@@ -176,6 +178,9 @@ const OfficerComplaint = () => {
                             }
                         );
                     } else {
+                        // For new complaints, add to Redux
+                        dispatch(addNewComplaintRealtime(complaint));
+                        
                         toast.success(
                             `New ${severity} priority ${category} complaint nearby!`,
                             {

@@ -220,6 +220,32 @@ const officerSlice = createSlice({
         state.totalComplaints++;
       }
     },
+    updateComplaintRealtime: (state, action) => {
+      // Update an existing complaint (e.g., when escalated)
+      const updatedComplaint = action.payload;
+      const complaintId = updatedComplaint._id;
+      
+      // Find and update in low severity
+      const lowIndex = state.nearbyComplaints.low_severity.complaints.findIndex(c => c._id === complaintId);
+      if (lowIndex !== -1) {
+        state.nearbyComplaints.low_severity.complaints[lowIndex] = updatedComplaint;
+        return;
+      }
+      
+      // Find and update in medium severity
+      const mediumIndex = state.nearbyComplaints.medium_severity.complaints.findIndex(c => c._id === complaintId);
+      if (mediumIndex !== -1) {
+        state.nearbyComplaints.medium_severity.complaints[mediumIndex] = updatedComplaint;
+        return;
+      }
+      
+      // Find and update in high severity
+      const highIndex = state.nearbyComplaints.high_severity.complaints.findIndex(c => c._id === complaintId);
+      if (highIndex !== -1) {
+        state.nearbyComplaints.high_severity.complaints[highIndex] = updatedComplaint;
+        return;
+      }
+    },
     removeComplaintRealtime: (state, action) => {
       // Remove complaint when it's accepted by another officer
       const complaintId = action.payload;
@@ -347,6 +373,6 @@ const officerSlice = createSlice({
   },
 });
 
-export const { clearOfficerError, updateOfficerLocation, addNewComplaintRealtime, removeComplaintRealtime } = officerSlice.actions;
+export const { clearOfficerError, updateOfficerLocation, addNewComplaintRealtime, updateComplaintRealtime, removeComplaintRealtime } = officerSlice.actions;
 
 export default officerSlice.reducer;

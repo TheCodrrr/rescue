@@ -189,11 +189,35 @@ export default function ComplaintDetail() {
             }
         });
 
+        // Listen for escalated complaints (for officers viewing this complaint)
+        socketRef.current.on('newComplaintForOfficer', (data) => {
+            const { complaint, escalated, level, previousLevel } = data;
+            
+            // If this is the current complaint and it was escalated, refresh the data
+            if (complaint._id === id && escalated) {
+                console.log('ComplaintDetail: Current complaint was escalated, refreshing...');
+                
+                toast.info(
+                    `This complaint has been escalated from Level ${previousLevel} to Level ${level}`,
+                    {
+                        duration: 5000,
+                        icon: '⬆️',
+                    }
+                );
+                
+                // Refresh complaint to update UI immediately
+                dispatch(fetchComplaintById(id)).then(() => {
+                    console.log('Complaint data refreshed after escalation');
+                });
+            }
+        });
+
         // Cleanup on unmount
         return () => {
             if (socketRef.current) {
                 socketRef.current.off(`notification:${user._id}`);
                 socketRef.current.off('complaintAccepted');
+                socketRef.current.off('newComplaintForOfficer');
                 socketRef.current.disconnect();
             }
         };
