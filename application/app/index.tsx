@@ -1,13 +1,13 @@
-import { Text, View, ScrollView, TouchableOpacity, Dimensions, StatusBar, ActivityIndicator } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
-import BottomNavigation from '../components/BottomNavigation';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Marker } from 'react-native-maps';
+import BottomNavigation from '../components/BottomNavigation';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../store/slices/authSlice';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,7 +19,7 @@ export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   // Default fallback location (India - New Delhi)
   const defaultLocation = {
@@ -38,20 +38,9 @@ export default function Index() {
   // Get user's current location
   const fetchLocation = async () => {
     try {
-      setIsLoadingLocation(true);
       setLocationError(null);
       
-      // Check if location services are enabled
-      const isEnabled = await Location.hasServicesEnabledAsync();
-      if (!isEnabled) {
-        console.log('Location services disabled, using default location');
-        setLocation(defaultLocation);
-        setLocationError('Location services disabled. Showing default location.');
-        setIsLoadingLocation(false);
-        return;
-      }
-      
-      // Check if permission is already granted
+      // Check if permission is already granted first
       let { status } = await Location.getForegroundPermissionsAsync();
       
       if (status !== 'granted') {
@@ -60,21 +49,44 @@ export default function Index() {
         if (newStatus !== 'granted') {
           setLocation(defaultLocation);
           setLocationError('Location permission denied. Showing default location.');
-          setIsLoadingLocation(false);
           return;
         }
       }
 
-      // Try to get last known location first (faster)
-      let currentLocation = await Location.getLastKnownPositionAsync();
+      // Try to get last known location first (instant)
+      const lastKnownLocation = await Location.getLastKnownPositionAsync();
       
-      if (currentLocation) {
-        setLocation(currentLocation);
+      if (lastKnownLocation) {
+        // Set last known location immediately (no loading state)
+        setLocation(lastKnownLocation);
         setLocationError(null);
-      } else {
-        // Fall back to getting current position with timeout
+        
+        // Then try to get more accurate current position in background
         try {
-          currentLocation = await Location.getCurrentPositionAsync({
+          const currentLocation = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          setLocation(currentLocation);
+        } catch (posError) {
+          // Keep using last known location, no error
+          console.log('getCurrentPositionAsync failed, using last known:', posError);
+        }
+      } else {
+        // No last known location, show loading and get current position
+        setIsLoadingLocation(true);
+        
+        // Check if location services are enabled
+        const isEnabled = await Location.hasServicesEnabledAsync();
+        if (!isEnabled) {
+          console.log('Location services disabled, using default location');
+          setLocation(defaultLocation);
+          setLocationError('Location services disabled. Showing default location.');
+          setIsLoadingLocation(false);
+          return;
+        }
+        
+        try {
+          const currentLocation = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.Low, // Lower accuracy is faster
             timeInterval: 10000,
           });
@@ -85,12 +97,12 @@ export default function Index() {
           setLocation(defaultLocation);
           setLocationError('Could not get current location. Showing default location.');
         }
+        setIsLoadingLocation(false);
       }
     } catch (error) {
       console.error('Error getting location:', error);
       setLocation(defaultLocation);
       setLocationError('Location unavailable. Showing default location.');
-    } finally {
       setIsLoadingLocation(false);
     }
   };

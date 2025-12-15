@@ -1,32 +1,32 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-  SafeAreaView,
-  ActivityIndicator,
-  RefreshControl,
-  Image,
-  Alert,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  fetchTrendingComplaints,
-  upvoteComplaint,
-  downvoteComplaint,
-  resetTrendingComplaints,
-  Complaint,
-} from '../store/slices/complaintSlice';
-import BottomNavigation from '../components/BottomNavigation';
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import axiosInstance from '../api/axiosInstance';
+import BottomNavigation from '../components/BottomNavigation';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import {
+  Complaint,
+  downvoteComplaint,
+  fetchTrendingComplaints,
+  resetTrendingComplaints,
+  upvoteComplaint,
+} from '../store/slices/complaintSlice';
 
 // Categories matching the website
 const categories = [
@@ -136,6 +136,7 @@ export default function TrendingScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const scrollViewRef = useRef<ScrollView>(null);
+  const isLoadingMoreRef = useRef(false); // Ref to track if a load is already in progress
 
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const {
@@ -179,9 +180,16 @@ export default function TrendingScreen() {
 
   // Load more complaints - called when user scrolls near bottom
   const loadMore = useCallback(() => {
+    // Prevent multiple simultaneous loads using ref
+    if (isLoadingMoreRef.current) return;
+    
     if (trendingHasNextPage && !isFetchingMoreTrending && !isFetchingTrending && trendingNextCursor) {
+      isLoadingMoreRef.current = true;
       console.log('Loading more trending complaints...');
-      dispatch(fetchTrendingComplaints({ cursor: trendingNextCursor, limit: 10 }));
+      dispatch(fetchTrendingComplaints({ cursor: trendingNextCursor, limit: 10 }))
+        .finally(() => {
+          isLoadingMoreRef.current = false;
+        });
     }
   }, [trendingHasNextPage, isFetchingMoreTrending, isFetchingTrending, trendingNextCursor, dispatch]);
 
@@ -189,10 +197,10 @@ export default function TrendingScreen() {
   const handleScroll = useCallback(
     (event: any) => {
       const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-      // Trigger loading when user has scrolled ~50% of the content (around 5th-7th complaint)
+      // Trigger loading when user has scrolled ~60% of the content (load earlier for smoother experience)
       const scrollPercentage = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
       
-      if (scrollPercentage >= 0.5) {
+      if (scrollPercentage >= 0.6) {
         loadMore();
       }
     },

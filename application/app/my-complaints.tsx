@@ -1,32 +1,32 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  StatusBar,
-  SafeAreaView,
   ActivityIndicator,
   Alert,
-  RefreshControl,
   Dimensions,
   Modal,
   Pressable,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import BottomNavigation from '../components/BottomNavigation';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
+  Complaint,
+  deleteComplaint,
+  downvoteComplaint,
   fetchUserComplaints,
+  resetUserComplaints,
   searchUserComplaints,
   upvoteComplaint,
-  downvoteComplaint,
-  deleteComplaint,
-  resetUserComplaints,
-  Complaint,
 } from '../store/slices/complaintSlice';
-import BottomNavigation from '../components/BottomNavigation';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -119,6 +119,7 @@ export default function MyComplaintsScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const scrollViewRef = useRef<ScrollView>(null);
+  const isLoadingMoreRef = useRef(false); // Ref to track if a load is already in progress
   
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const {
@@ -179,15 +180,25 @@ export default function MyComplaintsScreen() {
 
   // Load more complaints
   const loadMore = useCallback(() => {
+    // Prevent multiple simultaneous loads using ref
+    if (isLoadingMoreRef.current) return;
+    
     if (hasNextPage && !isFetchingMore && !isLoading && nextCursor) {
+      isLoadingMoreRef.current = true;
+      
       if (debouncedSearch.trim()) {
         dispatch(searchUserComplaints({ 
           searchTerm: debouncedSearch, 
           category: selectedCategory, 
           cursor: nextCursor 
-        }));
+        })).finally(() => {
+          isLoadingMoreRef.current = false;
+        });
       } else {
-        dispatch(fetchUserComplaints({ category: selectedCategory, cursor: nextCursor }));
+        dispatch(fetchUserComplaints({ category: selectedCategory, cursor: nextCursor }))
+          .finally(() => {
+            isLoadingMoreRef.current = false;
+          });
       }
     }
   }, [hasNextPage, isFetchingMore, isLoading, nextCursor, debouncedSearch, selectedCategory]);
@@ -210,9 +221,9 @@ export default function MyComplaintsScreen() {
   const handleScroll = useCallback(
     (event: any) => {
       const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-      // Trigger loading when user has scrolled 60% of the content (around 7 items)
+      // Trigger loading when user has scrolled 85% of the content (around 8-9 items)
       const scrollPercentage = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
-      const shouldLoadMore = scrollPercentage >= 0.6;
+      const shouldLoadMore = scrollPercentage >= 0.85;
 
       if (shouldLoadMore) {
         loadMore();

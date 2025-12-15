@@ -527,12 +527,12 @@ export const uploadEvidence = createAsyncThunk(
         type: file.mimeType || 'image/jpeg',
         name: file.fileName || 'evidence.jpg',
       } as any);
-      formData.append('complaintId', complaintId);
-      formData.append('evidenceType', evidenceType);
+      formData.append('complaint_id', complaintId);
+      formData.append('evidence_type', evidenceType);
       formData.append('description', description);
       formData.append('category', category);
 
-      const response = await axiosInstance.post('/evidence/upload', formData, {
+      const response = await axiosInstance.post('/evidences', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -638,8 +638,10 @@ const complaintSlice = createSlice({
         state.isFetchingMore = false;
         
         if (action.payload.isLoadMore) {
-          // Append to existing complaints
-          state.userComplaints = [...state.userComplaints, ...action.payload.complaints];
+          // Append to existing complaints with deduplication
+          const existingIds = new Set(state.userComplaints.map((c: any) => c._id));
+          const newComplaints = action.payload.complaints.filter((c: any) => !existingIds.has(c._id));
+          state.userComplaints = [...state.userComplaints, ...newComplaints];
         } else {
           // Replace complaints (fresh load)
           state.userComplaints = action.payload.complaints;
@@ -671,7 +673,10 @@ const complaintSlice = createSlice({
         state.isFetchingMore = false;
         
         if (action.payload.isLoadMore) {
-          state.userComplaints = [...state.userComplaints, ...action.payload.complaints];
+          // Append to existing complaints with deduplication
+          const existingIds = new Set(state.userComplaints.map((c: any) => c._id));
+          const newComplaints = action.payload.complaints.filter((c: any) => !existingIds.has(c._id));
+          state.userComplaints = [...state.userComplaints, ...newComplaints];
         } else {
           state.userComplaints = action.payload.complaints;
         }
@@ -840,8 +845,10 @@ const complaintSlice = createSlice({
         state.isFetchingMoreTrending = false;
         
         if (action.payload.isLoadMore) {
-          // Append to existing complaints
-          state.trendingComplaints = [...state.trendingComplaints, ...action.payload.complaints];
+          // Append to existing complaints with deduplication
+          const existingIds = new Set(state.trendingComplaints.map((c: any) => c._id));
+          const newComplaints = action.payload.complaints.filter((c: any) => !existingIds.has(c._id));
+          state.trendingComplaints = [...state.trendingComplaints, ...newComplaints];
         } else {
           // Replace complaints
           state.trendingComplaints = action.payload.complaints;
