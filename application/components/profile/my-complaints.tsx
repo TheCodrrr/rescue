@@ -542,7 +542,7 @@ export default function MyComplaints() {
           Please log in to view your complaints.
         </Text>
         <TouchableOpacity
-          onPress={() => router.push('/login')}
+          onPress={() => router.push('/(tabs)/login')}
           className="mt-6 bg-[#00ADB5] px-8 py-3 rounded-full"
         >
           <Text className="text-white font-semibold text-lg">Login</Text>

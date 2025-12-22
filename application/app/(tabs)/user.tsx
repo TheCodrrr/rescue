@@ -46,7 +46,7 @@ export default function UserScreen() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace('/login');
+      router.replace('/(tabs)/login');
     }
   }, [isAuthenticated]);
 
@@ -106,7 +106,7 @@ export default function UserScreen() {
   const handleLogout = async () => {
     closeSidebar();
     dispatch(logout());
-    router.replace('/(tabs)/index');
+    router.replace('/(tabs)');
   };
 
   // Get section title
@@ -251,7 +251,7 @@ export default function UserScreen() {
               <View className="w-12 h-12 rounded-full bg-[#00ADB5]/20 items-center justify-center mr-3 overflow-hidden">
                 {user?.profileImage ? (
                   <Image 
-                    source={{ uri: user.profileImage }}
+                    source={{ uri: user.profileImage, cache: 'reload' }}
                     style={{ width: 48, height: 48 }}
                     resizeMode="cover"
                   />

@@ -125,7 +125,7 @@ export default function ComplainScreen() {
         'Please log in to file a complaint.',
         [
           { text: 'Cancel', onPress: () => router.back() },
-          { text: 'Login', onPress: () => router.push('/login') },
+          { text: 'Login', onPress: () => router.push('/(tabs)/login') },
         ]
       );
     }
@@ -409,7 +409,7 @@ export default function ComplainScreen() {
               setEvidencePreviews([]);
               setManualLatitude('');
               setManualLongitude('');
-              router.push('/user');
+              router.push('/(tabs)/user');
             },
           },
         ]
@@ -432,7 +432,7 @@ export default function ComplainScreen() {
             Please log in to file a complaint.
           </Text>
           <TouchableOpacity
-            onPress={() => router.push('/login')}
+            onPress={() => router.push('/(tabs)/login')}
             className="mt-6 bg-[#00ADB5] px-8 py-3 rounded-full"
           >
             <Text className="text-white font-semibold text-lg">Login</Text>

@@ -166,13 +166,13 @@ export default function Index() {
             {!isAuthenticated ? (
               <View className="flex-row gap-2">
                 <TouchableOpacity 
-                  onPress={() => router.push('/login')}
+                  onPress={() => router.push('/(tabs)/login')}
                   className="bg-[#393E46] px-4 py-2 rounded-full border border-[#00ADB5]"
                 >
                   <Text className="text-[#00ADB5] font-semibold text-sm">Login</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
-                  onPress={() => router.push('/signup')}
+                  onPress={() => router.push('/(tabs)/signup')}
                   className="bg-[#00ADB5] px-4 py-2 rounded-full"
                 >
                   <Text className="text-white font-semibold text-sm">Signup</Text>

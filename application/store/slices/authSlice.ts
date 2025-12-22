@@ -7,9 +7,10 @@ const initialState = {
   isAuthenticated: false,
   user: null as any,
   token: null as string | null,
-  loading: false,
+  loading: false, // true only for login/register/etc
   error: null as string | null,
   initialized: false, // Track if auth has been initialized
+  initializing: true, // true only while checking AsyncStorage on app start
 };
 
 // 👇 Thunk to initialize auth state from AsyncStorage on app start
@@ -345,11 +346,11 @@ const authSlice = createSlice({
     builder
       // Initialize auth state
       .addCase(initializeAuth.pending, (state) => {
-        state.loading = true;
+        state.initializing = true;
         state.error = null;
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
-        state.loading = false;
+        state.initializing = false;
         state.initialized = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
@@ -357,7 +358,7 @@ const authSlice = createSlice({
         console.log("Auth initialized successfully");
       })
       .addCase(initializeAuth.rejected, (state, action) => {
-        state.loading = false;
+        state.initializing = false;
         state.initialized = true;
         state.user = null;
         state.token = null;

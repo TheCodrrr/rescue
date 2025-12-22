@@ -163,7 +163,7 @@ export default function Signup() {
       await dispatch(registerUser(formDataToSend)).unwrap();
       
       Alert.alert('Success', 'Account created successfully! Please login.');
-      router.push('/login');
+      router.push('/(tabs)/login');
     } catch (error: any) {
       console.error('Signup error:', error);
       Alert.alert('Signup Failed', error || 'Please try again.');

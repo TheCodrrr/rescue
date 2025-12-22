@@ -11,6 +11,12 @@ function RootLayoutContent() {
     store.dispatch(initializeAuth());
   }, []);
 
+  // Optionally, show a loading spinner while initializing
+  // const initializing = useAppSelector((state) => state.auth.initializing);
+  // if (initializing) {
+  //   return <View style={{flex:1, justifyContent:'center', alignItems:'center'}}><ActivityIndicator size="large" color="#00ADB5" /></View>;
+  // }
+
   return (
     <Stack
       screenOptions={{

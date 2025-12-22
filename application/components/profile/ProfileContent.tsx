@@ -209,7 +209,7 @@ export default function ProfileContent() {
     try {
       await dispatch(deleteUserAccount()).unwrap();
       dispatch(logout());
-      router.replace('/(tabs)/index');
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Error', error || 'Failed to delete account');
       setIsDeleting(false);
@@ -251,7 +251,7 @@ export default function ProfileContent() {
                     </View>
                   ) : userData.profileImage ? (
                     <Image 
-                      source={{ uri: userData.profileImage }}
+                      source={{ uri: userData.profileImage, cache: 'reload' }}
                       style={{ width: '100%', height: '100%' }}
                       resizeMode="cover"
                     />
@@ -267,7 +267,7 @@ export default function ProfileContent() {
               </TouchableOpacity>
 
               {/* Name & Role */}
-              <Text className="text-white text-2xl font-bold mb-1">{userData.name}</Text>
+              <Text className="text-white text-2xl font-bold mb-1" numberOfLines={1}>{userData.name}</Text>
               <View className="flex-row items-center mb-2">
                 <View className="bg-[#00ADB5]/20 px-3 py-1 rounded-full">
                   <Text className="text-[#00ADB5] font-semibold text-sm">{userData.role}</Text>

@@ -215,7 +215,7 @@ export default function TrendingScreen() {
           'Please login to vote on complaints.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Login', onPress: () => router.push('/login') },
+            { text: 'Login', onPress: () => router.push('/(tabs)/login') },
           ]
         );
         return;
@@ -235,7 +235,7 @@ export default function TrendingScreen() {
           'Please login to vote on complaints.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Login', onPress: () => router.push('/login') },
+            { text: 'Login', onPress: () => router.push('/(tabs)/login') },
           ]
         );
         return;
@@ -299,7 +299,7 @@ export default function TrendingScreen() {
           { text: 'Cancel', style: 'cancel' },
           { text: 'Login', onPress: () => {
             closeCommentModal();
-            router.push('/login');
+            router.push('/(tabs)/login');
           }},
         ]
       );

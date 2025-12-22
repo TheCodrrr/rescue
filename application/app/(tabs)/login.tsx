@@ -9,7 +9,7 @@ import { loginUser } from '../../store/slices/authSlice';
 export default function Login() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const { loading, error, initializing } = useAppSelector((state) => state.auth);
   
   const [formData, setFormData] = useState({
     email: "",
@@ -45,8 +45,14 @@ export default function Login() {
       })).unwrap();
       
       console.log('Login successful:', result);
-      Alert.alert('Success', 'Login successful!');
-      router.replace('/(tabs)/index');
+      
+      // Navigate first, then show alert
+      router.replace('/(tabs)');
+      
+      // Show success message after navigation
+      setTimeout(() => {
+        Alert.alert('Success', 'Login successful!');
+      }, 100);
     } catch (error: any) {
       console.error('Login error:', error);
       Alert.alert('Login Failed', error || 'Please check your credentials and try again.');
@@ -157,12 +163,12 @@ export default function Login() {
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleSubmit}
-                disabled={loading}
+                disabled={loading || initializing}
                 className={`bg-[#00ADB5] py-4 rounded-full flex-row items-center justify-center ${
-                  loading ? 'opacity-70' : ''
+                  loading || initializing ? 'opacity-70' : ''
                 }`}
               >
-                {loading ? (
+                {(loading || initializing) ? (
                   <>
                     <Text className="text-white font-bold text-base mr-2">Logging in...</Text>
                   </>
@@ -181,7 +187,7 @@ export default function Login() {
             <View className="bg-[#393E46] rounded-2xl p-4 border border-[#00ADB5]/20">
               <View className="flex-row items-center justify-center">
                 <Text className="text-white/70 text-sm mr-2">Don't have an account?</Text>
-                <TouchableOpacity onPress={() => router.push('/signup')}>
+                <TouchableOpacity onPress={() => router.push('/(tabs)/signup')}>
                   <Text className="text-[#00ADB5] font-bold text-sm">Create account →</Text>
                 </TouchableOpacity>
               </View>
