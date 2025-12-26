@@ -22,6 +22,7 @@ import {
     Trash2,
     AlertTriangle
 } from 'lucide-react';
+import CloudImage from './utils/CloudImage';
 
 // Password Change Modal Component - moved outside to prevent re-renders
 const PasswordChangeModal = React.memo(({ 
@@ -604,7 +605,7 @@ function UserProfileContent({ activeSection, contentRef }) {
             <div className="profile-card" style={{'--delay': '0.1s'}}>
                 <div className="profile-header">
                     <div className="profile-avatar-container">
-                        <img
+                        {/* <img
                             key={`main-avatar-${imageRefreshKey}`}
                             src={userData.profileImage}
                             alt={userData.name}
@@ -613,6 +614,19 @@ function UserProfileContent({ activeSection, contentRef }) {
                             onError={(e) => {
                                 console.log("Profile image failed to load:", userData.profileImage);
                                 e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
+                            }}
+                        /> */}
+                        <CloudImage
+                            key={`main-avatar-${imageRefreshKey}`}
+                            src={userData.profileImage}
+                            alt={userData.name}
+                            className="user-profile-main-avatar"
+                            onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
+                            onError={(e) => {
+                                console.log("Profile image failed to load:", userData.profileImage);
+                                e.target.src = userData.profileImage.includes("cloudinary")
+                                ? userData.profileImage.replace("/upload/", "/upload/w_20,q_10,e_blur:1000/")
+                                : "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
                             }}
                         />
                         <button 

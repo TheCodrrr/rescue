@@ -11,6 +11,7 @@ import {
     CircleAlert,
     BarChart3,
 } from 'lucide-react';
+import CloudImage from './utils/CloudImage';
 
 function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
     const dispatch = useDispatch();
@@ -42,6 +43,8 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
+    const imgSrc = userData.profileImage.includes("cloudinary") ? userData.profileImage : userData.profileImage;
+
     return (
         <div className="profile-sidebar">
             <div className="sidebar-content">
@@ -49,13 +52,18 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
                 {/* User Quick Info */}
                 <div className="user-quick-info">
                     <div className="user-info-content">
-                        <img
+                        {/* <img
                             src={userData.profileImage}
                             alt={userData.name}
                             className="user-quick-avatar"
                             onError={(e) => {
                                 e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
                             }}
+                        /> */}
+                        <CloudImage
+                            src={imgSrc}
+                            alt={userData.name}
+                            className="w-12 h-12 rounded-full object-cover shadow-md user-quick-avatar"
                         />
                         <div>
                             <h3 className="user-quick-name">{userData.name}</h3>
