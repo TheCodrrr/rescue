@@ -641,7 +641,7 @@ export default function Complaint() {
                     {/* Register Complaint Section */}
                     {/* {activeTab === 'register' && ( */}
                         <div className="tab-content">
-                            <div className="section-header">
+                            <div className="section-title">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                                     <div>
                                         <h2 className="complaint-section-title">Report an Incident</h2>

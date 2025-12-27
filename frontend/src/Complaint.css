@@ -1388,7 +1388,7 @@
 }
 
 /* Section Header Styles */
-.section-header {
+.section-title {
     text-align: center;
     margin-bottom: 2rem;
     animation: fadeInScale 1s ease-out 0.6s both;

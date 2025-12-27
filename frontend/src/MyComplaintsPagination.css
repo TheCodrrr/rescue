@@ -166,7 +166,8 @@
 
 /* Profile Card Container */
 .my-complaints-profile-card {
-    background: linear-gradient(135deg, var(--color1), var(--color18));
+    /* background: linear-gradient(135deg, var(--color13), var(--color13)); */
+    background: var(--color13);
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);

@@ -3,7 +3,7 @@
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    padding: 30px;
+    .section-title {
     margin-top: 30px;
     backdrop-filter: blur(20px);
 }
@@ -13,28 +13,28 @@
 }
 
 .progress-header h3 {
-    font-size: 24px;
+    .section-title.clickable {
     font-weight: 700;
     color: #fff;
     margin: 0 0 8px 0;
-    display: flex;
+    .section-title.clickable:hover {
     align-items: center;
     gap: 10px;
-}
+    .section-title.officer-level {
 
 .progress-subtitle {
-    font-size: 14px;
+    .section-title .section-icon {
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
 }
-
+    .section-title h3 {
 /* Tabs */
 .progress-tabs {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0;
+    .section-title .evidence-count {
 }
 
 .progress-tab {
@@ -42,7 +42,7 @@
     border: none;
     border-bottom: 3px solid transparent;
     padding: 12px 24px;
-    font-size: 15px;
+    .section-title svg:last-child {
     font-weight: 600;
     color: rgba(255, 255, 255, 0.6);
     cursor: pointer;

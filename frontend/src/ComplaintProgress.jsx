@@ -384,7 +384,7 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer, comp
                                             {grouped.citizens.length > 0 && (
                                                 <div className="evidence-section">
                                                     <div 
-                                                        className="section-header clickable"
+                                                        className="section-title clickable"
                                                         onClick={() => toggleSection('citizens')}
                                                     >
                                                         <FiUser className="section-icon" />
@@ -417,7 +417,7 @@ const ComplaintProgress = ({ complaintId, category, currentUser, isOfficer, comp
                                                 .map((level) => (
                                                     <div key={`level-${level}`} className="evidence-section">
                                                         <div 
-                                                            className="section-header officer-level clickable"
+                                                            className="section-title officer-level clickable"
                                                             onClick={() => toggleSection(`officer-${level}`)}
                                                         >
                                                             <FiShield className="section-icon" />

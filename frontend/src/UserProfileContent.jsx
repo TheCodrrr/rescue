@@ -682,7 +682,7 @@ function UserProfileContent({ activeSection, contentRef }) {
 
             {/* Contact Information Card */}
             <div className="profile-card" style={{'--delay': '0.3s'}}>
-                <div className="section-header">
+                <div className="section-title">
                     <Mail className="section-icon" style={{color: '#93c5fd'}} />
                     <h2 className="section-title">Contact Information</h2>
                     {isEditing && (
@@ -874,7 +874,7 @@ function UserProfileContent({ activeSection, contentRef }) {
 
             {/* Security & Access Card */}
             <div className="profile-card" style={{'--delay': '0.5s'}}>
-                <div className="section-header">
+                <div className="section-title">
                     <Shield className="section-icon" style={{color: '#86efac'}} />
                     <h2 className="section-title">Security & Access</h2>
                 </div>
@@ -912,7 +912,7 @@ function UserProfileContent({ activeSection, contentRef }) {
 
             {/* Danger Zone Card */}
             <div className="profile-card danger-zone" style={{'--delay': '0.7s'}}>
-                <div className="section-header">
+                <div className="section-title">
                     <AlertTriangle className="section-icon danger-icon" />
                     <h2 className="section-title">Danger Zone</h2>
                 </div>
