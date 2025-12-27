@@ -636,7 +636,7 @@
     gap: 1.5rem;
     /* Add premium styling */
     padding: 2rem;
-    margin: 1rem 2rem 2rem 2rem;
+    margin: 1rem 0 2rem 0;
     background: linear-gradient(135deg, color-mix(in srgb, var(--color15) 10%, transparent), color-mix(in srgb, var(--color13) 15%, transparent));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -819,7 +819,7 @@
 .profile-role {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #93c5fd;
+    color: var(--color3);
 }
 
 .profile-department {
@@ -834,6 +834,8 @@
     padding: 0.25rem 0.75rem;
     border-radius: 0.5rem;
     display: inline-block;
+    width: fit-content;
+    background-color: var(--color3);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -846,11 +848,11 @@
     margin-bottom: 1.5rem;
 }
 
-.section-header .section-icon + .section-title {
+.section-header .section-icon + .user-profile-section-title {
     margin-right: auto;
 }
 
-.section-title {
+.user-profile-section-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: white;
@@ -1880,14 +1882,14 @@
     column-fill: balance;
 }
 
-.section-title {
+.user-profile-section-title {
     .my-complaints-grid {
         column-count: 2;
     }
 }
 
 @media (max-width: 768px) {
-.section-title .section-icon + .section-title {
+    .user-profile-section-title .section-icon + .user-profile-section-title {
         column-count: 1;
     }
 }

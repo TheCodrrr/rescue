@@ -602,8 +602,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     const renderProfileContent = () => (
         <div className="space-y-8">
             {/* Profile Header Card */}
-            <div className="profile-card" style={{'--delay': '0.1s'}}>
-                <div className="profile-header">
+            <div className="profile-header">
                     <div className="profile-avatar-container">
                         {/* <img
                             key={`main-avatar-${imageRefreshKey}`}
@@ -678,13 +677,12 @@ function UserProfileContent({ activeSection, contentRef }) {
                         </div>
                     </div>
                 </div>
-            </div>
 
             {/* Contact Information Card */}
             <div className="profile-card" style={{'--delay': '0.3s'}}>
-                <div className="section-title">
+                <div className="user-profile-section-title">
                     <Mail className="section-icon" style={{color: '#93c5fd'}} />
-                    <h2 className="section-title">Contact Information</h2>
+                    <h2 className="user-profile-section-title">Contact Information</h2>
                     {isEditing && (
                         <div className="edit-actions">
                             <button 
@@ -874,9 +872,9 @@ function UserProfileContent({ activeSection, contentRef }) {
 
             {/* Security & Access Card */}
             <div className="profile-card" style={{'--delay': '0.5s'}}>
-                <div className="section-title">
+                <div className="user-profile-section-title">
                     <Shield className="section-icon" style={{color: '#86efac'}} />
-                    <h2 className="section-title">Security & Access</h2>
+                    <h2 className="user-profile-section-title">Security & Access</h2>
                 </div>
                 
                 <div className="security-clearance">
@@ -912,9 +910,9 @@ function UserProfileContent({ activeSection, contentRef }) {
 
             {/* Danger Zone Card */}
             <div className="profile-card danger-zone" style={{'--delay': '0.7s'}}>
-                <div className="section-title">
+                <div className="user-profile-section-title">
                     <AlertTriangle className="section-icon danger-icon" />
-                    <h2 className="section-title">Danger Zone</h2>
+                    <h2 className="user-profile-section-title">Danger Zone</h2>
                 </div>
                 
                 <div className="danger-content">
@@ -944,7 +942,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     const renderSettingsContent = () => (
         <div className="space-y-8">
             <div className="profile-card">
-                <h2 className="section-title">Settings</h2>
+                <h2 className="user-profile-section-title">Settings</h2>
                 <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
                     Settings panel coming soon...
                 </p>
@@ -963,7 +961,7 @@ function UserProfileContent({ activeSection, contentRef }) {
     const renderActivityContent = () => (
         <div className="space-y-8">
             <div className="profile-card">
-                <h2 className="section-title">Activity Log</h2>
+                <h2 className="user-profile-section-title">Activity Log</h2>
                 <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
                     Activity log coming soon...
                 </p>

@@ -1035,13 +1035,13 @@ html {
 
 /* Journey Summary Styles */
 .cd-journey-summary {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(30, 64, 175, 0.25));
-    border: 1px solid rgba(96, 165, 250, 0.4);
+    /* background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(30, 64, 175, 0.25)); */
+    /* border: 1px solid rgba(96, 165, 250, 0.4); */
     border-radius: 16px;
     padding: 2rem;
     margin: 2rem 0;
     backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    /* box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15); */
 }
 
 .cd-journey-header {

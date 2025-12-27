@@ -1,154 +1,122 @@
+/* Complaint Progress Section Title */
+.complaint-progress-section-title {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #60a5fa;
+    background: none;
+    margin: 0;
+    padding: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+    cursor: pointer;
+    gap: 12px;
+}
+.complaint-progress-section-title.officer-level {
+    border-bottom-color: rgba(96, 165, 250, 0.3);
+}
+.complaint-progress-section-title:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
 /* Complaint Progress Wrapper */
 .complaint-progress-wrapper {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.13);
     border-radius: 20px;
-    .section-title {
-    margin-top: 30px;
-    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 36px 32px 32px 32px;
+    margin: 32px 0;
+    backdrop-filter: blur(24px);
+    position: relative;
 }
 
-.progress-header {
+.complaint-progress-wrapper .progress-header {
     margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
 }
 
-.progress-header h3 {
-    .section-title.clickable {
+.complaint-progress-wrapper .progress-header h3 {
+    font-size: 1.6rem;
     font-weight: 700;
     color: #fff;
-    margin: 0 0 8px 0;
-    .section-title.clickable:hover {
-    align-items: center;
-    gap: 10px;
-    .section-title.officer-level {
-
-.progress-subtitle {
-    .section-title .section-icon {
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.01em;
 }
-    .section-title h3 {
-/* Tabs */
-.progress-tabs {
+
+.complaint-progress-wrapper .progress-subtitle {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+    margin: 0;
+    font-weight: 400;
+}
+
+.complaint-progress-wrapper .progress-tabs {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    .section-title .evidence-count {
+    border-bottom: 2px solid rgba(255,255,255,0.10);
 }
 
-.progress-tab {
+.complaint-progress-wrapper .progress-tab {
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
     padding: 12px 24px;
-    .section-title svg:last-child {
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255,255,255,0.7);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     gap: 8px;
     position: relative;
     bottom: -2px;
+    outline: none;
 }
 
-.progress-tab:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.progress-tab.active {
+.complaint-progress-wrapper .progress-tab.active {
     color: #60a5fa;
     border-bottom-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.08);
 }
 
-/* Content */
-.progress-content {
-    min-height: 400px;
-}
-
-/* Evidence Hierarchy */
-.evidence-hierarchy {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-.evidence-section {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 0;
-    transition: all 0.3s ease;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    /* background-color: red; */
-}
-
-.evidence-section:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 12px;
-    margin-bottom: 0;
-    padding: 20px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.section-header.clickable {
-    cursor: pointer;
-    user-select: none;
-}
-
-.section-header.clickable:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.section-header.officer-level {
-    border-bottom-color: rgba(96, 165, 250, 0.3);
-}
-
-.section-header .section-icon {
-    font-size: 24px;
-    color: #60a5fa;
-}
-
-.section-header h3 {
-    font-size: 18px;
-    font-weight: 600;
+.complaint-progress-wrapper .progress-tab:hover:not(.active) {
     color: #fff;
-    margin: 0;
-    flex: 1;
+    background: rgba(255,255,255,0.05);
 }
 
-.section-header .evidence-count {
-    background: rgba(96, 165, 250, 0.2);
-    color: #60a5fa;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
+.complaint-progress-wrapper .progress-content {
+    min-height: 400px;
+    width: 100%;
 }
 
-.section-header svg:last-child {
-    margin-left: auto;
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.7);
-    transition: transform 0.3s ease;
+/* Add extra padding for mobile */
+@media (max-width: 768px) {
+    .complaint-progress-wrapper {
+        padding: 16px 6px 24px 6px;
+        margin: 16px 0;
+    }
+    .complaint-progress-wrapper .progress-tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+    .complaint-progress-wrapper .progress-tab {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 0;
+    }
 }
 
-.progress-loading,
-.progress-empty {
+/* All child classes scoped to .complaint-progress-wrapper */
+.complaint-progress-wrapper .progress-loading,
+.complaint-progress-wrapper .progress-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -157,7 +125,7 @@
     gap: 15px;
 }
 
-.loading-spinner {
+.complaint-progress-wrapper .loading-spinner {
     width: 50px;
     height: 50px;
     border: 4px solid rgba(255, 255, 255, 0.1);
@@ -170,79 +138,132 @@
     to { transform: rotate(360deg); }
 }
 
-.progress-empty svg {
+.complaint-progress-wrapper .progress-empty svg {
     font-size: 60px;
     color: rgba(255, 255, 255, 0.3);
 }
 
-.progress-empty p {
+.complaint-progress-wrapper .progress-empty p {
     font-size: 18px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
 }
 
-.progress-empty span {
+.complaint-progress-wrapper .progress-empty span {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* Evidence Grid */
-.evidence-grid {
+.complaint-progress-wrapper .evidence-hierarchy {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.complaint-progress-wrapper .evidence-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.complaint-progress-wrapper .evidence-section:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+}
+.complaint-progress-wrapper .section-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    margin-bottom: 0;
+    padding: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+.complaint-progress-wrapper .section-header.clickable {
+    cursor: pointer;
+    user-select: none;
+}
+.complaint-progress-wrapper .section-header.clickable:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+.complaint-progress-wrapper .section-header.officer-level {
+    border-bottom-color: rgba(96, 165, 250, 0.3);
+}
+.complaint-progress-wrapper .section-header .section-icon {
+    font-size: 24px;
+    color: #60a5fa;
+}
+.complaint-progress-wrapper .section-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+}
+.complaint-progress-wrapper .section-header .evidence-count {
+    background: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.complaint-progress-wrapper .section-header svg:last-child {
+    margin-left: auto;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: transform 0.3s ease;
+}
+.complaint-progress-wrapper .evidence-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* always 3 columns */
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     padding: 20px;
 }
-
-.evidence-card {
+.complaint-progress-wrapper .evidence-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
 }
-
-/* Complainer Evidence - Gold/Amber Theme */
-.evidence-card.complainer-evidence {
+.complaint-progress-wrapper .evidence-card.complainer-evidence {
     background: rgba(251, 191, 36, 0.08);
     border: 1px solid rgba(251, 191, 36, 0.3);
 }
-
-.evidence-card.complainer-evidence:hover {
+.complaint-progress-wrapper .evidence-card.complainer-evidence:hover {
     transform: translateY(-5px);
     border-color: rgba(251, 191, 36, 0.6);
     box-shadow: 0 10px 30px rgba(251, 191, 36, 0.25);
 }
-
-.evidence-card.complainer-evidence .evidence-preview {
+.complaint-progress-wrapper .evidence-card.complainer-evidence .evidence-preview {
     background: rgba(251, 191, 36, 0.1);
 }
-
-/* Other Citizen Evidence - Green Theme */
-.evidence-card.other-citizen-evidence {
+.complaint-progress-wrapper .evidence-card.other-citizen-evidence {
     background: rgba(34, 197, 94, 0.08);
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
-.evidence-card.other-citizen-evidence:hover {
+.complaint-progress-wrapper .evidence-card.other-citizen-evidence:hover {
     transform: translateY(-5px);
     border-color: rgba(34, 197, 94, 0.6);
     box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
 }
-
-.evidence-card.other-citizen-evidence .evidence-preview {
+.complaint-progress-wrapper .evidence-card.other-citizen-evidence .evidence-preview {
     background: rgba(34, 197, 94, 0.1);
 }
-
-/* Officer Evidence - Default Blue Theme */
-.evidence-card:hover {
+.complaint-progress-wrapper .evidence-card:hover {
     transform: translateY(-5px);
     border-color: rgba(96, 165, 250, 0.5);
     box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
 }
-
-.evidence-preview {
+.complaint-progress-wrapper .evidence-preview {
     width: 100%;
     height: 140px;
     background: rgba(0, 0, 0, 0.3);
@@ -251,30 +272,25 @@
     justify-content: center;
     overflow: hidden;
 }
-
-.evidence-preview img {
+.complaint-progress-wrapper .evidence-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-
-.evidence-icon-large {
+.complaint-progress-wrapper .evidence-icon-large {
     font-size: 40px;
     color: rgba(255, 255, 255, 0.4);
 }
-
-.evidence-info {
+.complaint-progress-wrapper .evidence-info {
     padding: 14px;
 }
-
-.evidence-header {
+.complaint-progress-wrapper .evidence-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
 }
-
-.evidence-type-badge {
+.complaint-progress-wrapper .evidence-type-badge {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -287,8 +303,7 @@
     color: #60a5fa;
     text-transform: capitalize;
 }
-
-.role-badge {
+.complaint-progress-wrapper .role-badge {
     display: flex;
     align-items: center;
     gap: 3px;
@@ -297,26 +312,22 @@
     font-size: 10px;
     font-weight: 600;
 }
-
-.role-citizen {
+.complaint-progress-wrapper .role-citizen {
     background: rgba(34, 197, 94, 0.2);
     color: #22c55e;
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
-.role-officer {
+.complaint-progress-wrapper .role-officer {
     background: rgba(59, 130, 246, 0.2);
     color: #3b82f6;
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
-
-.role-admin {
+.complaint-progress-wrapper .role-admin {
     background: rgba(168, 85, 247, 0.2);
     color: #a855f7;
     border: 1px solid rgba(168, 85, 247, 0.3);
 }
-
-.evidence-filename {
+.complaint-progress-wrapper .evidence-filename {
     font-size: 14px;
     font-weight: 600;
     color: #fff;
@@ -325,8 +336,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-.evidence-description {
+.complaint-progress-wrapper .evidence-description {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
     margin: 0 0 10px 0;
@@ -335,8 +345,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
-.evidence-meta {
+.complaint-progress-wrapper .evidence-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -344,25 +353,21 @@
     padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-.meta-item {
+.complaint-progress-wrapper .meta-item {
     display: flex;
     align-items: center;
     gap: 4px;
     font-size: 11px;
     color: rgba(255, 255, 255, 0.6);
 }
-
-.meta-item svg {
+.complaint-progress-wrapper .meta-item svg {
     font-size: 12px;
 }
-
-.evidence-actions {
+.complaint-progress-wrapper .evidence-actions {
     display: flex;
     gap: 6px;
 }
-
-.evidence-action-btn {
+.complaint-progress-wrapper .evidence-action-btn {
     flex: 1;
     display: flex;
     align-items: center;
@@ -377,34 +382,28 @@
     transition: all 0.3s ease;
     text-decoration: none;
 }
-
-.view-btn {
+.complaint-progress-wrapper .view-btn {
     background: rgba(96, 165, 250, 0.2);
     color: #60a5fa;
     border: 1px solid rgba(96, 165, 250, 0.3);
 }
-
-.view-btn:hover {
+.complaint-progress-wrapper .view-btn:hover {
     background: rgba(96, 165, 250, 0.3);
 }
-
-.download-btn {
+.complaint-progress-wrapper .download-btn {
     background: rgba(34, 197, 94, 0.2);
     color: #22c55e;
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
-.download-btn:hover {
+.complaint-progress-wrapper .download-btn:hover {
     background: rgba(34, 197, 94, 0.3);
 }
-
-.delete-btn {
+.complaint-progress-wrapper .delete-btn {
     background: rgba(239, 68, 68, 0.2);
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
-
-.delete-btn:hover {
+.complaint-progress-wrapper .delete-btn:hover {
     background: rgba(239, 68, 68, 0.3);
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
@@ -1165,18 +1165,58 @@ export default function ComplaintDetail() {
         setRejectionReason('');
     };
 
-    const openCommentModal = () => {
+
+    const openCommentModal = useCallback(() => {
         setCommentModalOpen(true);
         // Comments are already fetched on component mount, but refresh them for the modal
         dispatch(fetchComments(id));
-    };
+    }, [id, dispatch]);
 
-    const closeCommentModal = () => {
+    const closeCommentModal = useCallback(() => {
         setCommentModalOpen(false);
-    };
+    }, []);
+
+    // Prevent background scroll when comment modal is open (add class to body)
+    // Store and restore scroll position when modal opens/closes
+    const scrollPositionRef = useRef(0);
+    useEffect(() => {
+        if (commentModalOpen) {
+            scrollPositionRef.current = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollPositionRef.current}px`;
+            document.body.style.left = '0';
+            document.body.style.width = '100%';
+            document.body.style.overflowY = 'scroll';
+            document.body.style.height = '100vh';
+        } else {
+            // Remove scroll-behavior to prevent animation
+            const html = document.documentElement;
+            const prevScrollBehavior = html.style.scrollBehavior;
+            html.style.scrollBehavior = 'auto';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.width = '';
+            document.body.style.overflowY = '';
+            document.body.style.height = '';
+            window.scrollTo(0, scrollPositionRef.current);
+            // Restore scroll-behavior
+            setTimeout(() => {
+                html.style.scrollBehavior = prevScrollBehavior;
+            }, 0);
+        }
+        return () => {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.width = '';
+            document.body.style.overflowY = '';
+            document.body.style.height = '';
+        };
+    }, [commentModalOpen]);
 
     // Handler functions for CommentModal component
-    const handleCommentSubmit = async (commentData) => {
+    const handleCommentSubmit = useCallback(async (commentData) => {
         try {
             const result = await dispatch(addComment({
                 complaintId: commentData.complaintId,
@@ -1195,9 +1235,9 @@ export default function ComplaintDetail() {
             console.error('Error adding comment:', error);
             throw error;
         }
-    };
+    }, [id, dispatch]);
 
-    const handleCommentUpdate = async (commentId, updateData) => {
+    const handleCommentUpdate = useCallback(async (commentId, updateData) => {
         try {
             const result = await dispatch(updateComment({
                 commentId,
@@ -1216,9 +1256,9 @@ export default function ComplaintDetail() {
             console.error('Error updating comment:', error);
             throw error;
         }
-    };
+    }, [id, dispatch]);
 
-    const handleCommentDelete = async (commentId) => {
+    const handleCommentDelete = useCallback(async (commentId) => {
         try {
             const result = await dispatch(removeComment(commentId));
 
@@ -1233,7 +1273,7 @@ export default function ComplaintDetail() {
             console.error('Error deleting comment:', error);
             throw error;
         }
-    };
+    }, [id, dispatch]);
 
     if (isLoading) {
         return (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import './CommentModal.css';
@@ -26,15 +27,24 @@ const CommentModal = ({
     const [editedCommentText, setEditedCommentText] = useState('');
     const [editedCommentRating, setEditedCommentRating] = useState(0);
 
-    // Reset form when modal opens/closes
+    // Reset form and control body scroll when modal opens/closes
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen) {
+            // Prevent background scroll
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Restore scroll
+            document.body.style.overflow = '';
             setNewComment('');
             setCommentRating(0);
             setEditingCommentId(null);
             setEditedCommentText('');
             setEditedCommentRating(0);
         }
+        // Cleanup in case modal is unmounted
+        return () => {
+            document.body.style.overflow = '';
+        };
     }, [isOpen]);
 
     const renderStars = (rating) => {
@@ -152,7 +162,7 @@ const CommentModal = ({
 
     if (!isOpen) return null;
 
-    return (
+    const modalContent = (
         <div className="comment-modal-overlay" onClick={onClose}>
             <div className="comment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
@@ -389,6 +399,8 @@ const CommentModal = ({
             </div>
         </div>
     );
+
+    return ReactDOM.createPortal(modalContent, document.getElementById('modal-root'));
 };
 
 export default CommentModal;
