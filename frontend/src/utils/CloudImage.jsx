@@ -2,7 +2,9 @@ import { useState } from "react";
 
 const CloudImage = ({ src, alt, className }) => {
     const [loaded, setLoaded] = useState(false);
-    const lqip = src.replace("/upload/", "/upload/w_20,q_10,e_blur:1000/");
+    const lqip = src.includes("cloudinary")
+    ? src.replace("/upload/", "/upload/w_20,q_10,e_blur:1000/")
+    : src;
 
     return (
         <img

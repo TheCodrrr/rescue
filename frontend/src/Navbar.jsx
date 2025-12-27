@@ -3,6 +3,7 @@ import "./Navbar.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { logout } from "./auth/redux/authSlice";
+import CloudImage from "./utils/CloudImage";
 
 // Memoized navigation links component
 const NavLinks = React.memo(({ links, onLinkClick }) => {
@@ -75,9 +76,9 @@ const AuthButtons = React.memo(({ isAuthenticated, handleLogin, handleSignup, ha
                         onClick={handleProfileClick}
                         title={`${userName || 'Unknown'}'s Profile`}
                     >
-                        <img 
-                            src={userProfileImage || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png'} 
-                            alt={userName || 'Unknown'}
+                        <CloudImage
+                            src={userProfileImage || "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png"}
+                            alt={userName || "Unknown"}
                             className="profile-avatar"
                         />
                         <div className="profile-status-indicator"></div>
