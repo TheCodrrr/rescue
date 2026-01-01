@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { getNearbyAnalytics } from "../controllers/analytics.controllers.js";
+import { getComplaintByCategory } from "../controllers/complaint.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
 const router = Router();
 
-// Protected route - requires authentication
+// Protected routes - requires authentication
 router.route("/nearby").get(verifyJWT, getNearbyAnalytics);
+router.route("/category").get(verifyJWT, getComplaintByCategory);
 
 export default router;

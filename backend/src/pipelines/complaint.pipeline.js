@@ -1,7 +1,6 @@
 export const complaintByCategoryPipeline = (userLat, userLon, radius) => [
     {
         $match: {
-            active: true, 
             location: {
                 $geoWithin: {
                     $centerSphere: [
@@ -14,7 +13,7 @@ export const complaintByCategoryPipeline = (userLat, userLon, radius) => [
     },
     {
         $group: {
-            _id: "category",
+            _id: "$category",
             count: { $sum: 1 },
         }
     },

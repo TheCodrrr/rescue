@@ -1,5 +1,5 @@
 import express from "express";
-import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, getComplaintByUserAndCategory, updateComplaintStatus, upvoteComplaint, getTrendingComplaints, getNearbyComplaints, searchMyComplaints, getComplaintByCategory } from "../controllers/complaint.controllers.js";
+import { assignComplaintToDepartment, createComplaint, deleteComplaint, downvoteComplaint, getComplaintById, getComplaintByUser, getComplaintByUserAndCategory, updateComplaintStatus, upvoteComplaint, getTrendingComplaints, getNearbyComplaints, searchMyComplaints } from "../controllers/complaint.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { pool } from "../config/postgres.js";
 import { io } from "../server.js";
@@ -35,7 +35,5 @@ router.route("/:complaintId/assign").patch(verifyJWT, assignComplaintToDepartmen
 router.route("/:complaintId").delete(verifyJWT, deleteComplaint);
 router.route("/:complaintId/upvote").patch(verifyJWT, upvoteComplaint);
 router.route("/:complaintId/downvote").patch(verifyJWT, downvoteComplaint);
-
-router.get("/analytics", verifyJWT, getComplaintByCategory);
 
 export default router;
