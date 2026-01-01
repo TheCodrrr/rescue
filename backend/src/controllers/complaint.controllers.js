@@ -8,6 +8,7 @@ import { calculateTrendingScore } from "../../utils/trendingScore.js";
 import { io } from "../server.js";
 import { History } from "../models/history.models.js";
 import { scheduleEscalation, cancelEscalation } from "../../utils/scheduleEscalation.js";
+import { complaintByCategoryPipeline } from "../pipelines/complaint.pipeline.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -47,6 +48,28 @@ const getTrendingComplaints = asyncHandler(async (req, res) => {
         hasNextPage,
     });
 });
+
+const getComplaintByCategory = asyncHandler(async (req, res) => {
+    const userLat = req.user.latitude;
+    const userLon = req.user.longitude;
+
+    const radius = 50 * 1000;
+
+    const result = await Complaint.aggregate(
+        complaintByCategoryPipeline(userLat, userLon, radius)
+    )
+
+    const categories = ["rail", "fire", "cyber", "police", "court", "road"];
+
+    const formatted = {};
+    categories.forEach((cat) => (formatted[cat] = 0));
+    result.forEach((item) => {
+        formatted[item.category] = item.count;
+    })
+
+    return res.status(200).json({ success: true, data: formatted });
+
+})
 
 const getNearbyComplaints = asyncHandler(async (req, res) => {
     try {
@@ -869,6 +892,7 @@ export {
     upvoteComplaint,
     downvoteComplaint,
     getTrendingComplaints,
+    getComplaintByCategory,
     getNearbyComplaints,
     searchMyComplaints
 }
