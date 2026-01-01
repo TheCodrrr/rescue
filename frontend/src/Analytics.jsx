@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as d3 from 'd3';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -53,6 +54,7 @@ const Analytics = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user } = useSelector((state) => state.auth);
+    const trendChartRef = useRef(null);
 
     useEffect(() => {
         fetchAllData();
@@ -81,6 +83,193 @@ const Analytics = () => {
             setLoading(false);
         }
     };
+
+    // D3.js Gradient Line Chart for Complaint Trends
+    useEffect(() => {
+        if (!categoryData?.complaintsByDate || !trendChartRef.current) return;
+
+        // Clear previous chart
+        d3.select(trendChartRef.current).selectAll("*").remove();
+
+        const data = categoryData.complaintsByDate.map(d => ({
+            date: new Date(d.date),
+            count: d.count
+        }));
+
+        // Chart dimensions
+        const containerWidth = trendChartRef.current.clientWidth;
+        const width = containerWidth || 800;
+        const height = 300;
+        const marginTop = 30;
+        const marginRight = 30;
+        const marginBottom = 50;
+        const marginLeft = 50;
+
+        // Create scales
+        const x = d3.scaleUtc()
+            .domain(d3.extent(data, d => d.date))
+            .range([marginLeft, width - marginRight]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.count) || 10]).nice()
+            .range([height - marginBottom, marginTop]);
+
+        // Color scale for gradient (based on count)
+        const colorScale = d3.scaleSequential()
+            .domain([0, d3.max(data, d => d.count) || 10])
+            .interpolator(d3.interpolateRgbBasis(['#10b981', '#00ADB5', '#8b5cf6', '#ec4899', '#ef4444']));
+
+        // Create the line generator
+        const line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(d => x(d.date))
+            .y(d => y(d.count));
+
+        // Create SVG
+        const svg = d3.select(trendChartRef.current)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+            .attr("style", "max-width: 100%; height: auto;");
+
+        // Create gradient definition
+        const gradientId = `line-gradient-${Date.now()}`;
+        const gradient = svg.append("defs")
+            .append("linearGradient")
+            .attr("id", gradientId)
+            .attr("gradientUnits", "userSpaceOnUse")
+            .attr("x1", marginLeft)
+            .attr("y1", 0)
+            .attr("x2", width - marginRight)
+            .attr("y2", 0);
+
+        // Add gradient stops based on data
+        data.forEach((d, i) => {
+            gradient.append("stop")
+                .attr("offset", `${(i / (data.length - 1)) * 100}%`)
+                .attr("stop-color", colorScale(d.count));
+        });
+
+        // Add X axis
+        svg.append("g")
+            .attr("transform", `translate(0,${height - marginBottom})`)
+            .call(d3.axisBottom(x)
+                .ticks(d3.timeWeek.every(1))
+                .tickFormat(d3.timeFormat("%b %d")))
+            .call(g => g.select(".domain").attr("stroke", "#374151"))
+            .call(g => g.selectAll(".tick line").attr("stroke", "#374151"))
+            .call(g => g.selectAll(".tick text")
+                .attr("fill", "#94a3b8")
+                .attr("font-size", "10px")
+                .attr("transform", "rotate(-45)")
+                .attr("text-anchor", "end")
+                .attr("dx", "-0.5em")
+                .attr("dy", "0.5em"));
+
+        // Add Y axis
+        svg.append("g")
+            .attr("transform", `translate(${marginLeft},0)`)
+            .call(d3.axisLeft(y).ticks(5))
+            .call(g => g.select(".domain").attr("stroke", "#374151"))
+            .call(g => g.selectAll(".tick line").attr("stroke", "#374151"))
+            .call(g => g.selectAll(".tick text").attr("fill", "#94a3b8"));
+
+        // Add Y axis label
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 12)
+            .attr("x", -(height / 2))
+            .attr("fill", "#94a3b8")
+            .attr("font-size", "12px")
+            .attr("text-anchor", "middle")
+            .text("Complaints");
+
+        // Add grid lines
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", `translate(${marginLeft},0)`)
+            .call(d3.axisLeft(y)
+                .ticks(5)
+                .tickSize(-(width - marginLeft - marginRight))
+                .tickFormat(""))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll(".tick line")
+                .attr("stroke", "#1e293b")
+                .attr("stroke-dasharray", "2,2"));
+
+        // Add area fill with gradient
+        const area = d3.area()
+            .curve(d3.curveMonotoneX)
+            .x(d => x(d.date))
+            .y0(height - marginBottom)
+            .y1(d => y(d.count));
+
+        svg.append("path")
+            .datum(data)
+            .attr("fill", `url(#${gradientId})`)
+            .attr("fill-opacity", 0.15)
+            .attr("d", area);
+
+        // Add the line path
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", `url(#${gradientId})`)
+            .attr("stroke-width", 2.5)
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("d", line);
+
+        // Add dots at data points
+        svg.selectAll(".dot")
+            .data(data)
+            .join("circle")
+            .attr("class", "dot")
+            .attr("cx", d => x(d.date))
+            .attr("cy", d => y(d.count))
+            .attr("r", 4)
+            .attr("fill", d => colorScale(d.count))
+            .attr("stroke", "#1e293b")
+            .attr("stroke-width", 2)
+            .style("cursor", "pointer")
+            .on("mouseover", function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr("r", 7);
+                
+                // Show tooltip
+                const tooltip = svg.append("g")
+                    .attr("class", "tooltip-group")
+                    .attr("transform", `translate(${x(d.date)},${y(d.count) - 15})`);
+
+                tooltip.append("rect")
+                    .attr("x", -40)
+                    .attr("y", -30)
+                    .attr("width", 80)
+                    .attr("height", 28)
+                    .attr("rx", 4)
+                    .attr("fill", "rgba(0,0,0,0.85)")
+                    .attr("stroke", colorScale(d.count))
+                    .attr("stroke-width", 1);
+
+                tooltip.append("text")
+                    .attr("text-anchor", "middle")
+                    .attr("y", -12)
+                    .attr("fill", "#fff")
+                    .attr("font-size", "11px")
+                    .text(`${d3.timeFormat("%b %d")(d.date)}: ${d.count}`);
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr("r", 4);
+                svg.selectAll(".tooltip-group").remove();
+            });
+
+    }, [categoryData]);
 
     // Animation variants
     const containerVariants = {
@@ -410,15 +599,17 @@ const Analytics = () => {
                     </div>
                 </motion.div>
 
-                {/* Time Series */}
+                {/* Time Series - D3.js Gradient Line Chart */}
                 <motion.div className="chart-card chart-wide" variants={itemVariants}>
                     <div className="chart-header">
                         <h3 className="chart-title">Complaint Trends</h3>
-                        <p className="chart-subtitle">Monthly complaint volume (Last 6 months)</p>
+                        <p className="chart-subtitle">Daily complaint volume (Last 60 days)</p>
                     </div>
-                    <div className="chart-container">
-                        {timeSeriesChartData && (
-                            <Line data={timeSeriesChartData} options={chartOptions} />
+                    <div className="chart-container d3-chart-container" ref={trendChartRef}>
+                        {!categoryData?.complaintsByDate && (
+                            <p style={{ color: '#94a3b8', textAlign: 'center', paddingTop: '100px' }}>
+                                No trend data available
+                            </p>
                         )}
                     </div>
                 </motion.div>

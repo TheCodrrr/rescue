@@ -179,6 +179,19 @@
     position: relative;
 }
 
+/* D3 Chart Container */
+.d3-chart-container {
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.d3-chart-container svg {
+    overflow: visible;
+}
+
 /* Response Stats */
 .response-stats {
     display: flex;
