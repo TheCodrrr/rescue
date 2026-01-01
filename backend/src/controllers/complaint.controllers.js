@@ -8,7 +8,7 @@ import { calculateTrendingScore } from "../../utils/trendingScore.js";
 import { io } from "../server.js";
 import { History } from "../models/history.models.js";
 import { scheduleEscalation, cancelEscalation } from "../../utils/scheduleEscalation.js";
-import { complaintByCategoryPipeline } from "../pipelines/complaint.pipeline.js";
+import { complaintByCategoryPipeline, complaintByDate } from "../pipelines/complaint.pipeline.js";
 
 const getTrendingComplaints = asyncHandler(async (req, res) => {
     const { cursor, limit } = req.query;
@@ -49,10 +49,15 @@ const getTrendingComplaints = asyncHandler(async (req, res) => {
     });
 });
 
-const getComplaintByCategory = asyncHandler(async (req, res) => {
+const getComplaintAnalytics = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const userLat = req.user.latitude;
-    const userLon = req.user.longitude;
+    const userLat = parseFloat(req.user.latitude);
+    const userLon = parseFloat(req.user.longitude);
+
+    // Validate user location
+    if (!userLat || !userLon || isNaN(userLat) || isNaN(userLon)) {
+        throw new ApiError(400, "User location not found. Please update your profile with location information.");
+    }
 
     const radius = 100 * 1000;
 
@@ -99,6 +104,24 @@ const getComplaintByCategory = asyncHandler(async (req, res) => {
     const engagementRate = totalComplaints > 0 ? 
         (((totalUpvotes + totalDownvotes) / totalComplaints) * 100).toFixed(1) : 0;
 
+    const dateWiseResult = await Complaint.aggregate(
+        complaintByDate()
+    )
+
+    const dateMap = {};
+    dateWiseResult.forEach((d) => (dateMap[d.date] = d.count));
+
+    const last60Days = [];
+    for (let i = 59; i >= 0; i--) {
+        const dt = new Date();
+        dt.setDate(dt.getDate() - i);
+        const dateStr = dt.toISOString().split("T")[0];
+        last60Days.push({
+            date: dateStr,
+            count: dateMap[dateStr] || 0,
+        })
+    }
+
     return res.status(200).json({ 
         success: true, 
         data: {
@@ -110,7 +133,8 @@ const getComplaintByCategory = asyncHandler(async (req, res) => {
                 totalUpvotes,
                 totalDownvotes,
                 engagementRate
-            }
+            },
+            complaintsByDate: last60Days,
         }
     });
 
@@ -937,7 +961,7 @@ export {
     upvoteComplaint,
     downvoteComplaint,
     getTrendingComplaints,
-    getComplaintByCategory,
+    getComplaintAnalytics,
     getNearbyComplaints,
     searchMyComplaints
 }
