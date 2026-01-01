@@ -1388,23 +1388,10 @@
 }
 
 /* Section Header Styles */
-
-.complaint-section-title-wrapper {
+.complaint-form-section-header {
     text-align: center;
     margin-bottom: 2rem;
     animation: fadeInScale 1s ease-out 0.6s both;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.complaint-section-title-wrapper:hover {
-    background-color: var(--color13);
-    cursor: pointer;
-}
-
-.complaint-section-title-wrapper > * {
-    margin-left: 20px;
 }
 
 .complaint-section-title {

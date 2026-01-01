@@ -848,15 +848,22 @@
     margin-bottom: 1.5rem;
 }
 
-.section-header .section-icon + .user-profile-section-title {
+.section-header .section-icon + .up-profile-section-title {
     margin-right: auto;
 }
 
-.user-profile-section-title {
+.up-profile-section-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: white;
     margin: 0;
+}
+
+.up-profile-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
 }
 
 .section-icon {
@@ -1882,14 +1889,14 @@
     column-fill: balance;
 }
 
-.user-profile-section-title {
+@media (max-width: 1024px) {
     .my-complaints-grid {
         column-count: 2;
     }
 }
 
 @media (max-width: 768px) {
-    .user-profile-section-title .section-icon + .user-profile-section-title {
+    .my-complaints-grid {
         column-count: 1;
     }
 }
