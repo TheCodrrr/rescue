@@ -49,21 +49,31 @@ ChartJS.register(
 
 const Analytics = () => {
     const [analyticsData, setAnalyticsData] = useState(null);
+    const [categoryData, setCategoryData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        fetchAnalytics();
+        fetchAllData();
     }, []);
 
-    const fetchAnalytics = async () => {
+    const fetchAllData = async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axiosInstance.get('/analytics/nearby');
-            console.log("Hello Hello Hello: ", response);
-            setAnalyticsData(response.data.data);
+            
+            // Fetch both analytics and category data in parallel
+            const [analyticsResponse, categoryResponse] = await Promise.all([
+                axiosInstance.get('/analytics/nearby'),
+                axiosInstance.get('/analytics/category')
+            ]);
+            
+            console.log("Analytics data: ", analyticsResponse);
+            console.log("Category data: ", categoryResponse);
+            
+            setAnalyticsData(analyticsResponse.data.data);
+            setCategoryData(categoryResponse.data.data);
         } catch (err) {
             console.error('Error fetching analytics:', err);
             setError(err.response?.data?.message || 'Failed to load analytics data');
@@ -118,17 +128,32 @@ const Analytics = () => {
         high: '#ef4444'
     };
 
-    // Category Distribution Chart (Doughnut)
-    const categoryChartData = analyticsData ? {
-        labels: analyticsData.categoryDistribution.map(c => c.category.toUpperCase()),
-        datasets: [{
-            data: analyticsData.categoryDistribution.map(c => c.count),
-            backgroundColor: analyticsData.categoryDistribution.map(c => categoryColors[c.category]),
-            borderColor: '#1e293b',
-            borderWidth: 2,
-            hoverOffset: 10
-        }]
-    } : null;
+    // Default colors for any category not explicitly defined
+    const defaultColors = ['#00ADB5', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16'];
+
+    // Category Distribution Chart (Doughnut) - using data from /analytics/category
+    const categoryChartData = categoryData?.categoryDistribution ? (() => {
+        // Transform object format { rail: 5, fire: 3, ... } to array format
+        const categories = Object.entries(categoryData.categoryDistribution)
+            .filter(([_, count]) => count > 0) // Only show categories with complaints
+            .map(([category, count]) => ({ category, count }));
+        
+        // If no categories have complaints, return null
+        if (categories.length === 0) return null;
+        
+        return {
+            labels: categories.map(c => c.category.toUpperCase()),
+            datasets: [{
+                data: categories.map(c => c.count),
+                backgroundColor: categories.map((c, index) => 
+                    categoryColors[c.category] || defaultColors[index % defaultColors.length]
+                ),
+                borderColor: '#1e293b',
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        };
+    })() : null;
 
     // Status Distribution Chart (Pie)
     const statusChartData = analyticsData ? {
@@ -274,7 +299,7 @@ const Analytics = () => {
                 <AlertTriangle size={48} className="error-icon" />
                 <h3>Failed to Load Analytics</h3>
                 <p>{error}</p>
-                <button onClick={fetchAnalytics} className="retry-btn">
+                <button onClick={fetchAllData} className="retry-btn">
                     Try Again
                 </button>
             </div>
@@ -308,7 +333,7 @@ const Analytics = () => {
                     <div>
                         <h1 className="analytics-title">Area Analytics</h1>
                         <p className="analytics-subtitle">
-                            Complaints within 10km radius • {analyticsData.totalComplaints} total complaints
+                            Complaints within 100km radius • {categoryData?.totalComplaints || 0} total complaints
                         </p>
                     </div>
                 </div>
@@ -322,7 +347,7 @@ const Analytics = () => {
                     </div>
                     <div className="stat-content">
                         <p className="stat-label">Total Complaints</p>
-                        <h3 className="stat-value">{analyticsData.totalComplaints}</h3>
+                        <h3 className="stat-value">{categoryData?.totalComplaints || 0}</h3>
                     </div>
                 </motion.div>
 
@@ -332,7 +357,7 @@ const Analytics = () => {
                     </div>
                     <div className="stat-content">
                         <p className="stat-label">Resolution Rate</p>
-                        <h3 className="stat-value">{analyticsData.resolutionRate}%</h3>
+                        <h3 className="stat-value">{categoryData?.resolutionRate || 0}%</h3>
                     </div>
                 </motion.div>
 
@@ -342,7 +367,7 @@ const Analytics = () => {
                     </div>
                     <div className="stat-content">
                         <p className="stat-label">Your Complaints</p>
-                        <h3 className="stat-value">{analyticsData.userComplaintsCount}</h3>
+                        <h3 className="stat-value">{categoryData?.userComplaintsCount || 0}</h3>
                     </div>
                 </motion.div>
 
@@ -352,7 +377,7 @@ const Analytics = () => {
                     </div>
                     <div className="stat-content">
                         <p className="stat-label">Engagement Rate</p>
-                        <h3 className="stat-value">{analyticsData.engagementStats.engagementRate}%</h3>
+                        <h3 className="stat-value">{categoryData?.engagementStats?.engagementRate || 0}%</h3>
                     </div>
                 </motion.div>
             </motion.div>
@@ -489,14 +514,14 @@ const Analytics = () => {
                             <ThumbsUp size={32} />
                             <div>
                                 <p className="engagement-label">Total Upvotes</p>
-                                <h3 className="engagement-value">{analyticsData.engagementStats.totalUpvotes}</h3>
+                                <h3 className="engagement-value">{categoryData?.engagementStats?.totalUpvotes || 0}</h3>
                             </div>
                         </div>
                         <div className="engagement-item downvote">
                             <ThumbsDown size={32} />
                             <div>
                                 <p className="engagement-label">Total Downvotes</p>
-                                <h3 className="engagement-value">{analyticsData.engagementStats.totalDownvotes}</h3>
+                                <h3 className="engagement-value">{categoryData?.engagementStats?.totalDownvotes || 0}</h3>
                             </div>
                         </div>
                     </div>
