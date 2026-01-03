@@ -6,6 +6,7 @@ import officerReducer from "./officerSlice.js";
 import notificationReducer from "./notificationSlice.js";
 import evidenceReducer from "./evidenceSlice.js";
 import departmentReducer from "./departmentSlice.js";
+import analyticsReducer from "./analyticsSlice.js";
 
 export const store = configureStore({
     reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
         notifications: notificationReducer,
         evidence: evidenceReducer,
         department: departmentReducer,
+        analytics: analyticsReducer,
     }
 })
