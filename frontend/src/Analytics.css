@@ -73,11 +73,11 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px color-mix(in srgb, var(--color3) 8%, transparent);
 }
 
-.stat-card:hover {
+/* .stat-card:hover {
     background: linear-gradient(135deg, color-mix(in srgb, var(--color13) 35%, transparent), color-mix(in srgb, var(--color18) 30%, transparent));
     border-color: color-mix(in srgb, var(--color3) 25%, transparent);
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px color-mix(in srgb, var(--color3) 25%, transparent), 0 0 20px color-mix(in srgb, var(--color3) 12%, transparent);
-}
+} */
 
 .stat-icon {
     width: 56px;
@@ -483,4 +483,65 @@
     .location-bar {
         width: 80px;
     }
+}
+
+/* Bubble Map Styles */
+.bubble-map-container {
+    width: 100%;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1a2744 100%);
+}
+
+.bubble-map-container svg {
+    overflow: visible;
+}
+
+.chart-header-with-icon {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.chart-header-icon {
+    color: var(--color3);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.no-map-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #94a3b8;
+    height: 100%;
+}
+
+.no-map-data .no-data-icon {
+    opacity: 0.5;
+}
+
+.no-map-data p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Bubble map tooltip animation */
+.complaint-bubble {
+    transition: fill-opacity 0.15s ease, r 0.15s ease;
+}
+
+/* Legend hover effect */
+.legend text {
+    transition: fill 0.2s ease;
+}
+
+.legend g:hover text {
+    fill: #fff;
 }
