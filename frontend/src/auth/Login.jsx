@@ -159,7 +159,7 @@ export default function Login() {
 
                             <div className="relative z-10 text-center mb-6">
                                 <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Welcome Back!</h2>
-                                <p className="text-white/80 text-sm drop-shadow-md">Login to your Lodge account</p>
+                                <p className="text-white/80 text-sm drop-shadow-md">Login to your Rescue account</p>
                             </div>
                             
                             {/* Welcome Icon Section */}
@@ -180,7 +180,7 @@ export default function Login() {
                                         <div className="w-2 h-2 bg-white/70 rounded-full animate-pulse shadow-sm" style={{animationDelay: '0.5s'}}></div>
                                         <div className="w-2 h-2 bg-white/80 rounded-full animate-pulse shadow-sm" style={{animationDelay: '1s'}}></div>
                                     </div>
-                                    <p className="text-white/90 text-sm italic font-light drop-shadow-md">"Welcome back to Lodge"</p>
+                                    <p className="text-white/90 text-sm italic font-light drop-shadow-md">"Welcome back to Rescue"</p>
                                 </div>
                             </div>
                         </div>

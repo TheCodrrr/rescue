@@ -476,7 +476,7 @@ export default function Signup() {
                             <div className="absolute top-1/3 right-4 w-8 h-8 bg-white/25 backdrop-blur-sm rounded-lg border border-white/35 animate-float" style={{animationDelay: '2s'}}></div>
 
                             <div className="relative z-10 text-center mb-6">
-                                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Welcome to Lodge!</h2>
+                                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Welcome to Rescue!</h2>
                                 <p className="text-white/80 text-sm drop-shadow-md">Create your account and join our community</p>
                             </div>
                             
