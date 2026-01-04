@@ -6,7 +6,8 @@ const app = express();
 
 app.use(cors({
     // origin: process.env.CORS_ORIGIN,
-    origin: "*",
+    // origin: "*",
+    origin: "https://rescue-navy.vercel.app",
     credentials: true,
 }));
 app.use(express.json({ limit: "16kb" }));
