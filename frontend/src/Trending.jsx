@@ -928,9 +928,48 @@ const Trending = () => {
             </p>
           </div>
 
-          <div className="trending-complaints-grid">
-            {data.pages.map((page, pageIndex) =>
-              page.complaints?.map((complaint, index) => (
+          {/* Loading State */}
+          {status === 'pending' && (
+            <div className="trending-loading">
+              <div className="animated-loader">
+                <div className="animated-circle">
+                  <div className="dot"></div>
+                  <div className="outline"></div>
+                </div>
+                <div className="animated-circle">
+                  <div className="dot"></div>
+                  <div className="outline"></div>
+                </div>
+                <div className="animated-circle">
+                  <div className="dot"></div>
+                  <div className="outline"></div>
+                </div>
+                <div className="animated-circle">
+                  <div className="dot"></div>
+                  <div className="outline"></div>
+                </div>
+              </div>
+              <span>Loading trending complaints...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {status === 'error' && (
+            <div className="trending-error">
+              <FiAlertTriangle size={48} />
+              <h3>Failed to load complaints</h3>
+              <p>{error?.message || 'Something went wrong. Please try again.'}</p>
+              <button onClick={() => window.location.reload()} className="retry-btn">
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Success State - Show complaints */}
+          {status === 'success' && data?.pages && (
+            <div className="trending-complaints-grid">
+              {data.pages.map((page, pageIndex) =>
+                page.complaints?.map((complaint, index) => (
                 <div key={complaint._id || `${pageIndex}-${index}`} className="trending-card">
                   {/* Card Header - Category with status + User info on right */}
                   <div className="trending-card-header">
@@ -1074,44 +1113,45 @@ const Trending = () => {
                 </div>
               ))
             )}
-          </div>
 
-          <div ref={ref} className="load-more-section">
-            {isFetchingNextPage ? (
-              <div className="loading-more">
-                <div className="animated-loader">
-                  <div className="animated-circle">
-                    <div className="dot"></div>
-                    <div className="outline"></div>
+            <div ref={ref} className="load-more-section">
+              {isFetchingNextPage ? (
+                <div className="loading-more">
+                  <div className="animated-loader">
+                    <div className="animated-circle">
+                      <div className="dot"></div>
+                      <div className="outline"></div>
+                    </div>
+                    <div className="animated-circle">
+                      <div className="dot"></div>
+                      <div className="outline"></div>
+                    </div>
+                    <div className="animated-circle">
+                      <div className="dot"></div>
+                      <div className="outline"></div>
+                    </div>
+                    <div className="animated-circle">
+                      <div className="dot"></div>
+                      <div className="outline"></div>
+                    </div>
                   </div>
-                  <div className="animated-circle">
-                    <div className="dot"></div>
-                    <div className="outline"></div>
-                  </div>
-                  <div className="animated-circle">
-                    <div className="dot"></div>
-                    <div className="outline"></div>
-                  </div>
-                  <div className="animated-circle">
-                    <div className="dot"></div>
-                    <div className="outline"></div>
-                  </div>
+                  <span>Loading more complaints...</span>
                 </div>
-                <span>Loading more complaints...</span>
-              </div>
-            ) : hasNextPage ? (
-              <div className="scroll-indicator">
-                <span>Scroll to load more</span>
-                <svg className="scroll-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </div>
-            ) : (
-              <div className="end-message">
-                <span>🎉 You've reached the end! No more complaints to show.</span>
-              </div>
-            )}
+              ) : hasNextPage ? (
+                <div className="scroll-indicator">
+                  <span>Scroll to load more</span>
+                  <svg className="scroll-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              ) : (
+                <div className="end-message">
+                  <span>🎉 You've reached the end! No more complaints to show.</span>
+                </div>
+              )}
+            </div>
           </div>
+          )}
         </div>
       </div>
 

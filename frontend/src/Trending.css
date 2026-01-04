@@ -133,6 +133,70 @@
   font-weight: 400;
 }
 
+/* Loading State */
+.trending-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* Error State */
+.trending-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color2) 85%, transparent), color-mix(in srgb, var(--color12) 80%, transparent));
+  border-radius: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.trending-error svg {
+  color: #ef4444;
+}
+
+.trending-error h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+}
+
+.trending-error p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.trending-error .retry-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--color3), var(--color8));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.trending-error .retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 40%, transparent);
+}
+
 /* Complaints Grid */
 .trending-complaints-grid {
   display: grid;

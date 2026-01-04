@@ -19,10 +19,10 @@ export default function Footer() {
     ];
 
     const emergencyServices = [
-        { name: 'Fire Department', phone: '911', icon: '🔥' },
-        { name: 'Police', phone: '911', icon: '👮' },
-        { name: 'Medical Emergency', phone: '911', icon: '🚑' },
-        { name: 'Cyber Crime', phone: '1-800-CYBER', icon: '💻' }
+        { name: 'Fire Department', phone: '101', icon: '🔥' },
+        { name: 'Police', phone: '100', icon: '👮' },
+        { name: 'Medical Emergency', phone: '102', icon: '🚑' },
+        { name: 'Cyber Crime', phone: '1930', icon: '💻' }
     ];
 
     return (
@@ -36,7 +36,7 @@ export default function Footer() {
                         </svg>
                     </div>
                     <div className="emergency-text">
-                        <h3>Emergency? Call 911 Immediately</h3>
+                        <h3>Emergency? Call 112 Immediately</h3>
                         <p>For life-threatening emergencies, don't use this platform - call emergency services directly</p>
                     </div>
                 </div>
@@ -137,7 +137,7 @@ export default function Footer() {
                     <div className="copyright">
                         <p>&copy; {currentYear} Rescue Emergency Platform. All rights reserved.</p>
                         <p className="disclaimer">
-                            This platform is for non-emergency incident reporting. For immediate emergencies, always call 911.
+                            This platform is for non-emergency incident reporting. For immediate emergencies, always call 112.
                         </p>
                     </div>
                     <div className="footer-status">

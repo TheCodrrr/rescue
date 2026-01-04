@@ -1,37 +1,31 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "./Navbar.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { logout } from "./auth/redux/authSlice";
 import CloudImage from "./utils/CloudImage";
 
-// Memoized navigation links component
-const NavLinks = React.memo(({ links, onLinkClick }) => {
+// Navigation links component using React Router Link
+const NavLinks = ({ links, currentPath }) => {
     return (
         <>
             {links.map((link, index) => (
-                <a
+                <Link
                     key={link.name}
-                    href={link.href}
-                    className="navbar-link"
+                    to={link.href}
+                    className={`navbar-link ${currentPath === link.href ? 'navbar-link-active' : ''}`}
                     style={{ animationDelay: `${index * 0.1}s` }}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        if (onLinkClick) {
-                            onLinkClick(link.href);
-                        }
-                    }}
                 >
                     <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                     </svg>
                     <span className="navbar-link-text">{link.name}</span>
                     <div className="navbar-link-hover-effect"></div>
-                </a>
+                </Link>
             ))}
         </>
     );
-});
+};
 
 NavLinks.displayName = 'NavLinks';
 
@@ -101,6 +95,7 @@ const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -139,12 +134,6 @@ const Navbar = () => {
         setIsMobileMenuOpen(false);
     }, []);
 
-    // Handle navigation link clicks using React Router
-    const handleNavLinkClick = useCallback((href) => {
-        // Use React Router navigate for proper SPA navigation
-        navigate(href);
-    }, [navigate]);
-
     // Common navigation links accessible to both roles
     const commonNavLinks = useMemo(() => [
         { name: 'Home', href: '/home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -154,7 +143,7 @@ const Navbar = () => {
 
     // Citizen-specific navigation links
     const citizenSpecificLinks = useMemo(() => [
-        { name: 'Authority', href: '#authority', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' }
+        // { name: 'Authority', href: '#authority', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' }
     ], []);
 
     // Officer-specific navigation links
@@ -205,7 +194,7 @@ const Navbar = () => {
 
                 {/* Desktop Navigation */}
                 <div className="navbar-menu ml-3">
-                    <NavLinks links={displayNavLinks} onLinkClick={handleNavLinkClick} />
+                    <NavLinks links={displayNavLinks} currentPath={location.pathname} />
                 </div>
 
                 {/* Authentication & Profile Section */}
@@ -233,22 +222,18 @@ const Navbar = () => {
             <div className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu-active' : ''}`}>
                 <div className="mobile-menu-content">
                     {displayNavLinks.map((link, index) => (
-                        <a
+                        <Link
                             key={link.name}
-                            href={link.href}
-                            className="mobile-menu-link"
+                            to={link.href}
+                            className={`mobile-menu-link ${location.pathname === link.href ? 'mobile-menu-link-active' : ''}`}
                             style={{ animationDelay: `${index * 0.1}s` }}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                closeMobileMenu();
-                                handleNavLinkClick(link.href);
-                            }}
+                            onClick={closeMobileMenu}
                         >
                             <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                             </svg>
                             <span className="mobile-menu-link-text">{link.name}</span>
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>
@@ -258,4 +243,4 @@ const Navbar = () => {
 
 Navbar.displayName = 'Navbar';
 
-export default React.memo(Navbar);
+export default Navbar;

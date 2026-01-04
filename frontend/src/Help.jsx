@@ -101,7 +101,7 @@ const Help = () => {
         {
             id: 10,
             question: "What should I do in case of an emergency?",
-            answer: "For immediate emergencies, always call your local emergency services first (911, 112, etc.). Use our platform for non-urgent issues or to document emergency situations for follow-up and tracking purposes.",
+            answer: "For immediate emergencies, always call 112 (unified emergency number), 100 (Police), 101 (Fire), or 102 (Ambulance). Use our platform for non-urgent issues or to document emergency situations for follow-up and tracking purposes.",
             category: "getting-started"
         }
     ];
