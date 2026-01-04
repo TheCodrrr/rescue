@@ -978,7 +978,7 @@ const Analytics = () => {
                             <MapPin size={20} className="chart-header-icon" />
                             <div>
                                 <h3 className="chart-title">Complaint Hotspots</h3>
-                                <p className="chart-subtitle">Geographic distribution of complaints within 100km</p>
+                                <p className="chart-subtitle">Geographic distribution of complaints within 300km</p>
                             </div>
                         </div>
                     </div>

@@ -58,7 +58,8 @@ import {
 import { 
     rejectComplaint, 
     acceptComplaint, 
-    addEscalationEvent 
+    addEscalationEvent,
+    resolveComplaint
 } from './auth/redux/officerSlice';
 import { 
     addComplaintVoteHistory, 
@@ -110,6 +111,9 @@ export default function ComplaintDetail() {
     const [complaintIgnored, setComplaintIgnored] = useState(false);
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
+    const [resolveModalOpen, setResolveModalOpen] = useState(false);
+    const [officerNotes, setOfficerNotes] = useState('');
+    const [resolveInProgress, setResolveInProgress] = useState(false);
     const socketRef = useRef(null);
 
     // Socket.io connection for real-time notifications (when viewing complaint as owner or as officer)
@@ -1165,6 +1169,71 @@ export default function ComplaintDetail() {
         setRejectionReason('');
     };
 
+    // Resolve complaint handlers
+    const handleResolveComplaint = () => {
+        if (!isAuthenticated || user?.role !== 'officer') {
+            toast.error('🔐 Only officers can resolve complaints', {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
+        // Open resolve modal
+        setOfficerNotes('');
+        setResolveModalOpen(true);
+    };
+
+    const handleResolveSubmit = async () => {
+        setResolveInProgress(true);
+        try {
+            // Show loading toast
+            const loadingToast = toast.loading('Resolving complaint...');
+            
+            // Use Redux thunk to resolve complaint
+            const result = await dispatch(resolveComplaint({ 
+                complaintId: id, 
+                officerNotes: officerNotes.trim()
+            }));
+            
+            // Dismiss loading toast
+            toast.dismiss(loadingToast);
+
+            if (resolveComplaint.fulfilled.match(result)) {
+                // Show success toast
+                toast.success('✅ Complaint resolved successfully!', {
+                    duration: 4000,
+                    position: 'top-center',
+                    icon: '🎉'
+                });
+                
+                // Close modal and reset
+                setResolveModalOpen(false);
+                setOfficerNotes('');
+                
+                // Refresh complaint details to show updated status
+                dispatch(fetchComplaintById(id));
+                
+                console.log('✅ Complaint resolved:', id);
+            } else {
+                throw new Error(result.payload || 'Failed to resolve complaint');
+            }
+        } catch (error) {
+            console.error('Error resolving complaint:', error);
+            toast.error(error.message || '❌ Failed to resolve complaint', {
+                duration: 3000,
+                position: 'top-center',
+            });
+        } finally {
+            setResolveInProgress(false);
+        }
+    };
+
+    const handleResolveCancel = () => {
+        setResolveModalOpen(false);
+        setOfficerNotes('');
+    };
+
 
     const openCommentModal = useCallback(() => {
         setCommentModalOpen(true);
@@ -1341,7 +1410,7 @@ export default function ComplaintDetail() {
     }
 
     const severityInfo = getSeverityInfo(selectedComplaint.severity);
-    const canEdit = isAuthenticated && user && (user._id === selectedComplaint.userId || user.role === 'admin');
+    const canEdit = isAuthenticated && user && user.role === 'admin';
 
     return (
         <>
@@ -1452,6 +1521,39 @@ export default function ComplaintDetail() {
                                     </div>
                                 </div>
                             )}
+                        </motion.div>
+                    )}
+
+                    {/* Officer Resolve Section - Show Resolve button for officer handling this in_progress complaint */}
+                    {isAuthenticated && 
+                        user?.role === 'officer' && 
+                        selectedComplaint.assigned_officer_id && 
+                        (selectedComplaint.assigned_officer_id === user._id || 
+                         selectedComplaint.assigned_officer_id?._id === user._id) &&
+                        selectedComplaint.status === 'in_progress' && (
+                        <motion.div 
+                            className="cd-resolve-section"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <div className="cd-resolve-header">
+                                <FiCheckCircle className="cd-resolve-icon" />
+                                <h3>You are handling this complaint</h3>
+                            </div>
+                            <button
+                                className="cd-resolve-btn"
+                                onClick={handleResolveComplaint}
+                                disabled={resolveInProgress}
+                            >
+                                {resolveInProgress ? (
+                                    <div className="cd-loading-spinner-small"></div>
+                                ) : (
+                                    <>
+                                        <FiCheckCircle /> Mark as Resolved
+                                    </>
+                                )}
+                            </button>
                         </motion.div>
                     )}
 
@@ -1818,25 +1920,6 @@ export default function ComplaintDetail() {
                                 isOfficer={user?.role === 'officer'}
                                 complainerId={selectedComplaint.user_id?._id}
                             />
-
-                            {/* Status Update Section (for admins or complaint owner) */}
-                            {canEdit && (
-                                <div className="cd-status-management">
-                                    <h3>Update Status</h3>
-                                    <div className="cd-status-controls">
-                                        {['pending', 'in-progress', 'resolved', 'rejected'].map((status) => (
-                                            <button
-                                                key={status}
-                                                className={`cd-status-option-btn ${mapStatusToFrontend(selectedComplaint.status) === status ? 'cd-active-status' : ''}`}
-                                                onClick={() => handleStatusUpdate(status)}
-                                                disabled={statusUpdateInProgress}
-                                            >
-                                                {status.replace('-', ' ').toUpperCase()}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -1911,6 +1994,49 @@ export default function ComplaintDetail() {
                                 disabled={!rejectionReason.trim()}
                             >
                                 Submit Rejection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Resolve Modal */}
+            {resolveModalOpen && (
+                <div className="resolve-modal-overlay" onClick={handleResolveCancel}>
+                    <div className="resolve-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="resolve-modal-header">
+                            <h2><FiCheckCircle /> Resolve Complaint</h2>
+                            <button className="resolve-modal-close" onClick={handleResolveCancel}>
+                                ×
+                            </button>
+                        </div>
+                        <div className="resolve-modal-body">
+                            <p>Add any notes about how this complaint was resolved (optional):</p>
+                            <textarea
+                                className="resolve-modal-textarea"
+                                placeholder="Enter officer notes... (e.g., actions taken, resolution details)"
+                                value={officerNotes}
+                                onChange={(e) => setOfficerNotes(e.target.value)}
+                                rows={5}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="resolve-modal-footer">
+                            <button className="resolve-modal-cancel-btn" onClick={handleResolveCancel}>
+                                Cancel
+                            </button>
+                            <button 
+                                className="resolve-modal-submit-btn" 
+                                onClick={handleResolveSubmit}
+                                disabled={resolveInProgress}
+                            >
+                                {resolveInProgress ? (
+                                    <div className="cd-loading-spinner-small"></div>
+                                ) : (
+                                    <>
+                                        <FiCheckCircle /> Resolve Complaint
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

@@ -184,6 +184,47 @@ export const addEscalationEvent = createAsyncThunk(
   }
 );
 
+// Thunk to resolve a complaint (officer must be handling it)
+export const resolveComplaint = createAsyncThunk(
+  'officer/resolveComplaint',
+  async ({ complaintId, officerNotes }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        return thunkAPI.rejectWithValue('Authentication required. Please log in.');
+      }
+
+      if (!complaintId) {
+        return thunkAPI.rejectWithValue('Complaint ID is required');
+      }
+
+      console.log(`Resolving complaint: ${complaintId}`);
+      
+      const response = await axiosInstance.put(
+        `/officer/resolve-complaint/${complaintId}`,
+        { officer_notes: officerNotes || '' }
+      );
+
+      console.log("Resolve complaint API response:", response.data);
+      
+      return { complaintId, ...response.data };
+    } catch (error) {
+      console.error("Resolve complaint API error:", error);
+      
+      let errorMessage = 'Failed to resolve complaint. Please try again.';
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const officerSlice = createSlice({
   name: 'officer',
   initialState,
@@ -369,6 +410,19 @@ const officerSlice = createSlice({
       })
       .addCase(addEscalationEvent.rejected, (state, action) => {
         state.error = action.payload || 'Failed to add escalation event';
+      })
+      // Resolve complaint
+      .addCase(resolveComplaint.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resolveComplaint.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log('Complaint resolved:', action.payload);
+      })
+      .addCase(resolveComplaint.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || 'Failed to resolve complaint';
       });
   },
 });
