@@ -580,10 +580,83 @@ const getOfficersByCategory = asyncHandler(async (req, res) => {
     })
 })
 
+const resolveComplaint = asyncHandler(async (req, res) => {
+    const officerId = req.user._id;
+    const complaintId = req.params.id;
+
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) {
+        throw new ApiError(404, "Complaint not found.");
+    }
+
+    if (complaint.status !== "in_progress") {
+        throw new ApiError(400, "Complaint status not in progress")
+    }
+
+    const officer = await User.findById(officerId);
+    const isHandling = officer.complaints.some(
+        (cId) => cId.toString() === complaintId
+    );
+
+    if (!isHandling) {
+        throw new ApiError(403, "You are not handling this complaint");
+    }
+
+    complaint.status = "resolved";
+    complaint.officer_notes = req.body.officer_notes || complaint.officer_notes;
+
+    await complaint.save();
+
+    // Cancel the escalation job since complaint is now resolved
+    try {
+        const cancelResult = await cancelEscalation(complaintId);
+        if (cancelResult.success) {
+            console.log(`✅ Escalation cancelled for resolved complaint ${complaintId}`);
+        } else {
+            console.log(`ℹ️ No escalation to cancel for complaint ${complaintId}: ${cancelResult.message}`);
+        }
+    } catch (escalationError) {
+        console.error(`⚠️ Error cancelling escalation for complaint ${complaintId}:`, escalationError);
+        // Don't fail the resolve operation if escalation cancellation fails
+    }
+
+    // Notify the citizen that their complaint has been resolved
+    try {
+        const userId = complaint.user_id.toString();
+        
+        const notificationData = {
+            type: "complaint_resolved",
+            complaint_id: complaintId,
+            complaint_title: complaint.title,
+            officer_name: officer.name || "Officer",
+            officer_id: officerId.toString(),
+            status: "resolved",
+            timestamp: new Date().toISOString(),
+            read: false
+        };
+
+        await createNotification(userId, notificationData);
+        
+        // Emit real-time notification to the complaint owner
+        io.emit(`notification:${userId}`, notificationData);
+        console.log(`🔔 Complaint resolved notification sent to user ${userId}`);
+    } catch (notificationError) {
+        console.error("⚠️ Failed to send resolution notification:", notificationError);
+        // Continue even if notification fails
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Complaint resolved successfully",
+        complaint,
+    })
+})
+
 export {
     getNearbyComplaintsForOfficer,
     rejectComplaint,
     assignOfficerToComplaint,
     getOfficerAcceptedComplaints,
     getOfficersByCategory,
+    resolveComplaint,
 };

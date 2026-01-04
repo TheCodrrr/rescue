@@ -5,13 +5,17 @@ import {
     getNearbyComplaintsForOfficer,
     rejectComplaint,
     getOfficerAcceptedComplaints,
-    getOfficersByCategory
+    getOfficersByCategory,
+    resolveComplaint
 } from "../controllers/officer.controllers.js";
 
 const router = express.Router();
 
 // Route to get nearby complaints for officers (filtered by rejected complaints)
 router.get("/nearby-complaints", verifyJWT, getNearbyComplaintsForOfficer);
+
+// Route to resolve a complaint (officer must be handling it & status must be in_progress)
+router.put("/resolve-complaint/:id", verifyJWT, resolveComplaint);
 
 // Route to reject a complaint (add to Redis)
 router.post("/reject-complaint", verifyJWT, rejectComplaint);
