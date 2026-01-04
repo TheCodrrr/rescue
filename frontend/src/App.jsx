@@ -83,13 +83,13 @@ function RoleProtectedRoute({ children, allowedRoles = ['citizen', 'officer'] })
     return <Navigate to={role === 'officer' ? '/officer/dashboard' : '/'} replace />;
   }
   
-  return <>{children}</>;
+  return children;
 }
 
 function App() {
   const dispatch = useDispatch();
   const token = localStorage.getItem('token');
-  const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     if (token && !user) {
@@ -97,45 +97,86 @@ function App() {
     }
   }, [dispatch, token, user]);
 
-  // ⛔ Prevent redirect until auth is checked
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/trending" element={<Trending />} />
-          <Route path="/help" element={<Help />} />
-
-          <Route path="/user" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-          <Route path="/complain" element={<ProtectedRoute><ComplaintRouter /></ProtectedRoute>} />
-          <Route path="/complaint/:id" element={<ProtectedRoute><ComplaintDetail /></ProtectedRoute>} />
-
-          {/* Officer-only */}
-          <Route path="/officer/*" element={
-            <ProtectedRoute requiredRole="officer">
-              <Routes>
-                <Route path="department" element={<OfficerDepartment />} />
-                <Route path="escalations" element={<OfficerEscalations />} />
-                <Route path="analytics" element={<OfficerAnalytics />} />
-                <Route path="teams" element={<OfficerTeams />} />
-              </Routes>
-            </ProtectedRoute>
-          } />
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </QueryClientProvider>
+    <>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          {/* Programmatic-only route guard defined inside Router context */}
+          <ProgrammaticOnlyRouteDefinitions />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* ========== COMMON ROUTES (Both Citizen & Officer) ========== */}
+            {/* Home page - accessible by everyone */}
+            <Route path="/home" element={<Home />} />
+            
+            {/* Trending - accessible by everyone */}
+            <Route path="/trending" element={<Trending />} />
+            
+            {/* Help - accessible by everyone */}
+            <Route path="/help" element={<Help />} />
+            
+            {/* User profile - accessible by both roles */}
+            <Route path="/user" element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } />
+            
+            {/* ========== CITIZEN-ONLY ROUTES ========== */}
+            {/* Complaint routes for citizens */}
+            <Route path="/complain" element={
+              <RoleProtectedRoute allowedRoles={['citizen', 'officer', 'admin']}>
+                {/* Show different component based on role */}
+                <ComplaintRouter />
+              </RoleProtectedRoute>
+            } />
+            <Route path="/complaint/:id" element={
+              <RoleProtectedRoute allowedRoles={['citizen', 'officer', 'admin']}>
+                <ComplaintDetail />
+              </RoleProtectedRoute>
+            } />
+            
+            {/* ========== OFFICER ROUTES ========== */}
+            {/* Officer Department Management */}
+            <Route path="/officer/department" element={
+              <RoleProtectedRoute allowedRoles={['officer']}>
+                <OfficerDepartment />
+              </RoleProtectedRoute>
+            } />
+            
+            {/* Officer Escalations */}
+            <Route path="/officer/escalations" element={
+              <RoleProtectedRoute allowedRoles={['officer']}>
+                <OfficerEscalations />
+              </RoleProtectedRoute>
+            } />
+            
+            {/* Officer Analytics - Statistics and insights */}
+            <Route path="/officer/analytics" element={
+              <RoleProtectedRoute allowedRoles={['officer']}>
+                <OfficerAnalytics />
+              </RoleProtectedRoute>
+            } />
+            
+            {/* Officer Teams */}
+            <Route path="/officer/teams" element={
+              <RoleProtectedRoute allowedRoles={['officer']}>
+                <OfficerTeams />
+              </RoleProtectedRoute>
+            } />
+            
+            {/* 404 Not Found */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </QueryClientProvider>
+    </>
   );
 }
-
 
 // Component that enforces navigation only via navigate(path, { state: { _viaCode: true } })
 function ProgrammaticOnly({ children }) {
@@ -143,7 +184,7 @@ function ProgrammaticOnly({ children }) {
   if (!location.state || !location.state._viaCode) {
     return <Navigate to="/" replace />;
   }
-  return <>{children}</>;
+  return children;
 }
 
 // Example target component (replace with your real screen)
