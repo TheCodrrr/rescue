@@ -371,7 +371,7 @@ const OfficerTeams = () => {
 
                 <div className="teams-stats">
                     <div className="team-stat-card">
-                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #00ADB5, #71C9CE)' }}>
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
@@ -397,7 +397,7 @@ const OfficerTeams = () => {
                     </div>
 
                     <div className="team-stat-card">
-                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a, #fee140)' }}>
+                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #f97316, #fbbf24)' }}>
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -411,7 +411,7 @@ const OfficerTeams = () => {
                     </div>
 
                     <div className="team-stat-card">
-                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe, #00f2fe)' }}>
+                        <div className="team-stat-icon" style={{ background: 'linear-gradient(135deg, #A6E3E9, #CBF1F5)' }}>
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
@@ -625,14 +625,14 @@ const OfficerTeams = () => {
                                             </p>
                                         ) : (
                                             teamDetails.assigned_complaints?.map((complaint) => (
-                                                <div key={complaint._id} className="complaint-item">
-                                                    <div className="complaint-info">
-                                                        <div className="complaint-title">{complaint.title}</div>
-                                                        <div className="complaint-meta">
+                                                <div key={complaint._id} className="ot-complaint-item">
+                                                    <div className="ot-complaint-info">
+                                                        <div className="ot-complaint-title">{complaint.title}</div>
+                                                        <div className="ot-complaint-meta">
                                                             <span className={`severity-badge severity-${complaint.severity}`}>
                                                                 {complaint.severity}
                                                             </span>
-                                                            <span className="complaint-status">{complaint.status}</span>
+                                                            <span className="ot-complaint-status">{complaint.status}</span>
                                                         </div>
                                                     </div>
                                                     <button 
@@ -898,10 +898,10 @@ const OfficerTeams = () => {
                             <div className="modal-body">
                                 <div className="complaint-list">
                                     {availableComplaints.map((complaint) => (
-                                        <div key={complaint._id} className="complaint-item-select">
-                                            <div className="complaint-info">
-                                                <div className="complaint-title">{complaint.title}</div>
-                                                <div className="complaint-description">{complaint.description?.substring(0, 100)}...</div>
+                                        <div key={complaint._id} className="ot-complaint-item-select">
+                                            <div className="ot-complaint-info">
+                                                <div className="ot-complaint-title">{complaint.title}</div>
+                                                <div className="ot-complaint-description">{complaint.description?.substring(0, 100)}...</div>
                                                 <span className={`severity-badge severity-${complaint.severity}`}>
                                                     {complaint.severity}
                                                 </span>

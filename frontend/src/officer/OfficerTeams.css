@@ -1,7 +1,7 @@
 .teams-container {
     min-height: 100vh;
     padding: 8rem 2rem 4rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--color1) 0%, var(--color2) 50%, var(--color12) 100%);
     position: relative;
 }
 
@@ -13,8 +13,8 @@
     right: 0;
     bottom: 0;
     background: 
-        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.3), transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(0, 173, 181, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 173, 181, 0.1), transparent 50%);
     pointer-events: none;
 }
 
@@ -47,8 +47,8 @@
     padding: 0.875rem 1.5rem;
     border: none;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    color: #667eea;
+    background: linear-gradient(135deg, var(--color3), var(--color8));
+    color: white;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -56,12 +56,12 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 173, 181, 0.3);
 }
 
 .create-team-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 24px rgba(0, 173, 181, 0.5);
 }
 
 .create-team-btn svg {
@@ -80,21 +80,22 @@
 }
 
 .team-stat-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(57, 62, 70, 0.8);
     backdrop-filter: blur(20px);
     border-radius: 16px;
     padding: 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 173, 181, 0.2);
     transition: all 0.3s ease;
 }
 
 .team-stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 173, 181, 0.2);
+    border-color: rgba(0, 173, 181, 0.4);
 }
 
 .team-stat-icon {
@@ -115,7 +116,7 @@
 
 .team-stat-card h3 {
     font-size: 0.9rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 0.25rem;
     font-weight: 500;
 }
@@ -123,7 +124,7 @@
 .team-stat-number {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--color4);
     margin: 0;
 }
 
@@ -138,19 +139,20 @@
 }
 
 .officer-team-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(57, 62, 70, 0.8);
     backdrop-filter: blur(20px);
     border-radius: 16px;
     padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 173, 181, 0.2);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .officer-team-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 173, 181, 0.2);
+    border-color: rgba(0, 173, 181, 0.4);
 }
 
 .team-card-header {
@@ -164,7 +166,7 @@
 .team-name {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
     margin: 0;
     flex: 1;
 }
@@ -190,7 +192,7 @@
 }
 
 .team-description {
-    color: #666;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 1.5rem;
@@ -208,14 +210,14 @@
     align-items: flex-start;
     gap: 0.75rem;
     padding: 1rem;
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(0, 173, 181, 0.1);
     border-radius: 12px;
 }
 
 .team-info-item svg {
     width: 24px;
     height: 24px;
-    color: #667eea;
+    color: var(--color3);
     flex-shrink: 0;
 }
 
@@ -227,13 +229,13 @@
 
 .info-label {
     font-size: 0.8rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 500;
 }
 
 .info-value {
     font-size: 1rem;
-    color: #333;
+    color: var(--color4);
     font-weight: 600;
 }
 
@@ -242,7 +244,7 @@
     padding: 0.875rem;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
     font-size: 0.95rem;
     font-weight: 600;
@@ -261,7 +263,7 @@
 
 .view-team-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 173, 181, 0.4);
 }
 
 .team-members-section {
@@ -280,12 +282,12 @@
 }
 
 .members-table-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(57, 62, 70, 0.8);
     backdrop-filter: blur(20px);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 173, 181, 0.2);
 }
 
 .members-table {
@@ -294,7 +296,7 @@
 }
 
 .members-table thead {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
 }
 
 .members-table th {
@@ -308,17 +310,17 @@
 }
 
 .members-table tbody tr {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: background-color 0.2s ease;
 }
 
 .members-table tbody tr:hover {
-    background-color: rgba(102, 126, 234, 0.05);
+    background-color: rgba(0, 173, 181, 0.1);
 }
 
 .members-table td {
     padding: 1.25rem 1rem;
-    color: #333;
+    color: var(--color4);
     font-size: 0.95rem;
 }
 
@@ -333,7 +335,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
     display: flex;
     align-items: center;
@@ -374,7 +376,7 @@
     height: 36px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
     cursor: pointer;
     display: flex;
@@ -390,7 +392,7 @@
 
 .member-action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 173, 181, 0.4);
 }
 
 @media (max-width: 1024px) {
@@ -412,7 +414,7 @@
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
     border: none;
 }
@@ -460,13 +462,14 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--color2);
     border-radius: 16px;
     width: 100%;
     max-width: 900px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 173, 181, 0.2);
 }
 
 .modal-small {
@@ -478,13 +481,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
     margin: 0;
 }
 
@@ -493,7 +496,7 @@
     height: 32px;
     border: none;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -502,13 +505,13 @@
 }
 
 .modal-close:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 173, 181, 0.3);
 }
 
 .modal-close svg {
     width: 18px;
     height: 18px;
-    color: #666;
+    color: var(--color4);
 }
 
 .modal-body {
@@ -522,7 +525,7 @@
 .detail-section h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
     margin-bottom: 1rem;
 }
 
@@ -537,19 +540,19 @@
     flex-direction: column;
     gap: 0.25rem;
     padding: 1rem;
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(0, 173, 181, 0.1);
     border-radius: 8px;
 }
 
 .detail-label {
     font-size: 0.85rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 500;
 }
 
 .detail-value {
     font-size: 1rem;
-    color: #333;
+    color: var(--color4);
     font-weight: 600;
 }
 
@@ -566,13 +569,13 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     transition: background 0.2s ease;
 }
 
 .member-item:hover, .officer-item:hover {
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(0, 173, 181, 0.15);
 }
 
 .member-info {
@@ -585,17 +588,17 @@
 .member-name {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
 }
 
 .member-email {
     font-size: 0.85rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .member-category {
     font-size: 0.8rem;
-    color: #667eea;
+    color: var(--color3);
     font-weight: 500;
 }
 
@@ -626,7 +629,7 @@
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
     font-size: 0.9rem;
     font-weight: 600;
@@ -639,7 +642,7 @@
 
 .action-btn:hover, .btn-add:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 173, 181, 0.4);
 }
 
 .action-btn svg {
@@ -647,51 +650,51 @@
     height: 16px;
 }
 
-.complaint-item {
+.ot-complaint-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
 }
 
-.complaint-item-select {
+.ot-complaint-item-select {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     gap: 1rem;
 }
 
-.complaint-info {
+.ot-complaint-info {
     flex: 1;
 }
 
-.complaint-title {
+.ot-complaint-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
     margin-bottom: 0.5rem;
 }
 
-.complaint-description {
+.ot-complaint-description {
     font-size: 0.85rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     margin-bottom: 0.5rem;
 }
 
-.complaint-meta {
+.ot-complaint-meta {
     display: flex;
     gap: 0.5rem;
     align-items: center;
 }
 
-.complaint-status {
+.ot-complaint-status {
     font-size: 0.85rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: capitalize;
 }
 
@@ -726,22 +729,28 @@
     display: block;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color4);
     margin-bottom: 0.5rem;
 }
 
 .form-group input {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     font-size: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color4);
     transition: border-color 0.2s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--color3);
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .modal-footer {
@@ -762,22 +771,22 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color3), var(--color8));
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 173, 181, 0.4);
 }
 
 .btn-secondary {
-    background: rgba(0, 0, 0, 0.05);
-    color: #666;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color4);
 }
 
 .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 @keyframes spin {

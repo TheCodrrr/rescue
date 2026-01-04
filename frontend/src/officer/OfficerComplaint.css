@@ -1,7 +1,7 @@
 .officer-complaint-container {
     min-height: 100vh;
     padding: 8rem 2rem 4rem;
-    background: linear-gradient(135deg, var(--color13) 0%, var(--color18) 100%);
+    background: linear-gradient(135deg, var(--color12) 0%, var(--color18) 25%, var(--color13) 50%, var(--color2) 100%);
     position: relative;
 }
 
@@ -13,8 +13,8 @@
     right: 0;
     bottom: 0;
     background: 
-        radial-gradient(circle at 20% 50%, rgba(0, 173, 181, 0.2), transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(113, 201, 206, 0.2), transparent 50%);
+        radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--color3) 15%, transparent), transparent 50%),
+        radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color8) 15%, transparent), transparent 50%);
     pointer-events: none;
 }
 
@@ -159,20 +159,25 @@
 .officer-complaint-search-input {
     width: 100%;
     padding: 0.875rem 1rem 0.875rem 3rem;
-    border: none;
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--color2) 80%, transparent);
+    backdrop-filter: blur(20px);
     font-size: 1rem;
-    color: #333;
+    color: var(--color9);
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.officer-complaint-search-input::placeholder {
+    color: var(--color6);
 }
 
 .officer-complaint-search-input:focus {
     outline: none;
-    background: white;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--color2) 90%, transparent);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25), 0 0 15px color-mix(in srgb, var(--color3) 30%, transparent);
+    border-color: var(--color3);
     transform: translateY(-2px);
 }
 
@@ -221,13 +226,13 @@
 }
 
 .officer-complaint-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color2) 85%, transparent), color-mix(in srgb, var(--color12) 80%, transparent));
     backdrop-filter: blur(20px);
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
     cursor: pointer;
     height: auto;
     min-height: fit-content;
@@ -237,14 +242,15 @@
 
 .officer-complaint-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px color-mix(in srgb, var(--color3) 25%, transparent);
+    border-color: var(--color3);
 }
 
 .officer-complaint-card.selected {
-    border: 3px solid var(--color3);
-    box-shadow: 0 12px 40px rgba(0, 173, 181, 0.4);
+    border: 2px solid var(--color3);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--color3) 40%, transparent);
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 1);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color2) 95%, transparent), color-mix(in srgb, var(--color12) 90%, transparent));
 }
 
 .officer-complaint-card-header {
@@ -267,19 +273,21 @@
     height: 32px;
     border: none;
     border-radius: 8px;
-    background: rgba(0, 173, 181, 0.1);
+    background: color-mix(in srgb, var(--color3) 20%, transparent);
     color: var(--color3);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .officer-complaint-info-btn:hover {
     background: var(--color3);
-    color: white;
+    color: var(--color1);
     transform: scale(1.1);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--color3) 50%, transparent);
 }
 
 .officer-complaint-info-btn svg {
@@ -290,7 +298,7 @@
 .officer-complaint-card-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color9);
     flex: 1;
 }
 
@@ -329,7 +337,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #666;
+    color: var(--color14);
     font-size: 0.9rem;
 }
 
@@ -396,22 +404,22 @@
 }
 
 .officer-complaint-ignore-btn {
-    background: rgba(158, 158, 158, 0.1);
-    color: #888;
-    border: 1px solid rgba(158, 158, 158, 0.3);
+    background: color-mix(in srgb, var(--color6) 15%, transparent);
+    color: var(--color14);
+    border: 1px solid color-mix(in srgb, var(--color6) 30%, transparent);
 }
 
 .officer-complaint-ignore-btn:hover {
-    background: #999;
-    color: white;
-    border-color: #999;
+    background: var(--color6);
+    color: var(--color1);
+    border-color: var(--color6);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(158, 158, 158, 0.4);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color6) 40%, transparent);
 }
 
 .officer-complaint-reject-btn {
-    background: rgba(244, 67, 54, 0.1);
-    color: #f44336;
+    background: rgba(244, 67, 54, 0.15);
+    color: #ff6b6b;
     border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
@@ -420,7 +428,7 @@
     color: white;
     border-color: #f44336;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.5);
 }
 
 .officer-complaint-assign-btn {
@@ -633,20 +641,22 @@
 }
 
 .officer-stat-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color2) 85%, transparent), color-mix(in srgb, var(--color12) 80%, transparent));
     backdrop-filter: blur(20px);
     border-radius: 16px;
     padding: 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
 }
 
 .officer-stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 15px color-mix(in srgb, var(--color3) 20%, transparent);
+    border-color: var(--color3);
 }
 
 .officer-stat-icon {
@@ -679,13 +689,13 @@
 .officer-stat-details h3 {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: var(--color9);
     margin: 0;
 }
 
 .officer-stat-details p {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--color14);
     margin: 0;
 }
 
@@ -722,10 +732,11 @@
     margin: 0 auto;
     text-align: center;
     padding: 4rem 2rem;
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color2) 85%, transparent), color-mix(in srgb, var(--color12) 80%, transparent));
     backdrop-filter: blur(20px);
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color3) 25%, transparent);
     position: relative;
     z-index: 1;
 }
@@ -739,17 +750,17 @@
 
 .officer-complaint-empty h3 {
     font-size: 1.5rem;
-    color: #333;
+    color: var(--color9);
     margin-bottom: 0.5rem;
 }
 
 .officer-complaint-empty p {
-    color: #666;
+    color: var(--color14);
     font-size: 1rem;
 }
 
 .officer-complaint-description {
-    color: #555;
+    color: var(--color14);
     font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 1rem;
@@ -771,16 +782,16 @@
 }
 
 .officer-complaint-category {
-    background: rgba(0, 173, 181, 0.1);
+    background: color-mix(in srgb, var(--color3) 15%, transparent);
     color: var(--color3);
-    border: 1px solid rgba(0, 173, 181, 0.2);
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
     text-transform: capitalize;
 }
 
 .officer-complaint-distance {
-    background: rgba(76, 175, 80, 0.1);
-    color: #388e3c;
-    border: 1px solid rgba(76, 175, 80, 0.2);
+    background: color-mix(in srgb, var(--color8) 15%, transparent);
+    color: var(--color8);
+    border: 1px solid color-mix(in srgb, var(--color8) 30%, transparent);
 }
 
 .officer-complaint-user {
@@ -789,8 +800,9 @@
     gap: 0.5rem;
     margin-bottom: 1rem;
     padding: 0.5rem;
-    background: rgba(0, 173, 181, 0.05);
+    background: color-mix(in srgb, var(--color3) 10%, transparent);
     border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--color3) 20%, transparent);
 }
 
 .officer-complaint-user-avatar {
@@ -798,16 +810,17 @@
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--color3);
 }
 
 .officer-complaint-user span {
     font-size: 0.9rem;
-    color: #555;
+    color: var(--color9);
     font-weight: 500;
 }
 
 .officer-complaint-rail-info {
-    background: linear-gradient(135deg, rgba(0, 173, 181, 0.1), rgba(113, 201, 206, 0.1));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color3) 15%, transparent), color-mix(in srgb, var(--color8) 10%, transparent));
     border-left: 3px solid var(--color3);
     padding: 0.75rem;
     border-radius: 8px;
@@ -829,7 +842,7 @@
 }
 
 .rail-train-number {
-    color: #555;
+    color: var(--color14);
     font-size: 0.85rem;
     margin: 0;
 }
@@ -851,12 +864,13 @@
 }
 
 .reject-modal {
-    background: white;
+    background: linear-gradient(135deg, var(--color2), var(--color12));
     border-radius: 16px;
     padding: 2rem;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid color-mix(in srgb, var(--color3) 30%, transparent);
     animation: slideUp 0.3s ease-out;
 }
 
@@ -881,7 +895,7 @@
 .reject-modal-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color9);
     margin: 0;
 }
 
@@ -889,7 +903,7 @@
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: #666;
+    color: var(--color14);
     cursor: pointer;
     padding: 0.25rem;
     display: flex;
@@ -912,7 +926,7 @@
 }
 
 .reject-modal-body p {
-    color: #555;
+    color: var(--color14);
     margin-bottom: 1rem;
     font-size: 1rem;
 }
@@ -920,17 +934,24 @@
 .reject-modal-textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #e0e0e0;
+    border: 2px solid color-mix(in srgb, var(--color3) 30%, transparent);
     border-radius: 8px;
     font-size: 0.95rem;
     font-family: inherit;
     resize: vertical;
     transition: border-color 0.2s ease;
+    background: color-mix(in srgb, var(--color1) 80%, transparent);
+    color: var(--color9);
+}
+
+.reject-modal-textarea::placeholder {
+    color: var(--color6);
 }
 
 .reject-modal-textarea:focus {
     outline: none;
     border-color: var(--color3);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color3) 30%, transparent);
 }
 
 .reject-modal-footer {
@@ -951,12 +972,14 @@
 }
 
 .reject-modal-cancel-btn {
-    background: #f5f5f5;
-    color: #666;
+    background: color-mix(in srgb, var(--color2) 80%, transparent);
+    color: var(--color14);
+    border: 1px solid color-mix(in srgb, var(--color6) 30%, transparent);
 }
 
 .reject-modal-cancel-btn:hover {
-    background: #e0e0e0;
+    background: color-mix(in srgb, var(--color2) 100%, transparent);
+    color: var(--color9);
 }
 
 .reject-modal-submit-btn {

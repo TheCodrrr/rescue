@@ -2910,7 +2910,7 @@ html, body {
     font-weight: 500;
 }
 
-.complaint-meta {
+.home-complaint-meta {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2922,7 +2922,7 @@ html, body {
     backdrop-filter: blur(15px);
 }
 
-.meta-item {
+.home-meta-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2931,7 +2931,7 @@ html, body {
     font-weight: 600;
 }
 
-.meta-icon {
+.home-meta-icon {
     font-size: 0.9rem;
     width: 16px;
     text-align: center;
