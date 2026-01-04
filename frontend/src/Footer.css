@@ -104,27 +104,27 @@
 .footer-section:nth-child(4) { animation-delay: 0.4s; }
 
 /* Brand Section */
-.footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+.brand-section {
+    animation-delay: 0.1s;
 }
 
-.logo-icon {
+.footer-logo-icon {
     width: 2rem;
     height: 2rem;
-    color: var(--color3);
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
     filter: drop-shadow(0 0 8px rgba(0, 173, 181, 0.4));
 }
 
-.logo-text {
+.footer-logo-text {
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--color3) 0%, var(--color6) 50%, var(--color8) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    vertical-align: middle;
 }
 
 .brand-description {
