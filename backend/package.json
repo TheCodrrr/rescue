@@ -8,7 +8,8 @@
     "dora": "node src/index.js",
     "doraemon": "nodemon src/index.js",
     "gian": "nodemon queues/complaintWorker.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "render-start": "node render-start.js"
   },
   "keywords": [],
   "author": "",
