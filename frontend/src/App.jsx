@@ -110,26 +110,14 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             
             {/* ========== COMMON ROUTES (Both Citizen & Officer) ========== */}
-            {/* Home page - accessible by both roles */}
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } />
+            {/* Home page - accessible by everyone */}
+            <Route path="/home" element={<Home />} />
             
-            {/* Trending - accessible by both roles */}
-            <Route path="/trending" element={
-              <ProtectedRoute>
-                <Trending />
-              </ProtectedRoute>
-            } />
+            {/* Trending - accessible by everyone */}
+            <Route path="/trending" element={<Trending />} />
             
-            {/* Help - accessible by both roles */}
-            <Route path="/help" element={
-              <ProtectedRoute>
-                <Help />
-              </ProtectedRoute>
-            } />
+            {/* Help - accessible by everyone */}
+            <Route path="/help" element={<Help />} />
             
             {/* User profile - accessible by both roles */}
             <Route path="/user" element={
