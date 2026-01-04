@@ -100,7 +100,7 @@ class Prettify {
       retval["data"] = arr;
       return retval;
     } catch (err) {
-      console.log(err.message);
+      // console.log(err.message);
     }
   }
   

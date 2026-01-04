@@ -16,7 +16,7 @@ const fetchTrendingComplaints = async ({ pageParam }) => {
       }
     });
     
-    console.log("API Response:", data);
+    // console.log("API Response:", data);
     
     return {
       complaints: data.data || [],
@@ -78,7 +78,7 @@ export const useTrendingComplaintsCache = () => {
       cacheInitialized.current = true;
       setIsUsingCache(true);
       
-      console.log("Cache initialized with", allComplaintIds.length, "complaints");
+      // console.log("Cache initialized with", allComplaintIds.length, "complaints");
       
       // Store in sessionStorage as backup
       sessionStorage.setItem(CACHE_KEY, JSON.stringify(allComplaintIds));
@@ -94,11 +94,11 @@ export const useTrendingComplaintsCache = () => {
   const recordInteraction = useCallback(() => {
     setInteractionCount(prev => {
       const newCount = prev + 1;
-      console.log(`Interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
+      // console.log(`Interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
       
       // Check if we've reached the threshold
       if (newCount >= INTERACTION_THRESHOLD) {
-        console.log("Interaction threshold reached! Cache will be cleared on next fetch.");
+        // console.log("Interaction threshold reached! Cache will be cleared on next fetch.");
       }
       
       return newCount;
@@ -107,7 +107,7 @@ export const useTrendingComplaintsCache = () => {
 
   // Function to clear cache and refetch
   const clearCacheAndRefetch = useCallback(() => {
-    console.log("Clearing cache and refetching trending complaints...");
+    // console.log("Clearing cache and refetching trending complaints...");
     
     // Clear cache refs
     cachedOrderRef.current = null;
@@ -237,13 +237,13 @@ export const useTrendingComplaintsCache = () => {
       // Update sessionStorage
       sessionStorage.setItem(CACHE_KEY, JSON.stringify(cachedOrderRef.current));
       
-      console.log(`Cache expanded: ${newComplaintIds.length} new complaints added. Total: ${cachedOrderRef.current.length}`);
+      // console.log(`Cache expanded: ${newComplaintIds.length} new complaints added. Total: ${cachedOrderRef.current.length}`);
       
       // If the last page has fewer complaints than pageSize AND there's a next page,
       // it means we filtered out duplicates. We should signal to fetch more.
       const lastPage = reorderedPages[reorderedPages.length - 1];
       if (lastPage && lastPage.complaints.length < pageSize && lastPage.hasNextPage) {
-        console.log(`⚠️ Page ${reorderedPages.length} has only ${lastPage.complaints.length} complaints (duplicates filtered). Consider fetching more.`);
+        // console.log(`⚠️ Page ${reorderedPages.length} has only ${lastPage.complaints.length} complaints (duplicates filtered). Consider fetching more.`);
       }
     }
 

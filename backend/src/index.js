@@ -10,7 +10,9 @@ const PORT = process.env.PORT || 5000
 connectDB()
 .then(() => {
     server.listen(PORT, () => {
-        console.log(`server with sockets is saambding on port ${PORT}`)
+        // console.log(`server with sockets is saambding on port ${PORT}`)
     })
 })
-.catch((err) => console.log("MongoDB connection error: ", err));
+.catch((err) => {
+    // console.log("MongoDB connection error: ", err)
+});

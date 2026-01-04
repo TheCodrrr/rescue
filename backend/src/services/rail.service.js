@@ -38,11 +38,11 @@ export const fetchTrainStations = async (train_number) => {
 export const ensureTrainExists = async (train_number) => {
     const existingTrain = await getTrainByNumber(train_number);
     if (existingTrain) {
-        console.log("Train already exists:", existingTrain);
+        // console.log("Train already exists:", existingTrain);
         
         // Check if stations data exists, if not, fetch and update
         if (!existingTrain.stations || existingTrain.stations.length === 0) {
-            console.log("Train exists but no stations data, updating...");
+            // console.log("Train exists but no stations data, updating...");
             await updateTrainStations(train_number);
         }
         
@@ -67,11 +67,11 @@ export const ensureTrainExistsWithoutStationCheck = async (train_number) => {
         }
         
         train = json.data;
-        console.log("Train data fetched successfully for:", train_number);
+        // console.log("Train data fetched successfully for:", train_number);
         
         // Safely handle coaches data
         const coaches = train.coaches || {};
-        console.log("Coaches data:", Object.keys(coaches).length, "coach types");
+        // console.log("Coaches data:", Object.keys(coaches).length, "coach types");
         
     } catch (e) {
         console.error("Error fetching train data:", e);
@@ -80,7 +80,7 @@ export const ensureTrainExistsWithoutStationCheck = async (train_number) => {
 
     // Fetch all stations the train stops at
     const stations = await fetchTrainStations(train_number);
-    console.log(`Fetched ${stations.length} stations for train ${train_number}`);
+    // console.log(`Fetched ${stations.length} stations for train ${train_number}`);
 
     const newTrain = await addTrain({
         train_number,
@@ -168,7 +168,7 @@ export const initRailSchema = async () => {
       CREATE INDEX IF NOT EXISTS idx_trains_stations ON trains USING GIN (stations);
     `);
 
-    console.log("✅ Rail schema initialized");
+    // console.log("✅ Rail schema initialized");
   } catch (err) {
     console.error("❌ Error initializing schema:", err);
   }
@@ -303,21 +303,21 @@ export const updateTrainStations = async (train_number) => {
     const existingTrain = await getTrainByNumber(train_number);
     if (!existingTrain) {
       // If train doesn't exist, create it first
-      console.log(`Train ${train_number} not found in database, creating it...`);
+      // console.log(`Train ${train_number} not found in database, creating it...`);
       const created = await ensureTrainExistsWithoutStationCheck(train_number);
       if (!created) {
         throw new Error(`Failed to create train ${train_number}`);
       }
     }
     
-    console.log(`Fetching stations for train ${train_number}...`);
+    // console.log(`Fetching stations for train ${train_number}...`);
     const stations = await fetchTrainStations(train_number);
-    console.log(`Fetched ${stations.length} stations for train ${train_number}`);
+    // console.log(`Fetched ${stations.length} stations for train ${train_number}`);
     
     // Ensure stations is a valid array
     const validStations = Array.isArray(stations) ? stations : [];
     
-    console.log(`Updating database with stations data...`);
+    // console.log(`Updating database with stations data...`);
     const result = await pool.query(
       `UPDATE trains SET stations = $1 WHERE train_number = $2 RETURNING *`,
       [JSON.stringify(validStations), train_number]
@@ -327,7 +327,7 @@ export const updateTrainStations = async (train_number) => {
       throw new Error(`Train ${train_number} not found in database after creation attempt`);
     }
     
-    console.log(`✅ Updated stations for train ${train_number}`);
+    // console.log(`✅ Updated stations for train ${train_number}`);
     return result.rows[0];
   } catch (error) {
     console.error("❌ Error updating train stations:", error);
@@ -361,11 +361,11 @@ export const updateAllTrainStations = async () => {
     );
     
     const trainsToUpdate = result.rows;
-    console.log(`🔄 Found ${trainsToUpdate.length} trains without station data`);
+    // console.log(`🔄 Found ${trainsToUpdate.length} trains without station data`);
     
     for (const train of trainsToUpdate) {
       try {
-        console.log(`🔄 Updating stations for train ${train.train_number}...`);
+        // console.log(`🔄 Updating stations for train ${train.train_number}...`);
         await updateTrainStations(train.train_number);
         // Add a small delay to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -374,7 +374,7 @@ export const updateAllTrainStations = async () => {
       }
     }
     
-    console.log("✅ Completed updating train stations");
+    // console.log("✅ Completed updating train stations");
   } catch (error) {
     console.error("❌ Error updating all train stations:", error);
     throw error;

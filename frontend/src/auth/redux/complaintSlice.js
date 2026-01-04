@@ -25,7 +25,7 @@ export const submitComplaint = createAsyncThunk(
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required. Please log in to submit a complaint.');
       }
 
@@ -52,16 +52,16 @@ export const submitComplaint = createAsyncThunk(
         severity: complaintData.severity
       };
 
-      console.log("Original complaint data:", complaintData);
-      console.log("Formatted complaint data:", formattedComplaintData);
-      console.log("Token found, making request to submit complaint");
+      // console.log("Original complaint data:", complaintData);
+      // console.log("Formatted complaint data:", formattedComplaintData);
+      // console.log("Token found, making request to submit complaint");
       
       const response = await axiosInstance.post('/complaints/create', formattedComplaintData);
       // console.log("Submit complaint API response:", response.data);
       
       // Extract complaint data from the response
       const submittedComplaint = response.data.data || response.data;
-      console.log("Submitted complaint data:", submittedComplaint);
+      // console.log("Submitted complaint data:", submittedComplaint);
       
       // History entry is now created by the backend, no need to duplicate here
       
@@ -98,21 +98,21 @@ export const getUserComplaints = createAsyncThunk(
   'complaints/getUserComplaints',
   async (_, thunkAPI) => {
     try {
-      console.log("Making API call to get user complaints...");
+      // console.log("Making API call to get user complaints...");
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required');
       }
 
-      console.log("Token found, making request to get user complaints");
+      // console.log("Token found, making request to get user complaints");
       const response = await axiosInstance.get('/complaints/my-complaints');
-      console.log("Get user complaints API response:", response.data);
+      // console.log("Get user complaints API response:", response.data);
       
       // Extract complaints data from the response
       const complaints = response.data.data || response.data;
-      console.log("User complaints data:", complaints);
+      // console.log("User complaints data:", complaints);
       
       return complaints;
     } catch (error) {
@@ -134,7 +134,7 @@ export const getAllComplaints = createAsyncThunk(
   'complaints/getAllComplaints',
   async (filters = {}, thunkAPI) => {
     try {
-      console.log("Making API call to get all complaints...", filters);
+      // console.log("Making API call to get all complaints...", filters);
       
       // Build query string from filters
       const queryParams = new URLSearchParams();
@@ -146,13 +146,13 @@ export const getAllComplaints = createAsyncThunk(
       const queryString = queryParams.toString();
       const endpoint = `/complaints${queryString ? `?${queryString}` : ''}`;
       
-      console.log("Making request to:", endpoint);
+      // console.log("Making request to:", endpoint);
       const response = await axiosInstance.get(endpoint);
-      console.log("Get all complaints API response:", response.data);
+      // console.log("Get all complaints API response:", response.data);
       
       // Extract complaints data from the response
       const complaints = response.data.data || response.data;
-      console.log("All complaints data:", complaints);
+      // console.log("All complaints data:", complaints);
       
       return complaints;
     } catch (error) {
@@ -174,22 +174,22 @@ export const getNearbyComplaints = createAsyncThunk(
   'complaints/getNearbyComplaints',
   async ({ latitude, longitude }, thunkAPI) => {
     try {
-      console.log("🌍 [API] Making request to get nearby complaints...", { latitude, longitude });
-      console.log("🌍 [API] Request URL:", `/complaints/nearby?latitude=${latitude}&longitude=${longitude}`);
+      // console.log("🌍 [API] Making request to get nearby complaints...", { latitude, longitude });
+      // console.log("🌍 [API] Request URL:", `/complaints/nearby?latitude=${latitude}&longitude=${longitude}`);
       
       const response = await axiosInstance.get(`/complaints/nearby?latitude=${latitude}&longitude=${longitude}`);
-      console.log("🌍 [API] Full response received:", response);
-      console.log("🌍 [API] Response status:", response.status);
-      console.log("🌍 [API] Response data:", response.data);
+      // console.log("🌍 [API] Full response received:", response);
+      // console.log("🌍 [API] Response status:", response.status);
+      // console.log("🌍 [API] Response data:", response.data);
       
       // Extract complaints data from the response
       const complaints = response.data.complaints || response.data.data || response.data;
-      console.log("🌍 [API] Extracted complaints array:", complaints);
-      console.log("🌍 [API] Number of complaints extracted:", complaints?.length || 0);
+      // console.log("🌍 [API] Extracted complaints array:", complaints);
+      // console.log("🌍 [API] Number of complaints extracted:", complaints?.length || 0);
       
       if (complaints && complaints.length > 0) {
-        console.log("🌍 [API] First complaint sample:", complaints[0]);
-        console.log("🌍 [API] All complaint IDs:", complaints.map(c => c._id));
+        // console.log("🌍 [API] First complaint sample:", complaints[0]);
+        // console.log("🌍 [API] All complaint IDs:", complaints.map(c => c._id));
       }
       
       return complaints;
@@ -212,14 +212,14 @@ export const fetchComplaintById = createAsyncThunk(
   'complaints/fetchComplaintById',
   async (complaintId, thunkAPI) => {
     try {
-      console.log("Making API call to fetch complaint by ID...", complaintId);
+      // console.log("Making API call to fetch complaint by ID...", complaintId);
       
       const response = await axiosInstance.get(`/complaints/${complaintId}`);
-      console.log("Fetch complaint by ID API response:", response.data);
+      // console.log("Fetch complaint by ID API response:", response.data);
       
       // Extract complaint data from the response
       const complaint = response.data.data || response.data;
-      console.log("Complaint data:", complaint);
+      // console.log("Complaint data:", complaint);
       
       return complaint;
     } catch (error) {
@@ -241,17 +241,17 @@ export const upvoteComplaint = createAsyncThunk(
   'complaints/upvote',
   async (complaintId, thunkAPI) => {
     try {
-      console.log("Making API call to upvote complaint...", complaintId);
+      // console.log("Making API call to upvote complaint...", complaintId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required');
       }
 
-      console.log("Token found, making request to upvote complaint");
+      // console.log("Token found, making request to upvote complaint");
       const response = await axiosInstance.patch(`/complaints/${complaintId}/upvote`, {});
-      console.log("Upvote complaint API response:", response.data);
+      // console.log("Upvote complaint API response:", response.data);
       
       // Try multiple ways to extract the data
       let responseData;
@@ -263,7 +263,7 @@ export const upvoteComplaint = createAsyncThunk(
         responseData = response.data;
       }
       
-      console.log("Parsed upvote response data:", responseData);
+      // console.log("Parsed upvote response data:", responseData);
       
       // Try all possible field names - check singular first since that's the correct format
       const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
@@ -277,7 +277,7 @@ export const upvoteComplaint = createAsyncThunk(
         userVote: userVote
       };
       
-      console.log("Final payload with extracted votes:", payload);
+      // console.log("Final payload with extracted votes:", payload);
       return payload;
     } catch (error) {
       console.error("Upvote complaint API error:", error);
@@ -298,17 +298,17 @@ export const downvoteComplaint = createAsyncThunk(
   'complaints/downvote',
   async (complaintId, thunkAPI) => {
     try {
-      console.log("Making API call to downvote complaint...", complaintId);
+      // console.log("Making API call to downvote complaint...", complaintId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required');
       }
 
-      console.log("Token found, making request to downvote complaint");
+      // console.log("Token found, making request to downvote complaint");
       const response = await axiosInstance.patch(`/complaints/${complaintId}/downvote`, {});
-      console.log("Downvote complaint API response:", response.data);
+      // console.log("Downvote complaint API response:", response.data);
       
       // Try multiple ways to extract the data
       let responseData;
@@ -320,7 +320,7 @@ export const downvoteComplaint = createAsyncThunk(
         responseData = response.data;
       }
       
-      console.log("Parsed downvote response data:", responseData);
+      // console.log("Parsed downvote response data:", responseData);
       
       // Try all possible field names - check singular first since that's the correct format
       const upvotes = responseData.upvote ?? responseData.upvotes ?? 0;
@@ -334,7 +334,7 @@ export const downvoteComplaint = createAsyncThunk(
         userVote: userVote
       };
       
-      console.log("Final payload with extracted votes:", payload);
+      // console.log("Final payload with extracted votes:", payload);
       return payload;
     } catch (error) {
       console.error("Downvote complaint API error:", error);
@@ -355,17 +355,17 @@ export const updateComplaintStatus = createAsyncThunk(
   'complaints/updateStatus',
   async ({ complaintId, status }, thunkAPI) => {
     try {
-      console.log("Making API call to update complaint status...", { complaintId, status });
+      // console.log("Making API call to update complaint status...", { complaintId, status });
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required');
       }
 
-      console.log("Token found, making request to update complaint status");
+      // console.log("Token found, making request to update complaint status");
       const response = await axiosInstance.patch(`/complaints/${complaintId}/status`, { status });
-      console.log("Update complaint status API response:", response.data);
+      // console.log("Update complaint status API response:", response.data);
       
       // Try multiple ways to extract the data
       let responseData;
@@ -377,7 +377,7 @@ export const updateComplaintStatus = createAsyncThunk(
         responseData = response.data;
       }
       
-      console.log("Parsed update status response data:", responseData);
+      // console.log("Parsed update status response data:", responseData);
       
       const payload = {
         complaintId,
@@ -385,7 +385,7 @@ export const updateComplaintStatus = createAsyncThunk(
         updatedAt: responseData.updatedAt || new Date().toISOString()
       };
       
-      console.log("Final payload for status update:", payload);
+      // console.log("Final payload for status update:", payload);
       return payload;
     } catch (error) {
       console.error("Update complaint status API error:", error);
@@ -406,17 +406,17 @@ export const deleteComplaint = createAsyncThunk(
   'complaints/delete',
   async (complaintId, thunkAPI) => {
     try {
-      console.log("Making API call to delete complaint...", complaintId);
+      // console.log("Making API call to delete complaint...", complaintId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('Authentication required');
       }
 
-      console.log("Token found, making request to delete complaint");
+      // console.log("Token found, making request to delete complaint");
       const response = await axiosInstance.delete(`/complaints/${complaintId}`);
-      console.log("Delete complaint API response:", response.data);
+      // console.log("Delete complaint API response:", response.data);
       
       return {
         complaintId,
@@ -457,7 +457,7 @@ export const addComment = createAsyncThunk(
 
       const userId = user._id || user.id;
 
-      console.log(`Adding comment to complaint ${complaintId} by user ${userId}`);
+      // console.log(`Adding comment to complaint ${complaintId} by user ${userId}`);
       
       const requestBody = {
         complaint_id: complaintId,
@@ -466,11 +466,11 @@ export const addComment = createAsyncThunk(
         comment: content
       };
 
-      console.log("Comment request body:", requestBody);
+      // console.log("Comment request body:", requestBody);
       
       const response = await axiosInstance.post(`/feedbacks/`, requestBody);
       
-      console.log("Add comment API response:", response);
+      // console.log("Add comment API response:", response);
       
       return {
         complaintId,
@@ -494,23 +494,23 @@ export const fetchComments = createAsyncThunk(
   'complaints/fetchComments',
   async (complaintId, thunkAPI) => {
     try {
-      console.log(`Fetching comments for complaint ${complaintId}`);
+      // console.log(`Fetching comments for complaint ${complaintId}`);
       
       const response = await axiosInstance.get(`/feedbacks/complaint/${complaintId}`);
       
-      console.log("Fetch comments API response:", response.data);
-      console.log("Complete response:", JSON.stringify(response.data, null, 2));
+      // console.log("Fetch comments API response:", response.data);
+      // console.log("Complete response:", JSON.stringify(response.data, null, 2));
       
       // The response.data.data contains an array of comments directly
       const commentsArray = response.data.data || [];
       
-      console.log("Extracted comments array:", commentsArray);
-      console.log("Number of comments found:", commentsArray.length);
+      // console.log("Extracted comments array:", commentsArray);
+      // console.log("Number of comments found:", commentsArray.length);
       
       // Debug: Log the first comment structure if available
       if (commentsArray.length > 0) {
-        console.log("First comment structure:", JSON.stringify(commentsArray[0], null, 2));
-        console.log("First comment user data:", commentsArray[0]?.user_id);
+        // console.log("First comment structure:", JSON.stringify(commentsArray[0], null, 2));
+        // console.log("First comment user data:", commentsArray[0]?.user_id);
       }
       
       return {
@@ -537,14 +537,14 @@ export const updateComment = createAsyncThunk(
   'comments/updateComment',
   async ({ commentId, comment, rating }, thunkAPI) => {
     try {
-      console.log(`Updating comment ${commentId}`, { comment, rating });
+      // console.log(`Updating comment ${commentId}`, { comment, rating });
       
       const response = await axiosInstance.patch(`/feedbacks/${commentId}`, {
         comment,
         rating
       });
       
-      console.log("Update comment API response:", response.data);
+      // console.log("Update comment API response:", response.data);
       
       return {
         commentId,
@@ -569,11 +569,11 @@ export const removeComment = createAsyncThunk(
   'comments/removeComment',
   async (commentId, thunkAPI) => {
     try {
-      console.log(`Deleting comment ${commentId}`);
+      // console.log(`Deleting comment ${commentId}`);
       
       const response = await axiosInstance.delete(`/feedbacks/${commentId}`);
       
-      console.log("Delete comment API response:", response.data);
+      // console.log("Delete comment API response:", response.data);
       
       return {
         commentId,
@@ -704,7 +704,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(upvoteComplaint.fulfilled, (state, action) => {
-        console.log("Upvote fulfilled with payload:", action.payload);
+        // console.log("Upvote fulfilled with payload:", action.payload);
         const { complaintId, upvotes, downvotes, userVote } = action.payload;
         
         // Try different ways to match the complaint ID
@@ -716,14 +716,14 @@ const complaintSlice = createSlice({
         );
         
         if (complaint) {
-          console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          // console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
           complaint.downvote = downvotes;
           complaint.userVote = userVote;
-          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
+          // console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
           // Complaint not in current state.complaints array (e.g., viewing from different context)
-          console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
+          // console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
         }
         
         // Also update selectedComplaint if it matches the voted complaint
@@ -733,7 +733,7 @@ const complaintSlice = createSlice({
           state.selectedComplaint.id === complaintId ||
           state.selectedComplaint.id?.toString() === complaintId?.toString()
         )) {
-          console.log("Updating selectedComplaint upvotes/downvotes");
+          // console.log("Updating selectedComplaint upvotes/downvotes");
           state.selectedComplaint.upvote = upvotes;
           state.selectedComplaint.downvote = downvotes;
           state.selectedComplaint.userVote = userVote;
@@ -749,7 +749,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(downvoteComplaint.fulfilled, (state, action) => {
-        console.log("Downvote fulfilled with payload:", action.payload);
+        // console.log("Downvote fulfilled with payload:", action.payload);
         const { complaintId, upvotes, downvotes, userVote } = action.payload;
         
         // Try different ways to match the complaint ID
@@ -761,14 +761,14 @@ const complaintSlice = createSlice({
         );
         
         if (complaint) {
-          console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
+          // console.log("Before update - upvote:", complaint.upvote, "downvote:", complaint.downvote);
           complaint.upvote = upvotes;
           complaint.downvote = downvotes;
           complaint.userVote = userVote;
-          console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
+          // console.log("After update - upvote:", complaint.upvote, "downvote:", complaint.downvote, "userVote:", complaint.userVote);
         } else {
           // Complaint not in current state.complaints array (e.g., viewing from different context)
-          console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
+          // console.log("Complaint not in state.complaints array - this is normal if voting from detail page or other context");
         }
         
         // Also update selectedComplaint if it matches the voted complaint
@@ -778,7 +778,7 @@ const complaintSlice = createSlice({
           state.selectedComplaint.id === complaintId ||
           state.selectedComplaint.id?.toString() === complaintId?.toString()
         )) {
-          console.log("Updating selectedComplaint upvotes/downvotes");
+          // console.log("Updating selectedComplaint upvotes/downvotes");
           state.selectedComplaint.upvote = upvotes;
           state.selectedComplaint.downvote = downvotes;
           state.selectedComplaint.userVote = userVote;
@@ -794,9 +794,9 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(updateComplaintStatus.fulfilled, (state, action) => {
-        console.log("Update status fulfilled with payload:", action.payload);
+        // console.log("Update status fulfilled with payload:", action.payload);
         const { complaintId, status, updatedAt } = action.payload;
-        console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
+        // console.log("Looking for complaint with ID:", complaintId, "Type:", typeof complaintId);
         
         // Try different ways to match the complaint ID
         const complaint = state.complaints.find(c => 
@@ -806,13 +806,13 @@ const complaintSlice = createSlice({
           c.id?.toString() === complaintId?.toString()
         );
         
-        console.log("Found complaint for status update:", complaint);
+        // console.log("Found complaint for status update:", complaint);
         
         if (complaint) {
-          console.log("Before update - status:", complaint.status);
+          // console.log("Before update - status:", complaint.status);
           complaint.status = status;
           complaint.updatedAt = updatedAt;
-          console.log("After update - status:", complaint.status);
+          // console.log("After update - status:", complaint.status);
         } else {
           console.error("Could not find complaint with ID:", complaintId);
         }
@@ -824,7 +824,7 @@ const complaintSlice = createSlice({
           state.selectedComplaint.id === complaintId ||
           state.selectedComplaint.id?.toString() === complaintId?.toString()
         )) {
-          console.log("Updating selectedComplaint status");
+          // console.log("Updating selectedComplaint status");
           state.selectedComplaint.status = status;
           state.selectedComplaint.updatedAt = updatedAt;
         }
@@ -839,7 +839,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(deleteComplaint.fulfilled, (state, action) => {
-        console.log("Delete complaint fulfilled with payload:", action.payload);
+        // console.log("Delete complaint fulfilled with payload:", action.payload);
         const { complaintId } = action.payload;
         
         // Remove the complaint from the state
@@ -850,7 +850,7 @@ const complaintSlice = createSlice({
           complaint.id?.toString() !== complaintId?.toString()
         );
         
-        console.log("Complaint deleted from state. Remaining complaints:", state.complaints.length);
+        // console.log("Complaint deleted from state. Remaining complaints:", state.complaints.length);
         state.error = null;
       })
       .addCase(deleteComplaint.rejected, (state, action) => {
@@ -901,7 +901,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchComments.fulfilled, (state, action) => {
-        console.log("Fetch comments fulfilled with payload:", action.payload);
+        // console.log("Fetch comments fulfilled with payload:", action.payload);
         const { complaintId, comments } = action.payload;
         
         // Find the complaint and update its comments
@@ -915,9 +915,9 @@ const complaintSlice = createSlice({
         if (complaintIndex !== -1) {
           // Update the comments for this complaint
           state.complaints[complaintIndex].comments = comments;
-          console.log(`Updated comments for complaint ${complaintId}:`, comments);
+          // console.log(`Updated comments for complaint ${complaintId}:`, comments);
         } else {
-          console.log(`Complaint not found in state for ID: ${complaintId}`);
+          // console.log(`Complaint not found in state for ID: ${complaintId}`);
         }
         
         // Also update selectedComplaint if it matches the complaint with new comments
@@ -927,7 +927,7 @@ const complaintSlice = createSlice({
           state.selectedComplaint.id === complaintId ||
           state.selectedComplaint.id?.toString() === complaintId?.toString()
         )) {
-          console.log("Updating selectedComplaint comments");
+          // console.log("Updating selectedComplaint comments");
           state.selectedComplaint.comments = comments;
           state.selectedComplaint.commentCount = comments.length;
         }
@@ -944,7 +944,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(updateComment.fulfilled, (state, action) => {
-        console.log("Update comment fulfilled with payload:", action.payload);
+        // console.log("Update comment fulfilled with payload:", action.payload);
         state.isLoading = false;
         state.error = null;
         // Note: We'll refresh comments after update, so no need to update state here
@@ -960,7 +960,7 @@ const complaintSlice = createSlice({
         state.error = null;
       })
       .addCase(removeComment.fulfilled, (state, action) => {
-        console.log("Remove comment fulfilled with payload:", action.payload);
+        // console.log("Remove comment fulfilled with payload:", action.payload);
         state.isLoading = false;
         state.error = null;
         // Note: We'll refresh comments after deletion, so no need to update state here

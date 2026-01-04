@@ -38,11 +38,11 @@ export const uploadEvidence = createAsyncThunk(
   'evidence/uploadEvidence',
   async ({ file, complaintId, evidenceType, description, category }, thunkAPI) => {
     try {
-      console.log("Making API call to upload evidence...", file.name);
+      // console.log("Making API call to upload evidence...", file.name);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
@@ -56,14 +56,14 @@ export const uploadEvidence = createAsyncThunk(
         formData.append('description', description);
       }
 
-      console.log("Token found, making request to upload evidence");
-      console.log("FormData contents:", {
-        file: formData.get('file'),
-        complaint_id: formData.get('complaint_id'),
-        evidence_type: formData.get('evidence_type'),
-        category: formData.get('category'),
-        description: formData.get('description'),
-      });
+      // console.log("Token found, making request to upload evidence");
+      // console.log("FormData contents:", {
+        // file: formData.get('file'),
+        // complaint_id: formData.get('complaint_id'),
+        // evidence_type: formData.get('evidence_type'),
+        // category: formData.get('category'),
+        // description: formData.get('description'),
+      // });
       
       const res = await axiosInstance.post('/evidences', formData, {
         headers: {
@@ -71,7 +71,7 @@ export const uploadEvidence = createAsyncThunk(
         },
       });
       
-      console.log("Upload evidence API response:", res.data);
+      // console.log("Upload evidence API response:", res.data);
       
       return res.data.data;
     } catch (error) {
@@ -93,16 +93,16 @@ export const fetchComplaintEvidence = createAsyncThunk(
   'evidence/fetchComplaintEvidence',
   async (complaintId, thunkAPI) => {
     try {
-      console.log("Fetching evidence for complaint:", complaintId);
+      // console.log("Fetching evidence for complaint:", complaintId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
       const res = await axiosInstance.get(`/evidences/complaint/${complaintId}`);
-      console.log("Fetch evidence API response:", res.data);
+      // console.log("Fetch evidence API response:", res.data);
       
       return res.data.data;
     } catch (error) {
@@ -124,16 +124,16 @@ export const deleteEvidence = createAsyncThunk(
   'evidence/deleteEvidence',
   async (evidenceId, thunkAPI) => {
     try {
-      console.log("Deleting evidence:", evidenceId);
+      // console.log("Deleting evidence:", evidenceId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
       const res = await axiosInstance.delete(`/evidences/${evidenceId}`);
-      console.log("Delete evidence API response:", res.data);
+      // console.log("Delete evidence API response:", res.data);
       
       return evidenceId; // Return the deleted evidence ID for state update
     } catch (error) {
@@ -155,16 +155,16 @@ export const fetchUserEvidence = createAsyncThunk(
   'evidence/fetchUserEvidence',
   async (userId, thunkAPI) => {
     try {
-      console.log("Fetching evidence for user:", userId);
+      // console.log("Fetching evidence for user:", userId);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
       const res = await axiosInstance.get(`/evidences/user/${userId}`);
-      console.log("Fetch user evidence API response:", res.data);
+      // console.log("Fetch user evidence API response:", res.data);
       
       return res.data.data;
     } catch (error) {

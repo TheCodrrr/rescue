@@ -153,7 +153,7 @@ const Trending = () => {
             count: comments.length
           }
         }));
-        console.log(`Fetched ${comments.length} comments for complaint ${complaintId}`);
+        // console.log(`Fetched ${comments.length} comments for complaint ${complaintId}`);
       }
     } catch (error) {
       console.error(`Error fetching comments for complaint ${complaintId}:`, error);
@@ -271,7 +271,7 @@ const Trending = () => {
     );
   }
 
-  console.log("kem cho, this is the data: ", data);
+  // console.log("kem cho, this is the data: ", data);
 
   // Helper functions
   const getCategoryIcon = (category) => {
@@ -382,7 +382,7 @@ const Trending = () => {
     try {
       const result = await dispatch(upvoteComplaint(complaintId));
       if (upvoteComplaint.fulfilled.match(result)) {
-        console.log('Upvote result payload:', result.payload);
+        // console.log('Upvote result payload:', result.payload);
         
         // Record interaction for cache management
         recordInteraction();
@@ -403,13 +403,13 @@ const Trending = () => {
                     downvote: result.payload.downvotes,
                     userVote: result.payload.userVote
                   };
-                  console.log('Updating complaint cache:', {
-                    id: complaintId,
-                    oldUpvote: complaint.upvote,
-                    newUpvote: result.payload.upvotes,
-                    oldDownvote: complaint.downvote,
-                    newDownvote: result.payload.downvotes
-                  });
+                  // console.log('Updating complaint cache:', {
+                    // id: complaintId,
+                    // oldUpvote: complaint.upvote,
+                    // newUpvote: result.payload.upvotes,
+                    // oldDownvote: complaint.downvote,
+                    // newDownvote: result.payload.downvotes
+                  // });
                   return updatedComplaint;
                 }
                 return complaint;
@@ -480,7 +480,7 @@ const Trending = () => {
     try {
       const result = await dispatch(downvoteComplaint(complaintId));
       if (downvoteComplaint.fulfilled.match(result)) {
-        console.log('Downvote result payload:', result.payload);
+        // console.log('Downvote result payload:', result.payload);
         
         // Record interaction for cache management
         recordInteraction();
@@ -501,13 +501,13 @@ const Trending = () => {
                     downvote: result.payload.downvotes,
                     userVote: result.payload.userVote
                   };
-                  console.log('Updating complaint cache (downvote):', {
-                    id: complaintId,
-                    oldUpvote: complaint.upvote,
-                    newUpvote: result.payload.upvotes,
-                    oldDownvote: complaint.downvote,
-                    newDownvote: result.payload.downvotes
-                  });
+                  // console.log('Updating complaint cache (downvote):', {
+                    // id: complaintId,
+                    // oldUpvote: complaint.upvote,
+                    // newUpvote: result.payload.upvotes,
+                    // oldDownvote: complaint.downvote,
+                    // newDownvote: result.payload.downvotes
+                  // });
                   return updatedComplaint;
                 }
                 return complaint;
@@ -592,7 +592,7 @@ const Trending = () => {
           comments: result.payload.comments || []
         }));
         
-        console.log('Fetched comments for complaint:', complaint._id, result.payload.comments);
+        // console.log('Fetched comments for complaint:', complaint._id, result.payload.comments);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -694,7 +694,7 @@ const Trending = () => {
           };
           setSelectedComplaintForComments(updatedComplaint);
           
-          console.log('Updated local comment data after adding comment:', newComments);
+          // console.log('Updated local comment data after adding comment:', newComments);
         }
         
         toast.success('Comment added successfully!', {
@@ -816,7 +816,7 @@ const Trending = () => {
 
   const handleModalCommentSubmit = async (commentData) => {
     try {
-      console.log('Received commentData in handleModalCommentSubmit:', commentData);
+      // console.log('Received commentData in handleModalCommentSubmit:', commentData);
       
       // CommentModal sends 'content' not 'comment'
       const commentText = commentData.content || commentData.comment;
@@ -871,7 +871,7 @@ const Trending = () => {
             comments: newComments
           }));
           
-          console.log('Comment added successfully, updated comment count:', newComments.length);
+          // console.log('Comment added successfully, updated comment count:', newComments.length);
         }
         
         toast.success('Comment added successfully!', {

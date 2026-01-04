@@ -13,7 +13,7 @@ dotenv.config();
 const connectDB = async () => {
     try {
         await mongoose.connect(`${process.env.MONGODB_URI}/lodge`);
-        console.log("MongoDB connected for complaint worker to database: lodge");
+        // console.log("MongoDB connected for complaint worker to database: lodge");
     } catch (error) {
         console.error("MongoDB connection error:", error);
         process.exit(1);
@@ -163,17 +163,17 @@ const worker = new Worker(
 )
 
 worker.on("completed", (job) => {
-    console.log("\n");
-    console.log("✅".repeat(40));
-    console.log(`✅ BullMQ Job COMPLETED: ${job.id}`);
-    console.log(`✅ Complaint: ${job.data.complaintId}`);
-    console.log(`✅ Completed at: ${new Date().toISOString()}`);
-    console.log("✅".repeat(40));
-    console.log("\n");
+    // console.log("\n");
+    // console.log("✅".repeat(40));
+    // console.log(`✅ BullMQ Job COMPLETED: ${job.id}`);
+    // console.log(`✅ Complaint: ${job.data.complaintId}`);
+    // console.log(`✅ Completed at: ${new Date().toISOString()}`);
+    // console.log("✅".repeat(40));
+    // console.log("\n");
 })
 
 worker.on("failed", (job, err) => {
-    console.log("\n");
+    // console.log("\n");
     console.error("❌".repeat(40));
     console.error(`❌ BullMQ Job FAILED: ${job?.id}`);
     console.error(`❌ Complaint: ${job?.data?.complaintId}`);

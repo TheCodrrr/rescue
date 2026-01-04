@@ -69,15 +69,15 @@ const rejectComplaint = asyncHandler(async (req, res) => {
             complaint.status = 'rejected';
             complaint.active = false; // Also mark as inactive so it doesn't appear in queries
             statusChanged = true;
-            console.log(`Complaint ${complaintId} status changed to 'rejected' after ${distinctOfficerRejections.size} officer rejections`);
+            // console.log(`Complaint ${complaintId} status changed to 'rejected' after ${distinctOfficerRejections.size} officer rejections`);
             
             // Cancel the escalation job for this complaint
             try {
                 const cancelResult = await cancelEscalation(complaintId);
                 if (cancelResult.success) {
-                    console.log(`✅ Escalation timer cancelled for rejected complaint ${complaintId}`);
+                    // console.log(`✅ Escalation timer cancelled for rejected complaint ${complaintId}`);
                 } else {
-                    console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
+                    // console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
                 }
             } catch (escalationError) {
                 console.error(`Error cancelling escalation for complaint ${complaintId}:`, escalationError);
@@ -119,7 +119,7 @@ const rejectComplaint = asyncHandler(async (req, res) => {
                 
                 // Emit real-time notification to the specific user
                 io.emit(`notification:${userId}`, notificationData);
-                console.log(`🔔 Rejection notification sent to user ${userId}`);
+                // console.log(`🔔 Rejection notification sent to user ${userId}`);
             } catch (notificationError) {
                 console.error("⚠️ Failed to send rejection notification:", notificationError);
                 // Continue even if notification fails
@@ -368,7 +368,7 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
             
             // Reschedule escalation with new level (level 1 -> 2 based on severity)
             await scheduleEscalation(complaint);
-            console.log(`Rescheduled escalation for complaint ${complaint._id} after officer acceptance`);
+            // console.log(`Rescheduled escalation for complaint ${complaint._id} after officer acceptance`);
         } catch (escalationError) {
             console.error("Error rescheduling escalation:", escalationError);
             // Don't fail the assignment if escalation rescheduling fails
@@ -393,7 +393,7 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
             
             // Emit real-time notification to the specific user (complaint owner)
             io.emit(`notification:${userId}`, notificationData);
-            console.log(`🔔 Officer acceptance notification sent to user ${userId}`);
+            // console.log(`🔔 Officer acceptance notification sent to user ${userId}`);
             
             // Emit real-time event to inform that complaint is now accepted (for other officers)
             io.emit('complaintAccepted', {
@@ -402,7 +402,7 @@ const assignOfficerToComplaint = asyncHandler(async (req, res) => {
                 officer_name: officer.name || "Officer",
                 timestamp: new Date().toISOString()
             });
-            console.log(`🔔 Complaint accepted event broadcasted to all officers for complaint ${complaintId}`);
+            // console.log(`🔔 Complaint accepted event broadcasted to all officers for complaint ${complaintId}`);
             
         } catch (notificationError) {
             console.error("⚠️ Failed to send notification:", notificationError);
@@ -611,9 +611,9 @@ const resolveComplaint = asyncHandler(async (req, res) => {
     try {
         const cancelResult = await cancelEscalation(complaintId);
         if (cancelResult.success) {
-            console.log(`✅ Escalation cancelled for resolved complaint ${complaintId}`);
+            // console.log(`✅ Escalation cancelled for resolved complaint ${complaintId}`);
         } else {
-            console.log(`ℹ️ No escalation to cancel for complaint ${complaintId}: ${cancelResult.message}`);
+            // console.log(`ℹ️ No escalation to cancel for complaint ${complaintId}: ${cancelResult.message}`);
         }
     } catch (escalationError) {
         console.error(`⚠️ Error cancelling escalation for complaint ${complaintId}:`, escalationError);
@@ -639,7 +639,7 @@ const resolveComplaint = asyncHandler(async (req, res) => {
         
         // Emit real-time notification to the complaint owner
         io.emit(`notification:${userId}`, notificationData);
-        console.log(`🔔 Complaint resolved notification sent to user ${userId}`);
+        // console.log(`🔔 Complaint resolved notification sent to user ${userId}`);
     } catch (notificationError) {
         console.error("⚠️ Failed to send resolution notification:", notificationError);
         // Continue even if notification fails

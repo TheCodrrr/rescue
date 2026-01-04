@@ -125,7 +125,7 @@ complaintSchema.index({ location: '2dsphere' });
 complaintSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
     try {
         await Feedback.deleteMany({ complaint_id: this._id });
-        console.log("Deleted related feedbacks");
+        // console.log("Deleted related feedbacks");
         next();
     } catch (err) {
         next(err);

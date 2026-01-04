@@ -72,14 +72,14 @@ const OfficerComplaint = () => {
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.5);
         } catch (error) {
-            console.log('Could not play notification sound:', error);
+            // console.log('Could not play notification sound:', error);
         }
     };
 
     // Fetch nearby complaints when location is available
     useEffect(() => {
         if (location.latitude && location.longitude && !location.loading) {
-            console.log('Fetching complaints for location:', location);
+            // console.log('Fetching complaints for location:', location);
             dispatch(fetchNearbyComplaints({
                 latitude: location.latitude,
                 longitude: location.longitude
@@ -101,7 +101,7 @@ const OfficerComplaint = () => {
                          import.meta.env.VITE_API_URL?.replace('/api/v1', '') ||
                          'http://localhost:5000';
         
-        console.log("🔌 Officer connecting to socket:", socketURL);
+        // console.log("🔌 Officer connecting to socket:", socketURL);
         
         socketRef.current = io(socketURL, {
             withCredentials: true,
@@ -112,13 +112,13 @@ const OfficerComplaint = () => {
         });
 
         socketRef.current.on('connect', () => {
-            console.log('✅ Officer socket connected:', socketRef.current.id);
+            // console.log('✅ Officer socket connected:', socketRef.current.id);
             setSocketConnected(true);
             toast.success('Connected to real-time updates');
         });
 
         socketRef.current.on('disconnect', (reason) => {
-            console.log('❌ Officer socket disconnected:', reason);
+            // console.log('❌ Officer socket disconnected:', reason);
             setSocketConnected(false);
             if (reason === 'io server disconnect') {
                 // Reconnect manually if server disconnected
@@ -202,18 +202,18 @@ const OfficerComplaint = () => {
         socketRef.current.on('complaintAccepted', (data) => {
             const { complaint_id, officer_id, officer_name } = data;
             
-            console.log('🔔 OfficerComplaint received complaintAccepted event:', data);
-            console.log('Current officer ID:', user?._id, 'Accepting officer ID:', officer_id);
+            // console.log('🔔 OfficerComplaint received complaintAccepted event:', data);
+            // console.log('Current officer ID:', user?._id, 'Accepting officer ID:', officer_id);
             
             // If this officer didn't accept it, remove it from their view
             if (officer_id !== user?._id) {
-                console.log('✅ Different officer accepted, removing complaint from view');
-                console.log('Before removal - Total complaints:', totalComplaints);
+                // console.log('✅ Different officer accepted, removing complaint from view');
+                // console.log('Before removal - Total complaints:', totalComplaints);
                 
                 // Remove from Redux state (which updates UI instantly)
                 dispatch(removeComplaintRealtime(complaint_id));
                 
-                console.log('✅ Dispatched removeComplaintRealtime action');
+                // console.log('✅ Dispatched removeComplaintRealtime action');
                 
                 // Also add to rejected IDs as backup
                 setRejectedComplaintIds(prev => new Set([...prev, complaint_id]));
@@ -221,23 +221,23 @@ const OfficerComplaint = () => {
                 // If this was the selected complaint, clear selection
                 if (selectedComplaint?._id === complaint_id) {
                     setSelectedComplaint(null);
-                    console.log('✅ Cleared selected complaint');
+                    // console.log('✅ Cleared selected complaint');
                 }
                 
                 toast.info(`Complaint accepted by ${officer_name}`, {
                     duration: 3000,
                 });
                 
-                console.log(`✅ Complaint ${complaint_id} accepted by another officer, removed from view`);
+                // console.log(`✅ Complaint ${complaint_id} accepted by another officer, removed from view`);
             } else {
-                console.log('ℹ️ This officer accepted the complaint, no action needed');
+                // console.log('ℹ️ This officer accepted the complaint, no action needed');
             }
         });
 
         // Cleanup on unmount
         return () => {
             if (socketRef.current) {
-                console.log('🔌 Disconnecting officer socket');
+                // console.log('🔌 Disconnecting officer socket');
                 socketRef.current.off('newComplaintForOfficer');
                 socketRef.current.off('complaintAccepted');
                 socketRef.current.disconnect();
@@ -344,7 +344,7 @@ const OfficerComplaint = () => {
 
     const handleComplaintClick = useCallback((complaint) => {
         setSelectedComplaint(complaint);
-        console.log('Selected complaint:', complaint);
+        // console.log('Selected complaint:', complaint);
     }, []);
 
     const handleVisitComplaint = useCallback((complaint) => {
@@ -363,7 +363,7 @@ const OfficerComplaint = () => {
         }
         
         toast.success('Complaint ignored - it will remain visible to other officers');
-        console.log('Complaint ignored (no action taken):', complaintId);
+        // console.log('Complaint ignored (no action taken):', complaintId);
     }, [selectedComplaint]);
 
     const handleRejectComplaint = useCallback((complaintId, e) => {
@@ -411,7 +411,7 @@ const OfficerComplaint = () => {
                 // Show success toast
                 toast.success('Complaint rejected successfully');
                 
-                console.log('✅ Complaint rejected:', rejectComplaintId);
+                // console.log('✅ Complaint rejected:', rejectComplaintId);
             } else {
                 throw new Error(result.payload || 'Failed to reject complaint');
             }
@@ -451,7 +451,7 @@ const OfficerComplaint = () => {
 
             if (acceptComplaint.fulfilled.match(acceptResult)) {
                 // Officer accepted complaint - complaint stays at level 1
-                console.log('✅ Complaint accepted by officer:', complaintId);
+                // console.log('✅ Complaint accepted by officer:', complaintId);
 
                 // Remove complaint from rejected list if it was there
                 setRejectedComplaintIds(prev => {
@@ -475,7 +475,7 @@ const OfficerComplaint = () => {
                 // No need to refresh - Redux state is already updated in acceptComplaint.fulfilled
                 // This prevents the second unnecessary re-render
                 
-                console.log('✅ Complaint accepted:', complaintId);
+                // console.log('✅ Complaint accepted:', complaintId);
             } else {
                 toast.dismiss(loadingToast);
                 throw new Error(acceptResult.payload || 'Failed to accept complaint');
@@ -497,7 +497,7 @@ const OfficerComplaint = () => {
                 
                 if (clickedOutside) {
                     setSelectedComplaint(null);
-                    console.log('Deselected complaint - clicked outside');
+                    // console.log('Deselected complaint - clicked outside');
                 }
             }
         };

@@ -164,7 +164,7 @@ function MyComplaints() {
     // Fetch comments for visible complaints when data loads
     useEffect(() => {
         if (allComplaints.length > 0) {
-            console.log('Loading comments for visible complaints...', allComplaints.length);
+            // console.log('Loading comments for visible complaints...', allComplaints.length);
             allComplaints.forEach((complaint) => {
                 if (complaint._id) {
                     dispatch(fetchComments(complaint._id)).catch((err) => {
@@ -381,10 +381,10 @@ function MyComplaints() {
     };
 
     const handleVisitComplaint = useCallback((complaint) => {
-        console.log('clicked');
+        // console.log('clicked');
         // Clear any potential state conflicts and navigate
         setTimeout(() => {
-            console.log(`/complaint/${complaint._id}`);
+            // console.log(`/complaint/${complaint._id}`);
             navigate(`/complaint/${complaint._id}`, { replace: true });
         }, 0);
     }, [navigate]);

@@ -12,9 +12,9 @@ export const fetchDepartmentDetails = createAsyncThunk(
   'department/fetchDetails',
   async (departmentId, thunkAPI) => {
     try {
-      console.log("Fetching department details for ID:", departmentId);
+      // console.log("Fetching department details for ID:", departmentId);
       const res = await axiosInstance.get(`/departments/detail/${departmentId}`);
-      console.log("Department details API response:", res.data);
+      // console.log("Department details API response:", res.data);
       return res.data.data;
     } catch (error) {
       console.error("Department details API error:", error);

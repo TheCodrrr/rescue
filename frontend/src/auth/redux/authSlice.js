@@ -25,22 +25,22 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, thunkAPI) => {
     try {
-      console.log("Making API call to load user...");
+      // console.log("Making API call to load user...");
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
-      console.log("Token found, making request to /users/me");
+      // console.log("Token found, making request to /users/me");
       const res = await axiosInstance.get('/users/me');
-      console.log("Load user API response:", res.data);
+      // console.log("Load user API response:", res.data);
       
       // Extract user data from the correct path based on your API response structure
       // Your API returns: {statusCode: 200, data: {user_data}, message: 'Current user details', success: true}
       const userData = res.data.data;
-      console.log("Extracted user data:", userData);
+      // console.log("Extracted user data:", userData);
       
       return userData;
     } catch (error) {
@@ -62,11 +62,11 @@ export const updateUser = createAsyncThunk(
   'auth/updateUser',
   async (updateData, thunkAPI) => {
     try {
-      console.log("Making API call to update user...", updateData);
+      // console.log("Making API call to update user...", updateData);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
@@ -80,13 +80,13 @@ export const updateUser = createAsyncThunk(
         longitude: updateData.longitude
       };
 
-      console.log("Token found, making request to update user profile with data:", profileData);
+      // console.log("Token found, making request to update user profile with data:", profileData);
       const res = await axiosInstance.patch('/users/update', profileData);
-      console.log("Update user API response:", res.data);
+      // console.log("Update user API response:", res.data);
       
       // Extract updated user data from the correct path based on your API response structure
       const userData = res.data.data;
-      console.log("Updated user data:", userData);
+      // console.log("Updated user data:", userData);
       
       return userData;
     } catch (error) {
@@ -108,11 +108,11 @@ export const uploadProfileImage = createAsyncThunk(
   'auth/uploadProfileImage',
   async (imageFile, thunkAPI) => {
     try {
-      console.log("Making API call to upload profile image...", imageFile.name);
+      // console.log("Making API call to upload profile image...", imageFile.name);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
@@ -120,23 +120,23 @@ export const uploadProfileImage = createAsyncThunk(
       const formData = new FormData();
       formData.append('profileImage', imageFile);
 
-      console.log("Token found, making request to upload profile image");
-      console.log("Token being used:", token);
-      console.log("FormData contents:", formData.get('profileImage'));
+      // console.log("Token found, making request to upload profile image");
+      // console.log("Token being used:", token);
+      // console.log("FormData contents:", formData.get('profileImage'));
       
       const res = await axiosInstance.patch('/users/update-profile-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log("Upload profile image API response:", res.data);
-      console.log("Full response object:", res);
+      // console.log("Upload profile image API response:", res.data);
+      // console.log("Full response object:", res);
       
       // Extract updated user data from the correct path based on your API response structure
       const userData = res.data.data;
-      console.log("Updated user data with new profile image:", userData);
-      console.log("Old profile image URL:", userData.profileImage);
-      console.log("New profile image should be:", userData.profileImage);
+      // console.log("Updated user data with new profile image:", userData);
+      // console.log("Old profile image URL:", userData.profileImage);
+      // console.log("New profile image should be:", userData.profileImage);
       
       // Verify that we actually got a new profile image URL
       if (!userData.profileImage) {
@@ -163,17 +163,17 @@ export const deleteUser = createAsyncThunk(
   'auth/deleteUser',
   async (_, thunkAPI) => {
     try {
-      console.log("Making API call to delete user account...");
+      // console.log("Making API call to delete user account...");
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
-      console.log("Token found, making request to delete user account");
+      // console.log("Token found, making request to delete user account");
       const res = await axiosInstance.delete('/users/delete');
-      console.log("Delete user API response:", res.data);
+      // console.log("Delete user API response:", res.data);
       
       return res.data;
     } catch (error) {
@@ -195,11 +195,11 @@ export const changePassword = createAsyncThunk(
   'auth/changePassword',
   async ({ oldPassword, newPassword }, thunkAPI) => {
     try {
-      console.log("Making API call to change password...");
+      // console.log("Making API call to change password...");
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.log("No token found in localStorage");
+        // console.log("No token found in localStorage");
         return thunkAPI.rejectWithValue('No authentication token found');
       }
 
@@ -208,10 +208,10 @@ export const changePassword = createAsyncThunk(
         newPassword
       };
 
-      console.log("Token found, making request to change password");
-      console.log("Password data being sent:", passwordData);
+      // console.log("Token found, making request to change password");
+      // console.log("Password data being sent:", passwordData);
       const res = await axiosInstance.patch('/users/change-password', passwordData);
-      console.log("Change password API response:", res.data);
+      // console.log("Change password API response:", res.data);
       
       return res.data;
     } catch (error) {
@@ -233,16 +233,16 @@ export const verifyDepartmentSecret = createAsyncThunk(
   'auth/verifyDepartmentSecret',
   async ({ department_id, department_secret }, thunkAPI) => {
     try {
-      console.log("Making API call to verify department secret...");
+      // console.log("Making API call to verify department secret...");
       
       const secretData = {
         department_id,
         department_secret
       };
 
-      console.log("Department secret data being sent:", secretData);
+      // console.log("Department secret data being sent:", secretData);
       const res = await axiosInstance.post('/departments/validate-secret', secretData);
-      console.log("Verify department secret API response:", res.data);
+      // console.log("Verify department secret API response:", res.data);
       
       return res.data;
     } catch (error) {
@@ -264,14 +264,14 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (formDataToSend, thunkAPI) => {
     try {
-      console.log("Making API call to register user...");
+      // console.log("Making API call to register user...");
       
       const res = await axiosInstance.post('/users/register', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log("Register user API response:", res.data);
+      // console.log("Register user API response:", res.data);
       
       return res.data;
     } catch (error) {
@@ -293,12 +293,12 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, thunkAPI) => {
     try {
-      console.log("Making API call to login user...");
+      // console.log("Making API call to login user...");
       
       const loginData = { email, password };
       
       const res = await axiosInstance.post('/users/login', loginData);
-      console.log("Login user API response:", res.data);
+      // console.log("Login user API response:", res.data);
       
       return res.data;
     } catch (error) {

@@ -197,9 +197,9 @@ const CommentModal = ({
                             {comments && comments.length > 0 ? (
                                 comments.map((comment) => {
                                     // Debug: log comment structure
-                                    console.log('Comment structure:', comment);
-                                    console.log('User info:', comment.user);
-                                    console.log('User_id info:', comment.user_id);
+                                    // console.log('Comment structure:', comment);
+                                    // console.log('User info:', comment.user);
+                                    // console.log('User_id info:', comment.user_id);
                                     
                                     const isEditing = editingCommentId === comment._id;
                                     const isOwner = user && (

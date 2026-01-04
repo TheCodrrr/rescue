@@ -39,17 +39,17 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket) => {
-    console.log("A user connected: ", socket.id);
+    // console.log("A user connected: ", socket.id);
 
     socket.on("disconnect", () => {
-        console.log("A user disconnected", socket.id);
+        // console.log("A user disconnected", socket.id);
     });
 });
 
 (async function initializeServices() {
     try {
         await initRailSchema();
-        console.log("Rail schema initialized successfully.");
+        // console.log("Rail schema initialized successfully.");
     } catch (error) {
         console.error("Error initializing rail schema:", error);
     }

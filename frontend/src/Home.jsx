@@ -78,7 +78,7 @@ export default function Home() {
     const requestLocationPermission = () => {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
-                console.log('Geolocation is not supported by this browser');
+                // console.log('Geolocation is not supported by this browser');
                 setLocationPermission('denied');
                 const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
                 setUserLocation(fallbackLocation);
@@ -88,7 +88,7 @@ export default function Home() {
 
             // Set a manual timeout to ensure we don't wait forever
             const timeoutId = setTimeout(() => {
-                console.log('⏱️ Location request timed out after 5 seconds');
+                // console.log('⏱️ Location request timed out after 5 seconds');
                 setLocationPermission('denied');
                 const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
                 setUserLocation(fallbackLocation);
@@ -102,14 +102,14 @@ export default function Home() {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
-                    console.log('✅ Location permission granted:', location);
+                    // console.log('✅ Location permission granted:', location);
                     setLocationPermission('granted');
                     setUserLocation(location);
                     resolve(location);
                 },
                 (error) => {
                     clearTimeout(timeoutId); // Clear the manual timeout
-                    console.log('❌ Location access denied or failed:', error.message);
+                    // console.log('❌ Location access denied or failed:', error.message);
                     setLocationPermission('denied');
                     const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
                     setUserLocation(fallbackLocation);
@@ -126,7 +126,7 @@ export default function Home() {
 
     // Navigate to complaint detail page
     const handleViewComplaintDetails = (complaint) => {
-        console.log("From home.jsx: ", complaint);
+        // console.log("From home.jsx: ", complaint);
         // Clear any potential state conflicts and navigate
         setTimeout(() => {
             navigate(`/complaint/${complaint.id}`, { replace: true });
@@ -139,43 +139,43 @@ export default function Home() {
         const socketURL = import.meta.env.VITE_SOCKET_URL || 
                          'http://localhost:5000';
         
-        console.log("Initializing socket connection to:", socketURL);
+        // console.log("Initializing socket connection to:", socketURL);
         socketRef.current = io(socketURL, {
             withCredentials: true,
             transports: ['websocket', 'polling']
         });
 
         socketRef.current.on('connect', () => {
-            console.log('Socket connected:', socketRef.current.id);
+            // console.log('Socket connected:', socketRef.current.id);
         });
 
         socketRef.current.on('disconnect', () => {
-            console.log('Socket disconnected');
+            // console.log('Socket disconnected');
         });
 
         // Set up the newComplaint listener here (for storing pending complaints)
         socketRef.current.on('newComplaint', (complaint) => {
-            console.log('🚨 New complaint received via socket:', complaint);
-            console.log('Complaint details:', {
-                id: complaint._id,
-                title: complaint.title,
-                category: complaint.category,
-                coordinates: getComplaintCoordinates(complaint),
-                address: complaint.address,
-                user: complaint.user_id
-            });
+            // console.log('🚨 New complaint received via socket:', complaint);
+            // console.log('Complaint details:', {
+                // id: complaint._id,
+                // title: complaint.title,
+                // category: complaint.category,
+                // coordinates: getComplaintCoordinates(complaint),
+                // address: complaint.address,
+                // user: complaint.user_id
+            // });
             
             // Always store for later processing - the dedicated useEffect will handle it
-            console.log('Storing complaint for processing when map is ready');
+            // console.log('Storing complaint for processing when map is ready');
             window.pendingComplaints = window.pendingComplaints || [];
             window.pendingComplaints.push(complaint);
-            console.log(`Total pending complaints: ${window.pendingComplaints.length}`);
+            // console.log(`Total pending complaints: ${window.pendingComplaints.length}`);
         });
 
         // Cleanup on unmount
         return () => {
             if (socketRef.current) {
-                console.log('Cleaning up socket connection');
+                // console.log('Cleaning up socket connection');
                 socketRef.current.off('newComplaint');
                 socketRef.current.disconnect();
             }
@@ -186,15 +186,15 @@ export default function Home() {
     useEffect(() => {
         const setupListener = async () => {
             if (socketRef.current && mapReady && mapRef.current && userLocation) {
-                console.log('Setting up newComplaint listener - map is ready');
+                // console.log('Setting up newComplaint listener - map is ready');
                 
                 // Remove any existing listener
                 socketRef.current.off('newComplaint');
                 
                 // Add the new listener for immediate processing
                 socketRef.current.on('newComplaint', (complaint) => {
-                    console.log('🔴 [SOCKET] Received live complaint:', complaint?._id || '(no id)');
-                    console.log(complaint);
+                    // console.log('🔴 [SOCKET] Received live complaint:', complaint?._id || '(no id)');
+                    // console.log(complaint);
                     processNewComplaint(complaint);
                     
                     // Also update the right panel complaints
@@ -205,7 +205,7 @@ export default function Home() {
                 
                 // Process any pending complaints
                 if (window.pendingComplaints && window.pendingComplaints.length > 0) {
-                    console.log(`[mapReady] Processing ${window.pendingComplaints.length} pending complaint(s)...`);
+                    // console.log(`[mapReady] Processing ${window.pendingComplaints.length} pending complaint(s)...`);
                     window.pendingComplaints.forEach(complaint => {
                         processNewComplaint(complaint);
                     });
@@ -220,14 +220,14 @@ export default function Home() {
     // Function to process new complaints (can be used both for live and pending complaints)
     const processNewComplaint = async (complaint) => {
         if (!mapRef.current || !userLocation) {
-            console.log('Map or location not available for processing complaint');
+            // console.log('Map or location not available for processing complaint');
             return;
         }
 
         // Check if this complaint is already being displayed to prevent duplicates
         const existingComplaint = recentComplaints.find(existing => existing.id === complaint._id);
         if (existingComplaint) {
-            console.log('Complaint already exists, skipping duplicate:', complaint._id);
+            // console.log('Complaint already exists, skipping duplicate:', complaint._id);
             return;
         }
 
@@ -236,14 +236,14 @@ export default function Home() {
             marker.complaintId === complaint._id
         );
         if (existingMarker) {
-            console.log('Marker for complaint already exists on map, skipping:', complaint._id);
+            // console.log('Marker for complaint already exists on map, skipping:', complaint._id);
             return;
         }
 
-    console.log('[PROCESS] Processing complaint:', complaint?._id || '(no id)', 'Category:', complaint?.category);
-        console.log('User location:', userLocation);
+    // console.log('[PROCESS] Processing complaint:', complaint?._id || '(no id)', 'Category:', complaint?.category);
+        // console.log('User location:', userLocation);
     const complaintCoords = getComplaintCoordinates(complaint);
-    console.log('Complaint raw location payload:', complaintCoords);
+    // console.log('Complaint raw location payload:', complaintCoords);
 
         // Calculate distance between user and complaint
         const calculateDistance = (lat1, lng1, lat2, lng2) => {
@@ -264,21 +264,21 @@ export default function Home() {
             complaintCoords.lng
         );
 
-        console.log(`Distance from user to complaint: ${distance.toFixed(2)} km`);
+        // console.log(`Distance from user to complaint: ${distance.toFixed(2)} km`);
 
         // Debug mode - temporarily show all complaints regardless of distance
         const DEBUG_MODE = true; // Set to false for production
         const MAX_DISTANCE_KM = 100;
         
         if (!DEBUG_MODE && distance > MAX_DISTANCE_KM) {
-            console.log(`Complaint is too far away (${distance.toFixed(2)} km > ${MAX_DISTANCE_KM} km), skipping`);
+            // console.log(`Complaint is too far away (${distance.toFixed(2)} km > ${MAX_DISTANCE_KM} km), skipping`);
             return;
         }
 
         if (DEBUG_MODE) {
-            console.log(`🔧 DEBUG MODE: Showing complaint regardless of distance (${distance.toFixed(2)} km)`);
+            // console.log(`🔧 DEBUG MODE: Showing complaint regardless of distance (${distance.toFixed(2)} km)`);
         } else {
-            console.log('✅ Complaint is within acceptable distance, creating marker...');
+            // console.log('✅ Complaint is within acceptable distance, creating marker...');
         }
 
         // Get incident type configuration by category
@@ -301,10 +301,10 @@ export default function Home() {
         const parsedLat = finalCoords.lat;
         const parsedLng = finalCoords.lng;
 
-        console.log('🗺️ Coordinate extraction:', {
-            coordinates: finalCoords,
-            types: { lat: typeof parsedLat, lng: typeof parsedLng }
-        });
+        // console.log('🗺️ Coordinate extraction:', {
+            // coordinates: finalCoords,
+            // types: { lat: typeof parsedLat, lng: typeof parsedLng }
+        // });
 
         if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) {
             console.warn('[process] Skipping: invalid coordinates', { finalCoords, complaintId: complaint?._id });
@@ -335,12 +335,12 @@ export default function Home() {
             } : null
         };
 
-        console.log('Created incident object:', newIncident);
+        // console.log('Created incident object:', newIncident);
 
         // Create the marker directly without using stored function references
         try {
             const L = await import("leaflet");
-            console.log('[process] Creating marker at', { lat: newIncident.lat, lng: newIncident.lng });
+            // console.log('[process] Creating marker at', { lat: newIncident.lat, lng: newIncident.lng });
             
             // Create the marker HTML
             const markerHtml = `
@@ -361,7 +361,7 @@ export default function Home() {
                 })
             }).addTo(mapRef.current);
 
-            console.log('✅ Marker created successfully at coordinates:', [newIncident.lat, newIncident.lng]);
+            // console.log('✅ Marker created successfully at coordinates:', [newIncident.lat, newIncident.lng]);
 
             // Force map invalidation to ensure marker appears correctly
             setTimeout(() => {
@@ -376,7 +376,7 @@ export default function Home() {
                 Math.pow((userLocation.lng - newIncident.lng) * 111 * Math.cos(userLocation.lat * Math.PI / 180), 2)
             );
 
-            console.log('� Distance calculated:', distance.toFixed(2), 'km');
+            // console.log('� Distance calculated:', distance.toFixed(2), 'km');
 
             // Create popup content
             const reportedTime = newIncident.timestamp.toLocaleString();
@@ -504,8 +504,8 @@ export default function Home() {
             marker.complaintId = complaint._id;
             incidentMarkersRef.current.push(marker);
             
-            console.log('✅ Marker added to map successfully!');
-            console.log('� Total markers on map:', incidentMarkersRef.current.length);
+            // console.log('✅ Marker added to map successfully!');
+            // console.log('� Total markers on map:', incidentMarkersRef.current.length);
             
             // Force immediate render so the marker appears at the correct spot without user interaction
             // Some layouts/animations can defer Leaflet's pixel calculations until a move/zoom.
@@ -526,7 +526,7 @@ export default function Home() {
                     mapRef.current.panTo([currentCenter.lat + 0.0001, currentCenter.lng + 0.0001]);
                     mapRef.current.panTo([currentCenter.lat, currentCenter.lng]);
                     
-                    console.log('🗺️ Map refreshed and marker position validated');
+                    // console.log('🗺️ Map refreshed and marker position validated');
                 } catch (e) {
                     console.warn('Map refresh failed:', e);
                 }
@@ -538,7 +538,7 @@ export default function Home() {
             const isInCurrentView = currentBounds.contains(markerLatLng);
             
             if (!isInCurrentView) {
-                console.log('📍 Panning map to show new complaint...');
+                // console.log('📍 Panning map to show new complaint...');
                 mapRef.current.panTo(markerLatLng);
             }
 
@@ -556,7 +556,7 @@ export default function Home() {
                 }
             }, 100);
 
-            console.log('🎉 New complaint marker successfully displayed on map!');
+            // console.log('🎉 New complaint marker successfully displayed on map!');
             
         } catch (error) {
             console.error('❌ Error creating marker:', error);
@@ -565,31 +565,31 @@ export default function Home() {
 
     // Request location immediately when component mounts
     useEffect(() => {
-        console.log("🚀 Home component mounted - requesting location immediately");
+        // console.log("🚀 Home component mounted - requesting location immediately");
         if (!userLocation && !locationPermission) {
-            console.log("📍 Initiating location request...");
+            // console.log("📍 Initiating location request...");
             requestLocationPermission();
         }
     }, []); // Run only once on mount
 
     useEffect(() => {
-        console.log("Home component - checking authentication");
+        // console.log("Home component - checking authentication");
         const token = localStorage.getItem("token");
-        console.log("Token exists:", !!token);
-        console.log("Current user:", user);
-        console.log("isAuthenticated:", isAuthenticated);
-        console.log("Loading:", loading);
-        console.log("Has loaded user:", hasLoadedUser.current);
+        // console.log("Token exists:", !!token);
+        // console.log("Current user:", user);
+        // console.log("isAuthenticated:", isAuthenticated);
+        // console.log("Loading:", loading);
+        // console.log("Has loaded user:", hasLoadedUser.current);
         
         // Always try to load user data if we have a token and haven't loaded yet
         // This ensures user data is loaded/refreshed on every page reload
         if (token && !loading && !hasLoadedUser.current) {
-            console.log("Token found, loading/refreshing user data...");
+            // console.log("Token found, loading/refreshing user data...");
             hasLoadedUser.current = true;
             dispatch(loadUser())
                 .unwrap()
                 .then((userData) => {
-                    console.log("✅ User loaded successfully:", userData);
+                    // console.log("✅ User loaded successfully:", userData);
                 })
                 .catch((error) => {
                     console.error("❌ Failed to load user:", error);
@@ -599,7 +599,7 @@ export default function Home() {
                     localStorage.removeItem('isLoggedIn');
                 });
         } else if (!token) {
-            console.log("No token found, user not authenticated");
+            // console.log("No token found, user not authenticated");
             hasLoadedUser.current = false; // Reset
         }
     }, [dispatch, user, loading, isAuthenticated]);
@@ -612,20 +612,20 @@ export default function Home() {
 
         // Set up interval to refresh nearby complaints every 5 minutes
         const refreshInterval = setInterval(() => {
-            console.log('🔄 [REFRESH] Refreshing nearby complaints...');
+            // console.log('🔄 [REFRESH] Refreshing nearby complaints...');
             dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
                 .unwrap()
                 .then((nearbyComplaints) => {
-                    console.log('🔄 [REFRESH] Nearby complaints refreshed:', nearbyComplaints?.length || 0, 'complaints found');
+                    // console.log('🔄 [REFRESH] Nearby complaints refreshed:', nearbyComplaints?.length || 0, 'complaints found');
                     
                     if (nearbyComplaints && nearbyComplaints.length > 0) {
-                        console.log('🔄 [REFRESH] Complaint IDs found:', nearbyComplaints.map(c => c._id));
+                        // console.log('🔄 [REFRESH] Complaint IDs found:', nearbyComplaints.map(c => c._id));
                         nearbyComplaints.forEach((complaint, index) => {
-                            console.log(`🔄 [REFRESH] Processing complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id, '- Title:', complaint.title);
+                            // console.log(`🔄 [REFRESH] Processing complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id, '- Title:', complaint.title);
                             processNewComplaint(complaint);
                         });
                     } else {
-                        console.log('🔄 [REFRESH] No complaints found during refresh');
+                        // console.log('🔄 [REFRESH] No complaints found during refresh');
                     }
                 })
                 .catch((error) => {
@@ -650,24 +650,24 @@ export default function Home() {
             if (map.scrollWheelZoom) map.scrollWheelZoom.enable();
             if (map.doubleClickZoom) map.doubleClickZoom.enable();
             if (map.touchZoom) map.touchZoom.enable();
-            console.log('🗺️ Map activated - zoom enabled');
+            // console.log('🗺️ Map activated - zoom enabled');
         } else {
             // Disable zoom interactions when map is inactive
             if (map.scrollWheelZoom) map.scrollWheelZoom.disable();
             if (map.doubleClickZoom) map.doubleClickZoom.disable();
             if (map.touchZoom) map.touchZoom.disable();
-            console.log('🗺️ Map deactivated - zoom disabled');
+            // console.log('🗺️ Map deactivated - zoom disabled');
         }
     }, [isMapActive]);
 
     // Map initialization useEffect - runs when userLocation is available
     useEffect(() => {
         if (!userLocation) {
-            console.log("User location not available yet, skipping map initialization");
+            // console.log("User location not available yet, skipping map initialization");
             return;
         }
 
-        console.log("Initializing map with user location:", userLocation);
+        // console.log("Initializing map with user location:", userLocation);
         
         let map;
         let incidentMarkers = [];
@@ -686,13 +686,13 @@ export default function Home() {
                 const L = await import("leaflet");
                 const mapElement = document.getElementById("live-map");
                 if (!mapElement) {
-                    console.log("Map element not found, retrying...");
+                    // console.log("Map element not found, retrying...");
                     return;
                 }
 
                 // Clean up existing map if any
                 if (mapRef.current) {
-                    console.log("Cleaning up existing map...");
+                    // console.log("Cleaning up existing map...");
                     if (mapRef.current._incidentInterval) {
                         clearInterval(mapRef.current._incidentInterval);
                     }
@@ -714,7 +714,7 @@ export default function Home() {
                 setTimeout(() => {
                     if (map) {
                         map.invalidateSize();
-                        console.log('🗺️ Map size invalidated after initialization');
+                        // console.log('🗺️ Map size invalidated after initialization');
                     }
                 }, 100);
                 
@@ -879,60 +879,60 @@ export default function Home() {
                 // Store reference to calculateDistance function for use in socket listener  
                 window.calculateDistanceRef = calculateDistance;
 
-                console.log('Map loaded successfully with user location:', userLocation);
+                // console.log('Map loaded successfully with user location:', userLocation);
                 setMapReady(true);
                 
                 // Fetch nearby complaints from the past 30 minutes
-                console.log('Fetching nearby complaints...');
+                // console.log('Fetching nearby complaints...');
                 dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
                     .unwrap()
                     .then((nearbyComplaints) => {
-                        console.log('Nearby complaints fetched successfully:', nearbyComplaints);
-                        console.log('📊 [NEARBY COMPLAINTS SUMMARY]');
-                        console.log('Total nearby complaints found:', nearbyComplaints?.length || 0);
+                        // console.log('Nearby complaints fetched successfully:', nearbyComplaints);
+                        // console.log('📊 [NEARBY COMPLAINTS SUMMARY]');
+                        // console.log('Total nearby complaints found:', nearbyComplaints?.length || 0);
                         
                         // Log detailed information about each complaint
                         if (nearbyComplaints && nearbyComplaints.length > 0) {
-                            console.log('📋 [DETAILED COMPLAINTS LIST]');
+                            // console.log('📋 [DETAILED COMPLAINTS LIST]');
                             nearbyComplaints.forEach((complaint, index) => {
-                                console.log(`\n--- Complaint ${index + 1} ---`);
-                                console.log('ID:', complaint._id);
-                                console.log('Title:', complaint.title);
-                                console.log('Description:', complaint.description);
-                                console.log('Category:', complaint.category);
-                                console.log('Severity:', complaint.severity);
-                                console.log('Status:', complaint.status);
-                                console.log('Address:', complaint.address);
-                                console.log('Created At:', complaint.createdAt);
-                                console.log('Updated At:', complaint.updatedAt);
+                                // console.log(`\n--- Complaint ${index + 1} ---`);
+                                // console.log('ID:', complaint._id);
+                                // console.log('Title:', complaint.title);
+                                // console.log('Description:', complaint.description);
+                                // console.log('Category:', complaint.category);
+                                // console.log('Severity:', complaint.severity);
+                                // console.log('Status:', complaint.status);
+                                // console.log('Address:', complaint.address);
+                                // console.log('Created At:', complaint.createdAt);
+                                // console.log('Updated At:', complaint.updatedAt);
                                 if (complaint.location) {
                                     if (complaint.location.coordinates) {
-                                        console.log('Location (GeoJSON):', complaint.location);
-                                        console.log('Coordinates [lng, lat]:', complaint.location.coordinates);
+                                        // console.log('Location (GeoJSON):', complaint.location);
+                                        // console.log('Coordinates [lng, lat]:', complaint.location.coordinates);
                                     } else if (complaint.latitude && complaint.longitude) {
-                                        console.log('Location (Legacy):', { lat: complaint.latitude, lng: complaint.longitude });
+                                        // console.log('Location (Legacy):', { lat: complaint.latitude, lng: complaint.longitude });
                                     }
                                 }
                                 if (complaint.user_id) {
-                                    console.log('Reporter:', {
-                                        id: complaint.user_id._id || complaint.user_id,
-                                        name: complaint.user_id.name || 'Unknown',
-                                        email: complaint.user_id.email || 'Unknown'
-                                    });
+                                    // console.log('Reporter:', {
+                                        // id: complaint.user_id._id || complaint.user_id,
+                                        // name: complaint.user_id.name || 'Unknown',
+                                        // email: complaint.user_id.email || 'Unknown'
+                                    // });
                                 }
-                                console.log('Upvotes:', complaint.upvote || 0);
-                                console.log('Downvotes:', complaint.downvote || 0);
-                                console.log('Priority:', complaint.priority || 1);
-                                console.log('---');
+                                // console.log('Upvotes:', complaint.upvote || 0);
+                                // console.log('Downvotes:', complaint.downvote || 0);
+                                // console.log('Priority:', complaint.priority || 1);
+                                // console.log('---');
                             });
                             
-                            console.log('\n🔄 [PROCESSING] Starting to process complaints on map...');
+                            // console.log('\n🔄 [PROCESSING] Starting to process complaints on map...');
                             nearbyComplaints.forEach((complaint, index) => {
-                                console.log(`🗂️ [API] Processing nearby complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id);
+                                // console.log(`🗂️ [API] Processing nearby complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id);
                                 processNewComplaint(complaint);
                             });
                         } else {
-                            console.log('No nearby complaints found in the past 30 minutes');
+                            // console.log('No nearby complaints found in the past 30 minutes');
                         }
                     })
                     .catch((error) => {
@@ -941,7 +941,7 @@ export default function Home() {
                 
                 // Process any pending complaints that arrived before map was ready
                 if (window.pendingComplaints && window.pendingComplaints.length > 0) {
-                    console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
+                    // console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
                     window.pendingComplaints.forEach(complaint => {
                         processNewComplaint(complaint);
                     });

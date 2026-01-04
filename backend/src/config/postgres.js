@@ -12,13 +12,13 @@ export const pool = new Pool({
 
 pool.connect()
     .then(client => {
-        console.log("Connected to postgresql");
+        // console.log("Connected to postgresql");
         client.release();
     })
     .catch(err => console.error("PostgreSQL connection error: ", err));
 
 process.on("SIGINT", async () => {
     await pool.end();
-    console.log("PostgreSQL pool closed");
+    // console.log("PostgreSQL pool closed");
     process.exit(0);
 })

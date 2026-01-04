@@ -121,7 +121,7 @@ const UserHistory = () => {
         threshold: 0.1,
         onChange: (inView) => {
             if (inView && hasNextPage && !isFetchingNextPage) {
-                console.log('8th record visible, prefetching next page...');
+                // console.log('8th record visible, prefetching next page...');
                 fetchNextPage();
             }
         },

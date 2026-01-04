@@ -154,7 +154,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     // Schedule initial escalation (level 1 -> next level based on severity)
     try {
       await scheduleEscalation(complaint);
-      console.log(`Initial escalation scheduled for complaint ${complaint._id}`);
+      // console.log(`Initial escalation scheduled for complaint ${complaint._id}`);
     } catch (escalationError) {
       console.error("Error scheduling initial escalation:", escalationError);
       // Don't fail the complaint creation if escalation scheduling fails
@@ -484,9 +484,9 @@ const updateComplaintStatus = asyncHandler(async (req, res) => {
         try {
             const cancelResult = await cancelEscalation(complaintId);
             if (cancelResult.success) {
-                console.log(`✅ Escalation timer cancelled for ${status} complaint ${complaintId}`);
+                // console.log(`✅ Escalation timer cancelled for ${status} complaint ${complaintId}`);
             } else {
-                console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
+                // console.log(`⚠️ Could not cancel escalation: ${cancelResult.message}`);
             }
         } catch (escalationError) {
             console.error(`Error cancelling escalation for complaint ${complaintId}:`, escalationError);

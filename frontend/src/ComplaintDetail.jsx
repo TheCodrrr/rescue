@@ -100,7 +100,7 @@ export default function ComplaintDetail() {
         error,
         success 
     } = useSelector((state) => state.complaints);
-    console.log("The selected complaint is: ", selectedComplaint);
+    // console.log("The selected complaint is: ", selectedComplaint);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
     const [votingInProgress, setVotingInProgress] = useState({});
@@ -168,11 +168,11 @@ export default function ComplaintDetail() {
         socketRef.current.on('complaintAccepted', (data) => {
             const { complaint_id, officer_id, officer_name } = data;
             
-            console.log('ComplaintDetail received complaintAccepted:', complaint_id, 'current:', id);
+            // console.log('ComplaintDetail received complaintAccepted:', complaint_id, 'current:', id);
             
             // If this is the current complaint, refresh the data
             if (complaint_id === id) {
-                console.log('Match! Refreshing complaint data...');
+                // console.log('Match! Refreshing complaint data...');
                 
                 // Show appropriate toast
                 if (user.role === 'officer' && officer_id !== user._id) {
@@ -188,7 +188,7 @@ export default function ComplaintDetail() {
                 
                 // Refresh complaint to update UI immediately
                 dispatch(fetchComplaintById(id)).then(() => {
-                    console.log('Complaint data refreshed successfully');
+                    // console.log('Complaint data refreshed successfully');
                 });
             }
         });
@@ -199,7 +199,7 @@ export default function ComplaintDetail() {
             
             // If this is the current complaint and it was escalated, refresh the data
             if (complaint._id === id && escalated) {
-                console.log('ComplaintDetail: Current complaint was escalated, refreshing...');
+                // console.log('ComplaintDetail: Current complaint was escalated, refreshing...');
                 
                 toast.info(
                     `This complaint has been escalated from Level ${previousLevel} to Level ${level}`,
@@ -211,7 +211,7 @@ export default function ComplaintDetail() {
                 
                 // Refresh complaint to update UI immediately
                 dispatch(fetchComplaintById(id)).then(() => {
-                    console.log('Complaint data refreshed after escalation');
+                    // console.log('Complaint data refreshed after escalation');
                 });
             }
         });
@@ -1059,7 +1059,7 @@ export default function ComplaintDetail() {
 
             if (acceptComplaint.fulfilled.match(acceptResult)) {
                 // Officer accepted complaint - complaint stays at level 1
-                console.log('✅ Complaint accepted by officer:', id);
+                // console.log('✅ Complaint accepted by officer:', id);
                 
                 // Dismiss loading and show success
                 toast.dismiss(loadingToast);
@@ -1072,7 +1072,7 @@ export default function ComplaintDetail() {
                 // Refresh complaint details to show updated assigned_officer_id
                 dispatch(fetchComplaintById(id));
                 
-                console.log('✅ Complaint accepted:', id);
+                // console.log('✅ Complaint accepted:', id);
             } else {
                 toast.dismiss(loadingToast);
                 throw new Error(acceptResult.payload || 'Failed to accept complaint');
@@ -1103,7 +1103,7 @@ export default function ComplaintDetail() {
             duration: 2000,
             position: 'top-center',
         });
-        console.log('Complaint ignored (no action taken):', id);
+        // console.log('Complaint ignored (no action taken):', id);
     };
 
     const handleRejectComplaint = () => {
@@ -1151,7 +1151,7 @@ export default function ComplaintDetail() {
                 setRejectionReason('');
                 setComplaintIgnored(true);
                 
-                console.log('✅ Complaint rejected:', id);
+                // console.log('✅ Complaint rejected:', id);
             } else {
                 throw new Error(result.payload || 'Failed to reject complaint');
             }
@@ -1214,7 +1214,7 @@ export default function ComplaintDetail() {
                 // Refresh complaint details to show updated status
                 dispatch(fetchComplaintById(id));
                 
-                console.log('✅ Complaint resolved:', id);
+                // console.log('✅ Complaint resolved:', id);
             } else {
                 throw new Error(result.payload || 'Failed to resolve complaint');
             }
@@ -1459,14 +1459,14 @@ export default function ComplaintDetail() {
                             selectedComplaint.status !== 'rejected' &&
                             selectedComplaint.status !== 'resolved';
                         
-                        console.log('Button visibility check:', {
-                            isAuthenticated,
-                            role: user?.role,
-                            assigned_officer_id: selectedComplaint.assigned_officer_id,
-                            active: selectedComplaint.active,
-                            status: selectedComplaint.status,
-                            shouldShowButtons
-                        });
+                        // console.log('Button visibility check:', {
+                            // isAuthenticated,
+                            // role: user?.role,
+                            // assigned_officer_id: selectedComplaint.assigned_officer_id,
+                            // active: selectedComplaint.active,
+                            // status: selectedComplaint.status,
+                            // shouldShowButtons
+                        // });
                         
                         return shouldShowButtons;
                     })() && (

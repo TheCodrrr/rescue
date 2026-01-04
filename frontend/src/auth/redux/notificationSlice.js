@@ -19,11 +19,11 @@ export const fetchNotifications = createAsyncThunk(
                 return thunkAPI.rejectWithValue('Authentication required. Please log in.');
             }
 
-            console.log('Fetching user notifications...');
+            // console.log('Fetching user notifications...');
             
             const response = await axiosInstance.get('/users/notifications');
 
-            console.log("Notifications API response:", response.data);
+            // console.log("Notifications API response:", response.data);
             
             return response.data.data || [];
         } catch (error) {
@@ -53,11 +53,11 @@ export const deleteNotification = createAsyncThunk(
                 return thunkAPI.rejectWithValue('Authentication required. Please log in.');
             }
 
-            console.log(`Deleting notification at index: ${index}`);
+            // console.log(`Deleting notification at index: ${index}`);
             
             const response = await axiosInstance.delete(`/users/notifications/${index}`);
 
-            console.log("Delete notification API response:", response.data);
+            // console.log("Delete notification API response:", response.data);
             
             return { index, ...response.data };
         } catch (error) {

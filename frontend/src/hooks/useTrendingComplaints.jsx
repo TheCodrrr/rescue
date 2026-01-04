@@ -10,7 +10,7 @@ const fetchTrendingComplaints = async ({ pageParam }) => {
       }
     });
     
-    console.log("API Response:", data);
+    // console.log("API Response:", data);
     
     // Return the data in the expected format
     return {

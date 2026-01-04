@@ -667,7 +667,7 @@ const Analytics = () => {
                 }
             })
             .catch((err) => {
-                console.log("India map failed, trying world map:", err);
+                // console.log("India map failed, trying world map:", err);
                 // Fallback to world map if India map fails
                 d3.json(worldGeoJsonUrl)
                     .then(geoData => {
@@ -678,7 +678,7 @@ const Analytics = () => {
                         }
                     })
                     .catch((err2) => {
-                        console.log("World map also failed:", err2);
+                        // console.log("World map also failed:", err2);
                         // Render without map background - just show bubbles
                         loadingText.remove();
                         

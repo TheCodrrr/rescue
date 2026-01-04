@@ -112,18 +112,18 @@ const Navbar = () => {
 
     const handleSignup = useCallback(() => {
         navigate('/signup');
-        console.log('Signup clicked');
+        // console.log('Signup clicked');
     }, [navigate]);
 
     const handleSignOut = useCallback(() => {
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         dispatch(logout());
-        console.log('Sign out clicked');
+        // console.log('Sign out clicked');
     }, [dispatch]);
 
     const handleProfileClick = useCallback(() => {
         navigate("/user");
-        console.log('Profile clicked');
+        // console.log('Profile clicked');
     }, [navigate]);
 
     const toggleMobileMenu = useCallback(() => {

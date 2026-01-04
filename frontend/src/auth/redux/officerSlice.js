@@ -29,13 +29,13 @@ export const fetchNearbyComplaints = createAsyncThunk(
         return thunkAPI.rejectWithValue('Location coordinates are required');
       }
 
-      console.log(`Fetching nearby complaints for location: lat=${latitude}, lng=${longitude}`);
+      // console.log(`Fetching nearby complaints for location: lat=${latitude}, lng=${longitude}`);
       
       const response = await axiosInstance.get('/officer/nearby-complaints', {
         params: { latitude, longitude }
       });
 
-      console.log("Nearby complaints API response:", response.data);
+      // console.log("Nearby complaints API response:", response.data);
       
       return response.data;
     } catch (error) {
@@ -73,14 +73,14 @@ export const rejectComplaint = createAsyncThunk(
         return thunkAPI.rejectWithValue('Rejection reason is required');
       }
 
-      console.log(`Rejecting complaint: ${complaintId} with reason: ${reason}`);
+      // console.log(`Rejecting complaint: ${complaintId} with reason: ${reason}`);
       
       const response = await axiosInstance.post('/officer/reject-complaint', {
         complaintId,
         reason: reason.trim()
       });
 
-      console.log("Reject complaint API response:", response.data);
+      // console.log("Reject complaint API response:", response.data);
       
       return { complaintId, ...response.data };
     } catch (error) {
@@ -114,13 +114,13 @@ export const acceptComplaint = createAsyncThunk(
         return thunkAPI.rejectWithValue('Complaint ID and Officer ID are required');
       }
 
-      console.log(`Accepting complaint: ${complaintId} for officer: ${officerId}`);
+      // console.log(`Accepting complaint: ${complaintId} for officer: ${officerId}`);
       
       const response = await axiosInstance.put(
         `/officer/${officerId}/assign-complaint/${complaintId}`
       );
 
-      console.log("Accept complaint API response:", response.data);
+      // console.log("Accept complaint API response:", response.data);
       
       return { complaintId, ...response.data };
     } catch (error) {
@@ -154,7 +154,7 @@ export const addEscalationEvent = createAsyncThunk(
         return thunkAPI.rejectWithValue('Complaint ID is required');
       }
 
-      console.log(`Adding escalation event for complaint: ${complaintId}`);
+      // console.log(`Adding escalation event for complaint: ${complaintId}`);
       
       const response = await axiosInstance.patch(
         `/escalations/${complaintId}/add-event`,
@@ -165,7 +165,7 @@ export const addEscalationEvent = createAsyncThunk(
         }
       );
 
-      console.log("Add escalation event API response:", response.data);
+      // console.log("Add escalation event API response:", response.data);
       
       return { complaintId, ...response.data };
     } catch (error) {
@@ -199,14 +199,14 @@ export const resolveComplaint = createAsyncThunk(
         return thunkAPI.rejectWithValue('Complaint ID is required');
       }
 
-      console.log(`Resolving complaint: ${complaintId}`);
+      // console.log(`Resolving complaint: ${complaintId}`);
       
       const response = await axiosInstance.put(
         `/officer/resolve-complaint/${complaintId}`,
         { officer_notes: officerNotes || '' }
       );
 
-      console.log("Resolve complaint API response:", response.data);
+      // console.log("Resolve complaint API response:", response.data);
       
       return { complaintId, ...response.data };
     } catch (error) {
@@ -406,7 +406,7 @@ const officerSlice = createSlice({
       })
       .addCase(addEscalationEvent.fulfilled, (state, action) => {
         // Escalation event added successfully
-        console.log('Escalation event added:', action.payload);
+        // console.log('Escalation event added:', action.payload);
       })
       .addCase(addEscalationEvent.rejected, (state, action) => {
         state.error = action.payload || 'Failed to add escalation event';
@@ -418,7 +418,7 @@ const officerSlice = createSlice({
       })
       .addCase(resolveComplaint.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log('Complaint resolved:', action.payload);
+        // console.log('Complaint resolved:', action.payload);
       })
       .addCase(resolveComplaint.rejected, (state, action) => {
         state.isLoading = false;

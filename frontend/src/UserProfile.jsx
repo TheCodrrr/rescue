@@ -24,14 +24,14 @@ function UserProfile() {
     // If the pathname is not '/user', we shouldn't render this component
     useEffect(() => {
         if (location.pathname !== '/user') {
-            console.log("Not on /user route, pathname is:", location.pathname);
+            // console.log("Not on /user route, pathname is:", location.pathname);
             // Component will unmount naturally as router switches to the correct route
         }
     }, [location.pathname]);
     
     // Handle tab changes and update URL - memoized to prevent re-creation
     const handleSectionChange = useCallback((section) => {
-        console.log("Section change requested:", section);
+        // console.log("Section change requested:", section);
         if (section !== activeSection) {
             setActiveSection(section);
             setSearchParams({ tab: section });
@@ -63,10 +63,10 @@ function UserProfile() {
     
     // Load user data when component mounts - runs only once
     useEffect(() => {
-        console.log("UserProfile mounted. Auth state:", { isAuthenticated, loading, hasToken: !!localStorage.getItem("token") });
+        // console.log("UserProfile mounted. Auth state:", { isAuthenticated, loading, hasToken: !!localStorage.getItem("token") });
         
         if (!hasLoadedUser.current && localStorage.getItem("token") && !user) {
-            console.log("Loading user data...");
+            // console.log("Loading user data...");
             dispatch(loadUser());
             hasLoadedUser.current = true;
         }
@@ -76,17 +76,17 @@ function UserProfile() {
     useEffect(() => {
         const currentTab = searchParams.get('tab') || 'profile';
         if (currentTab !== activeSection) {
-            console.log("URL tab changed, updating activeSection:", currentTab);
+            // console.log("URL tab changed, updating activeSection:", currentTab);
             setActiveSection(currentTab);
         }
     }, [searchParams]); // Listen to searchParams changes
 
     // Handle authentication redirects
     useEffect(() => {
-        console.log("Auth effect triggered:", { isAuthenticated, loading });
+        // console.log("Auth effect triggered:", { isAuthenticated, loading });
         
         if (!loading && !isAuthenticated && !localStorage.getItem("token")) {
-            console.log("Not authenticated, redirecting to home...");
+            // console.log("Not authenticated, redirecting to home...");
             navigate('/');
         }
     }, [isAuthenticated, loading, navigate]);
@@ -94,12 +94,12 @@ function UserProfile() {
     // Cleanup function
     useEffect(() => {
         return () => {
-            console.log("UserProfile component unmounting");
+            // console.log("UserProfile component unmounting");
         };
     }, []);
     
     const handleBackToHome = useCallback(() => {
-        console.log("Back button clicked. Auth state:", { isAuthenticated, hasToken: !!localStorage.getItem("token") });
+        // console.log("Back button clicked. Auth state:", { isAuthenticated, hasToken: !!localStorage.getItem("token") });
         
         // Try to go back to previous page first, fallback to home routes
         if (window.history.length > 1) {

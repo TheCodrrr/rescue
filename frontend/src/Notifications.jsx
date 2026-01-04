@@ -43,7 +43,7 @@ const Notifications = () => {
                           import.meta.env.REACT_APP_SOCKET_URL || 
                           'http://localhost:5000';
 
-        console.log("🔌 Notifications connecting to socket:", socketURL);
+        // console.log("🔌 Notifications connecting to socket:", socketURL);
 
         socketRef.current = io(socketURL, {
             reconnection: true,
@@ -53,11 +53,11 @@ const Notifications = () => {
         });
 
         socketRef.current.on('connect', () => {
-            console.log('✅ Notifications socket connected:', socketRef.current.id);
+            // console.log('✅ Notifications socket connected:', socketRef.current.id);
         });
 
         socketRef.current.on('disconnect', (reason) => {
-            console.log('❌ Notifications socket disconnected:', reason);
+            // console.log('❌ Notifications socket disconnected:', reason);
         });
 
         socketRef.current.on('connect_error', (error) => {
@@ -66,10 +66,10 @@ const Notifications = () => {
 
         // Listen for notifications specific to this user
         const notificationEvent = `notification:${user._id}`;
-        console.log('👂 Listening for notifications on event:', notificationEvent);
+        // console.log('👂 Listening for notifications on event:', notificationEvent);
 
         socketRef.current.on(notificationEvent, (notificationData) => {
-            console.log('🔔 Received real-time notification:', notificationData);
+            // console.log('🔔 Received real-time notification:', notificationData);
             
             // Refresh notifications to get the latest from backend
             dispatch(fetchNotifications());
@@ -112,7 +112,7 @@ const Notifications = () => {
         // Cleanup on unmount
         return () => {
             if (socketRef.current) {
-                console.log('🔌 Disconnecting notifications socket');
+                // console.log('🔌 Disconnecting notifications socket');
                 socketRef.current.off(notificationEvent);
                 socketRef.current.disconnect();
             }
@@ -125,10 +125,10 @@ const Notifications = () => {
             const audio = new Audio('/notification-sound.mp3');
             audio.volume = 0.5;
             audio.play().catch(err => {
-                console.log('Could not play notification sound:', err);
+                // console.log('Could not play notification sound:', err);
             });
         } catch (error) {
-            console.log('Notification sound not available:', error);
+            // console.log('Notification sound not available:', error);
         }
     };
 

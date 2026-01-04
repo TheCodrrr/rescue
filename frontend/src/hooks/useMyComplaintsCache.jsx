@@ -50,7 +50,7 @@ const fetchMyComplaints = async ({ pageParam, category, searchTerm, isOfficer })
     
     const { data } = await axiosInstance.get(endpoint, { params });
     
-    console.log("My Complaints API Response:", data);
+    // console.log("My Complaints API Response:", data);
     
 
     return {
@@ -123,7 +123,7 @@ export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
       cacheInitialized.current = true;
       setIsUsingCache(true);
       
-      console.log("My Complaints cache initialized with", allComplaintIds.length, "complaints");
+      // console.log("My Complaints cache initialized with", allComplaintIds.length, "complaints");
       
       // Store in sessionStorage as backup
       sessionStorage.setItem(CACHE_KEY, JSON.stringify(allComplaintIds));
@@ -139,11 +139,11 @@ export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
   const recordInteraction = useCallback(() => {
     setInteractionCount(prev => {
       const newCount = prev + 1;
-      console.log(`My Complaints interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
+      // console.log(`My Complaints interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
       
       // Check if we've reached the threshold
       if (newCount >= INTERACTION_THRESHOLD) {
-        console.log("Interaction threshold reached! Cache will be cleared on next fetch.");
+        // console.log("Interaction threshold reached! Cache will be cleared on next fetch.");
       }
       
       return newCount;
@@ -152,7 +152,7 @@ export const useMyComplaintsCache = (category = 'all', searchTerm = '') => {
 
   // Function to clear cache and refetch
   const clearCacheAndRefetch = useCallback(() => {
-    console.log("Clearing My Complaints cache and refetching...");
+    // console.log("Clearing My Complaints cache and refetching...");
     
     // Clear cache refs
     cachedOrderRef.current = null;

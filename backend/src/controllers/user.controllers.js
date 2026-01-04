@@ -18,7 +18,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         const user = await User.findById(userId);
     
         if (!user) {
-            console.log(`The user with the id ${userId} was not found.`);
+            // console.log(`The user with the id ${userId} was not found.`);
             return;
         }
     
@@ -65,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
         if (!department_id || department_id.trim() === "") throw new ApiError(400, "Department is required for officer role");
     }
 
-    console.log("The req.body is:", req.body);
+    // console.log("The req.body is:", req.body);
 
     const existedUser = await User.findOne({
         $or: [{ email }, { phone: phone || null }],
@@ -138,7 +138,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         return res.status(201).json(new ApiResponse(200, createdUser, "User registered successfully"));
     } catch (error) {
-        console.log("User creation failed.");
+        // console.log("User creation failed.");
         console.error(error);
         throw new ApiError(500, "Something went wrong while registering a user.");
     }

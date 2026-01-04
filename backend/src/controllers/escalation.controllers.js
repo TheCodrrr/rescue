@@ -40,9 +40,9 @@ import { scheduleEscalation } from "../../utils/scheduleEscalation.js";
 // });
 
 const addEscalationEvent = asyncHandler(async (req, res) => {
-    console.log("🔄 Adding escalation event for complaint:", req.params.complaintId);
-    console.log("📝 Request body:", req.body);
-    console.log("👤 User:", { id: req.user._id, role: req.user.role });
+    // console.log("🔄 Adding escalation event for complaint:", req.params.complaintId);
+    // console.log("📝 Request body:", req.body);
+    // console.log("👤 User:", { id: req.user._id, role: req.user.role });
     
     const { complaintId } = req.params;
     let { from_level, to_level, reason } = req.body;
@@ -58,16 +58,16 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Complaint not found");
     }
 
-    console.log("📋 Current complaint level:", complaint.level);
+    // console.log("📋 Current complaint level:", complaint.level);
 
     const fromLevelValue = from_level ?? complaint.level;
     const toLevelValue = to_level ?? fromLevelValue + 1;
 
-    console.log("📊 Escalation levels:", { from: fromLevelValue, to: toLevelValue });
+    // console.log("📊 Escalation levels:", { from: fromLevelValue, to: toLevelValue });
 
     let escalation = await Escalation.findOne({ complaint: complaintId });
     if (!escalation) {
-      console.log("🆕 Creating new escalation document");
+      // console.log("🆕 Creating new escalation document");
       escalation = await Escalation.create({
         complaint: complaintId,
         history: [],
@@ -75,7 +75,7 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
 
       complaint.escalation_id = escalation._id;
     } else {
-      console.log("📝 Found existing escalation:", escalation._id);
+      // console.log("📝 Found existing escalation:", escalation._id);
     }
 
     escalation.history.push({
@@ -86,16 +86,16 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
     })
 
     await escalation.save();
-    console.log("✅ Escalation saved");
+    // console.log("✅ Escalation saved");
 
     complaint.level = toLevelValue;
     await complaint.save();
-    console.log("✅ Complaint level updated to:", complaint.level);
+    // console.log("✅ Complaint level updated to:", complaint.level);
 
     // Reschedule escalation timer with new level
     try {
       await scheduleEscalation(complaint);
-      console.log(`🔄 Rescheduled escalation timer for complaint ${complaintId} at level ${toLevelValue}`);
+      // console.log(`🔄 Rescheduled escalation timer for complaint ${complaintId} at level ${toLevelValue}`);
     } catch (escalationError) {
       console.error("⚠️ Failed to reschedule escalation:", escalationError);
       // Continue even if scheduling fails - don't break the escalation event
@@ -121,7 +121,7 @@ const addEscalationEvent = asyncHandler(async (req, res) => {
       
       // Emit real-time notification to the specific user
       io.emit(`notification:${userId}`, notificationData);
-      console.log(`🔔 Notification emitted to user ${userId} via Socket.io`);
+      // console.log(`🔔 Notification emitted to user ${userId} via Socket.io`);
     } catch (redisError) {
       console.error("⚠️ Failed to store notification in Redis:", redisError);
       // Continue even if Redis fails - don't break the escalation

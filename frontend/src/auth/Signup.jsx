@@ -84,7 +84,7 @@ export default function Signup() {
                 if (response.data && response.data.data) {
                     setAllDepartments(response.data.data);
                     hasFetchedDepartments.current = true;
-                    console.log('✅ All departments fetched and cached:', response.data.data.length);
+                    // console.log('✅ All departments fetched and cached:', response.data.data.length);
                 }
             } catch (error) {
                 console.error('❌ Error fetching departments:', error);
@@ -126,7 +126,7 @@ export default function Signup() {
 
                 setDepartmentsByCategory(categorizedDepts);
                 hasPrefetchedCategories.current = true;
-                console.log('✅ Departments by category prefetched and cached');
+                // console.log('✅ Departments by category prefetched and cached');
             } catch (error) {
                 console.error('❌ Error prefetching departments by category:', error);
             } finally {

@@ -30,7 +30,7 @@ export const fetchUserHistory = createAsyncThunk(
             params.append('sort', filters.sortOrder || 'desc');
             params.append('limit', '50');
 
-            console.log('Fetching history with params:', params.toString());
+            // console.log('Fetching history with params:', params.toString());
             const response = await axiosInstance.get(`/history?${params.toString()}`);
             
             if (response.data && response.data.histories) {
@@ -50,7 +50,7 @@ export const addHistoryEntry = createAsyncThunk(
     'history/addHistoryEntry',
     async (historyData, thunkAPI) => {
         try {
-            console.log('Adding history entry:', historyData);
+            // console.log('Adding history entry:', historyData);
             const response = await axiosInstance.post('/history', historyData);
             return response.data.history;
         } catch (error) {

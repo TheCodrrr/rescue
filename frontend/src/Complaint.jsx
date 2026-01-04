@@ -575,7 +575,7 @@ export default function Complaint() {
             })
         };
         
-        console.log("Complaint data being submitted:", complaintData);
+        // console.log("Complaint data being submitted:", complaintData);
         
         try {
             const result = await dispatch(submitComplaint(complaintData)).unwrap();
@@ -583,7 +583,7 @@ export default function Complaint() {
             
             // Upload evidence files if any
             if (formData.evidenceFiles && formData.evidenceFiles.length > 0) {
-                console.log("Uploading evidence files for complaint:", createdComplaint._id);
+                // console.log("Uploading evidence files for complaint:", createdComplaint._id);
                 
                 for (const file of formData.evidenceFiles) {
                     try {
@@ -602,7 +602,7 @@ export default function Complaint() {
                     }
                 }
                 
-                console.log("All evidence files uploaded successfully");
+                // console.log("All evidence files uploaded successfully");
             }
         } catch (err) {
             // Error handling is done in useEffect

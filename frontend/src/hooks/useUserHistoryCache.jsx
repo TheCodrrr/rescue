@@ -25,7 +25,7 @@ const fetchUserHistory = async ({ pageParam, userId, filters }) => {
 
     const { data } = await axiosInstance.get("/history", { params });
     
-    console.log("User History API Response:", data);
+    // console.log("User History API Response:", data);
     
     return {
       histories: data.histories || [],
@@ -82,7 +82,7 @@ export const useUserHistoryCache = (userId, filters = {}) => {
         });
       });
       
-      console.log("History cache initialized with", allHistoryIds.length, "records");
+      // console.log("History cache initialized with", allHistoryIds.length, "records");
       
       // Store in sessionStorage as backup
       sessionStorage.setItem(CACHE_KEY, JSON.stringify(allHistoryIds));
@@ -98,11 +98,11 @@ export const useUserHistoryCache = (userId, filters = {}) => {
   const recordInteraction = useCallback(() => {
     setInteractionCount(prev => {
       const newCount = prev + 1;
-      console.log(`History interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
+      // console.log(`History interaction recorded: ${newCount}/${INTERACTION_THRESHOLD}`);
       
       // Check if we've reached the threshold
       if (newCount >= INTERACTION_THRESHOLD) {
-        console.log("Interaction threshold reached! Clearing cache and refetching...");
+        // console.log("Interaction threshold reached! Clearing cache and refetching...");
         
         // Clear the cache and refetch
         queryClient.invalidateQueries({ queryKey: ["userHistory", userId] });
@@ -118,7 +118,7 @@ export const useUserHistoryCache = (userId, filters = {}) => {
 
   // Function to manually clear cache and refetch
   const clearCacheAndRefetch = useCallback(() => {
-    console.log("Manually clearing history cache and refetching...");
+    // console.log("Manually clearing history cache and refetching...");
     
     // Clear session storage
     sessionStorage.removeItem(CACHE_KEY);

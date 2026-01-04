@@ -17,6 +17,6 @@ export const calculateTrendingScore = (complaint) => {
     const maxScore = 1; // adjust based on your expected scale
     const normalized = Math.min((score / maxScore) * 25, 25);
 
-    console.log("Trending score:", normalized);
+    // console.log("Trending score:", normalized);
     return normalized;
 };

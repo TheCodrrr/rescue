@@ -609,9 +609,9 @@ function UserProfileContent({ activeSection, contentRef }) {
                             src={userData.profileImage}
                             alt={userData.name}
                             className="user-profile-main-avatar"
-                            onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
+                            // onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
                             onError={(e) => {
-                                console.log("Profile image failed to load:", userData.profileImage);
+                                // console.log("Profile image failed to load:", userData.profileImage);
                                 e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
                             }}
                         /> */}
@@ -620,9 +620,9 @@ function UserProfileContent({ activeSection, contentRef }) {
                             src={userData.profileImage}
                             alt={userData.name}
                             className="user-profile-main-avatar"
-                            onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
+                            // onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
                             onError={(e) => {
-                                console.log("Profile image failed to load:", userData.profileImage);
+                                // console.log("Profile image failed to load:", userData.profileImage);
                                 e.target.src = userData.profileImage.includes("cloudinary")
                                 ? userData.profileImage.replace("/upload/", "/upload/w_20,q_10,e_blur:1000/")
                                 : "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
