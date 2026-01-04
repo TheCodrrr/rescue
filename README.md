@@ -172,6 +172,16 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Department-based Filtering**
 - ✅ **Level-based Access Control**
 - ✅ **Complaint History** for assigned cases
+- ✅ **Officer Dashboard** - Command center with stats overview
+- ✅ **Officer Cases Management** - Filter by status (all, pending, in-progress, resolved)
+- ✅ **Officer Escalations View** - Track high-priority escalated complaints
+- ✅ **Officer Analytics Dashboard** - Case trends, response times, resolution rates
+- ✅ **Officer Reports** - Generate reports with date range filtering
+- ✅ **Officer Department View** - Department analytics with Chart.js/D3.js visualizations
+- ✅ **Interactive Complaint Maps** - Leaflet maps showing officer location and nearby complaints
+- ✅ **Complaint Card Map** - Visual connection between officer and complaint locations
+- ✅ **Severity-colored Markers** - Color-coded complaint pins (green: low, yellow: medium, red: high)
+- ✅ **Distance Calculation Display** - Show distance to each complaint using Haversine formula
 
 ### 8. **Escalation System**
 - ✅ **Multi-level Escalation** (Level 1 to Level 5)
@@ -189,6 +199,12 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Auto-close** complaints after maximum escalation level
 - ✅ **Job Scheduling & Cancellation** on officer action
 - ✅ **Complaint Reactivation** on auto-escalation for new officer assignment
+- ✅ **Escalation Badge Component** - Visual badge showing escalation level
+- ✅ **Live Countdown Timer** - Real-time countdown until next escalation
+- ✅ **Progress Bar** - Visual progress towards next escalation level
+- ✅ **Overdue Indicators** - Alert when escalation time has passed
+- ✅ **Multiple Badge Sizes** - Small, medium, large badge variants
+- ✅ **Compact Badge** - Minimal version for list views
 
 ### 9. **Incident Reporting**
 - ✅ **Quick Incident Reports** for emergencies
@@ -245,6 +261,12 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Evidence Deletion** with authorization checks
 - ✅ **Redux State Management** for evidence operations
 - ✅ **Cloudinary Integration** for secure storage
+- ✅ **Complaint Progress Component** (625 lines) - Full evidence management UI
+- ✅ **Tabbed Interface** - View/Upload tabs for evidence
+- ✅ **Evidence Type Selection** - Categorize uploads by type
+- ✅ **Preview Modal** - View evidence files in overlay
+- ✅ **File Type Icons** - Different icons for images, videos, audio, documents
+- ✅ **Upload Progress** - Visual feedback during file upload
 
 ### 14. **Guidance System**
 - ✅ **User-contributed Guidance** for complaint categories
@@ -252,6 +274,31 @@ A comprehensive, real-time complaint management and incident reporting platform 
 - ✅ **Guidance Verification** by officers/admins
 - ✅ **Verified Badge** for trusted guidance
 - ✅ **Create, Read, Update, Delete** operations
+
+### 15. **Team Management System**
+- ✅ **Create Teams** with category-based grouping
+- ✅ **Team Head Assignment** (officer who creates is head)
+- ✅ **Member Management** - Add/remove officers from teams
+- ✅ **Complaint Assignment to Teams** - Assign complaints to entire teams
+- ✅ **Team Level Calculation** - Average of all member levels
+- ✅ **Category Validation** - Officers can only join teams of their category
+- ✅ **Department Association** - Teams linked to departments
+- ✅ **Team Details Aggregation** - Deep populated team information
+- ✅ **Category-based Team Search** - Find teams by category
+- ✅ **Team CRUD Operations** - Full create, read, update, delete support
+- ✅ **Officer Teams UI** - Full-featured team management interface (929 lines)
+- ✅ **Member Selection Modal** - Add officers with pagination
+- ✅ **Complaint Assignment Modal** - Assign available complaints to teams
+
+### 16. **Help & Support System**
+- ✅ **FAQ System** with categorized questions
+- ✅ **Category-based FAQ Filtering** (getting-started, complaints, features, security)
+- ✅ **Searchable Help Articles**
+- ✅ **Interactive Accordion UI** for FAQ items
+- ✅ **Contact Information Display**
+- ✅ **Video Tutorial Links** (planned)
+- ✅ **Quick Start Guides**
+- ✅ **Responsive Help Layout**
 ### 16. **User Profile & History**
 - ✅ **User Profile Page** with stats
 - ✅ **Profile Image Update**
@@ -338,12 +385,20 @@ A comprehensive, real-time complaint management and incident reporting platform 
 ##### **Frontend Caching (Session Storage)**
 - ✅ **Trending Complaints Cache** with interaction-based invalidation
 - ✅ **My Complaints Cache** per category
+- ✅ **User History Cache** for activity tracking
 - ✅ **Interaction Threshold** (50 interactions before cache clear)
 - ✅ **Cache Order Preservation** with vote count updates
 - ✅ **Cached Order Reference** (useRef) for performance
 - ✅ **Redux Integration** for real-time data merging
 - ✅ **Session-based Cache Persistence**
 - ✅ **Manual Cache Invalidation** option
+
+##### **Custom React Hooks**
+- ✅ **useGeolocation** - Browser geolocation tracking
+- ✅ **useTrendingComplaints** - Fetch and manage trending complaints
+- ✅ **useTrendingComplaintsCache** - Cache management for trending
+- ✅ **useMyComplaintsCache** - User complaints caching
+- ✅ **useUserHistoryCache** - Activity history caching
 
 ##### **Backend Caching (Redis)**
 - ✅ **Department Data Caching** for faster officer signup
@@ -360,6 +415,11 @@ A comprehensive, real-time complaint management and incident reporting platform 
   - `authSlice` - Authentication state
   - `complaintSlice` - Complaints data
   - `notificationSlice` - Notifications
+  - `evidenceSlice` - Evidence management
+  - `officerSlice` - Officer-specific state & nearby complaints
+  - `historySlice` - User activity history tracking
+  - `departmentSlice` - Department data
+  - `analyticsSlice` - Analytics data
 - ✅ **Redux Thunks** for async operations
 - ✅ **Redux Persist** for local storage
 - ✅ **Normalized State Structure**
@@ -810,6 +870,21 @@ http://localhost:5000/api/v1
 | GET | `/guidance/category/:categoryId` | Get guidance by category | ❌ |
 | PATCH | `/guidance/:guidanceId/verify` | Verify guidance (officer/admin) | ✅ (Officer/Admin) |
 | DELETE | `/guidance/:guidanceId` | Delete guidance | ✅ |
+
+### **Team Endpoints**
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/team` | Create a new team | ✅ (Officer) |
+| PUT | `/team/:teamId` | Update team details | ✅ (Officer) |
+| GET | `/team/:teamId` | Get team by ID (populated) | ✅ |
+| DELETE | `/team/:teamId` | Delete a team | ✅ (Officer) |
+| POST | `/team/:teamId/add-member` | Add officer to team | ✅ (Officer) |
+| POST | `/team/:teamId/remove-member` | Remove officer from team | ✅ (Officer) |
+| POST | `/team/:teamId/add-complaint` | Assign complaint to team | ✅ (Officer) |
+| POST | `/team/:teamId/remove-complaint` | Remove complaint from team | ✅ (Officer) |
+| GET | `/team/:teamId/details` | Get deep team details (aggregation) | ✅ |
+| GET | `/team/:category/category` | Get teams by category | ✅ |
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | POST | `/escalations/:complaintId` | Add escalation event | ✅ (Officer/Admin) |
@@ -876,6 +951,19 @@ const calculateTrendingScore = (complaint) => {
     
     return score;
 };
+```
+
+### **2. Team Level Calculation**
+```javascript
+// backend/controllers/team.controllers.js
+// Team level is calculated as average of all member levels (head + members)
+const levels = [
+    creator.user_level,
+    ...officers.map(o => o.user_level)
+];
+
+const teamLevel = levels.reduce((sum, lvl) => sum + lvl, 0) / levels.length;
+const finalTeamLevel = Math.round(teamLevel * 100) / 100; // Round to 2 decimal places
 ```
 
 ### **2. Interaction-based Cache Invalidation**
