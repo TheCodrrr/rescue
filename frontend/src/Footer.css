@@ -114,6 +114,7 @@
     display: inline-block;
     vertical-align: middle;
     margin-right: 0.5rem;
+    color: var(--color3);
     filter: drop-shadow(0 0 8px rgba(0, 173, 181, 0.4));
 }
 
