@@ -175,6 +175,11 @@ function UserProfileContent({ activeSection, contentRef }) {
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
     
+    // Log user details when component loads
+    useEffect(() => {
+        console.log('UserProfileContent loaded - User details:', user);
+    }, [user]);
+    
     // Reset scroll position when activeSection changes
     useEffect(() => {
         if (contentRef && contentRef.current) {
@@ -561,11 +566,29 @@ function UserProfileContent({ activeSection, contentRef }) {
         setPasswordSuccess('');
     };
     
+    // Temporary blur functions for privacy
+    const blurEmail = (email) => {
+        if (!email || email === "No email provided") return email;
+        const [localPart, domain] = email.split('@');
+        if (!domain) return email;
+        const blurredLocal = localPart.length > 2 
+            ? localPart[0] + '*'.repeat(localPart.length - 2) + localPart[localPart.length - 1]
+            : '*'.repeat(localPart.length);
+        return `${blurredLocal}@${domain}`;
+    };
+    
+    const blurPhone = (phone) => {
+        if (!phone || phone === "No phone provided") return phone;
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length < 4) return '*'.repeat(phone.length);
+        return phone.slice(0, -4).replace(/\d/g, '*') + phone.slice(-4);
+    };
+    
     // Use real user data from Redux or fallback to defaults
     const userData = user ? {
         name: user.name || "Unknown User",
-        email: user.email || "No email provided",
-        phone: user.phone || "No phone provided",
+        email: blurEmail(user.email) || "No email provided",
+        phone: blurPhone(user.phone) || "No phone provided",
         role: user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "User",
         location: user.address || user.location || "Address not specified",
         joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
@@ -575,8 +598,8 @@ function UserProfileContent({ activeSection, contentRef }) {
         profileImage: user.profileImage ? 
             `${user.profileImage}${user.profileImage.includes('?') ? '&' : '?'}v=${imageRefreshKey}&t=${Date.now()}` : 
             "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
-        department: user.department || "Emergency Response Team",
-        badgeNumber: user.badgeNumber || `${user.role?.toUpperCase() || 'USER'}-${new Date(user.createdAt || Date.now()).getFullYear()}-${user._id?.slice(-3) || '001'}`,
+        department: user.department_id?.name || null,
+        userLevel: user.user_level,
         clearanceLevel: user.user_level !== undefined 
             ? (user.user_level === 0 ? 'Basic Level' : `Level ${user.user_level}`)
             : (user.role === 'admin' ? 'Level 5' : user.role === 'officer' ? 'Level 3' : 'Basic Level'),
@@ -592,8 +615,8 @@ function UserProfileContent({ activeSection, contentRef }) {
         location: "Loading...",
         joinDate: "Loading...",
         profileImage: "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png",
-        department: "Loading...",
-        badgeNumber: "Loading...",
+        department: null,
+        userLevel: undefined,
         clearanceLevel: "Loading...",
         clearanceLevelDescription: "Loading...",
         coordinates: null
@@ -668,12 +691,16 @@ function UserProfileContent({ activeSection, contentRef }) {
                             <p className="profile-role">
                                 {userData.role}
                             </p>
-                            <p className="profile-department">
-                                {userData.department}
-                            </p>
-                            <p className="profile-badge">
-                                Badge: {userData.badgeNumber}
-                            </p>
+                            {user?.role === 'officer' && userData.department && (
+                                <p className="profile-department">
+                                    {userData.department}
+                                </p>
+                            )}
+                            {user?.role === 'officer' && userData.userLevel !== undefined && (
+                                <p className="profile-badge">
+                                    Level {userData.userLevel}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -973,12 +1000,16 @@ function UserProfileContent({ activeSection, contentRef }) {
         <Analytics />
     );
 
+    const renderMyComplaintsContent = () => (
+        <MyComplaints />
+    );
+
     const renderContent = () => {
         switch (activeSection) {
             case 'profile':
                 return renderProfileContent();
             case 'my-complaint':
-                return <MyComplaints />;
+                return renderMyComplaintsContent();
             case 'analytics':
                 return renderAnalyticsContent();
             case 'settings':
