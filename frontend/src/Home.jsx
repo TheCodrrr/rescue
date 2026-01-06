@@ -576,18 +576,11 @@ export default function Home() {
     }, []); // Run only once on mount
 
     useEffect(() => {
-        // console.log("Home component - checking authentication");
         const token = localStorage.getItem("token");
-        // console.log("Token exists:", !!token);
-        // console.log("Current user:", user);
-        // console.log("isAuthenticated:", isAuthenticated);
-        // console.log("Loading:", loading);
-        // console.log("Has loaded user:", hasLoadedUser.current);
         
-        // Always try to load user data if we have a token and haven't loaded yet
-        // This ensures user data is loaded/refreshed on every page reload
-        if (token && !loading && !hasLoadedUser.current) {
-            // console.log("Token found, loading/refreshing user data...");
+        // Only load user if we have a token, user isn't loaded yet, and we haven't tried loading
+        // Remove 'loading' from the condition to prevent re-triggering during load
+        if (token && !user && !hasLoadedUser.current) {
             hasLoadedUser.current = true;
             dispatch(loadUser())
                 .unwrap()
@@ -602,10 +595,9 @@ export default function Home() {
                     localStorage.removeItem('isLoggedIn');
                 });
         } else if (!token) {
-            // console.log("No token found, user not authenticated");
             hasLoadedUser.current = false; // Reset
         }
-    }, [dispatch, user, loading, isAuthenticated]);
+    }, [dispatch, user]); // Removed 'loading' and 'isAuthenticated' to prevent re-triggers
 
     // Periodic refresh of nearby complaints every 5 minutes
     useEffect(() => {
