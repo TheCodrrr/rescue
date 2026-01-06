@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./Home.css";
 import "leaflet/dist/leaflet.css";
+import * as L from "leaflet"; // Pre-load and cache Leaflet
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadUser, loginSuccess, logout } from "./auth/redux/authSlice";
@@ -73,6 +74,8 @@ export default function Home() {
 
     const socketRef = useRef(null);
     const incidentMarkersRef = useRef([]);
+    const mapContainerRef = useRef(null); // Ref for map container instead of getElementById
+    const leafletRef = useRef(L); // Cache Leaflet reference
 
     // Function to request location permission with faster timeout
     const requestLocationPermission = () => {
@@ -661,17 +664,15 @@ export default function Home() {
     }, [isMapActive]);
 
     // Map initialization useEffect - runs when userLocation is available
+    // OPTIMIZED: Deferred rendering, cached Leaflet, ref-based DOM access, lazy complaints fetch
     useEffect(() => {
         if (!userLocation) {
-            // console.log("User location not available yet, skipping map initialization");
             return;
         }
 
-        // console.log("Initializing map with user location:", userLocation);
-        
         let map;
-        let incidentMarkers = [];
         let userLocationMarker;
+        let isMounted = true; // Track if component is still mounted
         
         const incidentTypes = [
             { type: 'rail', icon: '🚂', color: '#f59e0b' },
@@ -681,18 +682,33 @@ export default function Home() {
             { type: 'court', icon: '⚖️', color: '#10b981' }
         ];
 
-        const loadMap = async () => {
+        // Calculate distance between two coordinates (hoisted for reuse)
+        const calculateDistance = (lat1, lng1, lat2, lng2) => {
+            const R = 6371; // Radius of the Earth in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        };
+
+        const loadMap = () => {
+            if (!isMounted) return;
+            
             try {
-                const L = await import("leaflet");
-                const mapElement = document.getElementById("live-map");
+                // Use cached Leaflet reference instead of dynamic import
+                const L = leafletRef.current;
+                
+                // Use ref instead of getElementById
+                const mapElement = mapContainerRef.current;
                 if (!mapElement) {
-                    // console.log("Map element not found, retrying...");
                     return;
                 }
 
                 // Clean up existing map if any
                 if (mapRef.current) {
-                    // console.log("Cleaning up existing map...");
                     if (mapRef.current._incidentInterval) {
                         clearInterval(mapRef.current._incidentInterval);
                     }
@@ -700,43 +716,34 @@ export default function Home() {
                     mapRef.current = null;
                 }
                 
-                // Initialize map with user's location
-                map = L.map("live-map", {
-                    scrollWheelZoom: false, // Disable scroll wheel zoom by default
-                    doubleClickZoom: false, // Disable double click zoom when inactive
-                    touchZoom: false, // Disable touch zoom when inactive
-                    dragging: true, // Keep dragging enabled
-                    zoomControl: true // Enable zoom control buttons
+                // Initialize map with user's location - lightweight init first
+                map = L.map(mapElement, {
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    touchZoom: false,
+                    dragging: true,
+                    zoomControl: true,
+                    preferCanvas: true // Better performance for many markers
                 }).setView([userLocation.lat, userLocation.lng], 13);
                 mapRef.current = map;
                 
-                // Force initial size calculation
-                setTimeout(() => {
-                    if (map) {
-                        map.invalidateSize();
-                        // console.log('🗺️ Map size invalidated after initialization');
-                    }
-                }, 100);
-                
+                // Add tile layer
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19
                 }).addTo(map);
 
-                // Add click handler to deactivate map when clicking on empty space
+                // Add click handler to deactivate map
                 map.on('click', function(e) {
-                    // Only deactivate if map is active and click is not on a marker
                     const clickedElement = e.originalEvent.target;
                     const isMarkerClick = clickedElement.closest('.leaflet-marker-icon') || 
                                          clickedElement.closest('.leaflet-popup');
-                    
                     if (!isMarkerClick) {
                         setIsMapActive(false);
                     }
                 });
 
-                // (Reverted) No additional whenReady/resize logic
-                // Add user location marker
+                // Add lightweight user location marker first (skip incidents initially)
                 const userMarkerHtml = `
                     <div class="user-location-marker">
                         <div class="user-pulse"></div>
@@ -767,9 +774,10 @@ export default function Home() {
                         <p><strong>Location Accuracy:</strong> ${locationPermission === 'granted' ? 'High' : 'Approximate'}</p>
                     </div>`;
 
-                userLocationMarker.bindPopup(userPopupContent).openPopup();
+                // Bind popup but DON'T auto-open (removes layout work on landing)
+                userLocationMarker.bindPopup(userPopupContent);
 
-                // Create animated markers for incidents
+                // Create incident marker function (for later use)
                 const createIncidentMarker = (incident, type, isRealComplaint = false) => {
                     const markerHtml = `
                         <div class="incident-marker ${type.type}-marker ${isRealComplaint ? 'real-complaint' : ''}">
@@ -789,12 +797,9 @@ export default function Home() {
 
                     const distance = calculateDistance(userLocation.lat, userLocation.lng, incident.lat, incident.lng);
 
-                    // Create different popup content for real complaints vs simulated ones
                     let popupContent;
                     if (isRealComplaint) {
-                        // More detailed popup for real complaints
-                        const reportedTime = incident.timestamp.toLocaleString();
-                        const timeDiff = Math.floor((new Date() - incident.timestamp) / (1000 * 60)); // minutes ago
+                        const timeDiff = Math.floor((new Date() - incident.timestamp) / (1000 * 60));
                         const timeAgo = timeDiff < 1 ? 'Just now' : timeDiff < 60 ? `${timeDiff}m ago` : `${Math.floor(timeDiff / 60)}h ago`;
                         
                         popupContent = `
@@ -806,7 +811,7 @@ export default function Home() {
                                 
                                 <div class="popup-content">
                                     <div class="complaint-details">
-                                        <p><strong>� Category:</strong> ${incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}</p>
+                                        <p><strong>📂 Category:</strong> ${incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}</p>
                                         <p><strong>📝 Description:</strong> ${incident.description}</p>
                                         <p><strong>🎯 Severity:</strong> <span class="severity-${incident.severity}">${incident.severity.toUpperCase()}</span></p>
                                         <p><strong>📊 Status:</strong> <span class="status-${incident.status}">${incident.status.replace('_', ' ').toUpperCase()}</span></p>
@@ -857,95 +862,60 @@ export default function Home() {
                     }
 
                     marker.bindPopup(popupContent);
-
                     return marker;
                 };
 
-                // Calculate distance between two coordinates
-                const calculateDistance = (lat1, lng1, lat2, lng2) => {
-                    const R = 6371; // Radius of the Earth in km
-                    const dLat = (lat2 - lat1) * Math.PI / 180;
-                    const dLng = (lng2 - lng1) * Math.PI / 180;
-                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    return R * c;
-                };
-
-                // Store reference to createIncidentMarker function for use in socket listener
+                // Store references for socket listener
                 window.createIncidentMarkerRef = createIncidentMarker;
-                
-                // Store reference to calculateDistance function for use in socket listener  
                 window.calculateDistanceRef = calculateDistance;
 
-                // console.log('Map loaded successfully with user location:', userLocation);
+                // Mark map as ready BEFORE fetching complaints (non-blocking)
                 setMapReady(true);
                 
-                // Fetch nearby complaints from the past 30 minutes
-                // console.log('Fetching nearby complaints...');
-                dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
-                    .unwrap()
-                    .then((nearbyComplaints) => {
-                        // console.log('Nearby complaints fetched successfully:', nearbyComplaints);
-                        // console.log('📊 [NEARBY COMPLAINTS SUMMARY]');
-                        // console.log('Total nearby complaints found:', nearbyComplaints?.length || 0);
-                        
-                        // Log detailed information about each complaint
-                        if (nearbyComplaints && nearbyComplaints.length > 0) {
-                            // console.log('📋 [DETAILED COMPLAINTS LIST]');
-                            nearbyComplaints.forEach((complaint, index) => {
-                                // console.log(`\n--- Complaint ${index + 1} ---`);
-                                // console.log('ID:', complaint._id);
-                                // console.log('Title:', complaint.title);
-                                // console.log('Description:', complaint.description);
-                                // console.log('Category:', complaint.category);
-                                // console.log('Severity:', complaint.severity);
-                                // console.log('Status:', complaint.status);
-                                // console.log('Address:', complaint.address);
-                                // console.log('Created At:', complaint.createdAt);
-                                // console.log('Updated At:', complaint.updatedAt);
-                                if (complaint.location) {
-                                    if (complaint.location.coordinates) {
-                                        // console.log('Location (GeoJSON):', complaint.location);
-                                        // console.log('Coordinates [lng, lat]:', complaint.location.coordinates);
-                                    } else if (complaint.latitude && complaint.longitude) {
-                                        // console.log('Location (Legacy):', { lat: complaint.latitude, lng: complaint.longitude });
-                                    }
-                                }
-                                if (complaint.user_id) {
-                                    // console.log('Reporter:', {
-                                        // id: complaint.user_id._id || complaint.user_id,
-                                        // name: complaint.user_id.name || 'Unknown',
-                                        // email: complaint.user_id.email || 'Unknown'
-                                    // });
-                                }
-                                // console.log('Upvotes:', complaint.upvote || 0);
-                                // console.log('Downvotes:', complaint.downvote || 0);
-                                // console.log('Priority:', complaint.priority || 1);
-                                // console.log('---');
-                            });
-                            
-                            // console.log('\n🔄 [PROCESSING] Starting to process complaints on map...');
-                            nearbyComplaints.forEach((complaint, index) => {
-                                // console.log(`🗂️ [API] Processing nearby complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id);
-                                processNewComplaint(complaint);
-                            });
-                        } else {
-                            // console.log('No nearby complaints found in the past 30 minutes');
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Failed to fetch nearby complaints:', error);
-                    });
+                // Force size calculation after initial render
+                requestAnimationFrame(() => {
+                    if (map && isMounted) {
+                        map.invalidateSize();
+                    }
+                });
                 
-                // Process any pending complaints that arrived before map was ready
+                // LAZY FETCH: Load complaints in separate async flow (non-blocking)
+                const fetchComplaintsLazy = async () => {
+                    if (!isMounted) return;
+                    
+                    try {
+                        const nearbyComplaints = await dispatch(getNearbyComplaints({ 
+                            latitude: userLocation.lat, 
+                            longitude: userLocation.lng 
+                        })).unwrap();
+                        
+                        if (!isMounted) return;
+                        
+                        if (nearbyComplaints && nearbyComplaints.length > 0) {
+                            // Process complaints in batches to avoid blocking
+                            const batchSize = 5;
+                            for (let i = 0; i < nearbyComplaints.length; i += batchSize) {
+                                if (!isMounted) break;
+                                const batch = nearbyComplaints.slice(i, i + batchSize);
+                                batch.forEach(complaint => processNewComplaint(complaint));
+                                // Yield to main thread between batches
+                                if (i + batchSize < nearbyComplaints.length) {
+                                    await new Promise(resolve => setTimeout(resolve, 0));
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch nearby complaints:', error);
+                    }
+                };
+                
+                // Defer complaints fetch to after map is visible
+                requestIdleCallback ? requestIdleCallback(fetchComplaintsLazy) : setTimeout(fetchComplaintsLazy, 100);
+                
+                // Process any pending complaints
                 if (window.pendingComplaints && window.pendingComplaints.length > 0) {
-                    // console.log(`Processing ${window.pendingComplaints.length} pending complaints...`);
-                    window.pendingComplaints.forEach(complaint => {
-                        processNewComplaint(complaint);
-                    });
-                    window.pendingComplaints = []; // Clear the pending complaints
+                    window.pendingComplaints.forEach(complaint => processNewComplaint(complaint));
+                    window.pendingComplaints = [];
                 }
                 
             } catch (error) {
@@ -954,10 +924,20 @@ export default function Home() {
             }
         };
         
-        // Add a small delay to ensure DOM is ready
-        setTimeout(loadMap, 100);
+        // DEFERRED: Use requestIdleCallback or fallback to setTimeout(0) for after UI paint
+        const deferMapInit = () => {
+            if (typeof requestIdleCallback !== 'undefined') {
+                requestIdleCallback(loadMap, { timeout: 500 });
+            } else {
+                setTimeout(loadMap, 0);
+            }
+        };
+        
+        deferMapInit();
         
         return () => {
+            isMounted = false;
+            
             // Clean up stored function references
             window.createIncidentMarkerRef = null;
             window.calculateDistanceRef = null;
@@ -1112,6 +1092,7 @@ export default function Home() {
                                 {userLocation ? (
                                     <div style={{ position: 'relative', flex: 1, width: '100%', minHeight: '300px' }}>
                                         <div 
+                                            ref={mapContainerRef}
                                             id="live-map" 
                                             className={`home-live-map-container ${isMapActive ? 'map-active' : 'map-inactive'}`}
                                         ></div>
