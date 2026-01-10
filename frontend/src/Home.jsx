@@ -49,7 +49,8 @@ export default function Home() {
     const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
     const { isLoading: complaintsLoading } = useSelector((state) => state.complaints);
     const [locationPermission, setLocationPermission] = useState(null); // 'granted', 'denied', 'prompt', null
-    const [userLocation, setUserLocation] = useState(null);
+    // Start with fallback location immediately so map can render right away
+    const [userLocation, setUserLocation] = useState({ lat: 28.6139, lng: 77.2090 }); // Delhi fallback
     const [mapReady, setMapReady] = useState(false);
     
     // Map interaction state
@@ -89,39 +90,34 @@ export default function Home() {
                 return;
             }
 
-            // Set a manual timeout to ensure we don't wait forever
+            // Set a manual timeout to ensure we don't wait forever (2 seconds max)
             const timeoutId = setTimeout(() => {
-                // console.log('⏱️ Location request timed out after 5 seconds');
                 setLocationPermission('denied');
-                const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
-                setUserLocation(fallbackLocation);
-                resolve(fallbackLocation);
-            }, 5000); // 5 second timeout
+                // Location already has fallback, just resolve
+                resolve({ lat: 28.6139, lng: 77.2090 });
+            }, 2000);
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    clearTimeout(timeoutId); // Clear the manual timeout
+                    clearTimeout(timeoutId);
                     const location = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
-                    // console.log('✅ Location permission granted:', location);
                     setLocationPermission('granted');
                     setUserLocation(location);
                     resolve(location);
                 },
                 (error) => {
-                    clearTimeout(timeoutId); // Clear the manual timeout
-                    // console.log('❌ Location access denied or failed:', error.message);
+                    clearTimeout(timeoutId);
                     setLocationPermission('denied');
-                    const fallbackLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi, India fallback
-                    setUserLocation(fallbackLocation);
-                    resolve(fallbackLocation);
+                    // Keep existing fallback location
+                    resolve({ lat: 28.6139, lng: 77.2090 });
                 },
                 {
-                    enableHighAccuracy: false, // Use false for faster response
-                    timeout: 5000, // Reduced from 10000 to 5000
-                    maximumAge: 300000 // 5 minutes - can use cached position
+                    enableHighAccuracy: false,
+                    timeout: 2000, // Fast timeout
+                    maximumAge: 600000 // 10 minutes - use cached position aggressively
                 }
             );
         });
@@ -129,96 +125,31 @@ export default function Home() {
 
     // Navigate to complaint detail page
     const handleViewComplaintDetails = (complaint) => {
-        // console.log("From home.jsx: ", complaint);
-        // Clear any potential state conflicts and navigate
         setTimeout(() => {
             navigate(`/complaint/${complaint.id}`, { replace: true });
         }, 0);
     };
 
-    // Socket initialization
-    useEffect(() => {
-        // Initialize socket connection
-        const socketURL = import.meta.env.VITE_SOCKET_URL || 
-                         'http://localhost:5000';
-        
-        // console.log("Initializing socket connection to:", socketURL);
-        socketRef.current = io(socketURL, {
-            withCredentials: true,
-            transports: ['websocket', 'polling']
-        });
-
-        socketRef.current.on('connect', () => {
-            // console.log('Socket connected:', socketRef.current.id);
-        });
-
-        socketRef.current.on('disconnect', () => {
-            // console.log('Socket disconnected');
-        });
-
-        // Set up the newComplaint listener here (for storing pending complaints)
-        socketRef.current.on('newComplaint', (complaint) => {
-            // console.log('🚨 New complaint received via socket:', complaint);
-            // console.log('Complaint details:', {
-                // id: complaint._id,
-                // title: complaint.title,
-                // category: complaint.category,
-                // coordinates: getComplaintCoordinates(complaint),
-                // address: complaint.address,
-                // user: complaint.user_id
-            // });
-            
-            // Always store for later processing - the dedicated useEffect will handle it
-            // console.log('Storing complaint for processing when map is ready');
-            window.pendingComplaints = window.pendingComplaints || [];
-            window.pendingComplaints.push(complaint);
-            // console.log(`Total pending complaints: ${window.pendingComplaints.length}`);
-        });
-
-        // Cleanup on unmount
-        return () => {
-            if (socketRef.current) {
-                // console.log('Cleaning up socket connection');
-                socketRef.current.off('newComplaint');
-                socketRef.current.disconnect();
-            }
-        };
+    // Helper: Toggle map zoom controls (used by click handler instead of useEffect)
+    const updateMapZoomControls = useCallback((active) => {
+        if (!mapRef.current) return;
+        const map = mapRef.current;
+        if (active) {
+            map.scrollWheelZoom?.enable();
+            map.doubleClickZoom?.enable();
+            map.touchZoom?.enable();
+        } else {
+            map.scrollWheelZoom?.disable();
+            map.doubleClickZoom?.disable();
+            map.touchZoom?.disable();
+        }
     }, []);
 
-    // Set up newComplaint listener when map becomes ready
-    useEffect(() => {
-        const setupListener = async () => {
-            if (socketRef.current && mapReady && mapRef.current && userLocation) {
-                // console.log('Setting up newComplaint listener - map is ready');
-                
-                // Remove any existing listener
-                socketRef.current.off('newComplaint');
-                
-                // Add the new listener for immediate processing
-                socketRef.current.on('newComplaint', (complaint) => {
-                    // console.log('🔴 [SOCKET] Received live complaint:', complaint?._id || '(no id)');
-                    // console.log(complaint);
-                    processNewComplaint(complaint);
-                    
-                    // Also update the right panel complaints
-                    if (setComplaints) {
-                        setComplaints(prevComplaints => [complaint, ...prevComplaints]);
-                    }
-                });
-                
-                // Process any pending complaints
-                if (window.pendingComplaints && window.pendingComplaints.length > 0) {
-                    // console.log(`[mapReady] Processing ${window.pendingComplaints.length} pending complaint(s)...`);
-                    window.pendingComplaints.forEach(complaint => {
-                        processNewComplaint(complaint);
-                    });
-                    window.pendingComplaints = []; // Clear the pending complaints
-                }
-            }
-        };
-        
-        setupListener();
-    }, [mapReady, userLocation]);
+    // Handle map activation (replaces useEffect #6)
+    const handleMapActivation = useCallback((active) => {
+        setIsMapActive(active);
+        updateMapZoomControls(active);
+    }, [updateMapZoomControls]);
 
     // Function to process new complaints (can be used both for live and pending complaints)
     const processNewComplaint = async (complaint) => {
@@ -566,97 +497,95 @@ export default function Home() {
         }
     };
 
-    // Request location immediately when component mounts
+    // ===========================================
+    // CONSOLIDATED USEEFFECT #1: Initial Mount
+    // Combines: Socket init + Geolocation + Load User
+    // ===========================================
     useEffect(() => {
-        // console.log("🚀 Home component mounted - requesting location immediately");
-        if (!userLocation && !locationPermission) {
-            // console.log("📍 Initiating location request...");
-            requestLocationPermission();
-        }
-    }, []); // Run only once on mount
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+        let isMounted = true;
         
-        // Only load user if we have a token, user isn't loaded yet, and we haven't tried loading
-        // Remove 'loading' from the condition to prevent re-triggering during load
+        // 1. Initialize socket connection (non-blocking)
+        const socketURL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+        socketRef.current = io(socketURL, {
+            withCredentials: true,
+            transports: ['websocket', 'polling']
+        });
+
+        // Store pending complaints until map is ready
+        socketRef.current.on('newComplaint', (complaint) => {
+            window.pendingComplaints = window.pendingComplaints || [];
+            window.pendingComplaints.push(complaint);
+        });
+
+        // 2. Request real geolocation in background (map already has fallback location)
+        requestLocationPermission();
+
+        // 3. Load user from token if available
+        const token = localStorage.getItem("token");
         if (token && !user && !hasLoadedUser.current) {
             hasLoadedUser.current = true;
             dispatch(loadUser())
                 .unwrap()
-                .then((userData) => {
-                    // console.log("✅ User loaded successfully:", userData);
-                })
                 .catch((error) => {
                     console.error("❌ Failed to load user:", error);
-                    hasLoadedUser.current = false; // Reset on error
-                    // Token might be invalid, clear it
+                    hasLoadedUser.current = false;
                     localStorage.removeItem('token');
                     localStorage.removeItem('isLoggedIn');
                 });
-        } else if (!token) {
-            hasLoadedUser.current = false; // Reset
         }
-    }, [dispatch, user]); // Removed 'loading' and 'isAuthenticated' to prevent re-triggers
 
-    // Periodic refresh of nearby complaints every 5 minutes
+        // Cleanup
+        return () => {
+            isMounted = false;
+            if (socketRef.current) {
+                socketRef.current.off('newComplaint');
+                socketRef.current.disconnect();
+            }
+        };
+    }, []); // Only run once on mount
+
+    // ===========================================
+    // CONSOLIDATED USEEFFECT #2: Map Ready Effects
+    // Combines: Socket listener upgrade + Periodic refresh
+    // ===========================================
     useEffect(() => {
-        if (!userLocation || !mapReady) {
+        if (!mapReady || !userLocation || !socketRef.current || !mapRef.current) {
             return;
         }
 
-        // Set up interval to refresh nearby complaints every 5 minutes
+        // Upgrade socket listener to process complaints immediately
+        socketRef.current.off('newComplaint');
+        socketRef.current.on('newComplaint', (complaint) => {
+            processNewComplaint(complaint);
+        });
+
+        // Process any pending complaints that arrived before map was ready
+        if (window.pendingComplaints?.length > 0) {
+            window.pendingComplaints.forEach(complaint => processNewComplaint(complaint));
+            window.pendingComplaints = [];
+        }
+
+        // Set up periodic refresh (every 5 minutes)
         const refreshInterval = setInterval(() => {
-            // console.log('🔄 [REFRESH] Refreshing nearby complaints...');
             dispatch(getNearbyComplaints({ latitude: userLocation.lat, longitude: userLocation.lng }))
                 .unwrap()
                 .then((nearbyComplaints) => {
-                    // console.log('🔄 [REFRESH] Nearby complaints refreshed:', nearbyComplaints?.length || 0, 'complaints found');
-                    
-                    if (nearbyComplaints && nearbyComplaints.length > 0) {
-                        // console.log('🔄 [REFRESH] Complaint IDs found:', nearbyComplaints.map(c => c._id));
-                        nearbyComplaints.forEach((complaint, index) => {
-                            // console.log(`🔄 [REFRESH] Processing complaint ${index + 1}/${nearbyComplaints.length}:`, complaint._id, '- Title:', complaint.title);
-                            processNewComplaint(complaint);
-                        });
-                    } else {
-                        // console.log('🔄 [REFRESH] No complaints found during refresh');
-                    }
+                    nearbyComplaints?.forEach(complaint => processNewComplaint(complaint));
                 })
                 .catch((error) => {
-                    console.error('🔄 [REFRESH] Failed to refresh nearby complaints:', error);
+                    console.error('Failed to refresh nearby complaints:', error);
                 });
-        }, 5 * 60 * 1000); // 5 minutes
+        }, 5 * 60 * 1000);
 
-        // Clean up interval on unmount
         return () => {
             clearInterval(refreshInterval);
         };
-    }, [userLocation, mapReady, dispatch]);
+    }, [mapReady, userLocation, dispatch]);
 
-    // Handle map active state changes
-    useEffect(() => {
-        if (!mapRef.current) return;
-
-        const map = mapRef.current;
-        
-        if (isMapActive) {
-            // Enable zoom interactions when map is active
-            if (map.scrollWheelZoom) map.scrollWheelZoom.enable();
-            if (map.doubleClickZoom) map.doubleClickZoom.enable();
-            if (map.touchZoom) map.touchZoom.enable();
-            // console.log('🗺️ Map activated - zoom enabled');
-        } else {
-            // Disable zoom interactions when map is inactive
-            if (map.scrollWheelZoom) map.scrollWheelZoom.disable();
-            if (map.doubleClickZoom) map.doubleClickZoom.disable();
-            if (map.touchZoom) map.touchZoom.disable();
-            // console.log('🗺️ Map deactivated - zoom disabled');
-        }
-    }, [isMapActive]);
-
-    // Map initialization useEffect - runs when userLocation is available
-    // OPTIMIZED: Deferred rendering, cached Leaflet, ref-based DOM access, lazy complaints fetch
+    // ===========================================
+    // CONSOLIDATED USEEFFECT #3: Map Initialization
+    // Only depends on userLocation (removed user/auth dependencies to prevent re-init)
+    // ===========================================
     useEffect(() => {
         if (!userLocation) {
             return;
@@ -725,13 +654,13 @@ export default function Home() {
                     maxZoom: 19
                 }).addTo(map);
 
-                // Add click handler to deactivate map
+                // Add click handler to deactivate map (uses direct state update, no useEffect needed)
                 map.on('click', function(e) {
                     const clickedElement = e.originalEvent.target;
                     const isMarkerClick = clickedElement.closest('.leaflet-marker-icon') || 
                                          clickedElement.closest('.leaflet-popup');
                     if (!isMarkerClick) {
-                        setIsMapActive(false);
+                        handleMapActivation(false);
                     }
                 });
 
@@ -916,19 +845,20 @@ export default function Home() {
             }
         };
         
-        // DEFERRED: Use requestIdleCallback or fallback to setTimeout(0) for after UI paint
-        const deferMapInit = () => {
-            if (typeof requestIdleCallback !== 'undefined') {
-                requestIdleCallback(loadMap, { timeout: 500 });
+        // Initialize map immediately - no deferral needed since we have fallback location
+        // Use small timeout to ensure DOM is ready
+        const initTimeout = setTimeout(() => {
+            if (mapContainerRef.current) {
+                loadMap();
             } else {
-                setTimeout(loadMap, 0);
+                // Retry once if container not ready
+                setTimeout(loadMap, 50);
             }
-        };
-        
-        deferMapInit();
+        }, 0);
         
         return () => {
             isMounted = false;
+            clearTimeout(initTimeout);
             
             // Clean up stored function references
             window.createIncidentMarkerRef = null;
@@ -948,7 +878,7 @@ export default function Home() {
             setMapReady(false);
             setIsMapActive(false);
         };
-    }, [userLocation, isAuthenticated, user, locationPermission]); // Dependencies: userLocation, auth state
+    }, [userLocation]); // Only re-init when location changes
 
     // Show loading only while authentication is loading, not for location
     if (loading) return (
@@ -1095,7 +1025,7 @@ export default function Home() {
                                                 className="map-event-blocker"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setIsMapActive(true);
+                                                    handleMapActivation(true);
                                                 }}
                                             >
                                                 {/* Message overlay inside blocker */}
