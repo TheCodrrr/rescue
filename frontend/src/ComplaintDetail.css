@@ -818,29 +818,127 @@ html {
 }
 
 /* Responsive Design */
+
+/* Large tablet */
+@media (max-width: 1024px) {
+    .cd-page-wrapper {
+        padding: 7rem 1rem 2rem 1rem;
+    }
+
+    .cd-rail-basic-info {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .cd-rail-info-wrapper {
+        padding: 2rem;
+    }
+
+    .cd-enhanced-info-card {
+        padding: 1.25rem;
+    }
+}
+
+/* Tablet portrait */
 @media (max-width: 768px) {
+    .cd-page-wrapper {
+        padding: 6rem 0.75rem 1.5rem 0.75rem;
+    }
+
+    .cd-main-container {
+        padding: 0;
+    }
+
     .cd-header-section {
         flex-direction: column;
         align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .cd-nav-back-btn {
+        padding: 0.85rem 1.5rem;
+        font-size: 1rem;
+        gap: 0.5rem;
     }
     
     .cd-header-actions {
         justify-content: space-between;
         width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .cd-edit-action-btn, .cd-delete-action-btn {
+        padding: 0.85rem 1.5rem;
+        font-size: 1rem;
+        flex: 1;
+        min-width: calc(50% - 0.5rem);
+    }
+
+    .cd-primary-card {
+        border-radius: 20px;
+        margin-bottom: 2rem;
+    }
+
+    .cd-card-header-wrapper {
+        padding: 1.5rem;
+    }
+
+    .cd-header-top-row {
+        gap: 1.25rem;
+    }
+
+    .cd-category-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .cd-category-label-text {
+        font-size: 1.1rem;
+    }
+
+    .cd-severity-indicator {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .cd-status-indicator {
+        padding: 0.65rem 1.25rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .cd-content-body {
+        padding: 2rem 1.5rem;
     }
     
     .cd-main-title {
-        font-size: 2.2rem;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cd-description-wrapper h3 {
+        font-size: 1.4rem;
+    }
+
+    .cd-description-content {
+        font-size: 1.1rem;
+        padding: 1.5rem;
     }
     
     .cd-interactions-wrapper {
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
     
     .cd-voting-controls, .cd-utility-buttons {
         justify-content: center;
         width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .cd-vote-btn, .cd-comment-btn, .cd-edit-btn, .cd-delete-btn {
+        min-width: 140px;
     }
     
     .cd-metadata-row {
@@ -850,14 +948,248 @@ html {
     
     .cd-status-controls {
         justify-content: center;
+        flex-wrap: wrap;
     }
-    
-    .cd-main-container {
-        padding: 0 1rem;
+
+    .cd-status-btn {
+        min-width: 150px;
     }
-    
+
+    .cd-rail-info-wrapper {
+        padding: 1.75rem;
+        margin: 2rem 0;
+    }
+
+    .cd-rail-info-wrapper h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cd-rail-basic-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .cd-location-map-wrapper h3 {
+        font-size: 1.2rem;
+    }
+
+    .cd-map-container {
+        padding: 0.75rem;
+    }
+}
+
+/* Mobile landscape and small tablet */
+@media (max-width: 640px) {
+    .cd-page-wrapper {
+        padding: 5.5rem 0.5rem 1.5rem 0.5rem;
+    }
+
+    .cd-header-section {
+        margin-bottom: 1.5rem;
+        gap: 0.85rem;
+    }
+
+    .cd-nav-back-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        gap: 0.4rem;
+        border-radius: 12px;
+    }
+
+    .cd-edit-action-btn, .cd-delete-action-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        gap: 0.5rem;
+        min-width: 100%;
+    }
+
+    .cd-primary-card {
+        border-radius: 16px;
+        margin-bottom: 1.75rem;
+    }
+
+    .cd-card-header-wrapper {
+        padding: 1.25rem;
+    }
+
+    .cd-header-top-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .cd-header-right-section {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .cd-category-display {
+        gap: 0.75rem;
+    }
+
+    .cd-category-icon-wrapper {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+    }
+
+    .cd-category-label-text {
+        font-size: 1rem;
+    }
+
+    .cd-severity-indicator {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .cd-status-indicator {
+        padding: 0.55rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
+
     .cd-content-body {
-        padding: 2rem;
+        padding: 1.5rem 1.25rem;
+    }
+
+    .cd-main-title {
+        font-size: 1.75rem;
+        line-height: 1.25;
+    }
+
+    .cd-description-wrapper {
+        margin-bottom: 2rem;
+    }
+
+    .cd-description-wrapper h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .cd-description-content {
+        font-size: 1rem;
+        padding: 1.25rem;
+        line-height: 1.7;
+    }
+
+    .cd-interactions-wrapper {
+        gap: 1.25rem;
+    }
+
+    .cd-voting-controls {
+        gap: 0.75rem;
+    }
+
+    .cd-vote-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+
+    .cd-vote-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .cd-utility-buttons {
+        gap: 0.75rem;
+    }
+
+    .cd-comment-btn, .cd-edit-btn, .cd-delete-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+
+    .cd-metadata-row {
+        gap: 1.25rem;
+    }
+
+    .cd-metadata-item {
+        padding: 0.85rem 1rem;
+    }
+
+    .cd-metadata-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .cd-metadata-label {
+        font-size: 0.75rem;
+    }
+
+    .cd-metadata-value {
+        font-size: 0.9rem;
+    }
+
+    .cd-status-controls {
+        gap: 0.75rem;
+    }
+
+    .cd-status-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+        min-width: 140px;
+    }
+
+    .cd-rail-info-wrapper {
+        padding: 1.5rem;
+        margin: 1.75rem 0;
+        border-radius: 16px;
+    }
+
+    .cd-rail-info-wrapper h3 {
+        font-size: 1.35rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .cd-enhanced-info-card {
+        padding: 1rem;
+    }
+
+    .cd-rail-info-icon {
+        font-size: 1.5rem;
+    }
+
+    .cd-rail-info-label {
+        font-size: 0.7rem;
+    }
+
+    .cd-rail-info-value {
+        font-size: 1rem;
+    }
+
+    .cd-location-map-wrapper {
+        margin-top: 2rem;
+        padding-top: 1.75rem;
+    }
+
+    .cd-location-map-wrapper h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .cd-map-container {
+        padding: 0.65rem;
+        border-radius: 12px;
+    }
+
+    .cd-officer-assignment-section {
+        padding: 1.25rem;
+    }
+
+    .cd-assignment-header h3 {
+        font-size: 1.15rem;
+    }
+
+    .cd-assignment-actions {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .cd-accept-btn, .cd-ignore-btn, .cd-reject-btn {
+        flex: 1;
+        min-width: 140px;
     }
 }
 
@@ -2218,6 +2550,257 @@ html {
         justify-content: center;
         padding: 0.65rem 1.5rem;
         font-size: 0.9rem;
+    }
+
+    /* Additional mobile optimizations */
+    .cd-page-wrapper {
+        padding: 5rem 0.5rem 1.25rem 0.5rem;
+    }
+
+    .cd-nav-back-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 10px;
+    }
+
+    .cd-edit-action-btn, .cd-delete-action-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .cd-primary-card {
+        border-radius: 14px;
+    }
+
+    .cd-card-header-wrapper {
+        padding: 1rem;
+    }
+
+    .cd-category-icon-wrapper {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .cd-category-label-text {
+        font-size: 0.95rem;
+    }
+
+    .cd-severity-indicator {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        gap: 0.4rem;
+    }
+
+    .cd-status-indicator {
+        padding: 0.5rem 0.9rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .cd-content-body {
+        padding: 1.25rem 1rem;
+    }
+
+    .cd-main-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .cd-description-wrapper h3 {
+        font-size: 1.15rem;
+    }
+
+    .cd-description-content {
+        font-size: 0.95rem;
+        padding: 1rem;
+    }
+
+    .cd-vote-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+        min-width: 110px;
+    }
+
+    .cd-comment-btn, .cd-edit-btn, .cd-delete-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+        min-width: 110px;
+    }
+
+    .cd-metadata-item {
+        padding: 0.75rem 0.85rem;
+    }
+
+    .cd-metadata-label {
+        font-size: 0.7rem;
+    }
+
+    .cd-metadata-value {
+        font-size: 0.85rem;
+    }
+
+    .cd-status-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        min-width: 130px;
+    }
+
+    .cd-rail-info-wrapper {
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+    }
+
+    .cd-rail-info-wrapper h3 {
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+
+    .cd-enhanced-info-card {
+        padding: 0.9rem;
+    }
+
+    .cd-rail-info-icon {
+        font-size: 1.35rem;
+    }
+
+    .cd-rail-info-label {
+        font-size: 0.65rem;
+    }
+
+    .cd-rail-info-value {
+        font-size: 0.95rem;
+    }
+
+    .cd-location-map-wrapper {
+        margin-top: 1.75rem;
+        padding-top: 1.5rem;
+    }
+
+    .cd-location-map-wrapper h3 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .cd-map-container {
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
+
+    .cd-escalation-section {
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+    }
+
+    .cd-rail-section {
+        padding: 1rem;
+    }
+
+    .cd-journey-summary {
+        padding: 0.9rem;
+    }
+
+    .cd-journey-stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .cd-journey-stat {
+        padding: 0.65rem;
+    }
+
+    .cd-stat-icon {
+        font-size: 1.15rem;
+    }
+
+    .cd-endpoint-info h5 {
+        font-size: 0.9rem;
+    }
+
+    .cd-endpoint-code,
+    .cd-endpoint-time {
+        font-size: 0.7rem;
+    }
+
+    .cd-timeline-station {
+        min-width: 100px;
+        padding: 0.65rem;
+    }
+
+    .cd-timeline-content h4 {
+        font-size: 0.85rem;
+    }
+
+    .cd-station-code,
+    .cd-station-time {
+        font-size: 0.75rem;
+    }
+
+    /* Modal responsive styles */
+    .reject-modal, .resolve-modal {
+        max-width: 95%;
+        padding: 1.25rem;
+        margin: 0.75rem;
+    }
+
+    .reject-modal-header, .resolve-modal-header {
+        margin-bottom: 1.25rem;
+    }
+
+    .reject-modal-header h2, .resolve-modal-header h2 {
+        font-size: 1.15rem;
+    }
+
+    .reject-modal-close svg, .resolve-modal-close svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .reject-modal-body p, .resolve-modal-body p {
+        font-size: 0.9rem;
+    }
+
+    .reject-modal-textarea, .resolve-modal-textarea {
+        min-height: 80px;
+        font-size: 0.9rem;
+        padding: 0.65rem;
+    }
+
+    .reject-modal-footer, .resolve-modal-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .reject-modal-cancel-btn, .reject-modal-submit-btn,
+    .resolve-modal-cancel-btn, .resolve-modal-submit-btn {
+        width: 100%;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+        justify-content: center;
+    }
+
+    .cd-resolve-section {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cd-resolve-header {
+        gap: 0.5rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .cd-resolve-header .cd-resolve-icon {
+        font-size: 1.35rem;
+    }
+
+    .cd-resolve-header h3 {
+        font-size: 1rem;
+    }
+
+    .cd-resolve-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.95rem;
+        width: 100%;
+        justify-content: center;
     }
 }
 
