@@ -218,23 +218,75 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation */}
-            <div className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu-active' : ''}`}>
-                <div className="mobile-menu-content">
+            {/* Mobile Navigation Sidebar */}
+            <div className={`mobile-nav-sidebar ${isMobileMenuOpen ? 'mobile-nav-sidebar-open' : ''}`}>
+                <div className="mobile-nav-sidebar-content">
                     {displayNavLinks.map((link, index) => (
                         <Link
                             key={link.name}
                             to={link.href}
-                            className={`mobile-menu-link ${location.pathname === link.href ? 'mobile-menu-link-active' : ''}`}
+                            className={`mobile-nav-link ${location.pathname === link.href ? 'mobile-nav-link-active' : ''}`}
                             style={{ animationDelay: `${index * 0.1}s` }}
                             onClick={closeMobileMenu}
                         >
-                            <svg className="mobile-menu-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="mobile-nav-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                             </svg>
-                            <span className="mobile-menu-link-text">{link.name}</span>
+                            <span className="mobile-nav-link-text">{link.name}</span>
                         </Link>
                     ))}
+
+                    {/* Mobile Auth Section */}
+                    <div className="mobile-nav-auth-section">
+                        {!isAuthenticated ? (
+                            <>
+                                <button 
+                                    className="mobile-nav-auth-btn mobile-nav-login-btn"
+                                    onClick={() => { handleLogin(); closeMobileMenu(); }}
+                                >
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                    </svg>
+                                    Login
+                                </button>
+                                <button 
+                                    className="mobile-nav-auth-btn mobile-nav-signup-btn"
+                                    onClick={() => { handleSignup(); closeMobileMenu(); }}
+                                >
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    Sign Up
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div 
+                                    className="mobile-nav-profile-card"
+                                    onClick={() => { handleProfileClick(); closeMobileMenu(); }}
+                                >
+                                    <CloudImage
+                                        src={userProfileImage || "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png"}
+                                        alt={userName || "Unknown"}
+                                        className="mobile-nav-profile-avatar"
+                                    />
+                                    <div className="mobile-nav-profile-info">
+                                        <div className="mobile-nav-profile-name">{userName || 'User'}</div>
+                                        <div className="mobile-nav-profile-role">{userRole === 'officer' ? 'Officer' : 'Citizen'}</div>
+                                    </div>
+                                </div>
+                                <button 
+                                    className="mobile-nav-auth-btn mobile-nav-signout-btn"
+                                    onClick={() => { handleSignOut(); closeMobileMenu(); }}
+                                >
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Sign Out
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
