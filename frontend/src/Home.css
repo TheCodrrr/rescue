@@ -3152,8 +3152,9 @@ html, body {
 
 @media (max-width: 768px) {
     .hero-section {
-        height: 30vh;
-        padding: 1rem;
+        height: auto;
+        min-height: 40vh;
+        padding: 2rem 1rem;
     }
     
     .map-section {
@@ -3474,7 +3475,7 @@ html, body {
 
     .hero-section {
         height: auto;
-        min-height: calc(100vh - 4rem);
+        min-height: 35vh;
         padding: 1.5rem 0;
     }
 
@@ -3759,7 +3760,7 @@ html, body {
 @media (min-width: 376px) and (max-width: 480px) {
     .hero-section {
         height: auto;
-        min-height: calc(100vh - 5rem);
+        min-height: 40vh;
         padding: 2rem 0;
     }
 
@@ -3879,7 +3880,7 @@ html, body {
 @media (min-width: 481px) and (max-width: 768px) {
     .hero-section {
         height: auto;
-        min-height: calc(100vh - 5rem);
+        min-height: 45vh;
     }
 
     .hero-title {
@@ -3936,7 +3937,7 @@ html, body {
 @media (max-height: 500px) and (orientation: landscape) {
     .hero-section {
         height: auto;
-        min-height: auto;
+        min-height: 30vh;
         padding: 1rem 0;
     }
 

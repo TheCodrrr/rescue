@@ -459,29 +459,377 @@
         padding: 1rem;
     }
 
-    .stats-grid {
-        grid-template-columns: 1fr;
+    .analytics-header {
+        padding: 1.5rem;
+        border-radius: 1rem;
     }
 
-    .charts-grid {
-        grid-template-columns: 1fr;
+    .header-content {
+        gap: 1rem;
     }
 
-    .chart-wide {
-        grid-column: span 1;
+    .header-icon-container {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
     }
 
     .analytics-title {
         font-size: 1.5rem;
     }
 
-    .header-icon-container {
+    .analytics-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
+        border-radius: 0.875rem;
+    }
+
+    .stat-icon {
         width: 48px;
         height: 48px;
     }
 
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .chart-wide {
+        grid-column: span 1;
+    }
+
+    .chart-card {
+        padding: 1.25rem;
+        border-radius: 1rem;
+    }
+
+    .chart-header {
+        margin-bottom: 1rem;
+    }
+
+    .chart-title {
+        font-size: 1.1rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .chart-container {
+        height: 280px;
+    }
+
+    .d3-chart-container {
+        min-height: 280px;
+    }
+
+    .bubble-map-container {
+        min-height: 400px;
+    }
+
     .location-bar {
         width: 80px;
+    }
+
+    /* D3 chart responsiveness */
+    .d3-chart-container svg text {
+        font-size: 9px !important;
+    }
+
+    .chart-header-with-icon {
+        gap: 0.5rem;
+    }
+
+    .chart-header-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .analytics-container {
+        padding: 0.75rem;
+    }
+
+    .analytics-header {
+        padding: 1rem;
+        border-radius: 0.875rem;
+    }
+
+    .header-content {
+        gap: 0.75rem;
+    }
+
+    .header-icon-container {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    .header-icon-container svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .analytics-title {
+        font-size: 1.3rem;
+    }
+
+    .analytics-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .stats-grid {
+        gap: 0.875rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    .stat-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    .charts-grid {
+        gap: 0.875rem;
+    }
+
+    .chart-card {
+        padding: 1rem;
+        border-radius: 0.875rem;
+    }
+
+    .chart-header {
+        margin-bottom: 0.875rem;
+    }
+
+    .chart-title {
+        font-size: 1rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+
+    .d3-chart-container {
+        min-height: 250px;
+    }
+
+    .bubble-map-container {
+        min-height: 350px;
+    }
+
+    /* D3 chart responsiveness */
+    .d3-chart-container svg text {
+        font-size: 8px !important;
+    }
+
+    /* Loading and error states */
+    .analytics-loading {
+        padding: 2rem 1rem;
+    }
+
+    .analytics-loading .loading-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .analytics-loading p {
+        font-size: 0.9rem;
+    }
+
+    .analytics-error {
+        padding: 2rem 1rem;
+    }
+
+    .analytics-error .error-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .analytics-error h3 {
+        font-size: 1.1rem;
+    }
+
+    .analytics-error p {
+        font-size: 0.85rem;
+    }
+
+    .analytics-empty {
+        padding: 2rem 1rem;
+    }
+
+    .analytics-empty .empty-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .analytics-empty h3 {
+        font-size: 1.1rem;
+    }
+
+    .analytics-empty p {
+        font-size: 0.85rem;
+    }
+
+    .retry-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .analytics-container {
+        padding: 0.5rem;
+    }
+
+    .analytics-header {
+        padding: 0.875rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .analytics-title {
+        font-size: 1.2rem;
+    }
+
+    .analytics-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .stat-card {
+        padding: 0.875rem;
+        gap: 0.75rem;
+    }
+
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .stat-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    .chart-card {
+        padding: 0.875rem;
+    }
+
+    .chart-title {
+        font-size: 0.95rem;
+    }
+
+    .chart-subtitle {
+        font-size: 0.7rem;
+    }
+
+    .chart-container {
+        height: 220px;
+    }
+
+    .d3-chart-container {
+        min-height: 220px;
+    }
+
+    .bubble-map-container {
+        min-height: 300px;
+    }
+
+    /* Further reduce D3 text sizes */
+    .d3-chart-container svg text {
+        font-size: 7px !important;
+    }
+
+    .chart-header-with-icon {
+        align-items: center;
+    }
+
+    .chart-header-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Adjust loading states */
+    .analytics-loading,
+    .analytics-error,
+    .analytics-empty {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .analytics-loading .loading-icon,
+    .analytics-error .error-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .analytics-empty .empty-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .analytics-loading p,
+    .analytics-error p,
+    .analytics-empty p {
+        font-size: 0.8rem;
+    }
+
+    .analytics-error h3,
+    .analytics-empty h3 {
+        font-size: 1rem;
+    }
+
+    .retry-btn {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8rem;
     }
 }
 
