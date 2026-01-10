@@ -1012,7 +1012,7 @@ export default function Home() {
                                 )}
 
                                 {userLocation ? (
-                                    <div style={{ position: 'relative', flex: 1, width: '100%', minHeight: '300px' }}>
+                                    <div style={{ position: 'relative', flex: 1, width: '100%', minHeight: '100px' }}>
                                         <div 
                                             ref={mapContainerRef}
                                             id="live-map" 

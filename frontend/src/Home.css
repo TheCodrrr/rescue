@@ -52,14 +52,16 @@ html, body {
 
 .hero-section {
     height: calc(100vh - 5rem); /* Take full height minus navbar */
+    min-height: 400px; /* Minimum height for very small screens */
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     text-align: center;
     position: relative;
-    padding: 2rem 0;
+    padding: 2rem 1rem;
     background: transparent;
+    box-sizing: border-box;
 }
 
 .hero-section::before {
@@ -2038,18 +2040,34 @@ html, body {
 @media (max-width: 768px) {
     .tabs-container {
         padding: 0.4rem;
-        max-width: 95%;
-        gap: 0.3rem; /* Reduce gap on mobile */
+        max-width: 100%;
+        width: 100%;
+        gap: 0.3rem;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-padding-left: 0;
     }
     
     .tab {
-        padding: 0.6rem 0.8rem; /* Reduce padding on mobile */
+        padding: 0.6rem 0.8rem;
         font-size: 0.8rem;
-        gap: 0.3rem; /* Reduce gap between icon and text */
+        gap: 0.3rem;
+        flex-shrink: 0;
+        margin: 3px;
+    }
+
+    .tab:first-child {
+        margin-left: 0;
     }
     
     .tab-icon {
         font-size: 1rem;
+    }
+
+    .category-tabs {
+        padding: 0 0.5rem;
+        margin-bottom: 1.5rem;
     }
 }
 
@@ -2183,10 +2201,14 @@ html, body {
     border: 2px solid color-mix(in srgb, var(--color6) 35%, transparent);
     border-bottom: none;
     box-shadow: 
-        0 30px 60px -12px color-mix(in srgb, var(--color3) 25%, transparent),
-        0 0 35px color-mix(in srgb, var(--color8) 15%, transparent),
+        0 -10px 30px -12px color-mix(in srgb, var(--color3) 25%, transparent),
+        -10px 0 20px -12px color-mix(in srgb, var(--color8) 15%, transparent),
+        10px 0 20px -12px color-mix(in srgb, var(--color8) 15%, transparent),
         inset 0 2px 4px color-mix(in srgb, var(--color9) 15%, transparent);
     color: var(--color3);
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
     /* padding: 1.5rem 1.5rem 1rem; */
 }
 
@@ -2199,7 +2221,8 @@ html, body {
     border-top: none;
     box-shadow: 
         0 30px 60px -12px color-mix(in srgb, var(--color3) 25%, transparent),
-        0 0 35px color-mix(in srgb, var(--color8) 15%, transparent),
+        -10px 0 20px -12px color-mix(in srgb, var(--color8) 15%, transparent),
+        10px 0 20px -12px color-mix(in srgb, var(--color8) 15%, transparent),
         inset 0 2px 4px color-mix(in srgb, var(--color9) 15%, transparent);
     /* padding: 0 1.5rem 1.5rem; */
     display: flex;
@@ -2210,6 +2233,9 @@ html, body {
     min-height: 0; /* Allow flex shrinking */
     scrollbar-width: thin;
     scrollbar-color: var(--color7) transparent;
+    margin-top: 0;
+    position: relative;
+    z-index: 1;
 }
 
 /* Custom scrollbar for complaints panel */
@@ -2259,13 +2285,14 @@ html, body {
 .home-complaints-list {
     display: flex;
     flex-direction: column;
-    height: 10rem;
+    flex: 1;
     gap: 1rem;
     padding: 1.5rem;
     /* padding: 1rem 0.5rem 0 0; */
     /* Remove all scrolling - let parent panel handle it */
-    overflow: hidden scroll;
-    flex-shrink: 0; /* Don't shrink - let content grow naturally */
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0; /* Allow flex shrinking for proper scroll */
 }
 
 /* Simplified Live Complaint Card - Home page specific */
@@ -2733,9 +2760,16 @@ html, body {
         min-height: 450px; /* Maintain usable space */
     }
     
-    .home-complaints-panel,
+    .home-complaints-panel {
+        padding: 1rem;
+        margin-top: 0;
+        border-top: none;
+    }
+
     .home-complaints-header {
         padding: 1rem;
+        margin-bottom: 0;
+        border-bottom: none;
     }
     
     .home-complaints-title {
@@ -2771,18 +2805,20 @@ html, body {
         min-height: 400px; /* Maintain minimum usable height */
     }
     
-    .home-complaints-panel,
+    .home-complaints-panel {
+        padding: 0.75rem;
+        margin-top: 0;
+        border-top: none;
+    }
+
     .home-complaints-header {
         padding: 0.75rem;
+        margin-bottom: 0;
+        border-bottom: none;
     }
     
     .home-complaints-title {
         font-size: 1.3rem;
-    }
-    
-    .home-complaints-header {
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
     }
     
     .home-live-complaint-card {
@@ -3423,4 +3459,646 @@ html, body {
 .report-time {
     font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.6);
+}
+
+/* ========================================
+   ENHANCED MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Extra small devices (phones, 320px and up) */
+@media (max-width: 375px) {
+    .home-page {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+
+    .hero-section {
+        height: auto;
+        min-height: calc(100vh - 4rem);
+        padding: 1.5rem 0;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .report-incident-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* Category Tabs - Extra Small */
+    .category-tabs {
+        padding: 0 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .tabs-container {
+        padding: 0.3rem;
+        gap: 0.15rem;
+        justify-content: flex-start;
+        width: 100%;
+        max-width: 100%;
+        scroll-padding-left: 0;
+        scroll-behavior: smooth;
+    }
+
+    .tab {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.7rem;
+        gap: 0.2rem;
+        margin: 2px;
+        flex-shrink: 0;
+    }
+
+    .tab:first-child {
+        margin-left: 0;
+    }
+
+    .tab-icon {
+        font-size: 0.9rem;
+    }
+
+    /* Hide text on very small screens, show only icons */
+    .tab span:not(.tab-icon) {
+        display: none;
+    }
+
+    /* Incidents Section - Extra Small */
+    .incidents-section {
+        padding: 1rem 0.25rem 3rem;
+    }
+
+    .incidents-container {
+        gap: 0.75rem;
+        flex-direction: column;
+    }
+
+    .map-panel {
+        height: auto;
+        min-height: 250px;
+        max-height: 300px;
+    }
+
+    .home-complaints-section {
+        height: auto;
+        min-height: 300px;
+        max-height: 60vh;
+        width: 100%;
+    }
+
+    .home-map-glass-container {
+        padding: 0.75rem;
+        border-radius: 16px;
+        height: 100%;
+    }
+
+    .home-live-map-container {
+        min-height: 180px;
+        border-radius: 10px;
+    }
+
+    /* Complaint Cards - Extra Small */
+    .home-complaints-panel {
+        padding: 0.5rem;
+        border-radius: 0 0 16px 16px;
+        min-height: 0;
+        flex: 1;
+        margin-top: 0;
+        border-top: none;
+    }
+
+    .home-complaints-header {
+        padding: 0.75rem;
+        border-radius: 16px 16px 0 0;
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .home-complaints-title {
+        font-size: 1.1rem;
+        padding-left: 0.75rem;
+    }
+
+    .home-complaints-subtitle {
+        font-size: 0.8rem;
+        padding-left: 0.75rem;
+    }
+
+    .home-complaints-list {
+        padding: 0.5rem;
+        gap: 0.75rem;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .home-live-complaint-card {
+        padding: 0.75rem;
+        border-radius: 12px;
+        min-height: auto;
+    }
+
+    .home-card-header {
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .home-incident-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .home-incident-type {
+        font-size: 0.65rem;
+    }
+
+    .home-time-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .home-card-title {
+        font-size: 0.9rem;
+    }
+
+    .home-card-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .home-card-meta {
+        gap: 0.3rem;
+    }
+
+    .home-meta-item {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .home-card-actions {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .home-action-btn {
+        padding: 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .home-reporter-info {
+        padding: 0.4rem;
+    }
+
+    .home-reporter-avatar {
+        width: 20px;
+        height: 20px;
+    }
+
+    .home-reporter-name {
+        font-size: 0.7rem;
+    }
+
+    .home-reporter-email,
+    .home-reporter-label {
+        font-size: 0.6rem;
+    }
+
+    /* No complaints state */
+    .home-no-complaints {
+        padding: 1rem;
+    }
+
+    .home-no-complaints-icon {
+        font-size: 2rem;
+    }
+
+    .home-no-complaints h3 {
+        font-size: 1rem;
+    }
+
+    .home-no-complaints p {
+        font-size: 0.8rem;
+    }
+
+    /* Live indicator */
+    .home-live-indicator {
+        font-size: 0.75rem;
+        gap: 0.3rem;
+    }
+
+    .home-live-indicator .pulse-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* Map inactive message */
+    .map-inactive-message {
+        font-size: 0.75rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .map-inactive-message .map-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Reduced box shadows for mobile */
+    .home-map-glass-container {
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--color3) 15%, transparent);
+    }
+
+    .home-live-map-container {
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 20%, transparent);
+    }
+
+    .home-live-map-container.map-active {
+        box-shadow: 0 4px 15px color-mix(in srgb, var(--color3) 35%, transparent), 0 0 0 2px var(--color3);
+    }
+
+    .home-complaints-section {
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--color3) 15%, transparent);
+    }
+
+    .home-live-complaint-card {
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--color3) 12%, transparent);
+    }
+
+    .home-live-complaint-card:hover {
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--color3) 20%, transparent);
+    }
+
+    .tabs-container {
+        box-shadow: 0 2px 10px color-mix(in srgb, var(--color3) 15%, transparent);
+    }
+
+    .tab.active {
+        box-shadow: 0 3px 10px color-mix(in srgb, var(--color3) 30%, transparent);
+    }
+
+    .report-incident-btn:hover {
+        box-shadow: 0 0 15px var(--color3), 0 0 25px var(--color8);
+    }
+}
+
+/* Small devices (phones, 376px to 480px) */
+@media (min-width: 376px) and (max-width: 480px) {
+    .hero-section {
+        height: auto;
+        min-height: calc(100vh - 5rem);
+        padding: 2rem 0;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Category Tabs - Small */
+    .tabs-container {
+        gap: 0.25rem;
+        padding: 0.35rem;
+        justify-content: flex-start;
+        width: 100%;
+        scroll-padding-left: 0;
+    }
+
+    .tab {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.75rem;
+        gap: 0.25rem;
+        margin: 2px;
+    }
+
+    .tab:first-child {
+        margin-left: 0;
+    }
+
+    /* Show abbreviated text */
+    .tab span:not(.tab-icon) {
+        display: inline;
+    }
+
+    /* Incidents Section - Small */
+    .incidents-section {
+        padding: 1.5rem 0.5rem 4rem;
+    }
+
+    .incidents-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .map-panel {
+        height: auto;
+        min-height: 280px;
+        max-height: 350px;
+    }
+
+    .home-complaints-section {
+        height: auto;
+        min-height: 350px;
+        max-height: 65vh;
+        width: 100%;
+    }
+
+    .home-complaints-panel {
+        flex: 1;
+        min-height: 0;
+        border-radius: 0 0 20px 20px;
+        margin-top: 0;
+        border-top: none;
+    }
+
+    .home-complaints-header {
+        border-radius: 20px 20px 0 0;
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .home-live-map-container {
+        min-height: 220px;
+    }
+
+    .home-complaints-list {
+        padding: 0.75rem;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .home-live-complaint-card {
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .home-card-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .home-action-btn {
+        flex: 1 1 45%;
+    }
+
+    /* Reduced box shadows for small devices */
+    .home-map-glass-container {
+        box-shadow: 0 10px 25px color-mix(in srgb, var(--color3) 18%, transparent);
+    }
+
+    .home-live-map-container {
+        box-shadow: 0 5px 15px color-mix(in srgb, var(--color3) 22%, transparent);
+    }
+
+    .home-live-map-container.map-active {
+        box-shadow: 0 5px 18px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 0 2px var(--color3);
+    }
+
+    .home-live-complaint-card {
+        box-shadow: 0 5px 15px color-mix(in srgb, var(--color3) 15%, transparent);
+    }
+}
+
+/* Medium devices (tablets, 481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .hero-section {
+        height: auto;
+        min-height: calc(100vh - 5rem);
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    /* Category Tabs - Medium */
+    .tabs-container {
+        gap: 0.3rem;
+        padding: 0.4rem;
+        flex-wrap: nowrap;
+    }
+
+    .tab {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    /* Map and Complaints - Side by side on larger tablets */
+    .incidents-container {
+        flex-direction: column;
+    }
+
+    .map-panel,
+    .home-complaints-section {
+        width: 100%;
+        height: 55vh;
+        min-height: 400px;
+    }
+
+    .home-live-complaint-card {
+        min-height: auto;
+    }
+
+    .home-card-actions {
+        flex-direction: row;
+    }
+
+    /* Reduced box shadows for tablets */
+    .home-map-glass-container {
+        box-shadow: 0 15px 35px color-mix(in srgb, var(--color3) 20%, transparent);
+    }
+
+    .home-live-map-container {
+        box-shadow: 0 6px 20px color-mix(in srgb, var(--color3) 25%, transparent);
+    }
+
+    .home-live-complaint-card {
+        box-shadow: 0 6px 18px color-mix(in srgb, var(--color3) 15%, transparent);
+    }
+}
+
+/* Landscape mode for mobile devices */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero-section {
+        height: auto;
+        min-height: auto;
+        padding: 1rem 0;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .floating-elements {
+        display: none;
+    }
+
+    .map-panel,
+    .home-complaints-section {
+        height: 80vh;
+        min-height: 300px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .tab:hover {
+        transform: none;
+    }
+
+    .tab.active {
+        transform: scale(1.02);
+    }
+
+    .home-live-complaint-card:hover {
+        transform: none;
+    }
+
+    .home-action-btn:hover {
+        transform: none;
+    }
+
+    .home-action-btn:active {
+        transform: scale(0.98);
+    }
+
+    .report-incident-btn:hover {
+        scale: 1;
+    }
+
+    .report-incident-btn:active {
+        scale: 0.98;
+    }
+
+    /* Larger touch targets */
+    .tab {
+        min-height: 44px;
+    }
+
+    .home-action-btn {
+        min-height: 44px;
+    }
+
+    /* Better scroll behavior */
+    .tabs-container {
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+    }
+
+    .tab {
+        scroll-snap-align: start;
+    }
+
+    .home-complaints-list {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Priority badge mobile adjustments */
+@media (max-width: 480px) {
+    .home-priority-badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.35rem;
+    }
+
+    .home-address-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .home-address-text {
+        font-size: 0.7rem;
+    }
+
+    .home-engagement-section {
+        padding: 0.3rem;
+    }
+
+    .home-vote-info {
+        gap: 0.5rem;
+    }
+
+    .home-upvotes,
+    .home-downvotes {
+        font-size: 0.7rem;
+    }
+
+    .home-assignment-info {
+        padding: 0.3rem;
+    }
+
+    .home-assignment-text {
+        font-size: 0.7rem;
+    }
+
+    /* Location permission banner */
+    .location-permission-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .permission-text {
+        text-align: center;
+    }
+
+    .permission-text p {
+        font-size: 0.8rem;
+    }
+
+    .retry-location-btn {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Loading states mobile */
+@media (max-width: 480px) {
+    .home-loading-container {
+        padding: 1rem;
+    }
+
+    .home-loading-spinner {
+        transform: scale(0.8);
+    }
+
+    .home-loading-text h2 {
+        font-size: 1.2rem;
+    }
+
+    .home-loading-text p {
+        font-size: 0.9rem;
+    }
+
+    .home-map-loading-container {
+        min-height: 200px;
+    }
+
+    .home-map-loading-container p {
+        font-size: 0.85rem;
+    }
 }
