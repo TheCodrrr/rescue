@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useInView } from 'react-intersection-observer';
 import { useUserHistoryCache } from './hooks/useUserHistoryCache.jsx';
@@ -30,6 +30,30 @@ const UserHistory = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
     const filters = useSelector(selectHistoryFilters);
+    
+    // Mobile detection for pagination
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    
+    // Mobile pagination state
+    const [currentMobilePage, setCurrentMobilePage] = useState(0); // 0-indexed page number
+    
+    // Ref for UserHistory section to scroll to on page change
+    const userHistoryRef = useRef(null);
+    
+    // Handle window resize for mobile detection
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    // Reset mobile page when filters change
+    useEffect(() => {
+        setCurrentMobilePage(0);
+    }, [filters]);
 
     // Use the infinite query hook with filters
     const { 
@@ -106,29 +130,39 @@ const UserHistory = () => {
         court: { color: '#f57c00', label: 'Court' }
     };
 
-    // Intersection observer for infinite scrolling at the bottom
+    // Intersection observer for infinite scrolling at the bottom (desktop only)
     const { ref } = useInView({
         threshold: 1,
         onChange: (inView) => {
-            if (inView && hasNextPage && !isFetchingNextPage) {
+            // Only trigger infinite scroll on desktop
+            if (!isMobile && inView && hasNextPage && !isFetchingNextPage) {
                 fetchNextPage();
             }
         },
     });
 
-    // Intersection observer for prefetching when 8th item is visible
+    // Intersection observer for prefetching when 8th item is visible (desktop only)
     const { ref: prefetchRef } = useInView({
         threshold: 0.1,
         onChange: (inView) => {
-            if (inView && hasNextPage && !isFetchingNextPage) {
+            // Only prefetch on desktop
+            if (!isMobile && inView && hasNextPage && !isFetchingNextPage) {
                 // console.log('8th record visible, prefetching next page...');
                 fetchNextPage();
             }
         },
     });
 
-    // Get all histories from pages
+    // Get histories based on device type
+    // Mobile: Show only current page (10 histories per page)
+    // Desktop: Show all loaded pages (infinite scroll)
     const allHistories = data?.pages?.flatMap(page => page.histories) || [];
+    const mobileHistories = (isMobile && data?.pages?.[currentMobilePage]) 
+        ? data.pages[currentMobilePage].histories || [] 
+        : [];
+    
+    // Display histories based on device
+    const displayHistories = isMobile ? mobileHistories : allHistories;
 
     const handleRefresh = useCallback(() => {
         clearCacheAndRefetch();
@@ -137,6 +171,49 @@ const UserHistory = () => {
     const handleFilterChange = useCallback((filterType, value) => {
         dispatch(setFilters({ [filterType]: value }));
     }, [dispatch]);
+    
+    // Mobile pagination functions
+    const scrollToHistory = () => {
+        if (userHistoryRef.current) {
+            userHistoryRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+    };
+
+    const goToPage = async (pageIndex) => {
+        // If the page hasn't been loaded yet, fetch it
+        if (pageIndex >= (data?.pages?.length || 0) && hasNextPage) {
+            await fetchNextPage();
+        }
+        setCurrentMobilePage(pageIndex);
+        scrollToHistory();
+    };
+
+    const goToPrevPage = () => {
+        if (currentMobilePage > 0) {
+            setCurrentMobilePage(currentMobilePage - 1);
+            scrollToHistory();
+        }
+    };
+
+    const goToNextPage = async () => {
+        const totalLoadedPages = data?.pages?.length || 0;
+        const nextPage = currentMobilePage + 1;
+        
+        // If next page exists in loaded data, go to it
+        if (nextPage < totalLoadedPages) {
+            setCurrentMobilePage(nextPage);
+            scrollToHistory();
+        } 
+        // If next page hasn't been loaded yet but more pages exist, fetch it
+        else if (hasNextPage && !isFetchingNextPage) {
+            await fetchNextPage();
+            setCurrentMobilePage(nextPage);
+            scrollToHistory();
+        }
+    };
 
     const getActionIcon = (actionType) => {
         const config = actionTypeConfig[actionType];
@@ -334,7 +411,7 @@ const UserHistory = () => {
 
         return (
             <div className="history-content">
-                {allHistories.length === 0 ? (
+                {displayHistories.length === 0 ? (
                     <div className="history-empty">
                         <Activity className="empty-icon" />
                         <h3>No History Found</h3>
@@ -348,7 +425,7 @@ const UserHistory = () => {
                 ) : (
                     <>
                         <div className="history-timeline">
-                            {allHistories.map((history, index) => {
+                            {displayHistories.map((history, index) => {
                                 const ActionIcon = getActionIcon(history.actionType);
                                 const actionColor = getActionColor(history.actionType);
                                 
@@ -370,7 +447,7 @@ const UserHistory = () => {
                                             >
                                                 <ActionIcon size={16} />
                                             </div>
-                                            {index < allHistories.length - 1 && <div className="marker-line"></div>}
+                                            {index < displayHistories.length - 1 && <div className="marker-line"></div>}
                                         </div>
                                         
                                         <div className="history-card">
@@ -415,8 +492,8 @@ const UserHistory = () => {
                             })}
                         </div>
 
-                        {/* Infinite Scroll Loading Indicator */}
-                        {hasNextPage && (
+                        {/* Desktop: Infinite Scroll Loading Indicator */}
+                        {!isMobile && hasNextPage && (
                             <div ref={ref} className="history-loading-more-container">
                                 {isFetchingNextPage ? (
                                     <div className="history-loading-more">
@@ -430,9 +507,99 @@ const UserHistory = () => {
                                 )}
                             </div>
                         )}
+                        
+                        {/* Mobile: Static Pagination */}
+                        {isMobile && displayHistories.length > 0 && (
+                            <div className="history-pagination-container">
+                                <button
+                                    className="pagination-btn prev"
+                                    onClick={goToPrevPage}
+                                    disabled={currentMobilePage === 0 || isFetchingNextPage}
+                                >
+                                    Prev
+                                </button>
+                                
+                                <div className="pagination-pages">
+                                    {(() => {
+                                        const totalLoadedPages = data?.pages?.length || 0;
+                                        const pages = [];
+                                        const maxVisiblePages = 5;
+                                        
+                                        // Calculate range of pages to show
+                                        let startPage = Math.max(0, currentMobilePage - 2);
+                                        let endPage = Math.min(totalLoadedPages - 1, startPage + maxVisiblePages - 1);
+                                        
+                                        // Adjust start if we're near the end
+                                        if (endPage - startPage < maxVisiblePages - 1) {
+                                            startPage = Math.max(0, endPage - maxVisiblePages + 1);
+                                        }
+                                        
+                                        // Show first page if not in range
+                                        if (startPage > 0) {
+                                            pages.push(
+                                                <button
+                                                    key={0}
+                                                    className="pagination-page-btn"
+                                                    onClick={() => goToPage(0)}
+                                                    disabled={isFetchingNextPage}
+                                                >
+                                                    1
+                                                </button>
+                                            );
+                                            if (startPage > 1) {
+                                                pages.push(
+                                                    <span key="ellipsis-start" className="pagination-ellipsis">
+                                                        ...
+                                                    </span>
+                                                );
+                                            }
+                                        }
+                                        
+                                        // Show page range
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            pages.push(
+                                                <button
+                                                    key={i}
+                                                    className={`pagination-page-btn ${i === currentMobilePage ? 'active' : ''}`}
+                                                    onClick={() => goToPage(i)}
+                                                    disabled={isFetchingNextPage}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            );
+                                        }
+                                        
+                                        // Show ellipsis and next indicator if more pages available
+                                        if (hasNextPage) {
+                                            pages.push(
+                                                <span key="ellipsis-end" className="pagination-ellipsis">
+                                                    ...
+                                                </span>
+                                            );
+                                        }
+                                        
+                                        return pages;
+                                    })()}
+                                    
+                                    {isFetchingNextPage && (
+                                        <div className="pagination-loading">
+                                            <div className="loading-spinner-small"></div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <button
+                                    className="pagination-btn next"
+                                    onClick={goToNextPage}
+                                    disabled={(!hasNextPage && currentMobilePage >= (data?.pages?.length || 1) - 1) || isFetchingNextPage}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
 
                         {/* End of list indicator */}
-                        {!hasNextPage && allHistories.length > 0 && (
+                        {!hasNextPage && displayHistories.length > 0 && (
                             <div className="history-end-of-list">
                                 <CheckCircle size={20} />
                                 <p>You've reached the end of your history</p>
@@ -445,7 +612,7 @@ const UserHistory = () => {
     }, [allHistories, isLoading, filters.actionType, filters.category, hasNextPage, isFetchingNextPage]);
 
     return (
-        <div className="user-history">
+        <div className="user-history" ref={userHistoryRef}>
             {headerComponent}
             
             {error && (

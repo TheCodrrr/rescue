@@ -2686,3 +2686,334 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* Mobile Responsive Styles for MyComplaints */
+@media (max-width: 768px) {
+    .my-complaints-profile-card {
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+    }
+
+    .my-complaints-section-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .my-complaints-section-title {
+        font-size: 1.5rem;
+    }
+
+    .my-complaints-section-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .my-complaints-search-filter-section {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .my-complaint-card {
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .my-complaint-card-header {
+        padding: 0.875rem 1rem 0.5rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .my-card-header-right {
+        flex-wrap: wrap;
+    }
+
+    .my-complaint-card-body {
+        padding: 0.875rem 1rem 1rem 1rem;
+    }
+
+    .my-complaint-title-section {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .my-complaint-title-display {
+        font-size: 0.95rem;
+    }
+
+    .my-complaint-description-display {
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .my-complaint-location {
+        font-size: 0.875rem;
+    }
+
+    .my-rail-train-meta {
+        padding: 0.75rem;
+    }
+
+    .my-train-name-text {
+        font-size: 0.875rem;
+    }
+
+    .my-train-number-pill {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.375rem;
+    }
+
+    .my-train-type-badge {
+        font-size: 0.7rem;
+        padding: 0.125rem 0.375rem;
+    }
+
+    .my-train-route-grid {
+        gap: 0.75rem;
+    }
+
+    .my-seg-label {
+        font-size: 0.7rem;
+    }
+
+    .my-station-name {
+        font-size: 0.85rem;
+    }
+
+    .my-code {
+        font-size: 0.75rem;
+    }
+
+    .my-seg-time {
+        font-size: 0.75rem;
+    }
+
+    .my-complaint-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .my-complaint-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .my-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .btn-create-complaint-user-profile {
+        height: 6rem !important;
+        font-size: 1.2rem !important;
+    }
+
+    .btn-create-complaint-user-profile svg {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+    }
+
+    /* Modal adjustments */
+    .my-delete-modal {
+        max-width: 90%;
+        margin: 1rem;
+    }
+
+    .my-delete-modal-header {
+        padding: 1rem 1rem 0.75rem 1rem;
+    }
+
+    .my-delete-modal-content {
+        padding: 0.875rem 1rem 1rem 1rem;
+    }
+
+    .my-delete-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .my-cancel-delete-btn,
+    .my-confirm-delete-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .my-complaints-profile-card {
+        padding: 1rem 0.75rem;
+        border-radius: 10px;
+    }
+
+    .my-complaints-section-title {
+        font-size: 1.3rem;
+    }
+
+    .my-complaints-section-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .my-complaints-search-filter-section {
+        padding: 0.875rem;
+    }
+
+    .my-complaint-card {
+        border-radius: 10px;
+    }
+
+    .my-complaint-card-header {
+        padding: 0.75rem 0.875rem 0.5rem 0.875rem;
+    }
+
+    .my-complaint-card-body {
+        padding: 0.75rem 0.875rem 0.875rem 0.875rem;
+    }
+
+    .my-complaint-title-display {
+        font-size: 0.9rem;
+    }
+
+    .my-complaint-description-display {
+        font-size: 0.8rem;
+    }
+
+    .my-category-name {
+        font-size: 0.8rem;
+    }
+
+    .my-status-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
+
+    .my-delete-btn-icon,
+    .my-visit-btn-icon {
+        padding: 0.4rem;
+    }
+
+    .my-delete-icon {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    .my-severity-badge-display {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .my-complaint-location {
+        font-size: 0.8rem;
+    }
+
+    .my-location-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .my-rail-train-meta {
+        padding: 0.625rem;
+    }
+
+    .my-train-name-text {
+        font-size: 0.8rem;
+    }
+
+    .my-action-btn {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-create-complaint-user-profile {
+        height: 5rem !important;
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .my-complaints-profile-card {
+        padding: 0.875rem 0.5rem;
+    }
+
+    .my-complaints-section-title {
+        font-size: 1.2rem;
+    }
+
+    .my-complaints-section-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .my-complaint-card-header {
+        padding: 0.625rem 0.75rem 0.5rem 0.75rem;
+    }
+
+    .my-complaint-card-body {
+        padding: 0.625rem 0.75rem 0.75rem 0.75rem;
+    }
+
+    .my-complaint-title-display {
+        font-size: 0.85rem;
+    }
+
+    .my-complaint-description-display {
+        font-size: 0.75rem;
+    }
+
+    .my-category-icon-display {
+        font-size: 1rem;
+    }
+
+    .my-category-name {
+        font-size: 0.75rem;
+    }
+
+    .my-status-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+
+    .my-action-btn {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+        gap: 0.25rem;
+    }
+
+    .my-action-btn svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    .my-action-btn span {
+        font-size: 0.75rem;
+    }
+
+    .btn-create-complaint-user-profile {
+        height: 4.5rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    .btn-create-complaint-user-profile svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+
+    .my-delete-modal {
+        max-width: 95%;
+    }
+
+    .my-delete-modal-title {
+        font-size: 1rem;
+    }
+
+    .my-delete-complaint-title {
+        font-size: 0.9rem;
+    }
+
+    .my-delete-warning-text {
+        font-size: 0.8rem;
+    }
+
+    .my-cancel-delete-btn,
+    .my-confirm-delete-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.8rem;
+    }
+}
