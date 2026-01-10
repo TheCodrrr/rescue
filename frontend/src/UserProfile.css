@@ -1001,22 +1001,21 @@
         flex-direction: column;
         height: auto;
         min-height: 100vh;
+        padding-top: 70px;
     }
     
+    /* Hide sidebar on mobile */
     .profile-sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        display: none;
     }
     
     .profile-main {
         margin-left: 0;
         padding: 0;
         height: auto;
-        min-height: 100vh;
+        min-height: calc(100vh - 70px);
         overflow-y: visible;
+        width: 100%;
     }
     
     .back-button-container {
@@ -1028,8 +1027,39 @@
         padding: 0 1rem 1rem 1rem;
     }
     
+    /* Mobile section spacing - each section gets spacing between them */
+    .mobile-section {
+        margin-bottom: 2rem;
+        width: 100%;
+    }
+
+    .mobile-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Stack all content sections vertically */
+    .content-container > * {
+        margin-bottom: 1.5rem;
+    }
+    
     .contact-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .profile-card {
+        border-radius: 1.25rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .card-content {
+        padding: 1.25rem;
     }
 }
 
@@ -1053,6 +1083,52 @@
 }
 
 @media (max-width: 640px) {
+    .user-profile-container {
+        padding-top: 65px;
+    }
+    
+    .profile-main {
+        min-height: calc(100vh - 65px);
+    }
+    
+    .back-button-container {
+        margin: 0.75rem;
+    }
+    
+    .back-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+    
+    .back-icon {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+    
+    .content-container {
+        padding: 0 0.75rem 0.75rem 0.75rem;
+    }
+    
+    .content-container > * {
+        margin-bottom: 1.25rem;
+    }
+    
+    .profile-card {
+        border-radius: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .card-content {
+        padding: 1rem;
+    }
+    
     .edit-actions {
         gap: 0.25rem;
     }
@@ -1082,6 +1158,143 @@
     
     .contact-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-profile-container {
+        padding-top: 60px;
+    }
+    
+    .profile-main {
+        min-height: calc(100vh - 60px);
+    }
+    
+    .back-button-container {
+        margin: 0.5rem;
+    }
+    
+    .back-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.65rem;
+    }
+    
+    .back-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+    
+    .content-container {
+        padding: 0 0.5rem 0.5rem 0.5rem;
+    }
+    
+    .content-container > * {
+        margin-bottom: 1rem;
+    }
+    
+    .profile-card {
+        border-radius: 0.85rem;
+    }
+    
+    .card-header {
+        padding: 0.85rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .card-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .card-content {
+        padding: 0.85rem;
+    }
+    
+    .info-item {
+        padding: 0.75rem;
+    }
+    
+    .info-label {
+        font-size: 0.75rem;
+    }
+    
+    .info-value {
+        font-size: 0.9rem;
+    }
+    
+    .edit-btn,
+    .save-btn,
+    .cancel-btn {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .user-profile-container {
+        padding-top: 55px;
+    }
+    
+    .profile-main {
+        min-height: calc(100vh - 55px);
+    }
+    
+    .back-button-container {
+        margin: 0.4rem;
+    }
+    
+    .back-btn {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.6rem;
+    }
+    
+    .back-icon {
+        width: 0.95rem;
+        height: 0.95rem;
+    }
+    
+    .content-container {
+        padding: 0 0.4rem 0.4rem 0.4rem;
+    }
+    
+    .content-container > * {
+        margin-bottom: 0.85rem;
+    }
+    
+    .profile-card {
+        border-radius: 0.75rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 0.95rem;
+    }
+    
+    .card-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .card-content {
+        padding: 0.75rem;
+    }
+    
+    .info-item {
+        padding: 0.65rem;
+    }
+    
+    .info-label {
+        font-size: 0.7rem;
+    }
+    
+    .info-value {
+        font-size: 0.85rem;
     }
 }
 

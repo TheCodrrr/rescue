@@ -42,6 +42,12 @@ function MyComplaints() {
     const location = useLocation();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
     
+    // Mobile detection for pagination
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    
+    // Mobile pagination state
+    const [currentMobilePage, setCurrentMobilePage] = useState(0); // 0-indexed page number
+    
     // State for complaint management
     const [expandedComments, setExpandedComments] = useState({});
     const [votingInProgress, setVotingInProgress] = useState({});
@@ -64,6 +70,9 @@ function MyComplaints() {
     // Ref for search input to maintain focus
     const searchInputRef = useRef(null);
     
+    // Ref for MyComplaints section to scroll to on page change
+    const myComplaintsRef = useRef(null);
+    
     // Debounce search query to avoid too many API calls
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -72,6 +81,16 @@ function MyComplaints() {
         
         return () => clearTimeout(timer);
     }, [searchQuery]);
+    
+    // Handle window resize for mobile detection
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     
     // Use the infinite query hook with selected category and search query
     const { 
@@ -100,18 +119,24 @@ function MyComplaints() {
         { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
     ];
 
-    // Intersection observer for infinite scrolling
+    // Intersection observer for infinite scrolling (desktop only)
     const { ref } = useInView({
         threshold: 1,
         onChange: (inView) => {
-            if (inView && hasNextPage && !isFetchingNextPage) {
+            // Only trigger infinite scroll on desktop
+            if (!isMobile && inView && hasNextPage && !isFetchingNextPage) {
                 fetchNextPage();
             }
         },
     });
 
-    // Get all complaints from pages
+    // Get complaints based on device type
+    // Mobile: Show only current page (9 complaints)
+    // Desktop: Show all loaded pages (infinite scroll)
     const allComplaints = data?.pages?.flatMap(page => page.complaints) || [];
+    const mobileComplaints = (isMobile && data?.pages?.[currentMobilePage]) 
+        ? data.pages[currentMobilePage].complaints || [] 
+        : [];
 
     // Handle search results - preserve previous data if new search returns empty
     useEffect(() => {
@@ -153,7 +178,10 @@ function MyComplaints() {
     }, [data, debouncedSearchQuery, showingPreviousData, previousData]);
 
     // Use previous data if showing previous, otherwise use current data
-    const displayComplaints = showingPreviousData && previousData ? previousData : allComplaints;
+    // On mobile: show only current page, on desktop: show all loaded pages
+    const displayComplaints = showingPreviousData && previousData 
+        ? previousData 
+        : (isMobile ? mobileComplaints : allComplaints);
 
     // For display counts:
     // - currentlyLoaded: number of complaints currently shown in the UI
@@ -177,8 +205,9 @@ function MyComplaints() {
         }
     }, [data?.pages?.length]); // Only trigger when new pages are loaded
 
-    // Scroll to top when category or search query changes
+    // Reset mobile page and scroll when category or search query changes
     useEffect(() => {
+        setCurrentMobilePage(0);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [selectedCategory, debouncedSearchQuery]);
 
@@ -400,6 +429,49 @@ function MyComplaints() {
         await dispatch(removeComment(commentId));
     };
 
+    // Mobile pagination functions
+    const scrollToMyComplaints = () => {
+        if (myComplaintsRef.current) {
+            myComplaintsRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+    };
+
+    const goToPage = async (pageIndex) => {
+        // If the page hasn't been loaded yet, fetch it
+        if (pageIndex >= (data?.pages?.length || 0) && hasNextPage) {
+            await fetchNextPage();
+        }
+        setCurrentMobilePage(pageIndex);
+        scrollToMyComplaints();
+    };
+
+    const goToPrevPage = () => {
+        if (currentMobilePage > 0) {
+            setCurrentMobilePage(currentMobilePage - 1);
+            scrollToMyComplaints();
+        }
+    };
+
+    const goToNextPage = async () => {
+        const totalLoadedPages = data?.pages?.length || 0;
+        const nextPage = currentMobilePage + 1;
+        
+        // If next page exists in loaded data, go to it
+        if (nextPage < totalLoadedPages) {
+            setCurrentMobilePage(nextPage);
+            scrollToMyComplaints();
+        } 
+        // If next page hasn't been loaded yet but more pages exist, fetch it
+        else if (hasNextPage && !isFetchingNextPage) {
+            await fetchNextPage();
+            setCurrentMobilePage(nextPage);
+            scrollToMyComplaints();
+        }
+    };
+
     const highlightText = (text, searchQuery) => {
         if (!searchQuery.trim()) return text;
         
@@ -434,7 +506,7 @@ function MyComplaints() {
 
     return (
         <>
-            <div className="my-complaints-profile-card">
+            <div className="my-complaints-profile-card" ref={myComplaintsRef}>
                 <div className="my-complaints-section-header">
                     <h2 className="my-complaints-section-title">
                         {isOfficer ? 'My Accepted Cases' : 'My Complaints'}
@@ -781,8 +853,8 @@ function MyComplaints() {
                             ))}
                     </div>
 
-                    {/* Infinite Scroll Loading Indicator */}
-                    {hasNextPage && (
+                    {/* Desktop: Infinite Scroll Loading Indicator */}
+                    {!isMobile && hasNextPage && (
                         <div ref={ref} className="my-complaints-loading-more-container">
                             {isFetchingNextPage ? (
                                 <div className="my-complaints-loading-more">
@@ -794,6 +866,96 @@ function MyComplaints() {
                                     <p>Scroll to load more</p>
                                 </div>
                             )}
+                        </div>
+                    )}
+                    
+                    {/* Mobile: Static Pagination */}
+                    {isMobile && displayComplaints.length > 0 && (
+                        <div className="my-complaints-pagination-container">
+                            <button
+                                className="pagination-btn prev"
+                                onClick={goToPrevPage}
+                                disabled={currentMobilePage === 0 || isFetchingNextPage}
+                            >
+                                Prev
+                            </button>
+                            
+                            <div className="pagination-pages">
+                                {(() => {
+                                    const totalLoadedPages = data?.pages?.length || 0;
+                                    const pages = [];
+                                    const maxVisiblePages = 5;
+                                    
+                                    // Calculate range of pages to show
+                                    let startPage = Math.max(0, currentMobilePage - 2);
+                                    let endPage = Math.min(totalLoadedPages - 1, startPage + maxVisiblePages - 1);
+                                    
+                                    // Adjust start if we're near the end
+                                    if (endPage - startPage < maxVisiblePages - 1) {
+                                        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+                                    }
+                                    
+                                    // Show first page if not in range
+                                    if (startPage > 0) {
+                                        pages.push(
+                                            <button
+                                                key={0}
+                                                className="pagination-page-btn"
+                                                onClick={() => goToPage(0)}
+                                                disabled={isFetchingNextPage}
+                                            >
+                                                1
+                                            </button>
+                                        );
+                                        if (startPage > 1) {
+                                            pages.push(
+                                                <span key="ellipsis-start" className="pagination-ellipsis">
+                                                    ...
+                                                </span>
+                                            );
+                                        }
+                                    }
+                                    
+                                    // Show page range
+                                    for (let i = startPage; i <= endPage; i++) {
+                                        pages.push(
+                                            <button
+                                                key={i}
+                                                className={`pagination-page-btn ${i === currentMobilePage ? 'active' : ''}`}
+                                                onClick={() => goToPage(i)}
+                                                disabled={isFetchingNextPage}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        );
+                                    }
+                                    
+                                    // Show ellipsis and next indicator if more pages available
+                                    if (hasNextPage) {
+                                        pages.push(
+                                            <span key="ellipsis-end" className="pagination-ellipsis">
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    
+                                    return pages;
+                                })()}
+                                
+                                {isFetchingNextPage && (
+                                    <div className="pagination-loading">
+                                        <div className="my-complaints-spinner-small"></div>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <button
+                                className="pagination-btn next"
+                                onClick={goToNextPage}
+                                disabled={(!hasNextPage && currentMobilePage >= (data?.pages?.length || 1) - 1) || isFetchingNextPage}
+                            >
+                                Next
+                            </button>
                         </div>
                     )}
 

@@ -1004,6 +1004,18 @@ function UserProfileContent({ activeSection, contentRef }) {
         <MyComplaints />
     );
 
+    // Check if we're on mobile (matches the 768px breakpoint where sidebar is hidden)
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const renderContent = () => {
         switch (activeSection) {
             case 'profile':
@@ -1025,10 +1037,31 @@ function UserProfileContent({ activeSection, contentRef }) {
         }
     };
 
+    // On mobile, render all sections vertically
+    const renderAllSections = () => (
+        <>
+            <div className="mobile-section">
+                {renderProfileContent()}
+            </div>
+            <div className="mobile-section">
+                {renderMyComplaintsContent()}
+            </div>
+            <div className="mobile-section">
+                {renderAnalyticsContent()}
+            </div>
+            <div className="mobile-section">
+                {renderHistoryContent()}
+            </div>
+            <div className="mobile-section">
+                {renderSettingsContent()}
+            </div>
+        </>
+    );
+
     return (
         <>
             <div className="content-container" ref={contentRef}>
-                {renderContent()}
+                {isMobile ? renderAllSections() : renderContent()}
             </div>
 
             {/* Password Change Modal */}
