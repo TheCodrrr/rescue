@@ -2,7 +2,6 @@
 
 A comprehensive, real-time complaint management and incident reporting platform designed for public safety departments including Police, Fire, Railway, Road, Cyber Crime, and Court services.
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
 ![React](https://img.shields.io/badge/react-19.1.0-blue.svg)
 
