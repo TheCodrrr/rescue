@@ -151,13 +151,14 @@ const getDepartmentsByCategory = asyncHandler(async (req, res) => {
 })
 
 const getDepartmentDetailsById = asyncHandler(async (req, res) => {
-    let { departmentId } = req.params;
-    departmentId = new mongoose.Types.ObjectId(departmentId);
+    const { departmentId } = req.params;
 
+    // Validate BEFORE attempting to construct an ObjectId to avoid BSON errors
     if (!mongoose.Types.ObjectId.isValid(departmentId)) {
         throw new ApiError(400, "Invalid department ID format");
     }
 
+    // Mongoose can cast a valid string ObjectId internally
     const department = await Department.findById(departmentId);
 
     if (!department) {

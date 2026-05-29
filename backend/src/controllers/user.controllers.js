@@ -151,6 +151,8 @@ const loginUser = asyncHandler( async (req, res) => {
     if (!email) throw new ApiError(400, "Email is required");
 
     const user = await User.findOne({ email });
+    const finds = await User.findOne({ email }).explain("executionStats");
+    console.log(finds);
 
     if (!user) throw new ApiError(404, "User not found.");
 
@@ -261,7 +263,16 @@ const changeCurrentPassword = asyncHandler( async (req, res) => {
     return res.status(200).json( new ApiResponse(200, {}, "Password changed successfully"))
 })
 const getCurrentUser = asyncHandler( async (req, res) => {
-    return res.status(200).json( new ApiResponse(200, req.user, "Current user details"))
+    let user = req.user;
+
+    if (user.role === 'officer' && user.department_id) {
+        user = await User.findById(user._id)
+            .select("-password -refreshToken")
+            .populate("department_id", "name")
+            .lean();
+    }
+
+    return res.status(200).json( new ApiResponse(200, user, "Current user details"))
 })
 const updateAccountDetails = asyncHandler( async (req, res) => {
     const {name, email, phone, latitude, longitude, address} = req.body;
