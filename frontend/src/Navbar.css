@@ -1,11 +1,11 @@
 .navbar {
     position: fixed;
-    z-index: 1000;
+    z-index: 5000;
     inset: 0 0 auto;
     padding: 0.75rem 0;
     border-bottom: 1px solid var(--palette-line);
     color: var(--palette-ink);
-    background: color-mix(in srgb, var(--palette-white) 94%, transparent);
+    background: color-mix(in srgb, var(--palette-white) 90%, var(--palette-frost));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     animation: navbar-enter 220ms ease-out both;
@@ -13,7 +13,8 @@
 }
 
 .navbar-scrolled {
-    box-shadow: 0 3px 14px var(--palette-shadow);
+    border-bottom-color: var(--palette-steel-soft);
+    box-shadow: 0 4px 18px var(--palette-shadow);
 }
 
 .navbar-container {
@@ -44,7 +45,10 @@
 }
 
 .lodge-text {
-    color: var(--palette-ink);
+    background: linear-gradient(110deg, var(--palette-ink), var(--palette-steel));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     font-size: 1.45rem;
     font-weight: 750;
 }
@@ -75,9 +79,9 @@
 
 .navbar-link:hover,
 .navbar-link-active {
-    border-color: var(--palette-line);
+    border-color: var(--palette-steel-soft);
     color: var(--palette-ink);
-    background: var(--palette-cloud);
+    background: var(--palette-tint);
 }
 
 .navbar-link-icon {
@@ -119,22 +123,22 @@
 
 .auth-btn:hover,
 .mobile-nav-auth-btn:hover {
-    border-color: var(--palette-ink);
+    border-color: var(--palette-steel);
     color: var(--palette-white);
-    background: var(--palette-ink);
+    background: var(--palette-steel);
 }
 
 .signup-btn,
 .mobile-nav-signup-btn {
     border-color: var(--palette-ink);
     color: var(--palette-white);
-    background: var(--palette-ink);
+    background: linear-gradient(110deg, var(--palette-ink), var(--palette-steel));
 }
 
 .signup-btn:hover,
 .mobile-nav-signup-btn:hover {
     border-color: var(--palette-steel);
-    background: var(--palette-steel);
+    background: var(--palette-ink-soft);
 }
 
 .auth-btn-icon {
@@ -218,7 +222,7 @@
     inset: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    background: var(--palette-white);
+    background: linear-gradient(160deg, var(--palette-white), var(--palette-frost));
     transform: translateX(-100%);
     transition: transform 220ms ease;
 }
@@ -252,9 +256,9 @@
 
 .mobile-nav-link:hover,
 .mobile-nav-link-active {
-    border-color: var(--palette-line);
+    border-color: var(--palette-steel-soft);
     color: var(--palette-ink);
-    background: var(--palette-cloud);
+    background: var(--palette-tint);
 }
 
 .mobile-nav-link-icon {
@@ -281,7 +285,7 @@
     padding: 0.75rem;
     border: 1px solid var(--palette-line);
     border-radius: 5px;
-    background: var(--palette-cloud);
+    background: linear-gradient(145deg, var(--palette-surface-raised), var(--palette-frost));
     cursor: pointer;
 }
 

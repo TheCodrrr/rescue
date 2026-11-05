@@ -189,12 +189,12 @@ const Trending = () => {
 
   // Categories array for icons and colors
   const categories = [
-    { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
-    { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: '#db2777' },
-    { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: '#ef4444' },
-    { value: 'cyber', label: 'Cyber Crime', icon: <FiAlertTriangle />, color: '#8b5cf6' },
-    { value: 'police', label: 'Police', icon: <FiAlertTriangle />, color: '#3b82f6' },
-    { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
+    { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: 'var(--palette-steel)' },
+    { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: 'var(--palette-steel)' },
+    { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: 'var(--palette-steel)' },
+    { value: 'cyber', label: 'Cyber Crime', icon: <FiAlertTriangle />, color: 'var(--palette-steel)' },
+    { value: 'police', label: 'Police', icon: <FiAlertTriangle />, color: 'var(--palette-steel)' },
+    { value: 'court', label: 'Court', icon: <MdBalance />, color: 'var(--palette-steel)' }
   ];
 
   // Handle ESC key to close modals
@@ -281,7 +281,7 @@ const Trending = () => {
 
   const getCategoryColor = (category) => {
     const categoryData = categories.find(cat => cat.value === category);
-    return categoryData ? categoryData.color : '#6b7280';
+    return categoryData ? categoryData.color : 'var(--palette-steel)';
   };
 
   const getStatusBadgeClass = (status) => {
@@ -321,9 +321,9 @@ const Trending = () => {
     const severityMap = {
       'low': {
         label: 'Low',
-        color: '#ffffff',
-        bgColor: 'rgba(16, 185, 129, 0.8)',
-        borderColor: 'rgba(16, 185, 129, 1)',
+        color: 'var(--palette-ink)',
+        bgColor: 'var(--palette-cloud)',
+        borderColor: 'var(--palette-mist)',
         icon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -332,9 +332,9 @@ const Trending = () => {
       },
       'medium': {
         label: 'Medium',
-        color: '#1f2937',
-        bgColor: 'rgba(245, 158, 11, 0.9)',
-        borderColor: 'rgba(245, 158, 11, 1)',
+        color: 'var(--palette-ink)',
+        bgColor: 'color-mix(in srgb, var(--palette-mist) 45%, var(--palette-white))',
+        borderColor: 'var(--palette-steel)',
         icon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -343,9 +343,9 @@ const Trending = () => {
       },
       'high': {
         label: 'High',
-        color: '#ffffff',
-        bgColor: 'rgba(239, 68, 68, 0.9)',
-        borderColor: 'rgba(239, 68, 68, 1)',
+        color: 'var(--palette-white)',
+        bgColor: 'var(--palette-steel)',
+        borderColor: 'var(--palette-ink)',
         icon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -356,9 +356,9 @@ const Trending = () => {
     
     return severityMap[severity] || {
       label: 'Unknown',
-      color: '#ffffff',
-      bgColor: 'rgba(107, 114, 128, 0.8)',
-      borderColor: 'rgba(107, 114, 128, 1)',
+      color: 'var(--palette-ink)',
+      bgColor: 'var(--palette-cloud)',
+      borderColor: 'var(--palette-mist)',
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -440,13 +440,12 @@ const Trending = () => {
           className: 'custom-toast custom-toast-success',
           icon: <FiThumbsUp />,
           style: {
-            background: 'rgba(34, 197, 94, 0.2)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(34, 197, 94, 0.4)',
-            color: '#fff',
+            background: 'var(--palette-cloud)',
+            border: '1px solid var(--palette-mist)',
+            color: 'var(--palette-ink)',
             fontWeight: '600',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)',
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px var(--palette-shadow)',
           },
         });
       } else {
@@ -538,13 +537,12 @@ const Trending = () => {
           className: 'custom-toast custom-toast-success',
           icon: <FiThumbsDown />,
           style: {
-            background: 'rgba(239, 68, 68, 0.2)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#fff',
+            background: 'var(--palette-cloud)',
+            border: '1px solid var(--palette-mist)',
+            color: 'var(--palette-ink)',
             fontWeight: '600',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.3)',
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px var(--palette-shadow)',
           },
         });
       } else {
@@ -879,13 +877,12 @@ const Trending = () => {
           position: 'top-center',
           icon: <FiMessageCircle />,
           style: {
-            background: 'rgba(16, 185, 129, 0.2)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            color: '#fff',
+            background: 'var(--palette-cloud)',
+            border: '1px solid var(--palette-mist)',
+            color: 'var(--palette-ink)',
             fontWeight: '600',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px var(--palette-shadow)',
           },
         });
       } else {

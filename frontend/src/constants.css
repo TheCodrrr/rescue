@@ -4,9 +4,16 @@
     --palette-steel: #526D82;
     --palette-ink: #27374D;
     --palette-white: #F7F9FB;
-    --palette-line: color-mix(in srgb, var(--palette-mist) 48%, var(--palette-white));
-    --palette-muted: color-mix(in srgb, var(--palette-steel) 72%, var(--palette-mist));
-    --palette-shadow: color-mix(in srgb, var(--palette-ink) 12%, transparent);
+    --palette-frost: color-mix(in srgb, var(--palette-cloud) 48%, var(--palette-white));
+    --palette-surface: color-mix(in srgb, var(--palette-cloud) 34%, var(--palette-white));
+    --palette-surface-raised: color-mix(in srgb, var(--palette-cloud) 72%, var(--palette-white));
+    --palette-tint: color-mix(in srgb, var(--palette-steel) 8%, var(--palette-white));
+    --palette-tint-strong: color-mix(in srgb, var(--palette-steel) 15%, var(--palette-white));
+    --palette-steel-soft: color-mix(in srgb, var(--palette-steel) 36%, var(--palette-cloud));
+    --palette-ink-soft: color-mix(in srgb, var(--palette-steel) 32%, var(--palette-ink));
+    --palette-line: color-mix(in srgb, var(--palette-mist) 56%, var(--palette-white));
+    --palette-muted: color-mix(in srgb, var(--palette-steel) 78%, var(--palette-mist));
+    --palette-shadow: color-mix(in srgb, var(--palette-ink) 16%, transparent);
 
     --color1: #222831;
     --color2: #393E46;
