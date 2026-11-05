@@ -1,4 +1,13 @@
 :root {
+    --palette-cloud: #DDE6ED;
+    --palette-mist: #9DB2BF;
+    --palette-steel: #526D82;
+    --palette-ink: #27374D;
+    --palette-white: #F7F9FB;
+    --palette-line: color-mix(in srgb, var(--palette-mist) 48%, var(--palette-white));
+    --palette-muted: color-mix(in srgb, var(--palette-steel) 72%, var(--palette-mist));
+    --palette-shadow: color-mix(in srgb, var(--palette-ink) 12%, transparent);
+
     --color1: #222831;
     --color2: #393E46;
     --color3: #00ADB5;
