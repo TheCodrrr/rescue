@@ -288,6 +288,21 @@
     background: var(--palette-tint-strong);
 }
 
+.trending-action-btn.trending-upvote { color: var(--palette-steel); }
+.trending-action-btn.trending-downvote { color: var(--palette-ink-soft); }
+
+.trending-action-btn.trending-upvote:hover:not(:disabled) {
+    border-color: var(--palette-steel);
+    color: var(--palette-ink);
+    background: var(--palette-surface-raised);
+}
+
+.trending-action-btn.trending-downvote:hover:not(:disabled) {
+    border-color: var(--palette-ink-soft);
+    color: var(--palette-ink);
+    background: var(--palette-tint-strong);
+}
+
 .trending-action-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .trending-action-btn.loading { background: var(--palette-tint-strong); }
 .action-icon { width: 0.9rem; height: 0.9rem; }

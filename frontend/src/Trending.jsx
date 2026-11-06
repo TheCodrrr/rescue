@@ -34,7 +34,9 @@ import {
   MdElectricalServices,
   MdTrain
 } from 'react-icons/md';
-import "./Trending.css";
+import trendingStyles from "./Trending.module.css";
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => trendingStyles[className] ?? className).join(" ");
 
 const Trending = () => {
   const dispatch = useDispatch();
@@ -220,10 +222,10 @@ const Trending = () => {
     return (
       <>
         <Navbar />
-        <div className="trending-page">
-          <div className="trending-container">
-            <div className="loading-state">
-              <div className="loading-spinner"></div>
+        <div className={cx("trending-page")}>
+          <div className={cx("trending-container")}>
+            <div className={cx("loading-state")}>
+              <div className={cx("loading-spinner")}></div>
               <p>Loading trending complaints...</p>
             </div>
           </div>
@@ -238,10 +240,10 @@ const Trending = () => {
     return (
       <>
         <Navbar />
-        <div className="trending-page">
-          <div className="trending-container">
-            <div className="error-state">
-              <div className="error-icon">⚠️</div>
+        <div className={cx("trending-page")}>
+          <div className={cx("trending-container")}>
+            <div className={cx("error-state")}>
+              <div className={cx("error-icon")}>⚠️</div>
               <h3>Error Loading Complaints</h3>
               <p>{error?.message || "Failed to load trending complaints"}</p>
             </div>
@@ -257,10 +259,10 @@ const Trending = () => {
     return (
       <>
         <Navbar />
-        <div className="trending-page">
-          <div className="trending-container">
-            <div className="empty-state">
-              <div className="empty-icon"><MdTrendingUp /></div>
+        <div className={cx("trending-page")}>
+          <div className={cx("trending-container")}>
+            <div className={cx("empty-state")}>
+              <div className={cx("empty-icon")}><MdTrendingUp /></div>
               <h3>No Trending Complaints</h3>
               <p>No trending complaints found at the moment.</p>
             </div>
@@ -902,7 +904,7 @@ const Trending = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <span 
         key={i} 
-        className={`star ${i < rating ? 'filled' : ''}`}
+        className={cx(`star ${i < rating ? 'filled' : ''}`)}
         onClick={() => setCommentRating(i + 1)}
       >
         ★
@@ -913,37 +915,37 @@ const Trending = () => {
   return (
     <>
       <Navbar />
-      <div className="trending-page">
-        <div className="trending-container">
-          <div className="trending-header">
-            <h1 className="trending-title">
-              <span className="trending-icon"><MdTrendingUp /></span>
+      <div className={cx("trending-page")}>
+        <div className={cx("trending-container")}>
+          <div className={cx("trending-header")}>
+            <h1 className={cx("trending-title")}>
+              <span className={cx("trending-icon")}><MdTrendingUp /></span>
               Trending Complaints
             </h1>
-            <p className="trending-subtitle">
+            <p className={cx("trending-subtitle")}>
               Discover the most discussed and voted complaints in your community
             </p>
           </div>
 
           {/* Loading State */}
           {status === 'pending' && (
-            <div className="trending-loading">
-              <div className="animated-loader">
-                <div className="animated-circle">
-                  <div className="dot"></div>
-                  <div className="outline"></div>
+            <div className={cx("trending-loading")}>
+              <div className={cx("animated-loader")}>
+                <div className={cx("animated-circle")}>
+                  <div className={cx("dot")}></div>
+                  <div className={cx("outline")}></div>
                 </div>
-                <div className="animated-circle">
-                  <div className="dot"></div>
-                  <div className="outline"></div>
+                <div className={cx("animated-circle")}>
+                  <div className={cx("dot")}></div>
+                  <div className={cx("outline")}></div>
                 </div>
-                <div className="animated-circle">
-                  <div className="dot"></div>
-                  <div className="outline"></div>
+                <div className={cx("animated-circle")}>
+                  <div className={cx("dot")}></div>
+                  <div className={cx("outline")}></div>
                 </div>
-                <div className="animated-circle">
-                  <div className="dot"></div>
-                  <div className="outline"></div>
+                <div className={cx("animated-circle")}>
+                  <div className={cx("dot")}></div>
+                  <div className={cx("outline")}></div>
                 </div>
               </div>
               <span>Loading trending complaints...</span>
@@ -952,11 +954,11 @@ const Trending = () => {
 
           {/* Error State */}
           {status === 'error' && (
-            <div className="trending-error">
+            <div className={cx("trending-error")}>
               <FiAlertTriangle size={48} />
               <h3>Failed to load complaints</h3>
               <p>{error?.message || 'Something went wrong. Please try again.'}</p>
-              <button onClick={() => window.location.reload()} className="retry-btn">
+              <button onClick={() => window.location.reload()} className={cx("retry-btn")}>
                 Retry
               </button>
             </div>
@@ -964,26 +966,26 @@ const Trending = () => {
 
           {/* Success State - Show complaints */}
           {status === 'success' && data?.pages && (
-            <div className="trending-complaints-grid">
+            <div className={cx("trending-complaints-grid")}>
               {data.pages.map((page, pageIndex) =>
                 page.complaints?.map((complaint, index) => (
-                <div key={complaint._id || `${pageIndex}-${index}`} className="trending-card">
+                <div key={complaint._id || `${pageIndex}-${index}`} className={cx("trending-card")}>
                   {/* Card Header - Category with status + User info on right */}
-                  <div className="trending-card-header">
-                    <div className="trending-category-with-status">
+                  <div className={cx("trending-card-header")}>
+                    <div className={cx("trending-category-with-status")}>
                       <span 
-                        className="trending-category-icon"
+                        className={cx("trending-category-icon")}
                         style={{ color: getCategoryColor(complaint.category) }}
                       >
                         {getCategoryIcon(complaint.category)}
                       </span>
-                      <span className="trending-category-name">
+                      <span className={cx("trending-category-name")}>
                         {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
                       </span>
                       {complaint.status && (
-                        <div className="trending-status-mini">
+                        <div className={cx("trending-status-mini")}>
                           <span 
-                            className={`trending-status-dot ${getStatusBadgeClass(complaint.status)}`}
+                            className={cx(`trending-status-dot ${getStatusBadgeClass(complaint.status)}`)}
                             title={`Status: ${mapStatusToFrontend(complaint.status).replace('-', ' ')}`}
                           ></span>
                         </div>
@@ -992,21 +994,21 @@ const Trending = () => {
                     
                     {/* Hoverable User Info - Right aligned */}
                     {complaint.user_id && (
-                      <div className="trending-user-hover-container">
-                        <div className="trending-user-avatar-hover">
+                      <div className={cx("trending-user-hover-container")}>
+                        <div className={cx("trending-user-avatar-hover")}>
                           {complaint.user_id.profileImage ? (
                             <img 
                               src={complaint.user_id.profileImage} 
                               alt={complaint.user_id.name || 'User'} 
-                              className="trending-avatar-image-hover"
+                              className={cx("trending-avatar-image-hover")}
                             />
                           ) : (
-                            <div className="trending-avatar-placeholder-hover">
+                            <div className={cx("trending-avatar-placeholder-hover")}>
                               {(complaint.user_id.name || 'U').charAt(0).toUpperCase()}
                             </div>
                           )}
                         </div>
-                        <div className="trending-user-name-expandable">
+                        <div className={cx("trending-user-name-expandable")}>
                           {complaint.user_id.name || 'Anonymous'}
                         </div>
                       </div>
@@ -1014,15 +1016,15 @@ const Trending = () => {
                   </div>
 
                   {/* Main Content Area */}
-                  <div className="trending-card-content">
+                  <div className={cx("trending-card-content")}>
                     {/* Title and Severity Row */}
-                    <div className="trending-title-row">
-                      <h4 className="trending-complaint-title">
+                    <div className={cx("trending-title-row")}>
+                      <h4 className={cx("trending-complaint-title")}>
                         {shortenString(complaint?.title || "", 15)}
                       </h4>
                       {complaint.severity && (
                         <div 
-                          className="trending-severity-indicator"
+                          className={cx("trending-severity-indicator")}
                           title="Severity"
                           style={{
                             color: getSeverityInfo(complaint.severity).color,
@@ -1030,10 +1032,10 @@ const Trending = () => {
                             borderColor: getSeverityInfo(complaint.severity).borderColor
                           }}
                         >
-                          <span className="trending-severity-icon">
+                          <span className={cx("trending-severity-icon")}>
                             {getSeverityInfo(complaint.severity).icon}
                           </span>
-                          <span className="trending-severity-label">
+                          <span className={cx("trending-severity-label")}>
                             {getSeverityInfo(complaint.severity).label}
                           </span>
                         </div>
@@ -1041,69 +1043,69 @@ const Trending = () => {
                     </div>
 
                     {/* Description */}
-                    <p className="trending-complaint-description">
+                    <p className={cx("trending-complaint-description")}>
                       {shortenString(complaint?.description || "", 130)}
                     </p>
 
                     {/* Address - Left aligned */}
                     {complaint.address && (
-                      <div className="trending-address-display">
-                        <FiMapPin className="trending-address-icon" />
-                        <span className="trending-address-text">{complaint.address}</span>
+                      <div className={cx("trending-address-display")}>
+                        <FiMapPin className={cx("trending-address-icon")} />
+                        <span className={cx("trending-address-text")}>{complaint.address}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Card Footer - Actions and Stats */}
-                  <div className="trending-card-footer">
+                  <div className={cx("trending-card-footer")}>
                     {/* Engagement Actions */}
-                    <div className="trending-actions">
+                    <div className={cx("trending-actions")}>
                       <button 
-                        className={`trending-action-btn trending-upvote ${votingInProgress[`${complaint._id}-upvote`] ? 'loading' : ''}`}
+                        className={cx(`trending-action-btn trending-upvote ${votingInProgress[`${complaint._id}-upvote`] ? 'loading' : ''}`)}
                         onClick={() => handleUpvote(complaint._id)}
                         disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
                         title="Upvote"
                       >
                         {votingInProgress[`${complaint._id}-upvote`] ? (
-                          <div className="action-spinner"></div>
+                          <div className={cx("action-spinner")}></div>
                         ) : (
-                          <FiThumbsUp className="action-icon" />
+                          <FiThumbsUp className={cx("action-icon")} />
                         )}
-                        <span className="action-count">{complaint.upvote || 0}</span>
+                        <span className={cx("action-count")}>{complaint.upvote || 0}</span>
                       </button>
                       
                       <button 
-                        className={`trending-action-btn trending-downvote ${votingInProgress[`${complaint._id}-downvote`] ? 'loading' : ''}`}
+                        className={cx(`trending-action-btn trending-downvote ${votingInProgress[`${complaint._id}-downvote`] ? 'loading' : ''}`)}
                         onClick={() => handleDownvote(complaint._id)}
                         disabled={votingInProgress[`${complaint._id}-upvote`] || votingInProgress[`${complaint._id}-downvote`]}
                         title="Downvote"
                       >
                         {votingInProgress[`${complaint._id}-downvote`] ? (
-                          <div className="action-spinner"></div>
+                          <div className={cx("action-spinner")}></div>
                         ) : (
-                          <FiThumbsDown className="action-icon" />
+                          <FiThumbsDown className={cx("action-icon")} />
                         )}
-                        <span className="action-count">{complaint.downvote || 0}</span>
+                        <span className={cx("action-count")}>{complaint.downvote || 0}</span>
                       </button>
 
                       <button 
-                        className="trending-action-btn trending-comment"
+                        className={cx("trending-action-btn trending-comment")}
                         onClick={() => openCommentModal(complaint)}
                         title="View Comments"
                       >
-                        <FiMessageCircle className="action-icon" />
-                        <span className="action-count">{getCommentCount(complaint)}</span>
+                        <FiMessageCircle className={cx("action-icon")} />
+                        <span className={cx("action-count")}>{getCommentCount(complaint)}</span>
                       </button>
                     </div>
 
                     {/* Meta Info */}
-                    <div className="trending-meta-info">
-                      <div className="trending-score-display">
-                        <MdLocalFireDepartment className="trending-fire-icon" />
-                        <span className="trending-score-value">{complaint.score?.toFixed(1) || '0.0'}</span>
+                    <div className={cx("trending-meta-info")}>
+                      <div className={cx("trending-score-display")}>
+                        <MdLocalFireDepartment className={cx("trending-fire-icon")} />
+                        <span className={cx("trending-score-value")}>{complaint.score?.toFixed(1) || '0.0'}</span>
                       </div>
-                      <div className="trending-date-display">
-                        <span className="trending-date-text">{formatDate(complaint.createdAt)}</span>
+                      <div className={cx("trending-date-display")}>
+                        <span className={cx("trending-date-text")}>{formatDate(complaint.createdAt)}</span>
                       </div>
                     </div>
                   </div>
@@ -1111,38 +1113,38 @@ const Trending = () => {
               ))
             )}
 
-            <div ref={ref} className="load-more-section">
+            <div ref={ref} className={cx("load-more-section")}>
               {isFetchingNextPage ? (
-                <div className="loading-more">
-                  <div className="animated-loader">
-                    <div className="animated-circle">
-                      <div className="dot"></div>
-                      <div className="outline"></div>
+                <div className={cx("loading-more")}>
+                  <div className={cx("animated-loader")}>
+                    <div className={cx("animated-circle")}>
+                      <div className={cx("dot")}></div>
+                      <div className={cx("outline")}></div>
                     </div>
-                    <div className="animated-circle">
-                      <div className="dot"></div>
-                      <div className="outline"></div>
+                    <div className={cx("animated-circle")}>
+                      <div className={cx("dot")}></div>
+                      <div className={cx("outline")}></div>
                     </div>
-                    <div className="animated-circle">
-                      <div className="dot"></div>
-                      <div className="outline"></div>
+                    <div className={cx("animated-circle")}>
+                      <div className={cx("dot")}></div>
+                      <div className={cx("outline")}></div>
                     </div>
-                    <div className="animated-circle">
-                      <div className="dot"></div>
-                      <div className="outline"></div>
+                    <div className={cx("animated-circle")}>
+                      <div className={cx("dot")}></div>
+                      <div className={cx("outline")}></div>
                     </div>
                   </div>
                   <span>Loading more complaints...</span>
                 </div>
               ) : hasNextPage ? (
-                <div className="scroll-indicator">
+                <div className={cx("scroll-indicator")}>
                   <span>Scroll to load more</span>
-                  <svg className="scroll-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cx("scroll-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
                 </div>
               ) : (
-                <div className="end-message">
+                <div className={cx("end-message")}>
                   <span>🎉 You've reached the end! No more complaints to show.</span>
                 </div>
               )}
