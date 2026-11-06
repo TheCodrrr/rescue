@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import "./Navbar.css";
+import navbarStyles from "./Navbar.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { logout } from "./auth/redux/authSlice";
 import CloudImage from "./utils/CloudImage";
 
 // Navigation links component using React Router Link
+const cx = (classNames) => classNames.split(/\s+/).map((className) => navbarStyles[className] ?? className).join(" ");
+
 const NavLinks = ({ links, currentPath }) => {
     return (
         <>
@@ -13,14 +15,14 @@ const NavLinks = ({ links, currentPath }) => {
                 <Link
                     key={link.name}
                     to={link.href}
-                    className={`navbar-link ${currentPath === link.href ? 'navbar-link-active' : ''}`}
+                    className={cx(`navbar-link ${currentPath === link.href ? 'navbar-link-active' : ''}`)}
                     style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                    <svg className="navbar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg className={cx("navbar-link-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                     </svg>
-                    <span className="navbar-link-text">{link.name}</span>
-                    <div className="navbar-link-hover-effect"></div>
+                    <span className={cx("navbar-link-text")}>{link.name}</span>
+                    <div className={cx("navbar-link-hover-effect")}></div>
                 </Link>
             ))}
         </>
@@ -32,23 +34,23 @@ NavLinks.displayName = 'NavLinks';
 // Memoized auth buttons component
 const AuthButtons = React.memo(({ isAuthenticated, handleLogin, handleSignup, handleSignOut, handleProfileClick, userProfileImage, userName }) => {
     return (
-        <div className="navbar-auth">
+        <div className={cx("navbar-auth")}>
             {!isAuthenticated ? (
                 <>
                     <button 
-                        className="auth-btn login-btn"
+                        className={cx("auth-btn login-btn")}
                         onClick={handleLogin}
                     >
-                        <svg className="auth-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className={cx("auth-btn-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                         </svg>
                         Login
                     </button>
                     <button 
-                        className="auth-btn signup-btn"
+                        className={cx("auth-btn signup-btn")}
                         onClick={handleSignup}
                     >
-                        <svg className="auth-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className={cx("auth-btn-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                         Sign Up
@@ -57,25 +59,25 @@ const AuthButtons = React.memo(({ isAuthenticated, handleLogin, handleSignup, ha
             ) : (
                 <>
                     <button 
-                        className="auth-btn signout-btn"
+                        className={cx("auth-btn signout-btn")}
                         onClick={handleSignOut}
                         title="Sign Out"
                     >
-                        <svg className="auth-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className={cx("auth-btn-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </button>
                     <button 
-                        className="profile-btn"
+                        className={cx("profile-btn")}
                         onClick={handleProfileClick}
                         title={`${userName || 'Unknown'}'s Profile`}
                     >
                         <CloudImage
                             src={userProfileImage || "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png"}
                             alt={userName || "Unknown"}
-                            className="profile-avatar"
+                            className={cx("profile-avatar")}
                         />
-                        <div className="profile-status-indicator"></div>
+                        <div className={cx("profile-status-indicator")}></div>
                     </button>
                 </>
             )}
@@ -184,20 +186,20 @@ const Navbar = () => {
     }, [isAuthenticated, userRole, commonNavLinks, citizenSpecificLinks, officerSpecificLinks]);
 
     return (
-        <nav className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`}>
-            <div className="navbar-container">
+        <nav className={cx(`navbar ${isScrolled ? 'navbar-scrolled' : ''}`)}>
+            <div className={cx("navbar-container")}>
                 {/* Logo */}
-                <div className="navbar-brand">
-                    <Link to="/home" className="lodge-logo" onClick={handleLogoClick}>
-                        <svg className="lodge-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className={cx("navbar-brand")}>
+                    <Link to="/home" className={cx("lodge-logo")} onClick={handleLogoClick}>
+                        <svg className={cx("lodge-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        <span className="lodge-text">Rescue</span>
+                        <span className={cx("lodge-text")}>Rescue</span>
                     </Link>
                 </div>
 
                 {/* Desktop Navigation */}
-                <div className="navbar-menu ml-3">
+                <div className={cx("navbar-menu ml-3")}>
                     <NavLinks links={displayNavLinks} currentPath={location.pathname} />
                 </div>
 
@@ -213,8 +215,8 @@ const Navbar = () => {
                 />
 
                 {/* Mobile Menu Button */}
-                <div className="mobile-menu-button" onClick={toggleMobileMenu}>
-                    <div className={`hamburger ${isMobileMenuOpen ? 'hamburger-active' : ''}`}>
+                <div className={cx("mobile-menu-button")} onClick={toggleMobileMenu}>
+                    <div className={cx(`hamburger ${isMobileMenuOpen ? 'hamburger-active' : ''}`)}>
                         <span></span>
                         <span></span>
                         <span></span>
@@ -223,29 +225,29 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Navigation Sidebar */}
-            <div className={`mobile-nav-sidebar ${isMobileMenuOpen ? 'mobile-nav-sidebar-open' : ''}`}>
-                <div className="mobile-nav-sidebar-content">
+            <div className={cx(`mobile-nav-sidebar ${isMobileMenuOpen ? 'mobile-nav-sidebar-open' : ''}`)}>
+                <div className={cx("mobile-nav-sidebar-content")}>
                     {displayNavLinks.map((link, index) => (
                         <Link
                             key={link.name}
                             to={link.href}
-                            className={`mobile-nav-link ${location.pathname === link.href ? 'mobile-nav-link-active' : ''}`}
+                            className={cx(`mobile-nav-link ${location.pathname === link.href ? 'mobile-nav-link-active' : ''}`)}
                             style={{ animationDelay: `${index * 0.1}s` }}
                             onClick={closeMobileMenu}
                         >
-                            <svg className="mobile-nav-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className={cx("mobile-nav-link-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
                             </svg>
-                            <span className="mobile-nav-link-text">{link.name}</span>
+                            <span className={cx("mobile-nav-link-text")}>{link.name}</span>
                         </Link>
                     ))}
 
                     {/* Mobile Auth Section */}
-                    <div className="mobile-nav-auth-section">
+                    <div className={cx("mobile-nav-auth-section")}>
                         {!isAuthenticated ? (
                             <>
                                 <button 
-                                    className="mobile-nav-auth-btn mobile-nav-login-btn"
+                                    className={cx("mobile-nav-auth-btn mobile-nav-login-btn")}
                                     onClick={() => { handleLogin(); closeMobileMenu(); }}
                                 >
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
@@ -254,7 +256,7 @@ const Navbar = () => {
                                     Login
                                 </button>
                                 <button 
-                                    className="mobile-nav-auth-btn mobile-nav-signup-btn"
+                                    className={cx("mobile-nav-auth-btn mobile-nav-signup-btn")}
                                     onClick={() => { handleSignup(); closeMobileMenu(); }}
                                 >
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
@@ -266,21 +268,21 @@ const Navbar = () => {
                         ) : (
                             <>
                                 <div 
-                                    className="mobile-nav-profile-card"
+                                    className={cx("mobile-nav-profile-card")}
                                     onClick={() => { handleProfileClick(); closeMobileMenu(); }}
                                 >
                                     <CloudImage
                                         src={userProfileImage || "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png"}
                                         alt={userName || "Unknown"}
-                                        className="mobile-nav-profile-avatar"
+                                        className={cx("mobile-nav-profile-avatar")}
                                     />
-                                    <div className="mobile-nav-profile-info">
-                                        <div className="mobile-nav-profile-name">{userName || 'User'}</div>
-                                        <div className="mobile-nav-profile-role">{userRole === 'officer' ? 'Officer' : 'Citizen'}</div>
+                                    <div className={cx("mobile-nav-profile-info")}>
+                                        <div className={cx("mobile-nav-profile-name")}>{userName || 'User'}</div>
+                                        <div className={cx("mobile-nav-profile-role")}>{userRole === 'officer' ? 'Officer' : 'Citizen'}</div>
                                     </div>
                                 </div>
                                 <button 
-                                    className="mobile-nav-auth-btn mobile-nav-signout-btn"
+                                    className={cx("mobile-nav-auth-btn mobile-nav-signout-btn")}
                                     onClick={() => { handleSignOut(); closeMobileMenu(); }}
                                 >
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
