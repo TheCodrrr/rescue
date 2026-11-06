@@ -2963,7 +2963,7 @@
 }
 
 /* Prevent background scroll when modal is open - AGGRESSIVE APPROACH */
-body.modal-open {
+:global(body.modal-open) {
     overflow: hidden !important;
     position: fixed !important;
     width: 100% !important;
@@ -2973,7 +2973,7 @@ body.modal-open {
     overscroll-behavior: none !important;
 }
 
-html.modal-open {
+:global(html.modal-open) {
     overflow: hidden !important;
     overscroll-behavior: none !important;
 }

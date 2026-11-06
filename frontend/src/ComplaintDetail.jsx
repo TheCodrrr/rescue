@@ -69,9 +69,10 @@ import {
 } from './auth/redux/historySlice';
 import EscalationBadge, { EscalationTimeline } from './EscalationBadge';
 import ComplaintProgress from './ComplaintProgress';
-import "./Complaint.css";
+import complaintStyles from "./Complaint.module.css";
 import "./ComplaintDetail.css";
 import "./Toast.css";
+const cx = (classNames) => classNames.split(/\s+/).map((className) => complaintStyles[className] ?? className).join(" ");
 
 // Fix for Leaflet default markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -461,7 +462,7 @@ export default function ComplaintDetail() {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="cd-rail-speed-gauge"
+                className={cx("cd-rail-speed-gauge")}
             >
                 <svg ref={svgRef} width="200" height="120"></svg>
             </motion.div>
@@ -490,21 +491,21 @@ export default function ComplaintDetail() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="cd-rail-route-timeline"
+                className={cx("cd-rail-route-timeline")}
             >
-                <div className="cd-route-overview">
-                    <div className="cd-route-summary">
-                        <div className="cd-route-info-item">
-                            <span className="cd-route-label">Total Stations:</span>
-                            <span className="cd-route-value">{routeStations.length}</span>
+                <div className={cx("cd-route-overview")}>
+                    <div className={cx("cd-route-summary")}>
+                        <div className={cx("cd-route-info-item")}>
+                            <span className={cx("cd-route-label")}>Total Stations:</span>
+                            <span className={cx("cd-route-value")}>{routeStations.length}</span>
                         </div>
-                        <div className="cd-route-info-item">
-                            <span className="cd-route-label">Total Distance:</span>
-                            <span className="cd-route-value">{totalDistance} km</span>
+                        <div className={cx("cd-route-info-item")}>
+                            <span className={cx("cd-route-label")}>Total Distance:</span>
+                            <span className={cx("cd-route-value")}>{totalDistance} km</span>
                         </div>
-                        <div className="cd-route-info-item">
-                            <span className="cd-route-label">Journey Time:</span>
-                            <span className="cd-route-value">
+                        <div className={cx("cd-route-info-item")}>
+                            <span className={cx("cd-route-label")}>Journey Time:</span>
+                            <span className={cx("cd-route-value")}>
                                 {routeStations.length > 1 ? 
                                     `${formatTime(routeStations[0]?.depart || routeStations[0]?.time || 'N/A')} - ${formatTime(routeStations[routeStations.length - 1]?.arrive || routeStations[routeStations.length - 1]?.time || 'N/A')}` 
                                     : 'N/A'}
@@ -513,7 +514,7 @@ export default function ComplaintDetail() {
                     </div>
                 </div>
 
-                <div className="cd-stations-timeline">
+                <div className={cx("cd-stations-timeline")}>
                     {routeStations.map((station, index) => {
                         const isFirst = index === 0;
                         const isLast = index === routeStations.length - 1;
@@ -526,22 +527,22 @@ export default function ComplaintDetail() {
                         return (
                             <motion.div
                                 key={`${stationCode}-${index}`}
-                                className={`cd-station-item ${isFirst ? 'cd-station-first' : ''} ${isLast ? 'cd-station-last' : ''}`}
+                                className={cx(`cd-station-item ${isFirst ? 'cd-station-first' : ''} ${isLast ? 'cd-station-last' : ''}`)}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: index * 0.05 }}
                                 onHoverStart={() => setSelectedStation(station)}
                                 onHoverEnd={() => setSelectedStation(null)}
                             >
-                                <div className="cd-station-timeline-track">
+                                <div className={cx("cd-station-timeline-track")}>
                                     <div 
-                                        className={`cd-station-dot ${isFirst ? 'cd-dot-start' : isLast ? 'cd-dot-end' : 'cd-dot-middle'}`}
+                                        className={cx(`cd-station-dot ${isFirst ? 'cd-dot-start' : isLast ? 'cd-dot-end' : 'cd-dot-middle'}`)}
                                     >
                                         {isFirst ? <MdMyLocation /> : isLast ? <MdFlag /> : <MdLocationOn />}
                                     </div>
                                     {!isLast && (
                                         <motion.div 
-                                            className="cd-station-connector"
+                                            className={cx("cd-station-connector")}
                                             initial={{ scaleY: 0 }}
                                             animate={{ 
                                                 scaleY: animationProgress >= progress ? 1 : 0 
@@ -554,55 +555,55 @@ export default function ComplaintDetail() {
                                     )}
                                 </div>
                                 
-                                <div className="cd-station-info">
-                                    <div className="cd-station-main-info">
-                                        <h4 className="cd-station-name">
+                                <div className={cx("cd-station-info")}>
+                                    <div className={cx("cd-station-main-info")}>
+                                        <h4 className={cx("cd-station-name")}>
                                             {stationName}
                                         </h4>
-                                        <span className="cd-station-code-badge">
+                                        <span className={cx("cd-station-code-badge")}>
                                             {stationCode}
                                         </span>
                                     </div>
                                     
-                                    <div className="cd-station-timing">
+                                    <div className={cx("cd-station-timing")}>
                                         {station.arrive && station.arrive !== 'First' && (
-                                            <span className="cd-station-time cd-arrival-time">
+                                            <span className={cx("cd-station-time cd-arrival-time")}>
                                                 <MdSchedule /> {formatTime(station.arrive)}
                                             </span>
                                         )}
                                         {station.depart && station.depart !== 'Last' && (
-                                            <span className="cd-station-time cd-departure-time">
+                                            <span className={cx("cd-station-time cd-departure-time")}>
                                                 <MdSchedule /> {formatTime(station.depart)}
                                             </span>
                                         )}
                                         {station.arrive === 'First' && (
-                                            <span className="cd-station-time cd-origin-time">
+                                            <span className={cx("cd-station-time cd-origin-time")}>
                                                 <MdMyLocation /> {formatTime(station.depart)}
                                             </span>
                                         )}
                                         {station.depart === 'Last' && (
-                                            <span className="cd-station-time cd-destination-time">
+                                            <span className={cx("cd-station-time cd-destination-time")}>
                                                 <MdFlag /> {formatTime(station.arrive)}
                                             </span>
                                         )}
                                         {station.time && !station.arrive && !station.depart && (
-                                            <span className="cd-station-time cd-general-time">
+                                            <span className={cx("cd-station-time cd-general-time")}>
                                                 <MdAccessTime /> {formatTime(station.time)}
                                             </span>
                                         )}
                                     </div>
                                     
-                                    <div className="cd-station-details">
-                                        <span className="cd-station-distance">
+                                    <div className={cx("cd-station-details")}>
+                                        <span className={cx("cd-station-distance")}>
                                             <MdDirectionsRailway /> {station.distance || 'N/A'} km
                                         </span>
                                         {station.zone && (
-                                            <span className="cd-station-zone">
+                                            <span className={cx("cd-station-zone")}>
                                                 <MdLocationOn /> {station.zone}
                                             </span>
                                         )}
                                         {station.day && (
-                                            <span className="cd-station-day">
+                                            <span className={cx("cd-station-day")}>
                                                 <MdAccessTime /> Day {station.day}
                                             </span>
                                         )}
@@ -615,7 +616,7 @@ export default function ComplaintDetail() {
 
                 {selectedStation && (
                     <motion.div
-                        className="cd-station-tooltip"
+                        className={cx("cd-station-tooltip")}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
@@ -686,7 +687,7 @@ export default function ComplaintDetail() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                className="cd-rail-frequency-chart"
+                className={cx("cd-rail-frequency-chart")}
             >
                 <svg ref={svgRef} width="300" height="60"></svg>
             </motion.div>
@@ -707,51 +708,51 @@ export default function ComplaintDetail() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6 }}
-                className="cd-journey-summary"
+                className={cx("cd-journey-summary")}
             >
-                <div className="cd-journey-header">
+                <div className={cx("cd-journey-header")}>
                     <h4><MdTrain /> Journey Overview</h4>
                 </div>
                 
-                <div className="cd-journey-stats">
-                    <div className="cd-journey-stat">
-                        <span className="cd-stat-icon"><MdLocationOn /></span>
-                        <span className="cd-stat-label">Total Stations</span>
-                        <span className="cd-stat-value">{stations.length}</span>
+                <div className={cx("cd-journey-stats")}>
+                    <div className={cx("cd-journey-stat")}>
+                        <span className={cx("cd-stat-icon")}><MdLocationOn /></span>
+                        <span className={cx("cd-stat-label")}>Total Stations</span>
+                        <span className={cx("cd-stat-value")}>{stations.length}</span>
                     </div>
                     
-                    <div className="cd-journey-stat">
-                        <span className="cd-stat-icon"><MdDirectionsRailway /></span>
-                        <span className="cd-stat-label">Distance</span>
-                        <span className="cd-stat-value">{lastStation.distance} km</span>
+                    <div className={cx("cd-journey-stat")}>
+                        <span className={cx("cd-stat-icon")}><MdDirectionsRailway /></span>
+                        <span className={cx("cd-stat-label")}>Distance</span>
+                        <span className={cx("cd-stat-value")}>{lastStation.distance} km</span>
                     </div>
                     
-                    <div className="cd-journey-stat">
-                        <span className="cd-stat-icon"><MdAccessTime /></span>
-                        <span className="cd-stat-label">Duration</span>
-                        <span className="cd-stat-value">{totalJourneyTime}</span>
+                    <div className={cx("cd-journey-stat")}>
+                        <span className={cx("cd-stat-icon")}><MdAccessTime /></span>
+                        <span className={cx("cd-stat-label")}>Duration</span>
+                        <span className={cx("cd-stat-value")}>{totalJourneyTime}</span>
                     </div>
                     
                     {averageSpeed && (
-                        <div className="cd-journey-stat">
-                            <span className="cd-stat-icon"><MdSpeed /></span>
-                            <span className="cd-stat-label">Avg Speed</span>
-                            <span className="cd-stat-value">{averageSpeed} km/h</span>
+                        <div className={cx("cd-journey-stat")}>
+                            <span className={cx("cd-stat-icon")}><MdSpeed /></span>
+                            <span className={cx("cd-stat-label")}>Avg Speed</span>
+                            <span className={cx("cd-stat-value")}>{averageSpeed} km/h</span>
                         </div>
                     )}
                 </div>
 
-                <div className="cd-journey-endpoints">
-                    <div className="cd-endpoint cd-origin">
-                        <div className="cd-endpoint-icon"><MdMyLocation /></div>
-                        <div className="cd-endpoint-info">
+                <div className={cx("cd-journey-endpoints")}>
+                    <div className={cx("cd-endpoint cd-origin")}>
+                        <div className={cx("cd-endpoint-icon")}><MdMyLocation /></div>
+                        <div className={cx("cd-endpoint-info")}>
                             <h5>{firstStation.source_stn_name}</h5>
-                            <span className="cd-endpoint-code">{firstStation.source_stn_code}</span>
-                            <span className="cd-endpoint-time">Departs: {formatTime(firstStation.depart)}</span>
+                            <span className={cx("cd-endpoint-code")}>{firstStation.source_stn_code}</span>
+                            <span className={cx("cd-endpoint-time")}>Departs: {formatTime(firstStation.depart)}</span>
                         </div>
                     </div>
                     
-                    <div className="cd-journey-arrow">
+                    <div className={cx("cd-journey-arrow")}>
                         <motion.div
                             animate={{ x: [0, 10, 0] }}
                             transition={{ duration: 2, repeat: Infinity }}
@@ -760,12 +761,12 @@ export default function ComplaintDetail() {
                         </motion.div>
                     </div>
                     
-                    <div className="cd-endpoint cd-destination">
-                        <div className="cd-endpoint-icon"><MdFlag /></div>
-                        <div className="cd-endpoint-info">
+                    <div className={cx("cd-endpoint cd-destination")}>
+                        <div className={cx("cd-endpoint-icon")}><MdFlag /></div>
+                        <div className={cx("cd-endpoint-info")}>
                             <h5>{lastStation.source_stn_name}</h5>
-                            <span className="cd-endpoint-code">{lastStation.source_stn_code}</span>
-                            <span className="cd-endpoint-time">Arrives: {formatTime(lastStation.arrive)}</span>
+                            <span className={cx("cd-endpoint-code")}>{lastStation.source_stn_code}</span>
+                            <span className={cx("cd-endpoint-time")}>Arrives: {formatTime(lastStation.arrive)}</span>
                         </div>
                     </div>
                 </div>
@@ -813,14 +814,14 @@ export default function ComplaintDetail() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)" }}
-            className="cd-rail-info-item cd-enhanced-info-card"
+            className={cx("cd-rail-info-item cd-enhanced-info-card")}
         >
-            <div className="cd-rail-info-icon" style={{ color }}>
+            <div className={cx("cd-rail-info-icon")} style={{ color }}>
                 {icon}
             </div>
-            <div className="cd-rail-info-content">
-                <span className="cd-rail-info-label">{label}</span>
-                <span className="cd-rail-info-value">{value}</span>
+            <div className={cx("cd-rail-info-content")}>
+                <span className={cx("cd-rail-info-label")}>{label}</span>
+                <span className={cx("cd-rail-info-value")}>{value}</span>
             </div>
         </motion.div>
     );
@@ -1348,11 +1349,11 @@ export default function ComplaintDetail() {
         return (
             <>
                 <Navbar />
-                <div className="cd-page-wrapper">
-                    <div className="cd-main-container">
-                        <div className="cd-loading-wrapper">
-                            <div className="cd-loading-animation"></div>
-                            <p className="cd-loading-message">Loading complaint details...</p>
+                <div className={cx("cd-page-wrapper")}>
+                    <div className={cx("cd-main-container")}>
+                        <div className={cx("cd-loading-wrapper")}>
+                            <div className={cx("cd-loading-animation")}></div>
+                            <p className={cx("cd-loading-message")}>Loading complaint details...</p>
                         </div>
                     </div>
                 </div>
@@ -1365,14 +1366,14 @@ export default function ComplaintDetail() {
         return (
             <>
                 <Navbar />
-                <div className="cd-page-wrapper">
-                    <div className="cd-main-container">
-                        <div className="cd-error-wrapper">
-                            <FiAlertTriangle className="cd-error-icon" />
+                <div className={cx("cd-page-wrapper")}>
+                    <div className={cx("cd-main-container")}>
+                        <div className={cx("cd-error-wrapper")}>
+                            <FiAlertTriangle className={cx("cd-error-icon")} />
                             <h2>Complaint Not Found</h2>
                             <p>The complaint you're looking for doesn't exist or has been removed.</p>
                             <button 
-                                className="cd-primary-btn"
+                                className={cx("cd-primary-btn")}
                                 onClick={() => navigate('/complain?tab=view')}
                             >
                                 <FiArrowLeft /> Back to Complaints
@@ -1389,14 +1390,14 @@ export default function ComplaintDetail() {
         return (
             <>
                 <Navbar />
-                <div className="cd-page-wrapper">
-                    <div className="cd-main-container">
-                        <div className="cd-error-wrapper">
-                            <FiAlertTriangle className="cd-error-icon" />
+                <div className={cx("cd-page-wrapper")}>
+                    <div className={cx("cd-main-container")}>
+                        <div className={cx("cd-error-wrapper")}>
+                            <FiAlertTriangle className={cx("cd-error-icon")} />
                             <h2>No Complaint Data</h2>
                             <p>Unable to load complaint details. Please try again.</p>
                             <button 
-                                className="cd-primary-btn"
+                                className={cx("cd-primary-btn")}
                                 onClick={() => navigate('/complain?tab=view')}
                             >
                                 <FiArrowLeft /> Back to Complaints
@@ -1415,33 +1416,33 @@ export default function ComplaintDetail() {
     return (
         <>
             <Navbar />
-            <div className="cd-page-wrapper">
-                <div className="cd-main-container">
+            <div className={cx("cd-page-wrapper")}>
+                <div className={cx("cd-main-container")}>
                     {/* Header with back button */}
-                    <div className="cd-header-section">
+                    <div className={cx("cd-header-section")}>
                         <button 
-                            className="cd-nav-back-btn"
+                            className={cx("cd-nav-back-btn")}
                             onClick={() => navigate('/complain?tab=view')}
                         >
                             <FiArrowLeft /> Back to Complaints
                         </button>
                         
                         {canEdit && (
-                            <div className="cd-header-actions">
+                            <div className={cx("cd-header-actions")}>
                                 <button 
-                                    className="cd-edit-action-btn"
+                                    className={cx("cd-edit-action-btn")}
                                     onClick={() => navigate(`/complain?edit=${id}`)}
                                     disabled={deleteInProgress}
                                 >
                                     <FiEdit3 /> Edit
                                 </button>
                                 <button 
-                                    className="cd-delete-action-btn"
+                                    className={cx("cd-delete-action-btn")}
                                     onClick={handleDeleteComplaint}
                                     disabled={deleteInProgress}
                                 >
                                     {deleteInProgress ? (
-                                        <div className="cd-loading-spinner-small"></div>
+                                        <div className={cx("cd-loading-spinner-small")}></div>
                                     ) : (
                                         <><FiTrash2 /> Delete</>
                                     )}
@@ -1471,39 +1472,39 @@ export default function ComplaintDetail() {
                         return shouldShowButtons;
                     })() && (
                         <motion.div 
-                            className="cd-officer-assignment-section"
+                            className={cx("cd-officer-assignment-section")}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
                         >
                             {!complaintIgnored ? (
                                 <>
-                                    <div className="cd-assignment-header">
-                                        <FiAlertTriangle className="cd-assignment-icon" />
+                                    <div className={cx("cd-assignment-header")}>
+                                        <FiAlertTriangle className={cx("cd-assignment-icon")} />
                                         <h3>Unassigned complaint - Take action</h3>
                                     </div>
-                                    <div className="cd-assignment-actions">
+                                    <div className={cx("cd-assignment-actions")}>
                                         <button
-                                            className="cd-ignore-btn"
+                                            className={cx("cd-ignore-btn")}
                                             onClick={handleIgnoreComplaint}
                                             disabled={assignmentInProgress}
                                         >
                                             <FiArrowLeft /> Ignore
                                         </button>
                                         <button
-                                            className="cd-reject-btn"
+                                            className={cx("cd-reject-btn")}
                                             onClick={handleRejectComplaint}
                                             disabled={assignmentInProgress}
                                         >
                                             <FiAlertTriangle /> Reject
                                         </button>
                                         <button
-                                            className="cd-accept-btn"
+                                            className={cx("cd-accept-btn")}
                                             onClick={handleAcceptComplaint}
                                             disabled={assignmentInProgress}
                                         >
                                             {assignmentInProgress ? (
-                                                <div className="cd-loading-spinner-small"></div>
+                                                <div className={cx("cd-loading-spinner-small")}></div>
                                             ) : (
                                                 <>
                                                     <FiCheckCircle /> Accept
@@ -1513,9 +1514,9 @@ export default function ComplaintDetail() {
                                     </div>
                                 </>
                             ) : (
-                                <div className="cd-ignored-disclaimer">
-                                    <FiCheckCircle className="cd-ignored-icon" />
-                                    <div className="cd-ignored-text">
+                                <div className={cx("cd-ignored-disclaimer")}>
+                                    <FiCheckCircle className={cx("cd-ignored-icon")} />
+                                    <div className={cx("cd-ignored-text")}>
                                         <h3>You have ignored this complaint</h3>
                                         <p>This complaint will not appear in your queue anymore.</p>
                                     </div>
@@ -1532,22 +1533,22 @@ export default function ComplaintDetail() {
                          selectedComplaint.assigned_officer_id?._id === user._id) &&
                         selectedComplaint.status === 'in_progress' && (
                         <motion.div 
-                            className="cd-resolve-section"
+                            className={cx("cd-resolve-section")}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
                         >
-                            <div className="cd-resolve-header">
-                                <FiCheckCircle className="cd-resolve-icon" />
+                            <div className={cx("cd-resolve-header")}>
+                                <FiCheckCircle className={cx("cd-resolve-icon")} />
                                 <h3>You are handling this complaint</h3>
                             </div>
                             <button
-                                className="cd-resolve-btn"
+                                className={cx("cd-resolve-btn")}
                                 onClick={handleResolveComplaint}
                                 disabled={resolveInProgress}
                             >
                                 {resolveInProgress ? (
-                                    <div className="cd-loading-spinner-small"></div>
+                                    <div className={cx("cd-loading-spinner-small")}></div>
                                 ) : (
                                     <>
                                         <FiCheckCircle /> Mark as Resolved
@@ -1558,38 +1559,38 @@ export default function ComplaintDetail() {
                     )}
 
                     {/* Main complaint card */}
-                    <div className="cd-primary-card">
+                    <div className={cx("cd-primary-card")}>
                         {/* Card Header */}
-                        <div className="cd-card-header-wrapper">
-                            <div className="cd-header-top-row">
-                                <div className="cd-header-left-section">
-                                    <div className="cd-category-display">
+                        <div className={cx("cd-card-header-wrapper")}>
+                            <div className={cx("cd-header-top-row")}>
+                                <div className={cx("cd-header-left-section")}>
+                                    <div className={cx("cd-category-display")}>
                                         <span 
-                                            className="cd-category-icon-wrapper" 
+                                            className={cx("cd-category-icon-wrapper")} 
                                             style={{ backgroundColor: getCategoryColor(selectedComplaint.category) }}
                                         >
                                             {getCategoryIcon(selectedComplaint.category)}
                                         </span>
-                                        <span className="cd-category-label-text">
+                                        <span className={cx("cd-category-label-text")}>
                                             {getCategoryLabel(selectedComplaint.category)}
                                         </span>
                                     </div>
-                                    <div className="cd-severity-display">
-                                        <span className={`cd-severity-indicator ${severityInfo.class}`}>
+                                    <div className={cx("cd-severity-display")}>
+                                        <span className={cx(`cd-severity-indicator ${severityInfo.class}`)}>
                                             {severityInfo.icon} {severityInfo.label}
                                         </span>
                                     </div>
                                 </div>
                                 
-                                <div className="cd-header-right-section">
-                                    <span className={`cd-status-indicator ${getStatusBadgeClass(mapStatusToFrontend(selectedComplaint.status))}`}>
+                                <div className={cx("cd-header-right-section")}>
+                                    <span className={cx(`cd-status-indicator ${getStatusBadgeClass(mapStatusToFrontend(selectedComplaint.status))}`)}>
                                         {mapStatusToFrontend(selectedComplaint.status)?.replace('-', ' ').toUpperCase() || 'PENDING'}
                                     </span>
                                 </div>
                             </div>
                             
                             {/* Escalation Badge */}
-                            <div className="cd-escalation-section">
+                            <div className={cx("cd-escalation-section")}>
                                 <EscalationBadge 
                                     complaint={selectedComplaint} 
                                     showTimer={true} 
@@ -1600,30 +1601,30 @@ export default function ComplaintDetail() {
                         </div>
 
                         {/* Card Body */}
-                        <div className="cd-content-body">
-                            <div className="cd-title-wrapper">
-                                <h1 className="cd-main-title">
+                        <div className={cx("cd-content-body")}>
+                            <div className={cx("cd-title-wrapper")}>
+                                <h1 className={cx("cd-main-title")}>
                                     {selectedComplaint.title}
                                 </h1>
                             </div>
                             
-                            <div className="cd-description-wrapper">
+                            <div className={cx("cd-description-wrapper")}>
                                 <h3>Description</h3>
-                                <p className="cd-description-content">
+                                <p className={cx("cd-description-content")}>
                                     {selectedComplaint.description}
                                 </p>
                             </div>
 
                             {/* Metadata */}
-                            <div className="cd-metadata-wrapper">
+                            <div className={cx("cd-metadata-wrapper")}>
                                 {/* User Information Section */}
-                                <div className="cd-user-info-section">
-                                    <div className="cd-user-card">
+                                <div className={cx("cd-user-info-section")}>
+                                    <div className={cx("cd-user-card")}>
                                         {safeGet(selectedComplaint, 'user_id.profileImage') && (
                                             <motion.img
                                                 src={safeGet(selectedComplaint, 'user_id.profileImage')}
                                                 alt={safeGet(selectedComplaint, 'user_id.name') || 'User'}
-                                                className="cd-user-avatar-large"
+                                                className={cx("cd-user-avatar-large")}
                                                 initial={{ scale: 0, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 transition={{ duration: 0.4, delay: 0.2 }}
@@ -1632,16 +1633,16 @@ export default function ComplaintDetail() {
                                                 }}
                                             />
                                         )}
-                                        <div className="cd-user-info-details">
-                                            <div className="cd-user-info-header">
-                                                <FiUser className="cd-user-info-icon" />
-                                                <span className="cd-user-info-label">Submitted by</span>
+                                        <div className={cx("cd-user-info-details")}>
+                                            <div className={cx("cd-user-info-header")}>
+                                                <FiUser className={cx("cd-user-info-icon")} />
+                                                <span className={cx("cd-user-info-label")}>Submitted by</span>
                                             </div>
-                                            <div className="cd-user-name-large">
+                                            <div className={cx("cd-user-name-large")}>
                                                 {safeGet(selectedComplaint, 'user_id.name') || selectedComplaint.userName || 'Anonymous'}
                                             </div>
                                             {safeGet(selectedComplaint, 'user_id.email') && (
-                                                <div className="cd-user-email">
+                                                <div className={cx("cd-user-email")}>
                                                     {safeGet(selectedComplaint, 'user_id.email')}
                                                 </div>
                                             )}
@@ -1650,21 +1651,21 @@ export default function ComplaintDetail() {
                                 </div>
 
                                 {/* Timestamps Section */}
-                                <div className="cd-timestamps-section">
-                                    <div className="cd-timestamp-item">
-                                        <FiCalendar className="cd-metadata-icon" />
-                                        <div className="cd-timestamp-content">
-                                            <span className="cd-timestamp-label">Created</span>
-                                            <span className="cd-timestamp-value">{formatDate(selectedComplaint.createdAt)}</span>
+                                <div className={cx("cd-timestamps-section")}>
+                                    <div className={cx("cd-timestamp-item")}>
+                                        <FiCalendar className={cx("cd-metadata-icon")} />
+                                        <div className={cx("cd-timestamp-content")}>
+                                            <span className={cx("cd-timestamp-label")}>Created</span>
+                                            <span className={cx("cd-timestamp-value")}>{formatDate(selectedComplaint.createdAt)}</span>
                                         </div>
                                     </div>
                                     
                                     {selectedComplaint.updatedAt !== selectedComplaint.createdAt && (
-                                        <div className="cd-timestamp-item">
-                                            <FiCalendar className="cd-metadata-icon" />
-                                            <div className="cd-timestamp-content">
-                                                <span className="cd-timestamp-label">Last updated</span>
-                                                <span className="cd-timestamp-value">{formatDate(selectedComplaint.updatedAt)}</span>
+                                        <div className={cx("cd-timestamp-item")}>
+                                            <FiCalendar className={cx("cd-metadata-icon")} />
+                                            <div className={cx("cd-timestamp-content")}>
+                                                <span className={cx("cd-timestamp-label")}>Last updated</span>
+                                                <span className={cx("cd-timestamp-value")}>{formatDate(selectedComplaint.updatedAt)}</span>
                                             </div>
                                         </div>
                                     )}
@@ -1672,12 +1673,12 @@ export default function ComplaintDetail() {
                                 
                                 {/* Location Section */}
                                 {selectedComplaint.location && (
-                                    <div className="cd-location-section">
-                                        <div className="cd-location-item">
-                                            <FiMapPin className="cd-metadata-icon" />
-                                            <div className="cd-location-content">
-                                                <span className="cd-location-label">Location</span>
-                                                <span className="cd-location-value">
+                                    <div className={cx("cd-location-section")}>
+                                        <div className={cx("cd-location-item")}>
+                                            <FiMapPin className={cx("cd-metadata-icon")} />
+                                            <div className={cx("cd-location-content")}>
+                                                <span className={cx("cd-location-label")}>Location</span>
+                                                <span className={cx("cd-location-value")}>
                                                     {selectedComplaint.address || 
                                                     (selectedComplaint.location.coordinates ? 
                                                         `${selectedComplaint.location.coordinates[1]?.toFixed(6)}, ${selectedComplaint.location.coordinates[0]?.toFixed(6)}` :
@@ -1690,12 +1691,12 @@ export default function ComplaintDetail() {
                                 
                                 {/* Train Number (if applicable) */}
                                 {selectedComplaint.trainNumber && (
-                                    <div className="cd-train-section">
-                                        <div className="cd-train-item">
-                                            <MdTrain className="cd-metadata-icon" />
-                                            <div className="cd-train-content">
-                                                <span className="cd-train-label">Train Number</span>
-                                                <span className="cd-train-value">{selectedComplaint.trainNumber}</span>
+                                    <div className={cx("cd-train-section")}>
+                                        <div className={cx("cd-train-item")}>
+                                            <MdTrain className={cx("cd-metadata-icon")} />
+                                            <div className={cx("cd-train-content")}>
+                                                <span className={cx("cd-train-label")}>Train Number</span>
+                                                <span className={cx("cd-train-value")}>{selectedComplaint.trainNumber}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1708,7 +1709,7 @@ export default function ComplaintDetail() {
                                     initial={{ opacity: 0, y: 50 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.8 }}
-                                    className="cd-rail-info-wrapper"
+                                    className={cx("cd-rail-info-wrapper")}
                                 >
                                     <motion.h3
                                         initial={{ opacity: 0, x: -20 }}
@@ -1719,7 +1720,7 @@ export default function ComplaintDetail() {
                                     </motion.h3>
                                     
                                     {/* Basic Train Info Cards */}
-                                    <div className="cd-rail-basic-info">
+                                    <div className={cx("cd-rail-basic-info")}>
                                         {safeGet(selectedComplaint, 'category_specific_data.train_name') && (
                                             <TrainInfoCard
                                                 icon={<MdTrain />}
@@ -1785,9 +1786,9 @@ export default function ComplaintDetail() {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             transition={{ duration: 0.6, delay: 0.5 }}
-                                            className="cd-rail-section"
+                                            className={cx("cd-rail-section")}
                                         >
-                                            <h4 className="cd-rail-section-title">
+                                            <h4 className={cx("cd-rail-section-title")}>
                                                 <FiNavigation /> Route Information
                                             </h4>
                                             <RailRouteTimeline
@@ -1800,15 +1801,15 @@ export default function ComplaintDetail() {
                                     )}
 
                                     {/* Performance Metrics */}
-                                    <div className="cd-rail-metrics">
+                                    <div className={cx("cd-rail-metrics")}>
                                         {safeGet(selectedComplaint, 'category_specific_data.avg_speed') && (
                                             <motion.div
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 transition={{ duration: 0.6, delay: 0.6 }}
-                                                className="cd-rail-section"
+                                                className={cx("cd-rail-section")}
                                             >
-                                                <h4 className="cd-rail-section-title">
+                                                <h4 className={cx("cd-rail-section-title")}>
                                                     <MdSpeed /> Average Speed
                                                 </h4>
                                                 <RailSpeedGauge speed={safeGet(selectedComplaint, 'category_specific_data.avg_speed')} />
@@ -1820,13 +1821,13 @@ export default function ComplaintDetail() {
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 transition={{ duration: 0.6, delay: 0.7 }}
-                                                className="cd-rail-section"
+                                                className={cx("cd-rail-section")}
                                             >
-                                                <h4 className="cd-rail-section-title">
+                                                <h4 className={cx("cd-rail-section-title")}>
                                                     <MdAccessTime /> Running Schedule
                                                 </h4>
                                                 <RailFrequencyChart frequency={safeGet(selectedComplaint, 'category_specific_data.frequency')} />
-                                                <p className="cd-frequency-summary">
+                                                <p className={cx("cd-frequency-summary")}>
                                                     Running Days: {formatFrequency(safeGet(selectedComplaint, 'category_specific_data.frequency'))}
                                                 </p>
                                             </motion.div>
@@ -1836,10 +1837,10 @@ export default function ComplaintDetail() {
                             )}
 
                             {/* Voting and Actions */}
-                            <div className="cd-interactions-wrapper">
-                                <div className="cd-voting-controls">
+                            <div className={cx("cd-interactions-wrapper")}>
+                                <div className={cx("cd-voting-controls")}>
                                     <button
-                                        className={`cd-vote-button cd-upvote-button ${selectedComplaint.userVote === 'upvote' ? 'cd-voted' : ''}`}
+                                        className={cx(`cd-vote-button cd-upvote-button ${selectedComplaint.userVote === 'upvote' ? 'cd-voted' : ''}`)}
                                         onClick={handleUpvote}
                                         disabled={votingInProgress[`${id}-upvote`] || votingInProgress[`${id}-downvote`]}
                                         title="Upvote this complaint"
@@ -1849,7 +1850,7 @@ export default function ComplaintDetail() {
                                     </button>
                                     
                                     <button
-                                        className={`cd-vote-button cd-downvote-button ${selectedComplaint.userVote === 'downvote' ? 'cd-voted' : ''}`}
+                                        className={cx(`cd-vote-button cd-downvote-button ${selectedComplaint.userVote === 'downvote' ? 'cd-voted' : ''}`)}
                                         onClick={handleDownvote}
                                         disabled={votingInProgress[`${id}-upvote`] || votingInProgress[`${id}-downvote`]}
                                         title="Downvote this complaint"
@@ -1859,9 +1860,9 @@ export default function ComplaintDetail() {
                                     </button>
                                 </div>
 
-                                <div className="cd-utility-buttons">
+                                <div className={cx("cd-utility-buttons")}>
                                     <button
-                                        className="cd-comments-btn"
+                                        className={cx("cd-comments-btn")}
                                         onClick={openCommentModal}
                                     >
                                         <FiMessageCircle />
@@ -1874,9 +1875,9 @@ export default function ComplaintDetail() {
                             {(() => {
                                 const coordinates = getCoordinates(selectedComplaint);
                                 return coordinates && (
-                                    <div className="cd-location-map-wrapper">
+                                    <div className={cx("cd-location-map-wrapper")}>
                                         <h3>Complaint Location</h3>
-                                        <div className="cd-map-container">
+                                        <div className={cx("cd-map-container")}>
                                             <MapContainer
                                                 center={coordinates}
                                                 zoom={15}
@@ -1905,7 +1906,7 @@ export default function ComplaintDetail() {
 
                             {/* Escalation Timeline Section */}
                             {selectedComplaint.escalation_id && (
-                                <div className="cd-escalation-timeline-section">
+                                <div className={cx("cd-escalation-timeline-section")}>
                                     <EscalationTimeline 
                                         escalationHistory={selectedComplaint.escalation_id?.history || []} 
                                     />
@@ -1965,18 +1966,18 @@ export default function ComplaintDetail() {
 
             {/* Rejection Modal */}
             {rejectModalOpen && (
-                <div className="reject-modal-overlay" onClick={handleRejectCancel}>
-                    <div className="reject-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="reject-modal-header">
+                <div className={cx("reject-modal-overlay")} onClick={handleRejectCancel}>
+                    <div className={cx("reject-modal")} onClick={(e) => e.stopPropagation()}>
+                        <div className={cx("reject-modal-header")}>
                             <h2>Reject Complaint</h2>
-                            <button className="reject-modal-close" onClick={handleRejectCancel}>
+                            <button className={cx("reject-modal-close")} onClick={handleRejectCancel}>
                                 <FiAlertTriangle />
                             </button>
                         </div>
-                        <div className="reject-modal-body">
+                        <div className={cx("reject-modal-body")}>
                             <p>Please provide a reason for rejecting this complaint:</p>
                             <textarea
-                                className="reject-modal-textarea"
+                                className={cx("reject-modal-textarea")}
                                 placeholder="Enter rejection reason..."
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
@@ -1984,12 +1985,12 @@ export default function ComplaintDetail() {
                                 autoFocus
                             />
                         </div>
-                        <div className="reject-modal-footer">
-                            <button className="reject-modal-cancel-btn" onClick={handleRejectCancel}>
+                        <div className={cx("reject-modal-footer")}>
+                            <button className={cx("reject-modal-cancel-btn")} onClick={handleRejectCancel}>
                                 Cancel
                             </button>
                             <button 
-                                className="reject-modal-submit-btn" 
+                                className={cx("reject-modal-submit-btn")} 
                                 onClick={handleRejectSubmit}
                                 disabled={!rejectionReason.trim()}
                             >
@@ -2002,18 +2003,18 @@ export default function ComplaintDetail() {
 
             {/* Resolve Modal */}
             {resolveModalOpen && (
-                <div className="resolve-modal-overlay" onClick={handleResolveCancel}>
-                    <div className="resolve-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="resolve-modal-header">
+                <div className={cx("resolve-modal-overlay")} onClick={handleResolveCancel}>
+                    <div className={cx("resolve-modal")} onClick={(e) => e.stopPropagation()}>
+                        <div className={cx("resolve-modal-header")}>
                             <h2><FiCheckCircle /> Resolve Complaint</h2>
-                            <button className="resolve-modal-close" onClick={handleResolveCancel}>
+                            <button className={cx("resolve-modal-close")} onClick={handleResolveCancel}>
                                 ×
                             </button>
                         </div>
-                        <div className="resolve-modal-body">
+                        <div className={cx("resolve-modal-body")}>
                             <p>Add any notes about how this complaint was resolved (optional):</p>
                             <textarea
-                                className="resolve-modal-textarea"
+                                className={cx("resolve-modal-textarea")}
                                 placeholder="Enter officer notes... (e.g., actions taken, resolution details)"
                                 value={officerNotes}
                                 onChange={(e) => setOfficerNotes(e.target.value)}
@@ -2021,17 +2022,17 @@ export default function ComplaintDetail() {
                                 autoFocus
                             />
                         </div>
-                        <div className="resolve-modal-footer">
-                            <button className="resolve-modal-cancel-btn" onClick={handleResolveCancel}>
+                        <div className={cx("resolve-modal-footer")}>
+                            <button className={cx("resolve-modal-cancel-btn")} onClick={handleResolveCancel}>
                                 Cancel
                             </button>
                             <button 
-                                className="resolve-modal-submit-btn" 
+                                className={cx("resolve-modal-submit-btn")} 
                                 onClick={handleResolveSubmit}
                                 disabled={resolveInProgress}
                             >
                                 {resolveInProgress ? (
-                                    <div className="cd-loading-spinner-small"></div>
+                                    <div className={cx("cd-loading-spinner-small")}></div>
                                 ) : (
                                     <>
                                         <FiCheckCircle /> Resolve Complaint

@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from 'react-hot-toast';
 import { navigateProgrammatically } from './App';
-import "./Complaint.css";
+import complaintStyles from "./Complaint.module.css";
 import "./Toast.css";
 import "leaflet/dist/leaflet.css";
 import Navbar from "./Navbar";
@@ -24,6 +24,7 @@ import {
     clearError
 } from './auth/redux/complaintSlice';
 import { uploadEvidence } from './auth/redux/evidenceSlice';
+const cx = (classNames) => classNames.split(/\s+/).map((className) => complaintStyles[className] ?? className).join(" ");
 
 export default function Complaint() {
     const dispatch = useDispatch();
@@ -623,15 +624,15 @@ export default function Complaint() {
         <>
             <Navbar />
             <Toaster />
-            <div className="complaint-page">
-                <div className="complaint-container">
+            <div className={cx("complaint-page")}>
+                <div className={cx("complaint-container")}>
                     {/* Tab Navigation */}
-                    {/* <div className="complaint-tab-navigation">
+                    {/* <div className={cx("complaint-tab-navigation")}>
                         <button 
-                            className={`complaint-tab-button ${activeTab === 'register' ? 'active' : ''}`}
+                            className={cx(`complaint-tab-button ${activeTab === 'register' ? 'active' : ''}`)}
                             onClick={() => handleTabChange('register')}
                         >
-                            <svg className="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={cx("tab-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
                             Register Complaint
@@ -640,12 +641,12 @@ export default function Complaint() {
 
                     {/* Register Complaint Section */}
                     {/* {activeTab === 'register' && ( */}
-                        <div className="tab-content">
-                            <div className="complaint-form-section-header">
+                        <div className={cx("tab-content")}>
+                            <div className={cx("complaint-form-section-header")}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                                     <div>
-                                        <h2 className="complaint-section-title">Report an Incident</h2>
-                                        <p className="section-subtitle">Help us help you by providing detailed information about the incident</p>
+                                        <h2 className={cx("complaint-section-title")}>Report an Incident</h2>
+                                        <p className={cx("section-subtitle")}>Help us help you by providing detailed information about the incident</p>
                                     </div>
                                     {isAuthenticated && (
                                         <button
@@ -681,11 +682,11 @@ export default function Complaint() {
                                 </div>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="complaint-form">
+                            <form onSubmit={handleSubmit} className={cx("complaint-form")}>
                                 {/* Title Field */}
-                                <div className="form-group">
-                                    <label htmlFor="title" className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label htmlFor="title" className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                         </svg>
                                         Complaint Title *
@@ -696,16 +697,16 @@ export default function Complaint() {
                                         name="title"
                                         value={formData.title}
                                         onChange={handleInputChange}
-                                        className="form-input"
+                                        className={cx("form-input")}
                                         placeholder="Briefly describe the incident"
                                         required
                                     />
                                 </div>
 
                                 {/* Description Field */}
-                                <div className="form-group">
-                                    <label htmlFor="description" className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label htmlFor="description" className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         Detailed Description *
@@ -715,7 +716,7 @@ export default function Complaint() {
                                         name="description"
                                         value={formData.description}
                                         onChange={handleInputChange}
-                                        className="form-textarea"
+                                        className={cx("form-textarea")}
                                         rows="4"
                                         placeholder="Provide detailed information about what happened, when it occurred, and any other relevant details"
                                         required
@@ -723,29 +724,29 @@ export default function Complaint() {
                                 </div>
 
                                 {/* Category Selection */}
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                         </svg>
                                         Incident Category *
                                     </label>
-                                    <div className="category-grid">
+                                    <div className={cx("category-grid")}>
                                         {categories.map((category) => (
-                                            <label key={category.value} className={`category-option ${formData.category === category.value ? 'selected' : ''}`}>
+                                            <label key={category.value} className={cx(`category-option ${formData.category === category.value ? 'selected' : ''}`)}>
                                                 <input
                                                     type="radio"
                                                     name="category"
                                                     value={category.value}
                                                     checked={formData.category === category.value}
                                                     onChange={handleInputChange}
-                                                    className="category-radio"
+                                                    className={cx("category-radio")}
                                                 />
-                                                <div className="category-content">
-                                                    <span className="category-icon" style={{ color: category.color }}>
+                                                <div className={cx("category-content")}>
+                                                    <span className={cx("category-icon")} style={{ color: category.color }}>
                                                         {category.icon}
                                                     </span>
-                                                    <span className="category-label">{category.label}</span>
+                                                    <span className={cx("category-label")}>{category.label}</span>
                                                 </div>
                                             </label>
                                         ))}
@@ -754,9 +755,9 @@ export default function Complaint() {
 
                                 {/* Rail-specific Train Number Field */}
                                 {formData.category === 'rail' && (
-                                    <div className="form-group">
-                                        <label htmlFor="trainNumber" className="form-label">
-                                            <MdTrain className="label-icon" />
+                                    <div className={cx("form-group")}>
+                                        <label htmlFor="trainNumber" className={cx("form-label")}>
+                                            <MdTrain className={cx("label-icon")} />
                                             Train Number *
                                         </label>
                                         <input
@@ -765,7 +766,7 @@ export default function Complaint() {
                                             name="trainNumber"
                                             value={formData.trainNumber}
                                             onChange={handleInputChange}
-                                            className="form-input"
+                                            className={cx("form-input")}
                                             placeholder="Enter train number (e.g., 12345)"
                                             required
                                         />
@@ -773,45 +774,45 @@ export default function Complaint() {
                                 )}
 
                                 {/* Severity Selection */}
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                         </svg>
                                         Severity Level
                                     </label>
-                                    <div className="severity-container">
-                                        <div className="complaint-severity-options">
+                                    <div className={cx("severity-container")}>
+                                        <div className={cx("complaint-severity-options")}>
                                             {['low', 'medium', 'high'].map((severity) => (
-                                                <label key={severity} className={`complaint-severity-option severity-${severity} ${formData.severity === severity ? 'selected' : ''}`}>
+                                                <label key={severity} className={cx(`complaint-severity-option severity-${severity} ${formData.severity === severity ? 'selected' : ''}`)}>
                                                     <input
                                                         type="radio"
                                                         name="severity"
                                                         value={severity}
                                                         checked={formData.severity === severity}
                                                         onChange={handleInputChange}
-                                                        className="severity-radio"
+                                                        className={cx("severity-radio")}
                                                     />
-                                                    <div className="severity-card">
-                                                        <div className="severity-icon-wrapper">
-                                                            <div className="severity-icon">
+                                                    <div className={cx("severity-card")}>
+                                                        <div className={cx("severity-icon-wrapper")}>
+                                                            <div className={cx("severity-icon")}>
                                                                 {severity === 'low' && '🟢'}
                                                                 {severity === 'medium' && '🟡'}
                                                                 {severity === 'high' && '🔴'}
                                                             </div>
-                                                            <div className="severity-pulse"></div>
+                                                            <div className={cx("severity-pulse")}></div>
                                                         </div>
-                                                        <div className="severity-content">
-                                                            <div className="severity-header">
-                                                                <span className="severity-label">
+                                                        <div className={cx("severity-content")}>
+                                                            <div className={cx("severity-header")}>
+                                                                <span className={cx("severity-label")}>
                                                                     {severity.charAt(0).toUpperCase() + severity.slice(1)}
                                                                 </span>
-                                                                <span className={`severity-badge severity-badge-${severity}`}>
-                                                                    <span className="severity-dot"></span>
+                                                                <span className={cx(`severity-badge severity-badge-${severity}`)}>
+                                                                    <span className={cx("severity-dot")}></span>
                                                                     {severity.toUpperCase()}
                                                                 </span>
                                                             </div>
-                                                            <p className="severity-description">
+                                                            <p className={cx("severity-description")}>
                                                                 {severity === 'low' && 'Minor issues with minimal impact'}
                                                                 {severity === 'medium' && 'Moderate issues requiring attention'}
                                                                 {severity === 'high' && 'Critical issues requiring immediate action'}
@@ -825,9 +826,9 @@ export default function Complaint() {
                                 </div>
 
                                 {/* Location Selection */}
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
@@ -835,8 +836,8 @@ export default function Complaint() {
                                     </label>
 
                                     {/* Location Method Selection */}
-                                    <div className="location-methods">
-                                        <label className={`location-method ${locationMethod === 'map' ? 'active' : ''}`}>
+                                    <div className={cx("location-methods")}>
+                                        <label className={cx(`location-method ${locationMethod === 'map' ? 'active' : ''}`)}>
                                             <input
                                                 type="radio"
                                                 name="locationMethod"
@@ -846,7 +847,7 @@ export default function Complaint() {
                                             />
                                             Select on Map
                                         </label>
-                                        <label className={`location-method ${locationMethod === 'manual' ? 'active' : ''}`}>
+                                        <label className={cx(`location-method ${locationMethod === 'manual' ? 'active' : ''}`)}>
                                             <input
                                                 type="radio"
                                                 name="locationMethod"
@@ -856,7 +857,7 @@ export default function Complaint() {
                                             />
                                             Enter Manually
                                         </label>
-                                        <label className={`location-method ${locationMethod === 'current' ? 'active' : ''}`}>
+                                        <label className={cx(`location-method ${locationMethod === 'current' ? 'active' : ''}`)}>
                                             <input
                                                 type="radio"
                                                 name="locationMethod"
@@ -873,22 +874,22 @@ export default function Complaint() {
 
                                     {/* Map Selection */}
                                     {locationMethod === 'map' && (
-                                        <div className="map-container">
-                                            <div className="map-instructions">
+                                        <div className={cx("map-container")}>
+                                            <div className={cx("map-instructions")}>
                                                 <p>Click on the map to select the incident location</p>
                                             </div>
-                                            <div ref={mapRef} className="location-map" style={{ height: '300px', width: '100%' }}></div>
+                                            <div ref={mapRef} className={cx("location-map")} style={{ height: '300px', width: '100%' }}></div>
                                             {formData.location.latitude && formData.location.longitude && (
-                                                <div className="selected-coordinates">
-                                                    <div className="coordinates-info">
+                                                <div className={cx("selected-coordinates")}>
+                                                    <div className={cx("coordinates-info")}>
                                                         <strong>Selected Location:</strong>
                                                     </div>
-                                                    <div className="coordinates-details">
-                                                        <div className="coordinates-line">
+                                                    <div className={cx("coordinates-details")}>
+                                                        <div className={cx("coordinates-line")}>
                                                             📍 Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
                                                         </div>
                                                         {formData.address && (
-                                                            <div className="address-line">
+                                                            <div className={cx("address-line")}>
                                                                 🏠 Address: {formData.address}
                                                             </div>
                                                         )}
@@ -901,8 +902,8 @@ export default function Complaint() {
                                     {/* Manual Location Input */}
                                     {locationMethod === 'manual' && (
                                         <div>
-                                            <div className="manual-location-methods">
-                                                <label className={`manual-method ${manualLocationMethod === 'type' ? 'active' : ''}`}>
+                                            <div className={cx("manual-location-methods")}>
+                                                <label className={cx(`manual-method ${manualLocationMethod === 'type' ? 'active' : ''}`)}>
                                                     <input
                                                         type="radio"
                                                         value="type"
@@ -911,7 +912,7 @@ export default function Complaint() {
                                                     />
                                                     Type Coordinates
                                                 </label>
-                                                <label className={`manual-method ${manualLocationMethod === 'current' ? 'active' : ''}`}>
+                                                <label className={cx(`manual-method ${manualLocationMethod === 'current' ? 'active' : ''}`)}>
                                                     <input
                                                         type="radio"
                                                         value="current"
@@ -923,30 +924,30 @@ export default function Complaint() {
                                             </div>
 
                                             {manualLocationMethod === 'type' && (
-                                                <div className="coordinates-inputs">
-                                                    <div className="coordinate-group">
-                                                        <label htmlFor="latitude" className="coordinate-label">Latitude *</label>
+                                                <div className={cx("coordinates-inputs")}>
+                                                    <div className={cx("coordinate-group")}>
+                                                        <label htmlFor="latitude" className={cx("coordinate-label")}>Latitude *</label>
                                                         <input
                                                             type="number"
                                                             id="latitude"
                                                             name="latitude"
                                                             value={formData.location.latitude || ''}
                                                             onChange={handleLocationChange}
-                                                            className="coordinate-input"
+                                                            className={cx("coordinate-input")}
                                                             step="any"
                                                             placeholder="e.g., 28.6139"
                                                             required
                                                         />
                                                     </div>
-                                                    <div className="coordinate-group">
-                                                        <label htmlFor="longitude" className="coordinate-label">Longitude *</label>
+                                                    <div className={cx("coordinate-group")}>
+                                                        <label htmlFor="longitude" className={cx("coordinate-label")}>Longitude *</label>
                                                         <input
                                                             type="number"
                                                             id="longitude"
                                                             name="longitude"
                                                             value={formData.location.longitude || ''}
                                                             onChange={handleLocationChange}
-                                                            className="coordinate-input"
+                                                            className={cx("coordinate-input")}
                                                             step="any"
                                                             placeholder="e.g., 77.2090"
                                                             required
@@ -956,25 +957,25 @@ export default function Complaint() {
                                             )}
 
                                             {manualLocationMethod === 'current' && (
-                                                <div className="current-location-section">
+                                                <div className={cx("current-location-section")}>
                                                     <button
                                                         type="button"
                                                         onClick={handleUseCurrentLocation}
-                                                        className="current-location-btn"
+                                                        className={cx("current-location-btn")}
                                                     >
                                                         Use My Current Location
                                                     </button>
                                                     {formData.location.latitude && formData.location.longitude && (
-                                                        <div className="current-coordinates">
-                                                            <div className="coordinates-info">
+                                                        <div className={cx("current-coordinates")}>
+                                                            <div className={cx("coordinates-info")}>
                                                                 <strong>Current Location:</strong>
                                                             </div>
-                                                            <div className="coordinates-details">
-                                                                <div className="coordinates-line">
+                                                            <div className={cx("coordinates-details")}>
+                                                                <div className={cx("coordinates-line")}>
                                                                     📍 Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
                                                                 </div>
                                                                 {formData.address && (
-                                                                    <div className="address-line">
+                                                                    <div className={cx("address-line")}>
                                                                         🏠 Address: {formData.address}
                                                                     </div>
                                                                 )}
@@ -988,17 +989,17 @@ export default function Complaint() {
 
                                     {/* Current Location */}
                                     {locationMethod === 'current' && formData.location.latitude && formData.location.longitude && (
-                                        <div className="current-location-section">
-                                            <div className="current-coordinates">
-                                                <div className="coordinates-info">
+                                        <div className={cx("current-location-section")}>
+                                            <div className={cx("current-coordinates")}>
+                                                <div className={cx("coordinates-info")}>
                                                     <strong>Current Location:</strong>
                                                 </div>
-                                                <div className="coordinates-details">
-                                                    <div className="coordinates-line">
+                                                <div className={cx("coordinates-details")}>
+                                                    <div className={cx("coordinates-line")}>
                                                         📍 Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
                                                     </div>
                                                     {formData.address && (
-                                                        <div className="address-line">
+                                                        <div className={cx("address-line")}>
                                                             🏠 Address: {formData.address}
                                                         </div>
                                                     )}
@@ -1009,9 +1010,9 @@ export default function Complaint() {
                                 </div>
 
                                 {/* Address Field */}
-                                <div className="form-group">
-                                    <label htmlFor="address" className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label htmlFor="address" className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                         </svg>
                                         Address (Optional)
@@ -1022,72 +1023,72 @@ export default function Complaint() {
                                         name="address"
                                         value={formData.address}
                                         onChange={handleInputChange}
-                                        className="form-input"
+                                        className={cx("form-input")}
                                         placeholder="Street address, landmark, or nearby location"
                                     />
                                 </div>
 
                                 {/* Evidence Upload Section */}
-                                <div className="form-group">
-                                    <label className="form-label">
-                                        <svg className="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className={cx("form-group")}>
+                                    <label className={cx("form-label")}>
+                                        <svg className={cx("label-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                         Evidence (Optional)
                                     </label>
-                                    <p className="form-hint">Upload images or videos as evidence (Max 5 files, 50MB each)</p>
+                                    <p className={cx("form-hint")}>Upload images or videos as evidence (Max 5 files, 50MB each)</p>
                                     
                                     {/* Upload Button */}
-                                    <div className="evidence-upload-container">
+                                    <div className={cx("evidence-upload-container")}>
                                         <input
                                             ref={fileInputRef}
                                             type="file"
                                             accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm,audio/aac,audio/m4a"
                                             multiple
                                             onChange={handleEvidenceUpload}
-                                            className="evidence-input-hidden"
+                                            className={cx("evidence-input-hidden")}
                                             id="evidence-upload"
                                         />
-                                        <label htmlFor="evidence-upload" className="evidence-upload-button">
-                                            <svg className="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <label htmlFor="evidence-upload" className={cx("evidence-upload-button")}>
+                                            <svg className={cx("upload-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
                                             <span>Choose Images, Videos, or Audio</span>
-                                            <span className="upload-hint">or drag and drop</span>
+                                            <span className={cx("upload-hint")}>or drag and drop</span>
                                         </label>
                                     </div>
 
                                     {/* Evidence Previews */}
                                     {evidencePreviews.length > 0 && (
-                                        <div className="evidence-previews">
-                                            <div className="evidence-grid">
+                                        <div className={cx("evidence-previews")}>
+                                            <div className={cx("evidence-grid")}>
                                                 {evidencePreviews.map((preview, index) => (
-                                                    <div key={index} className="evidence-item">
-                                                        <div className="evidence-preview">
+                                                    <div key={index} className={cx("evidence-item")}>
+                                                        <div className={cx("evidence-preview")}>
                                                             {preview.type === 'image' ? (
                                                                 <img 
                                                                     src={preview.url} 
                                                                     alt={`Evidence ${index + 1}`}
-                                                                    className="evidence-image"
+                                                                    className={cx("evidence-image")}
                                                                 />
                                                             ) : preview.type === 'video' ? (
                                                                 <video 
                                                                     src={preview.url}
-                                                                    className="evidence-video"
+                                                                    className={cx("evidence-video")}
                                                                     controls
                                                                 >
                                                                     Your browser does not support the video tag.
                                                                 </video>
                                                             ) : (
-                                                                <div className="evidence-audio-wrapper">
-                                                                    <div className="audio-icon-container">
-                                                                        <svg className="audio-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <div className={cx("evidence-audio-wrapper")}>
+                                                                    <div className={cx("audio-icon-container")}>
+                                                                        <svg className={cx("audio-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                                                         </svg>
                                                                     </div>
                                                                     <audio 
                                                                         src={preview.url}
-                                                                        className="evidence-audio"
+                                                                        className={cx("evidence-audio")}
                                                                         controls
                                                                     >
                                                                         Your browser does not support the audio tag.
@@ -1097,7 +1098,7 @@ export default function Complaint() {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleRemoveEvidence(index)}
-                                                                className="evidence-remove-btn"
+                                                                className={cx("evidence-remove-btn")}
                                                                 title="Remove this file"
                                                             >
                                                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1105,18 +1106,18 @@ export default function Complaint() {
                                                                 </svg>
                                                             </button>
                                                         </div>
-                                                        <div className="evidence-info">
-                                                            <div className="evidence-name" title={preview.name}>
+                                                        <div className={cx("evidence-info")}>
+                                                            <div className={cx("evidence-name")} title={preview.name}>
                                                                 {preview.type === 'image' ? '📷' : preview.type === 'video' ? '🎥' : '🎵'} {preview.name}
                                                             </div>
-                                                            <div className="evidence-size">
+                                                            <div className={cx("evidence-size")}>
                                                                 {formatFileSize(preview.size)}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="evidence-count">
+                                            <div className={cx("evidence-count")}>
                                                 {evidencePreviews.length} of 5 files uploaded
                                             </div>
                                         </div>
@@ -1124,24 +1125,24 @@ export default function Complaint() {
                                 </div>
 
                                 {/* Submit Button */}
-                                <div className="form-actions">
+                                <div className={cx("form-actions")}>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className={`animated-button ${isSubmitting ? 'submitting' : ''}`}
+                                        className={cx(`animated-button ${isSubmitting ? 'submitting' : ''}`)}
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <div className="submit-spinner"></div>
-                                                <span className="submit-btn-text">Submitting...</span>
+                                                <div className={cx("submit-spinner")}></div>
+                                                <span className={cx("submit-btn-text")}>Submitting...</span>
                                             </>
                                         ) : (
                                             <>
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path className="arr-2" d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z" fill="currentColor"/>
-                                                    <path className="arr-1" d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z" fill="currentColor"/>
+                                                    <path className={cx("arr-2")} d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z" fill="currentColor"/>
+                                                    <path className={cx("arr-1")} d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z" fill="currentColor"/>
                                                 </svg>
-                                                <span className="text">Submit Complaint</span>
+                                                <span className={cx("text")}>Submit Complaint</span>
                                             </>
                                         )}
                                     </button>
