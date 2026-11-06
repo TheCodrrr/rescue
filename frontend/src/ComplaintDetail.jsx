@@ -70,9 +70,9 @@ import {
 import EscalationBadge, { EscalationTimeline } from './EscalationBadge';
 import ComplaintProgress from './ComplaintProgress';
 import complaintStyles from "./Complaint.module.css";
-import "./ComplaintDetail.css";
+import complaintDetailStyles from "./ComplaintDetail.module.css";
 import "./Toast.css";
-const cx = (classNames) => classNames.split(/\s+/).map((className) => complaintStyles[className] ?? className).join(" ");
+const cx = (classNames) => classNames.split(/\s+/).map((className) => complaintDetailStyles[className] ?? complaintStyles[className] ?? className).join(" ");
 
 // Fix for Leaflet default markers
 delete L.Icon.Default.prototype._getIconUrl;
