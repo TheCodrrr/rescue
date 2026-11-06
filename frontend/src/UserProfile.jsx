@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import "./UserProfile.css";
+import profileStyles from "./UserProfile.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { loadUser } from "./auth/redux/authSlice";
@@ -7,6 +7,8 @@ import { ArrowLeft } from "lucide-react";
 import Navbar from './Navbar';
 import UserProfileSidebar from './UserProfileSidebar';
 import UserProfileContent from './UserProfileContent';
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => profileStyles[className] ?? className).join(" ");
 
 function UserProfile() {
     const location = useLocation();
@@ -44,13 +46,13 @@ function UserProfile() {
                 }
                 
                 // Also try querySelector as fallback
-                const contentContainer = document.querySelector('.content-container');
+                const contentContainer = document.querySelector(`.${profileStyles["content-container"]}`);
                 if (contentContainer) {
                     contentContainer.scrollTop = 0;
                 }
                 
                 // Reset main profile content area scroll
-                const profileMain = document.querySelector('.profile-main');
+                const profileMain = document.querySelector(`.${profileStyles["profile-main"]}`);
                 if (profileMain) {
                     profileMain.scrollTop = 0;
                 }
@@ -117,14 +119,14 @@ function UserProfile() {
     // Show loading state only during initial load (no user data and specific loading condition)
     if (!user && loading && !hasLoadedUser.current && localStorage.getItem("token")) {
         return (
-            <div className="user-profile-container">
-                <div className="profile-background">
-                    <div className="profile-bg-element"></div>
-                    <div className="profile-bg-element"></div>
-                    <div className="profile-bg-element"></div>
+            <div className={cx("user-profile-container")}>
+                <div className={cx("profile-background")}>
+                    <div className={cx("profile-bg-element")}></div>
+                    <div className={cx("profile-bg-element")}></div>
+                    <div className={cx("profile-bg-element")}></div>
                 </div>
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
+                <div className={cx("loading-container")}>
+                    <div className={cx("loading-spinner")}></div>
                     <p>Loading your profile...</p>
                 </div>
             </div>
@@ -140,15 +142,15 @@ function UserProfile() {
     const navbarComponent = useMemo(() => <Navbar />, []);
 
     return (
-        <div className="user-profile-container">
+        <div className={cx("user-profile-container")}>
             {/* Navbar */}
             {navbarComponent}
             
             {/* Background Elements */}
-            <div className="profile-background">
-                <div className="profile-bg-element"></div>
-                <div className="profile-bg-element"></div>
-                <div className="profile-bg-element"></div>
+            <div className={cx("profile-background")}>
+                <div className={cx("profile-bg-element")}></div>
+                <div className={cx("profile-bg-element")}></div>
+                <div className={cx("profile-bg-element")}></div>
             </div>
             
             {/* Sidebar */}
@@ -159,11 +161,11 @@ function UserProfile() {
             />
             
             {/* Main Content */}
-            <div className="profile-main">
+            <div className={cx("profile-main")}>
                 {/* Back Button */}
-                <div className="back-button-container">
-                    <button onClick={handleBackToHome} className="back-btn">
-                        <ArrowLeft className="back-icon" />
+                <div className={cx("back-button-container")}>
+                    <button onClick={handleBackToHome} className={cx("back-btn")}>
+                        <ArrowLeft className={cx("back-icon")} />
                     </button>
                 </div>
                 

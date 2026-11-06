@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import profileStyles from './UserProfile.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUser, uploadProfileImage, changePassword, deleteUser } from './auth/redux/authSlice';
@@ -34,20 +35,20 @@ const PasswordChangeModal = React.memo(({
     handleCancelPasswordChange,
     handlePasswordSubmit 
 }) => (
-    <div className="modal-overlay" onClick={handleCancelPasswordChange}>
-        <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-                <div className="modal-icon-container password">
-                    <Key className="modal-icon" />
+    <div className={cx("modal-overlay")} onClick={handleCancelPasswordChange}>
+        <div className={cx("modal-container")} onClick={(e) => e.stopPropagation()}>
+            <div className={cx("modal-header")}>
+                <div className={cx("modal-icon-container password")}>
+                    <Key className={cx("modal-icon")} />
                 </div>
-                <h2 className="modal-title">Change Password</h2>
-                <p className="modal-subtitle">Update your account password</p>
+                <h2 className={cx("modal-title")}>Change Password</h2>
+                <p className={cx("modal-subtitle")}>Update your account password</p>
             </div>
             
-            <div className="modal-content">
-                <div className="password-form">
-                    <div className="form-group">
-                        <label htmlFor="oldPassword" className="form-label">
+            <div className={cx("modal-content")}>
+                <div className={cx("password-form")}>
+                    <div className={cx("form-group")}>
+                        <label htmlFor="oldPassword" className={cx("form-label")}>
                             Current Password
                         </label>
                         <input
@@ -56,14 +57,14 @@ const PasswordChangeModal = React.memo(({
                             name="oldPassword"
                             value={passwordForm.oldPassword}
                             onChange={handlePasswordFormChange}
-                            className="form-input"
+                            className={cx("form-input")}
                             placeholder="Enter your current password"
                             disabled={passwordUpdating}
                         />
                     </div>
                     
-                    <div className="form-group">
-                        <label htmlFor="newPassword" className="form-label">
+                    <div className={cx("form-group")}>
+                        <label htmlFor="newPassword" className={cx("form-label")}>
                             New Password
                         </label>
                         <input
@@ -72,14 +73,14 @@ const PasswordChangeModal = React.memo(({
                             name="newPassword"
                             value={passwordForm.newPassword}
                             onChange={handlePasswordFormChange}
-                            className="form-input"
+                            className={cx("form-input")}
                             placeholder="Enter new password (min 6 characters)"
                             disabled={passwordUpdating}
                         />
                     </div>
                     
-                    <div className="form-group">
-                        <label htmlFor="confirmPassword" className="form-label">
+                    <div className={cx("form-group")}>
+                        <label htmlFor="confirmPassword" className={cx("form-label")}>
                             Confirm New Password
                         </label>
                         <input
@@ -88,7 +89,7 @@ const PasswordChangeModal = React.memo(({
                             name="confirmPassword"
                             value={passwordForm.confirmPassword}
                             onChange={handlePasswordFormChange}
-                            className="form-input"
+                            className={cx("form-input")}
                             placeholder="Confirm your new password"
                             disabled={passwordUpdating}
                         />
@@ -96,42 +97,42 @@ const PasswordChangeModal = React.memo(({
                 </div>
                 
                 {passwordError && (
-                    <div className="modal-error">
-                        <AlertTriangle className="error-icon" />
+                    <div className={cx("modal-error")}>
+                        <AlertTriangle className={cx("error-icon")} />
                         <span>{passwordError}</span>
                     </div>
                 )}
                 
                 {passwordSuccess && (
-                    <div className="modal-success">
-                        <div className="success-icon">✓</div>
+                    <div className={cx("modal-success")}>
+                        <div className={cx("success-icon")}>✓</div>
                         <span>{passwordSuccess}</span>
                     </div>
                 )}
             </div>
             
-            <div className="modal-actions">
+            <div className={cx("modal-actions")}>
                 <button
                     onClick={handleCancelPasswordChange}
-                    className="modal-btn cancel"
+                    className={cx("modal-btn cancel")}
                     disabled={passwordUpdating}
                 >
-                    <X className="btn-icon" />
+                    <X className={cx("btn-icon")} />
                     Cancel
                 </button>
                 <button
                     onClick={handlePasswordSubmit}
-                    className="modal-btn primary"
+                    className={cx("modal-btn primary")}
                     disabled={passwordUpdating || !passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
                 >
                     {passwordUpdating ? (
                         <>
-                            <div className="btn-spinner"></div>
+                            <div className={cx("btn-spinner")}></div>
                             Updating...
                         </>
                     ) : (
                         <>
-                            <Key className="btn-icon" />
+                            <Key className={cx("btn-icon")} />
                             Change Password
                         </>
                     )}
@@ -140,6 +141,8 @@ const PasswordChangeModal = React.memo(({
         </div>
     </div>
 ));
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => profileStyles[className] ?? className).join(" ");
 
 function UserProfileContent({ activeSection, contentRef }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -623,15 +626,15 @@ function UserProfileContent({ activeSection, contentRef }) {
     };
 
     const renderProfileContent = () => (
-        <div className="space-y-8">
+        <div className={cx("space-y-8")}>
             {/* Profile Header Card */}
-            <div className="profile-header">
-                    <div className="profile-avatar-container">
+            <div className={cx("profile-header")}>
+                    <div className={cx("profile-avatar-container")}>
                         {/* <img
                             key={`main-avatar-${imageRefreshKey}`}
                             src={userData.profileImage}
                             alt={userData.name}
-                            className="user-profile-main-avatar"
+                            className={cx("user-profile-main-avatar")}
                             // onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
                             onError={(e) => {
                                 // console.log("Profile image failed to load:", userData.profileImage);
@@ -642,7 +645,7 @@ function UserProfileContent({ activeSection, contentRef }) {
                             key={`main-avatar-${imageRefreshKey}`}
                             src={userData.profileImage}
                             alt={userData.name}
-                            className="user-profile-main-avatar"
+                            className={cx("user-profile-main-avatar")}
                             // onLoad={() => console.log("Profile image loaded:", userData.profileImage)}
                             onError={(e) => {
                                 // console.log("Profile image failed to load:", userData.profileImage);
@@ -652,15 +655,15 @@ function UserProfileContent({ activeSection, contentRef }) {
                             }}
                         />
                         <button 
-                            className="avatar-edit-btn"
+                            className={cx("avatar-edit-btn")}
                             onClick={handleAvatarClick}
                             disabled={imageUploading}
                             title="Change profile picture"
                         >
                             {imageUploading ? (
-                                <div className="location-spinner"></div>
+                                <div className={cx("location-spinner")}></div>
                             ) : (
-                                <Camera className="camera-icon" />
+                                <Camera className={cx("camera-icon")} />
                             )}
                         </button>
                         <input
@@ -672,32 +675,32 @@ function UserProfileContent({ activeSection, contentRef }) {
                         />
                     </div>
 
-                    <div className="profile-info">
-                        <div className="profile-header-row">
-                            <h1 className="profile-name">
+                    <div className={cx("profile-info")}>
+                        <div className={cx("profile-header-row")}>
+                            <h1 className={cx("profile-name")}>
                                 {userData.name}
                             </h1>
                             <button 
-                                className="edit-profile-btn" 
+                                className={cx("edit-profile-btn")} 
                                 onClick={handleEditProfile}
                                 disabled={isEditing}
                             >
-                                <Edit3 className="edit-icon" />
+                                <Edit3 className={cx("edit-icon")} />
                                 Edit Profile
                             </button>
                         </div>
                         
-                        <div className="profile-details">
-                            <p className="profile-role">
+                        <div className={cx("profile-details")}>
+                            <p className={cx("profile-role")}>
                                 {userData.role}
                             </p>
                             {user?.role === 'officer' && userData.department && (
-                                <p className="profile-department">
+                                <p className={cx("profile-department")}>
                                     {userData.department}
                                 </p>
                             )}
                             {user?.role === 'officer' && userData.userLevel !== undefined && (
-                                <p className="profile-badge">
+                                <p className={cx("profile-badge")}>
                                     Level {userData.userLevel}
                                 </p>
                             )}
@@ -706,26 +709,26 @@ function UserProfileContent({ activeSection, contentRef }) {
                 </div>
 
             {/* Contact Information Card */}
-            <div className="profile-card" style={{'--delay': '0.3s'}}>
-                <div className="up-profile-section-header">
-                    <Mail className="section-icon" style={{color: '#93c5fd'}} />
-                    <h2 className="up-profile-section-title">Contact Information</h2>
+            <div className={cx("profile-card")} style={{'--delay': '0.3s'}}>
+                <div className={cx("up-profile-section-header")}>
+                    <Mail className={cx("section-icon")} style={{color: '#93c5fd'}} />
+                    <h2 className={cx("up-profile-section-title")}>Contact Information</h2>
                     {isEditing && (
-                        <div className="edit-actions">
+                        <div className={cx("edit-actions")}>
                             <button 
-                                className="save-btn" 
+                                className={cx("save-btn")} 
                                 onClick={handleSaveProfile}
                                 disabled={profileUpdating}
                             >
-                                <Save className="w-4 h-4" />
+                                <Save className={cx("w-4 h-4")} />
                                 {profileUpdating ? 'Saving...' : 'Save'}
                             </button>
                             <button 
-                                className="cancel-btn" 
+                                className={cx("cancel-btn")} 
                                 onClick={handleCancelEdit}
                                 disabled={profileUpdating}
                             >
-                                <X className="w-4 h-4" />
+                                <X className={cx("w-4 h-4")} />
                                 Cancel
                             </button>
                         </div>
@@ -733,143 +736,143 @@ function UserProfileContent({ activeSection, contentRef }) {
                 </div>
                 
                 {updateError && (
-                    <div className="update-message error">
+                    <div className={cx("update-message error")}>
                         {updateError}
                     </div>
                 )}
                 {updateSuccess && (
-                    <div className="update-message success">
+                    <div className={cx("update-message success")}>
                         {updateSuccess}
                     </div>
                 )}
                 {imageUploading && (
-                    <div className="update-message info">
+                    <div className={cx("update-message info")}>
                         📸 Uploading profile image...
                     </div>
                 )}
                 
-                <div className="contact-grid">
-                    <div className="contact-column">
-                        <div className="contact-item">
-                            <User className="contact-icon" style={{color: '#fbbf24'}} />
-                            <div className="contact-info">
-                                <p className="contact-label">Full Name</p>
+                <div className={cx("contact-grid")}>
+                    <div className={cx("contact-column")}>
+                        <div className={cx("contact-item")}>
+                            <User className={cx("contact-icon")} style={{color: '#fbbf24'}} />
+                            <div className={cx("contact-info")}>
+                                <p className={cx("contact-label")}>Full Name</p>
                                 {isEditing ? (
                                     <input
                                         type="text"
                                         name="name"
                                         value={editForm.name}
                                         onChange={handleFormChange}
-                                        className="contact-input"
+                                        className={cx("contact-input")}
                                         placeholder="Enter your full name"
                                         disabled={false}
                                     />
                                 ) : (
-                                    <p className="contact-value">{userData.name}</p>
+                                    <p className={cx("contact-value")}>{userData.name}</p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="contact-item">
-                            <Mail className="contact-icon" style={{color: '#93c5fd'}} />
-                            <div className="contact-info">
-                                <p className="contact-label">Email</p>
+                        <div className={cx("contact-item")}>
+                            <Mail className={cx("contact-icon")} style={{color: '#93c5fd'}} />
+                            <div className={cx("contact-info")}>
+                                <p className={cx("contact-label")}>Email</p>
                                 {isEditing ? (
                                     <input
                                         type="email"
                                         name="email"
                                         value={editForm.email}
                                         onChange={handleFormChange}
-                                        className="contact-input"
+                                        className={cx("contact-input")}
                                         placeholder="Enter your email"
                                         disabled={false}
                                     />
                                 ) : (
-                                    <p className="contact-value">{userData.email}</p>
+                                    <p className={cx("contact-value")}>{userData.email}</p>
                                 )}
                             </div>
                         </div>
                         
-                        <div className="contact-item">
-                            <Phone className="contact-icon" style={{color: '#86efac'}} />
-                            <div className="contact-info">
-                                <p className="contact-label">Phone</p>
+                        <div className={cx("contact-item")}>
+                            <Phone className={cx("contact-icon")} style={{color: '#86efac'}} />
+                            <div className={cx("contact-info")}>
+                                <p className={cx("contact-label")}>Phone</p>
                                 {isEditing ? (
                                     <input
                                         type="tel"
                                         name="phone"
                                         value={editForm.phone}
                                         onChange={handleFormChange}
-                                        className="contact-input"
+                                        className={cx("contact-input")}
                                         placeholder="Enter your phone number"
                                         disabled={false}
                                     />
                                 ) : (
-                                    <p className="contact-value">{userData.phone}</p>
+                                    <p className={cx("contact-value")}>{userData.phone}</p>
                                 )}
                             </div>
                         </div>
                     </div>
                     
-                    <div className="contact-column">
-                        <div className="contact-item">
-                            <MapPin className="contact-icon" style={{color: '#fca5a5'}} />
-                            <div className="contact-info">
-                                <p className="contact-label">Address</p>
+                    <div className={cx("contact-column")}>
+                        <div className={cx("contact-item")}>
+                            <MapPin className={cx("contact-icon")} style={{color: '#fca5a5'}} />
+                            <div className={cx("contact-info")}>
+                                <p className={cx("contact-label")}>Address</p>
                                 {isEditing ? (
                                     <div>
-                                        <div className="address-input-container">
+                                        <div className={cx("address-input-container")}>
                                             <input
                                                 type="text"
                                                 name="address"
                                                 value={editForm.address}
                                                 onChange={handleFormChange}
-                                                className="contact-input"
+                                                className={cx("contact-input")}
                                                 placeholder="Enter your address (we'll find coordinates) or use location button"
                                                 disabled={false}
                                             />
-                                            <div className="address-buttons">
+                                            <div className={cx("address-buttons")}>
                                                 <button
                                                     type="button"
                                                     onClick={handleGeocodeAddress}
-                                                    className="geocode-btn"
+                                                    className={cx("geocode-btn")}
                                                     disabled={geocodingLoading || !editForm.address || editForm.address.trim().length < 5}
                                                     title="Find coordinates for this address"
                                                 >
                                                     {geocodingLoading ? (
-                                                        <div className="location-spinner"></div>
+                                                        <div className={cx("location-spinner")}></div>
                                                     ) : (
-                                                        <Search className="w-4 h-4" />
+                                                        <Search className={cx("w-4 h-4")} />
                                                     )}
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={getCurrentLocation}
-                                                    className="location-btn"
+                                                    className={cx("location-btn")}
                                                     disabled={locationLoading || geocodingLoading}
                                                     title="Get current location"
                                                 >
                                                     {locationLoading ? (
-                                                        <div className="location-spinner"></div>
+                                                        <div className={cx("location-spinner")}></div>
                                                     ) : (
-                                                        <MapPin className="w-4 h-4" />
+                                                        <MapPin className={cx("w-4 h-4")} />
                                                     )}
                                                 </button>
                                             </div>
                                         </div>
                                         
                                         {geocodingLoading && (
-                                            <p className="geocoding-status">
+                                            <p className={cx("geocoding-status")}>
                                                 🔍 Finding coordinates for address...
                                             </p>
                                         )}
                                         
                                         {editForm.latitude && editForm.longitude && (
-                                            <div className="coordinates-info">
-                                                <p className="coordinates-display">
+                                            <div className={cx("coordinates-info")}>
+                                                <p className={cx("coordinates-display")}>
                                                     📍 {editForm.latitude.toFixed(6)}, {editForm.longitude.toFixed(6)}
                                                 </p>
-                                                <p className="coordinates-note">
+                                                <p className={cx("coordinates-note")}>
                                                     ✓ Both address and coordinates are captured
                                                 </p>
                                             </div>
@@ -877,20 +880,20 @@ function UserProfileContent({ activeSection, contentRef }) {
                                     </div>
                                 ) : (
                                     <div>
-                                        <p className="contact-value">{userData.location}</p>
+                                        <p className={cx("contact-value")}>{userData.location}</p>
                                         {userData.coordinates && (
-                                            <p className="coordinates-display">📍 {userData.coordinates}</p>
+                                            <p className={cx("coordinates-display")}>📍 {userData.coordinates}</p>
                                         )}
                                     </div>
                                 )}
                             </div>
                         </div>
                         
-                        <div className="contact-item">
-                            <Calendar className="contact-icon" style={{color: '#c4b5fd'}} />
-                            <div className="contact-info">
-                                <p className="contact-label">Joined</p>
-                                <p className="contact-value">{userData.joinDate}</p>
+                        <div className={cx("contact-item")}>
+                            <Calendar className={cx("contact-icon")} style={{color: '#c4b5fd'}} />
+                            <div className={cx("contact-info")}>
+                                <p className={cx("contact-label")}>Joined</p>
+                                <p className={cx("contact-value")}>{userData.joinDate}</p>
                             </div>
                         </div>
                     </div>
@@ -898,37 +901,37 @@ function UserProfileContent({ activeSection, contentRef }) {
             </div>
 
             {/* Security & Access Card */}
-            <div className="profile-card" style={{'--delay': '0.5s'}}>
-                <div className="up-profile-section-header">
-                    <Shield className="section-icon" style={{color: '#86efac'}} />
-                    <h2 className="up-profile-section-title">Security & Access</h2>
+            <div className={cx("profile-card")} style={{'--delay': '0.5s'}}>
+                <div className={cx("up-profile-section-header")}>
+                    <Shield className={cx("section-icon")} style={{color: '#86efac'}} />
+                    <h2 className={cx("up-profile-section-title")}>Security & Access</h2>
                 </div>
                 
-                <div className="security-clearance">
-                    <div className="clearance-content">
-                        <div className="clearance-icon-container">
-                            <Shield className="clearance-icon" />
+                <div className={cx("security-clearance")}>
+                    <div className={cx("clearance-content")}>
+                        <div className={cx("clearance-icon-container")}>
+                            <Shield className={cx("clearance-icon")} />
                         </div>
-                        <div className="clearance-info">
-                            <p className="clearance-level">{userData.clearanceLevel}</p>
-                            <p className="clearance-description">{userData.clearanceLevelDescription}</p>
+                        <div className={cx("clearance-info")}>
+                            <p className={cx("clearance-level")}>{userData.clearanceLevel}</p>
+                            <p className={cx("clearance-description")}>{userData.clearanceLevelDescription}</p>
                         </div>
                     </div>
                     
-                    <div className="password-section">
-                        <div className="password-info">
-                            <Key className="password-icon" style={{color: '#fbbf24'}} />
+                    <div className={cx("password-section")}>
+                        <div className={cx("password-info")}>
+                            <Key className={cx("password-icon")} style={{color: '#fbbf24'}} />
                             <div>
-                                <h4 className="password-title">Password Security</h4>
-                                <p className="password-description">Keep your account secure by updating your password regularly</p>
+                                <h4 className={cx("password-title")}>Password Security</h4>
+                                <p className={cx("password-description")}>Keep your account secure by updating your password regularly</p>
                             </div>
                         </div>
                         <button 
-                            className="change-password-btn" 
+                            className={cx("change-password-btn")} 
                             onClick={handleChangePassword}
                             disabled={passwordUpdating}
                         >
-                            <Key className="key-icon" />
+                            <Key className={cx("key-icon")} />
                             Change Password
                         </button>
                     </div>
@@ -936,29 +939,29 @@ function UserProfileContent({ activeSection, contentRef }) {
             </div>
 
             {/* Danger Zone Card */}
-            <div className="profile-card danger-zone" style={{'--delay': '0.7s'}}>
-                <div className="up-profile-section-header">
-                    <AlertTriangle className="section-icon danger-icon" />
-                    <h2 className="up-profile-section-title">Danger Zone</h2>
+            <div className={cx("profile-card danger-zone")} style={{'--delay': '0.7s'}}>
+                <div className={cx("up-profile-section-header")}>
+                    <AlertTriangle className={cx("section-icon danger-icon")} />
+                    <h2 className={cx("up-profile-section-title")}>Danger Zone</h2>
                 </div>
                 
-                <div className="danger-content">
-                    <div className="danger-warning">
-                        <Trash2 className="danger-warning-icon" />
-                        <div className="danger-text">
-                            <h3 className="danger-title">Delete Account</h3>
-                            <p className="danger-description">
+                <div className={cx("danger-content")}>
+                    <div className={cx("danger-warning")}>
+                        <Trash2 className={cx("danger-warning-icon")} />
+                        <div className={cx("danger-text")}>
+                            <h3 className={cx("danger-title")}>Delete Account</h3>
+                            <p className={cx("danger-description")}>
                                 Permanently delete your account and all associated data. This action cannot be undone.
                             </p>
                         </div>
                     </div>
                     
                     <button 
-                        className="delete-account-btn" 
+                        className={cx("delete-account-btn")} 
                         onClick={handleDeleteAccount}
                         disabled={isDeleting}
                     >
-                        <Trash2 className="delete-icon" />
+                        <Trash2 className={cx("delete-icon")} />
                         Delete My Account
                     </button>
                 </div>
@@ -967,9 +970,9 @@ function UserProfileContent({ activeSection, contentRef }) {
     );
 
     const renderSettingsContent = () => (
-        <div className="space-y-8">
-            <div className="profile-card">
-                <h2 className="up-profile-section-title">Settings</h2>
+        <div className={cx("space-y-8")}>
+            <div className={cx("profile-card")}>
+                <h2 className={cx("up-profile-section-title")}>Settings</h2>
                 <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
                     Settings panel coming soon...
                 </p>
@@ -986,9 +989,9 @@ function UserProfileContent({ activeSection, contentRef }) {
     );
 
     const renderActivityContent = () => (
-        <div className="space-y-8">
-            <div className="profile-card">
-                <h2 className="up-profile-section-title">Activity Log</h2>
+        <div className={cx("space-y-8")}>
+            <div className={cx("profile-card")}>
+                <h2 className={cx("up-profile-section-title")}>Activity Log</h2>
                 <p style={{color: 'rgba(255, 255, 255, 0.7)', margin: '1rem 0'}}>
                     Activity log coming soon...
                 </p>
@@ -1040,19 +1043,19 @@ function UserProfileContent({ activeSection, contentRef }) {
     // On mobile, render all sections vertically
     const renderAllSections = () => (
         <>
-            <div className="mobile-section">
+            <div className={cx("mobile-section")}>
                 {renderProfileContent()}
             </div>
-            <div className="mobile-section">
+            <div className={cx("mobile-section")}>
                 {renderMyComplaintsContent()}
             </div>
-            <div className="mobile-section">
+            <div className={cx("mobile-section")}>
                 {renderAnalyticsContent()}
             </div>
-            <div className="mobile-section">
+            <div className={cx("mobile-section")}>
                 {renderHistoryContent()}
             </div>
-            <div className="mobile-section">
+            <div className={cx("mobile-section")}>
                 {renderSettingsContent()}
             </div>
         </>
@@ -1060,7 +1063,7 @@ function UserProfileContent({ activeSection, contentRef }) {
 
     return (
         <>
-            <div className="content-container" ref={contentRef}>
+            <div className={cx("content-container")} ref={contentRef}>
                 {isMobile ? renderAllSections() : renderContent()}
             </div>
 

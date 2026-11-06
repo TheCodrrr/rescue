@@ -1,4 +1,5 @@
 import React from 'react';
+import profileStyles from './UserProfile.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from './auth/redux/authSlice';
@@ -12,6 +13,8 @@ import {
     BarChart3,
 } from 'lucide-react';
 import CloudImage from './utils/CloudImage';
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => profileStyles[className] ?? className).join(" ");
 
 function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
     const dispatch = useDispatch();
@@ -46,16 +49,16 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
     const imgSrc = userData.profileImage.includes("cloudinary") ? userData.profileImage : userData.profileImage;
 
     return (
-        <div className="profile-sidebar">
-            <div className="sidebar-content">
+        <div className={cx("profile-sidebar")}>
+            <div className={cx("sidebar-content")}>
 
                 {/* User Quick Info */}
-                <div className="user-quick-info">
-                    <div className="user-info-content">
+                <div className={cx("user-quick-info")}>
+                    <div className={cx("user-info-content")}>
                         {/* <img
                             src={userData.profileImage}
                             alt={userData.name}
-                            className="user-quick-avatar"
+                            className={cx("user-quick-avatar")}
                             onError={(e) => {
                                 e.target.src = "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_1280.png";
                             }}
@@ -63,27 +66,27 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
                         <CloudImage
                             src={imgSrc}
                             alt={userData.name}
-                            className="w-12 h-12 rounded-full object-cover shadow-md user-quick-avatar"
+                            className={cx("w-12 h-12 rounded-full object-cover shadow-md user-quick-avatar")}
                         />
                         <div>
-                            <h3 className="user-quick-name">{userData.name}</h3>
-                            <p className="user-quick-role">{userData.role}</p>
+                            <h3 className={cx("user-quick-name")}>{userData.name}</h3>
+                            <p className={cx("user-quick-role")}>{userData.role}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="profile-nav">
+                <nav className={cx("profile-nav")}>
                     {sidebarLinks.map((link, index) => {
                         const IconComponent = link.icon;
                         return (
                             <button
                                 key={link.id}
                                 onClick={() => setActiveSection(link.id)}
-                                className={`nav-link ${activeSection === link.id ? 'active' : ''}`}
+                                className={cx(`nav-link ${activeSection === link.id ? 'active' : ''}`)}
                                 style={{ '--delay': `${index * 0.1}s` }}
                             >
-                                <IconComponent className="nav-icon" />
+                                <IconComponent className={cx("nav-icon")} />
                                 <span>{link.label}</span>
                             </button>
                         );
@@ -91,9 +94,9 @@ function UserProfileSidebar({ activeSection, setActiveSection, onBackToHome }) {
                 </nav>
 
                 {/* Logout Button */}
-                <div className="logout-container">
-                    <button onClick={handleLogout} className="logout-btn">
-                        <LogOut className="nav-icon" />
+                <div className={cx("logout-container")}>
+                    <button onClick={handleLogout} className={cx("logout-btn")}>
+                        <LogOut className={cx("nav-icon")} />
                         <span>Logout</span>
                     </button>
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import profileStyles from "./UserProfile.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
@@ -35,6 +36,8 @@ import {
     clearError
 } from './auth/redux/complaintSlice';
 import './MyComplaintsPagination.css';
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => profileStyles[className] ?? className).join(" ");
 
 function MyComplaints() {
     const dispatch = useDispatch();
@@ -480,7 +483,7 @@ function MyComplaints() {
         
         return parts.map((part, index) => 
             regex.test(part) ? (
-                <mark key={index} className="my-complaints-search-highlight">{part}</mark>
+                <mark key={index} className={cx("my-complaints-search-highlight")}>{part}</mark>
             ) : part
         );
     };
@@ -491,9 +494,9 @@ function MyComplaints() {
     // Early returns for auth check
     if (!isAuthenticated) {
         return (
-            <div className="my-complaints-profile-card">
-                <div className="my-complaints-empty-state">
-                    <div className="my-complaints-empty-icon">🔐</div>
+            <div className={cx("my-complaints-profile-card")}>
+                <div className={cx("my-complaints-empty-state")}>
+                    <div className={cx("my-complaints-empty-icon")}>🔐</div>
                     <h3>Authentication Required</h3>
                     <p>Please log in to view your complaints</p>
                 </div>
@@ -506,12 +509,12 @@ function MyComplaints() {
 
     return (
         <>
-            <div className="my-complaints-profile-card" ref={myComplaintsRef}>
-                <div className="my-complaints-section-header">
-                    <h2 className="my-complaints-section-title">
+            <div className={cx("my-complaints-profile-card")} ref={myComplaintsRef}>
+                <div className={cx("my-complaints-section-header")}>
+                    <h2 className={cx("my-complaints-section-title")}>
                         {isOfficer ? 'My Accepted Cases' : 'My Complaints'}
                     </h2>
-                    <p className="my-complaints-section-subtitle">
+                    <p className={cx("my-complaints-section-subtitle")}>
                         {isOfficer 
                             ? 'Manage and track complaints you have accepted' 
                             : 'Track the status of your submitted complaints'}
@@ -520,18 +523,18 @@ function MyComplaints() {
 
                 {/* Initial Loading State */}
                 {isLoading && !data ? (
-                    <div className="my-complaints-loading-container">
-                        <div className="spinner"></div>
+                    <div className={cx("my-complaints-loading-container")}>
+                        <div className={cx("spinner")}></div>
                         <p>Loading your complaints...</p>
                     </div>
                 ) : status === "error" ? (
                     /* Error State */
-                    <div className="my-complaints-error-state">
-                        <div className="my-complaints-error-icon">⚠️</div>
+                    <div className={cx("my-complaints-error-state")}>
+                        <div className={cx("my-complaints-error-icon")}>⚠️</div>
                         <h3>Error Loading Complaints</h3>
                         <p>{error?.message || "Failed to load your complaints. Please try again."}</p>
                         <button 
-                            className="my-complaints-retry-button"
+                            className={cx("my-complaints-retry-button")}
                             onClick={() => clearCacheAndRefetch()}
                         >
                             Retry
@@ -539,8 +542,8 @@ function MyComplaints() {
                     </div>
                 ) : (!isFetching && !showingPreviousData && (!data || !data.pages || data.pages.length === 0 || displayComplaints.length === 0)) ? (
                     /* Empty State - No complaints at all */
-                    <div className="my-complaints-empty-state">
-                        <div className="my-complaints-empty-icon">📋</div>
+                    <div className={cx("my-complaints-empty-state")}>
+                        <div className={cx("my-complaints-empty-icon")}>📋</div>
                         <h3>{isOfficer ? 'No Accepted Cases' : 'No Complaints Yet'}</h3>
                         <p>
                             {isOfficer 
@@ -550,28 +553,28 @@ function MyComplaints() {
                     </div>
                 ) : (
                     /* Main Content - Complaints List */
-                    <div className="my-complaints-list">
+                    <div className={cx("my-complaints-list")}>
                     {/* Removed loading overlay - data updates seamlessly in background */}
                     
                     {/* Search and Filter Section */}
                     {displayComplaints.length > 0 && (
-                        <div className="my-complaints-search-filter-section">
-                            <div className="my-complaints-search-bar-container">
-                                <div className="my-complaints-search-input-wrapper">
-                                    <svg className="my-complaints-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className={cx("my-complaints-search-filter-section")}>
+                            <div className={cx("my-complaints-search-bar-container")}>
+                                <div className={cx("my-complaints-search-input-wrapper")}>
+                                    <svg className={cx("my-complaints-search-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                     <input
                                         ref={searchInputRef}
                                         type="text"
-                                        className="my-complaints-search-input"
+                                        className={cx("my-complaints-search-input")}
                                         placeholder="Search complaints by title or description..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                     {searchQuery && (
                                         <button 
-                                            className="my-complaints-clear-search-btn"
+                                            className={cx("my-complaints-clear-search-btn")}
                                             onClick={() => {
                                                 setSearchQuery('');
                                                 setShowingPreviousData(false);
@@ -589,9 +592,9 @@ function MyComplaints() {
                                         </button>
                                     )}
                                 </div>
-                                <div className="my-complaints-category-filter-wrapper">
+                                <div className={cx("my-complaints-category-filter-wrapper")}>
                                     <select
-                                        className="my-complaints-category-filter"
+                                        className={cx("my-complaints-category-filter")}
                                         value={selectedCategory}
                                         onChange={(e) => setSelectedCategory(e.target.value)}
                                     >
@@ -606,18 +609,18 @@ function MyComplaints() {
                             </div>
                             
                             {/* Results Summary */}
-                            <div className="my-complaints-results-summary">
-                                <span className="my-complaints-results-count">
+                            <div className={cx("my-complaints-results-summary")}>
+                                <span className={cx("my-complaints-results-count")}>
                                     Showing {currentlyLoaded} of {totalAvailable} {isOfficer ? 'cases' : 'complaints'}
                                     {selectedCategory !== 'all' && (
-                                        <span className="my-complaints-category-indicator">
+                                        <span className={cx("my-complaints-category-indicator")}>
                                             {' '}in {categories.find(c => c.value === selectedCategory)?.label || selectedCategory}
                                         </span>
                                     )}
                                 </span>
                                 {(searchQuery || selectedCategory !== 'all') && (
                                     <button 
-                                        className="my-complaints-clear-filters-btn"
+                                        className={cx("my-complaints-clear-filters-btn")}
                                         onClick={() => {
                                             setSearchQuery('');
                                             setSelectedCategory('all');
@@ -652,7 +655,7 @@ function MyComplaints() {
                     )}
 
                     <Link
-                        className="btn-create-complaint-user-profile my-complaint-card"
+                        className={cx("btn-create-complaint-user-profile my-complaint-card")}
                         style={{
                             width: '100%',
                             height: '8rem',
@@ -682,87 +685,87 @@ function MyComplaints() {
                         </svg>
                         Create New Complaint
                     </Link>
-                    <div className="my-complaints-grid">
+                    <div className={cx("my-complaints-grid")}>
 
                             {filteredComplaints.map((complaint, index) => (
-                                <div key={complaint._id || index} className="my-complaint-card">
-                                    <div className="my-complaint-card-header">
-                                        <div className="my-complaint-card-header-left">
-                                            <div className="my-complaint-category">
+                                <div key={complaint._id || index} className={cx("my-complaint-card")}>
+                                    <div className={cx("my-complaint-card-header")}>
+                                        <div className={cx("my-complaint-card-header-left")}>
+                                            <div className={cx("my-complaint-category")}>
                                                 <span 
-                                                    className="my-category-icon-display"
+                                                    className={cx("my-category-icon-display")}
                                                     style={{ color: getCategoryColor(complaint.category) }}
                                                 >
                                                     {getCategoryIcon(complaint.category)}
                                                 </span>
-                                                <span className="my-category-name">
+                                                <span className={cx("my-category-name")}>
                                                     {categories.find(cat => cat.value === complaint.category)?.label || complaint.category}
                                                 </span>
                                             </div>
                                         </div>
                                         
-                                        <div className="my-card-header-right">
-                                            <span className={`my-status-badge ${getStatusBadgeClass(complaint.status)}`}>
+                                        <div className={cx("my-card-header-right")}>
+                                            <span className={cx(`my-status-badge ${getStatusBadgeClass(complaint.status)}`)}>
                                                 {mapStatusToFrontend(complaint.status).replace('-', ' ').toUpperCase()}
                                             </span>
                                             <button
-                                                className="my-delete-btn-icon"
+                                                className={cx("my-delete-btn-icon")}
                                                 onClick={() => openDeleteModal(complaint)}
                                                 disabled={deleteInProgress[complaint._id]}
                                                 title="Delete Complaint"
                                             >
                                                 {deleteInProgress[complaint._id] ? (
-                                                    <div className="btn-spinner-small"></div>
+                                                    <div className={cx("btn-spinner-small")}></div>
                                                 ) : (
-                                                    <svg className="my-delete-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className={cx("my-delete-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 )}
                                             </button>
                                             <Link
                                                 to={`/complaint/${complaint._id}`}
-                                                className="my-visit-btn-icon"
+                                                className={cx("my-visit-btn-icon")}
                                                 title="Visit Complaint Details"
                                             >
-                                                <FiExternalLink className="my-delete-icon" />
+                                                <FiExternalLink className={cx("my-delete-icon")} />
                                             </Link>
                                         </div>
                                     </div>
                                     
-                                    <div className="my-complaint-card-body">
-                                        <div className="my-complaint-title-section">
-                                            <h4 className="my-complaint-title-display">
+                                    <div className={cx("my-complaint-card-body")}>
+                                        <div className={cx("my-complaint-title-section")}>
+                                            <h4 className={cx("my-complaint-title-display")}>
                                                 {searchQuery ? highlightText(complaint.title, searchQuery) : complaint.title}
                                             </h4>
                                             
                                             {/* Severity Display */}
                                             {complaint.severity && (
-                                                <div className="my-complaint-severity">
+                                                <div className={cx("my-complaint-severity")}>
                                                     <div 
-                                                        className="my-severity-badge-display"
+                                                        className={cx("my-severity-badge-display")}
                                                         style={{
                                                             color: getSeverityInfo(complaint.severity).color,
                                                             backgroundColor: getSeverityInfo(complaint.severity).bgColor,
                                                             border: `1px solid ${getSeverityInfo(complaint.severity).borderColor}`
                                                         }}
                                                     >
-                                                        <span className="my-severity-icon-display" style={{ color: getSeverityInfo(complaint.severity).color }}>
+                                                        <span className={cx("my-severity-icon-display")} style={{ color: getSeverityInfo(complaint.severity).color }}>
                                                             {getSeverityInfo(complaint.severity).icon}
                                                         </span>
-                                                        <span className="my-severity-text">
+                                                        <span className={cx("my-severity-text")}>
                                                             {getSeverityInfo(complaint.severity).label}
                                                         </span>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
-                                        <p className="my-complaint-description-display">
+                                        <p className={cx("my-complaint-description-display")}>
                                             {searchQuery ? highlightText(complaint.description, searchQuery) : complaint.description}
                                         </p>
                                         
                                         {complaint.address && (
-                                            <div className="my-complaint-location">
-                                                <svg className="my-location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div className={cx("my-complaint-location")}>
+                                                <svg className={cx("my-location-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
@@ -772,39 +775,39 @@ function MyComplaints() {
 
                                         {/* Rail specific train meta */}
                                         {complaint.category === 'rail' && complaint.category_specific_data && (
-                                            <div className="my-rail-train-meta">
-                                                <div className="my-train-header-line">
-                                                    <div className="my-train-title-wrap">
-                                                        <span className="my-train-emoji" role="img" aria-label="train details"><MdDirectionsRailway /></span>
-                                                        <span className="my-train-name-text">{complaint.category_specific_data.train_name || complaint.category_specific_data.trainNumber || complaint.category_data_id}</span>
-                                                        <span className="my-train-number-pill">{complaint.category_specific_data.train_number || complaint.category_data_id}</span>
+                                            <div className={cx("my-rail-train-meta")}>
+                                                <div className={cx("my-train-header-line")}>
+                                                    <div className={cx("my-train-title-wrap")}>
+                                                        <span className={cx("my-train-emoji")} role="img" aria-label="train details"><MdDirectionsRailway /></span>
+                                                        <span className={cx("my-train-name-text")}>{complaint.category_specific_data.train_name || complaint.category_specific_data.trainNumber || complaint.category_data_id}</span>
+                                                        <span className={cx("my-train-number-pill")}>{complaint.category_specific_data.train_number || complaint.category_data_id}</span>
                                                     </div>
                                                     {complaint.category_specific_data.train_type && (
-                                                        <span className="my-train-type-badge" title="Train Type">{complaint.category_specific_data.train_type.replace(/_/g,' ')}</span>
+                                                        <span className={cx("my-train-type-badge")} title="Train Type">{complaint.category_specific_data.train_type.replace(/_/g,' ')}</span>
                                                     )}
                                                 </div>
-                                                <div className="my-train-route-grid">
+                                                <div className={cx("my-train-route-grid")}>
                                                     {(complaint.category_specific_data.routes?.from_station) && (
-                                                        <div className="my-route-segment from">
-                                                            <div className="my-seg-label">Origin</div>
-                                                            <div className="my-seg-station">
-                                                                <span className="my-station-name origin-name">{complaint.category_specific_data.routes.from_station.name}</span>
-                                                                <span className="my-code origin-code">({complaint.category_specific_data.routes.from_station.code})</span>
+                                                        <div className={cx("my-route-segment from")}>
+                                                            <div className={cx("my-seg-label")}>Origin</div>
+                                                            <div className={cx("my-seg-station")}>
+                                                                <span className={cx("my-station-name origin-name")}>{complaint.category_specific_data.routes.from_station.name}</span>
+                                                                <span className={cx("my-code origin-code")}>({complaint.category_specific_data.routes.from_station.code})</span>
                                                             </div>
                                                             {complaint.category_specific_data.routes.from_station.time && (
-                                                                <div className="my-seg-time">Dep: {complaint.category_specific_data.routes.from_station.time.replace('.', ':')}</div>
+                                                                <div className={cx("my-seg-time")}>Dep: {complaint.category_specific_data.routes.from_station.time.replace('.', ':')}</div>
                                                             )}
                                                         </div>
                                                     )}
                                                     {(complaint.category_specific_data.routes?.to_station) && (
-                                                        <div className="my-route-segment to">
-                                                            <div className="my-seg-label">Destination</div>
-                                                            <div className="my-seg-station">
-                                                                <span className="my-station-name destination-name">{complaint.category_specific_data.routes.to_station.name}</span>
-                                                                <span className="my-code destination-code">({complaint.category_specific_data.routes.to_station.code})</span>
+                                                        <div className={cx("my-route-segment to")}>
+                                                            <div className={cx("my-seg-label")}>Destination</div>
+                                                            <div className={cx("my-seg-station")}>
+                                                                <span className={cx("my-station-name destination-name")}>{complaint.category_specific_data.routes.to_station.name}</span>
+                                                                <span className={cx("my-code destination-code")}>({complaint.category_specific_data.routes.to_station.code})</span>
                                                             </div>
                                                             {complaint.category_specific_data.routes.to_station.time && (
-                                                                <div className="my-seg-time">Arr: {complaint.category_specific_data.routes.to_station.time.replace('.', ':')}</div>
+                                                                <div className={cx("my-seg-time")}>Arr: {complaint.category_specific_data.routes.to_station.time.replace('.', ':')}</div>
                                                             )}
                                                         </div>
                                                     )}
@@ -813,13 +816,13 @@ function MyComplaints() {
                                         )}
 
                                         {/* Complaint Meta Info */}
-                                        <div className="my-complaint-meta">
-                                            <span className="my-complaint-date">
+                                        <div className={cx("my-complaint-meta")}>
+                                            <span className={cx("my-complaint-date")}>
                                                 {formatDate(complaint.createdAt)}
                                             </span>
-                                            <div className="my-complaint-actions">
+                                            <div className={cx("my-complaint-actions")}>
                                                 <button
-                                                    className={`my-action-btn upvote ${complaint.userVote === 'upvote' ? 'voted' : ''}`}
+                                                    className={cx(`my-action-btn upvote ${complaint.userVote === 'upvote' ? 'voted' : ''}`)}
                                                     onClick={() => handleUpvote(complaint._id)}
                                                     disabled={votingInProgress[complaint._id]}
                                                     title="Upvote"
@@ -829,7 +832,7 @@ function MyComplaints() {
                                                 </button>
                                                 
                                                 <button
-                                                    className={`my-action-btn downvote ${complaint.userVote === 'downvote' ? 'voted' : ''}`}
+                                                    className={cx(`my-action-btn downvote ${complaint.userVote === 'downvote' ? 'voted' : ''}`)}
                                                     onClick={() => handleDownvote(complaint._id)}
                                                     disabled={votingInProgress[complaint._id]}
                                                     title="Downvote"
@@ -839,7 +842,7 @@ function MyComplaints() {
                                                 </button>
                                                 
                                                 <button
-                                                    className="my-action-btn comments"
+                                                    className={cx("my-action-btn comments")}
                                                     onClick={() => openCommentModal(complaint)}
                                                     title="View Comments"
                                                 >
@@ -855,14 +858,14 @@ function MyComplaints() {
 
                     {/* Desktop: Infinite Scroll Loading Indicator */}
                     {!isMobile && hasNextPage && (
-                        <div ref={ref} className="my-complaints-loading-more-container">
+                        <div ref={ref} className={cx("my-complaints-loading-more-container")}>
                             {isFetchingNextPage ? (
-                                <div className="my-complaints-loading-more">
-                                    <div className="my-complaints-spinner-small"></div>
+                                <div className={cx("my-complaints-loading-more")}>
+                                    <div className={cx("my-complaints-spinner-small")}></div>
                                     <p>Loading more complaints...</p>
                                 </div>
                             ) : (
-                                <div className="my-complaints-load-more-trigger">
+                                <div className={cx("my-complaints-load-more-trigger")}>
                                     <p>Scroll to load more</p>
                                 </div>
                             )}
@@ -871,16 +874,16 @@ function MyComplaints() {
                     
                     {/* Mobile: Static Pagination */}
                     {isMobile && displayComplaints.length > 0 && (
-                        <div className="my-complaints-pagination-container">
+                        <div className={cx("my-complaints-pagination-container")}>
                             <button
-                                className="pagination-btn prev"
+                                className={cx("pagination-btn prev")}
                                 onClick={goToPrevPage}
                                 disabled={currentMobilePage === 0 || isFetchingNextPage}
                             >
                                 Prev
                             </button>
                             
-                            <div className="pagination-pages">
+                            <div className={cx("pagination-pages")}>
                                 {(() => {
                                     const totalLoadedPages = data?.pages?.length || 0;
                                     const pages = [];
@@ -900,7 +903,7 @@ function MyComplaints() {
                                         pages.push(
                                             <button
                                                 key={0}
-                                                className="pagination-page-btn"
+                                                className={cx("pagination-page-btn")}
                                                 onClick={() => goToPage(0)}
                                                 disabled={isFetchingNextPage}
                                             >
@@ -909,7 +912,7 @@ function MyComplaints() {
                                         );
                                         if (startPage > 1) {
                                             pages.push(
-                                                <span key="ellipsis-start" className="pagination-ellipsis">
+                                                <span key="ellipsis-start" className={cx("pagination-ellipsis")}>
                                                     ...
                                                 </span>
                                             );
@@ -921,7 +924,7 @@ function MyComplaints() {
                                         pages.push(
                                             <button
                                                 key={i}
-                                                className={`pagination-page-btn ${i === currentMobilePage ? 'active' : ''}`}
+                                                className={cx(`pagination-page-btn ${i === currentMobilePage ? 'active' : ''}`)}
                                                 onClick={() => goToPage(i)}
                                                 disabled={isFetchingNextPage}
                                             >
@@ -933,7 +936,7 @@ function MyComplaints() {
                                     // Show ellipsis and next indicator if more pages available
                                     if (hasNextPage) {
                                         pages.push(
-                                            <span key="ellipsis-end" className="pagination-ellipsis">
+                                            <span key="ellipsis-end" className={cx("pagination-ellipsis")}>
                                                 ...
                                             </span>
                                         );
@@ -943,14 +946,14 @@ function MyComplaints() {
                                 })()}
                                 
                                 {isFetchingNextPage && (
-                                    <div className="pagination-loading">
-                                        <div className="my-complaints-spinner-small"></div>
+                                    <div className={cx("pagination-loading")}>
+                                        <div className={cx("my-complaints-spinner-small")}></div>
                                     </div>
                                 )}
                             </div>
                             
                             <button
-                                className="pagination-btn next"
+                                className={cx("pagination-btn next")}
                                 onClick={goToNextPage}
                                 disabled={(!hasNextPage && currentMobilePage >= (data?.pages?.length || 1) - 1) || isFetchingNextPage}
                             >
@@ -961,7 +964,7 @@ function MyComplaints() {
 
                     {/* End of list indicator */}
                     {!hasNextPage && displayComplaints.length > 0 && (
-                        <div className="my-complaints-end-of-list">
+                        <div className={cx("my-complaints-end-of-list")}>
                             <p>You've reached the end of your {isOfficer ? 'accepted cases' : 'complaints'}</p>
                         </div>
                     )}
@@ -970,51 +973,51 @@ function MyComplaints() {
 
                 {/* Delete Confirmation Modal */}
                 {deleteModalOpen && selectedComplaintForDelete && (
-                    <div className="my-delete-modal-overlay" onClick={closeDeleteModal}>
-                        <div className="my-delete-modal" onClick={(e) => e.stopPropagation()}>
-                            <div className="my-delete-modal-header">
-                                <h3 className="my-delete-modal-title">Delete Complaint</h3>
-                                <button className="my-delete-modal-close-btn" onClick={closeDeleteModal}>
+                    <div className={cx("my-delete-modal-overlay")} onClick={closeDeleteModal}>
+                        <div className={cx("my-delete-modal")} onClick={(e) => e.stopPropagation()}>
+                            <div className={cx("my-delete-modal-header")}>
+                                <h3 className={cx("my-delete-modal-title")}>Delete Complaint</h3>
+                                <button className={cx("my-delete-modal-close-btn")} onClick={closeDeleteModal}>
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
                             
-                            <div className="my-delete-modal-content">
-                                <div className="my-delete-modal-icon">
-                                    <svg className="my-delete-warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className={cx("my-delete-modal-content")}>
+                                <div className={cx("my-delete-modal-icon")}>
+                                    <svg className={cx("my-delete-warning-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                 </div>
                                 
-                                <div className="my-delete-confirmation-content">
-                                    <h4 className="my-delete-complaint-title">{selectedComplaintForDelete.title}</h4>
-                                    <p className="my-delete-warning-text">
+                                <div className={cx("my-delete-confirmation-content")}>
+                                    <h4 className={cx("my-delete-complaint-title")}>{selectedComplaintForDelete.title}</h4>
+                                    <p className={cx("my-delete-warning-text")}>
                                         Are you sure you want to delete this complaint? This action cannot be undone.
                                     </p>
                                     
-                                    <div className="my-delete-actions">
+                                    <div className={cx("my-delete-actions")}>
                                         <button
-                                            className="my-cancel-delete-btn"
+                                            className={cx("my-cancel-delete-btn")}
                                             onClick={closeDeleteModal}
                                             disabled={deleteInProgress[selectedComplaintForDelete._id]}
                                         >
                                             Cancel
                                         </button>
                                         <button
-                                            className="my-confirm-delete-btn"
+                                            className={cx("my-confirm-delete-btn")}
                                             onClick={() => handleDeleteComplaint(selectedComplaintForDelete._id)}
                                             disabled={deleteInProgress[selectedComplaintForDelete._id]}
                                         >
                                             {deleteInProgress[selectedComplaintForDelete._id] ? (
                                                 <>
-                                                    <div className="btn-spinner"></div>
+                                                    <div className={cx("btn-spinner")}></div>
                                                     <span>Deleting...</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <svg className="my-delete-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className={cx("my-delete-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                     <span>Delete Complaint</span>
