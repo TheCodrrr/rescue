@@ -34,7 +34,9 @@ import {
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import './Help.css';
+import helpStyles from "./Help.module.css";
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => helpStyles[className] ?? className).join(" ");
 
 const Help = () => {
     const [activeAccordion, setActiveAccordion] = useState(null);
@@ -262,28 +264,28 @@ const Help = () => {
     };
 
     return (
-        <div className="help-page">
+        <div className={cx("help-page")}>
             <Navbar />
             
             {/* Hero Section */}
             <motion.section 
-                className="help-hero"
+                className={cx("help-hero")}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
             >
-                <div className="help-hero-background">
-                    <div className="hero-bg-element"></div>
-                    <div className="hero-bg-element"></div>
-                    <div className="hero-bg-element"></div>
+                <div className={cx("help-hero-background")}>
+                    <div className={cx("hero-bg-element")}></div>
+                    <div className={cx("hero-bg-element")}></div>
+                    <div className={cx("hero-bg-element")}></div>
                 </div>
                 
-                <div className="help-hero-content">
+                <div className={cx("help-hero-content")}>
                     <motion.div
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
-                        className="hero-icon-container"
+                        className={cx("hero-icon-container")}
                     >
                         <HelpCircle size={64} />
                     </motion.div>
@@ -292,7 +294,7 @@ const Help = () => {
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.3, duration: 0.6 }}
-                        className="help-hero-title"
+                        className={cx("help-hero-title")}
                     >
                         How Can We Help You?
                     </motion.h1>
@@ -301,7 +303,7 @@ const Help = () => {
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.6 }}
-                        className="help-hero-subtitle"
+                        className={cx("help-hero-subtitle")}
                     >
                         Find answers to your questions and learn how to make the most of our platform
                     </motion.p>
@@ -310,13 +312,13 @@ const Help = () => {
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.5, duration: 0.6 }}
-                        className="help-search-container"
+                        className={cx("help-search-container")}
                     >
-                        <Search className="help-search-icon" />
+                        <Search className={cx("help-search-icon")} />
                         <input
                             type="text"
                             placeholder="Search for help..."
-                            className="help-search-input"
+                            className={cx("help-search-input")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -325,14 +327,14 @@ const Help = () => {
             </motion.section>
 
             {/* Quick Links Section */}
-            <section className="help-quick-links">
-                <div className="help-container">
+            <section className={cx("help-quick-links")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
-                        className="quick-links-grid"
+                        className={cx("quick-links-grid")}
                     >
                         {categories.map((category, index) => {
                             const Icon = category.icon;
@@ -340,19 +342,19 @@ const Help = () => {
                                 <motion.button
                                     key={category.id}
                                     variants={itemVariants}
-                                    className={`quick-link-card ${activeCategory === category.id ? 'active' : ''}`}
+                                    className={cx(`quick-link-card ${activeCategory === category.id ? 'active' : ''}`)}
                                     onClick={() => setActiveCategory(category.id)}
                                     whileHover={{ scale: 1.05, y: -5 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
                                     <div 
-                                        className="quick-link-icon"
+                                        className={cx("quick-link-icon")}
                                         style={{ background: `linear-gradient(135deg, ${category.color}, ${category.color}dd)` }}
                                     >
                                         <Icon size={28} />
                                     </div>
-                                    <h3 className="quick-link-title">{category.name}</h3>
-                                    <ChevronRight className="quick-link-arrow" />
+                                    <h3 className={cx("quick-link-title")}>{category.name}</h3>
+                                    <ChevronRight className={cx("quick-link-arrow")} />
                                 </motion.button>
                             );
                         })}
@@ -361,18 +363,18 @@ const Help = () => {
             </section>
 
             {/* How It Works Section */}
-            <section className="help-how-it-works">
-                <div className="help-container">
+            <section className={cx("help-how-it-works")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="help-section-header"
+                        className={cx("help-section-header")}
                     >
-                        <BookOpen className="help-section-icon" />
-                        <h2 className="help-section-title">How It Works</h2>
-                        <p className="help-section-subtitle">
+                        <BookOpen className={cx("help-section-icon")} />
+                        <h2 className={cx("help-section-title")}>How It Works</h2>
+                        <p className={cx("help-section-subtitle")}>
                             Get started in just 4 simple steps
                         </p>
                     </motion.div>
@@ -382,7 +384,7 @@ const Help = () => {
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
-                        className="steps-grid"
+                        className={cx("steps-grid")}
                     >
                         {steps.map((step, index) => {
                             const Icon = step.icon;
@@ -390,20 +392,20 @@ const Help = () => {
                                 <motion.div
                                     key={step.id}
                                     variants={itemVariants}
-                                    className="step-card"
+                                    className={cx("step-card")}
                                     whileHover={{ y: -10 }}
                                 >
-                                    <div className="step-number">{step.id}</div>
+                                    <div className={cx("step-number")}>{step.id}</div>
                                     <div 
-                                        className="step-icon"
+                                        className={cx("step-icon")}
                                         style={{ background: `linear-gradient(135deg, ${step.color}, ${step.color}dd)` }}
                                     >
                                         <Icon size={32} />
                                     </div>
-                                    <h3 className="step-title">{step.title}</h3>
-                                    <p className="step-description">{step.description}</p>
+                                    <h3 className={cx("step-title")}>{step.title}</h3>
+                                    <p className={cx("step-description")}>{step.description}</p>
                                     {index < steps.length - 1 && (
-                                        <div className="step-connector">
+                                        <div className={cx("step-connector")}>
                                             <ArrowRight />
                                         </div>
                                     )}
@@ -415,18 +417,18 @@ const Help = () => {
             </section>
 
             {/* Features Section */}
-            <section className="help-features">
-                <div className="help-container">
+            <section className={cx("help-features")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="help-section-header"
+                        className={cx("help-section-header")}
                     >
-                        <Zap className="help-section-icon" />
-                        <h2 className="help-section-title">Platform Features</h2>
-                        <p className="help-section-subtitle">
+                        <Zap className={cx("help-section-icon")} />
+                        <h2 className={cx("help-section-title")}>Platform Features</h2>
+                        <p className={cx("help-section-subtitle")}>
                             Powerful tools to help you manage and track complaints
                         </p>
                     </motion.div>
@@ -436,7 +438,7 @@ const Help = () => {
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
-                        className="features-grid"
+                        className={cx("features-grid")}
                     >
                         {features.map((feature) => {
                             const Icon = feature.icon;
@@ -444,17 +446,17 @@ const Help = () => {
                                 <motion.div
                                     key={feature.id}
                                     variants={itemVariants}
-                                    className="feature-card"
+                                    className={cx("feature-card")}
                                     whileHover={{ scale: 1.03, y: -5 }}
                                 >
                                     <div 
-                                        className="feature-icon"
+                                        className={cx("feature-icon")}
                                         style={{ background: `linear-gradient(135deg, ${feature.color}, ${feature.color}dd)` }}
                                     >
                                         <Icon size={24} />
                                     </div>
-                                    <h3 className="feature-title">{feature.title}</h3>
-                                    <p className="feature-description">{feature.description}</p>
+                                    <h3 className={cx("feature-title")}>{feature.title}</h3>
+                                    <p className={cx("feature-description")}>{feature.description}</p>
                                 </motion.div>
                             );
                         })}
@@ -463,18 +465,18 @@ const Help = () => {
             </section>
 
             {/* FAQ Section with Accordion */}
-            <section className="help-faq">
-                <div className="help-container">
+            <section className={cx("help-faq")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="help-section-header"
+                        className={cx("help-section-header")}
                     >
-                        <MessageCircle className="help-section-icon" />
-                        <h2 className="help-section-title">Frequently Asked Questions</h2>
-                        <p className="help-section-subtitle">
+                        <MessageCircle className={cx("help-section-icon")} />
+                        <h2 className={cx("help-section-title")}>Frequently Asked Questions</h2>
+                        <p className={cx("help-section-subtitle")}>
                             Find quick answers to common questions
                         </p>
                     </motion.div>
@@ -483,7 +485,7 @@ const Help = () => {
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
-                        className="faq-content"
+                        className={cx("faq-content")}
                     >
                         {filteredFAQs.map((faq, index) => (
                             <motion.div
@@ -492,18 +494,18 @@ const Help = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className="faq-item"
+                                className={cx("faq-item")}
                             >
                                 <button
-                                    className={`faq-question ${activeAccordion === faq.id ? 'active' : ''}`}
+                                    className={cx(`faq-question ${activeAccordion === faq.id ? 'active' : ''}`)}
                                     onClick={() => toggleAccordion(faq.id)}
                                 >
-                                    <span className="faq-question-text">{faq.question}</span>
+                                    <span className={cx("faq-question-text")}>{faq.question}</span>
                                     <motion.div
                                         animate={{ rotate: activeAccordion === faq.id ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <ChevronDown className="faq-icon" />
+                                        <ChevronDown className={cx("faq-icon")} />
                                     </motion.div>
                                 </button>
                                 
@@ -514,7 +516,7 @@ const Help = () => {
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.3 }}
-                                            className="faq-answer"
+                                            className={cx("faq-answer")}
                                         >
                                             <p>{faq.answer}</p>
                                         </motion.div>
@@ -527,23 +529,23 @@ const Help = () => {
             </section>
 
             {/* Testimonials Carousel */}
-            <section className="help-testimonials">
-                <div className="help-container">
+            <section className={cx("help-testimonials")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="help-section-header"
+                        className={cx("help-section-header")}
                     >
-                        <Heart className="help-section-icon" />
-                        <h2 className="help-section-title">What Our Users Say</h2>
-                        <p className="help-section-subtitle">
+                        <Heart className={cx("help-section-icon")} />
+                        <h2 className={cx("help-section-title")}>What Our Users Say</h2>
+                        <p className={cx("help-section-subtitle")}>
                             Real experiences from real people
                         </p>
                     </motion.div>
 
-                    <div className="testimonial-carousel">
+                    <div className={cx("testimonial-carousel")}>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentTestimonial}
@@ -551,36 +553,36 @@ const Help = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -100 }}
                                 transition={{ duration: 0.5 }}
-                                className="testimonial-card"
+                                className={cx("testimonial-card")}
                             >
-                                <div className="testimonial-avatar">
+                                <div className={cx("testimonial-avatar")}>
                                     <img src={testimonials[currentTestimonial].avatar} alt={testimonials[currentTestimonial].name} />
                                 </div>
-                                <div className="testimonial-rating">
+                                <div className={cx("testimonial-rating")}>
                                     {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
                                         <Star key={i} size={20} fill="#fbbf24" color="#fbbf24" />
                                     ))}
                                 </div>
-                                <p className="testimonial-text">"{testimonials[currentTestimonial].text}"</p>
-                                <h4 className="testimonial-name">{testimonials[currentTestimonial].name}</h4>
-                                <p className="testimonial-role">{testimonials[currentTestimonial].role}</p>
+                                <p className={cx("testimonial-text")}>"{testimonials[currentTestimonial].text}"</p>
+                                <h4 className={cx("testimonial-name")}>{testimonials[currentTestimonial].name}</h4>
+                                <p className={cx("testimonial-role")}>{testimonials[currentTestimonial].role}</p>
                             </motion.div>
                         </AnimatePresence>
 
-                        <div className="testimonial-controls">
-                            <button onClick={prevTestimonial} className="testimonial-btn">
+                        <div className={cx("testimonial-controls")}>
+                            <button onClick={prevTestimonial} className={cx("testimonial-btn")}>
                                 <ChevronDown style={{ transform: 'rotate(90deg)' }} />
                             </button>
-                            <div className="testimonial-dots">
+                            <div className={cx("testimonial-dots")}>
                                 {testimonials.map((_, index) => (
                                     <button
                                         key={index}
-                                        className={`testimonial-dot ${index === currentTestimonial ? 'active' : ''}`}
+                                        className={cx(`testimonial-dot ${index === currentTestimonial ? 'active' : ''}`)}
                                         onClick={() => setCurrentTestimonial(index)}
                                     />
                                 ))}
                             </div>
-                            <button onClick={nextTestimonial} className="testimonial-btn">
+                            <button onClick={nextTestimonial} className={cx("testimonial-btn")}>
                                 <ChevronDown style={{ transform: 'rotate(-90deg)' }} />
                             </button>
                         </div>
@@ -589,18 +591,18 @@ const Help = () => {
             </section>
 
             {/* Contact Support Section */}
-            <section className="help-contact">
-                <div className="help-container">
+            <section className={cx("help-contact")}>
+                <div className={cx("help-container")}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="help-section-header"
+                        className={cx("help-section-header")}
                     >
-                        <Phone className="help-section-icon" />
-                        <h2 className="help-section-title">Still Need Help?</h2>
-                        <p className="help-section-subtitle">
+                        <Phone className={cx("help-section-icon")} />
+                        <h2 className={cx("help-section-title")}>Still Need Help?</h2>
+                        <p className={cx("help-section-subtitle")}>
                             Our support team is here to assist you
                         </p>
                     </motion.div>
@@ -610,37 +612,37 @@ const Help = () => {
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
-                        className="help-contact-grid"
+                        className={cx("help-contact-grid")}
                     >
-                        <motion.div variants={itemVariants} className="help-contact-card">
-                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #60a5fa)' }}>
+                        <motion.div variants={itemVariants} className={cx("help-contact-card")}>
+                            <div className={cx("help-contact-icon")} style={{ background: 'linear-gradient(135deg, #3b82f6, #60a5fa)' }}>
                                 <Mail size={28} />
                             </div>
-                            <h3 className="help-contact-title">Email Support</h3>
-                            <p className="help-contact-description">Get help via email</p>
-                            <a href="mailto:support@rescue.com" className="help-contact-link">
+                            <h3 className={cx("help-contact-title")}>Email Support</h3>
+                            <p className={cx("help-contact-description")}>Get help via email</p>
+                            <a href="mailto:support@rescue.com" className={cx("help-contact-link")}>
                                 support@rescue.com
                             </a>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="help-contact-card">
-                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #10b981, #34d399)' }}>
+                        <motion.div variants={itemVariants} className={cx("help-contact-card")}>
+                            <div className={cx("help-contact-icon")} style={{ background: 'linear-gradient(135deg, #10b981, #34d399)' }}>
                                 <Phone size={28} />
                             </div>
-                            <h3 className="help-contact-title">Phone Support</h3>
-                            <p className="help-contact-description">Call us directly</p>
-                            <a href="tel:+1234567890" className="help-contact-link">
+                            <h3 className={cx("help-contact-title")}>Phone Support</h3>
+                            <p className={cx("help-contact-description")}>Call us directly</p>
+                            <a href="tel:+1234567890" className={cx("help-contact-link")}>
                                 +1 (234) 567-890
                             </a>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="help-contact-card">
-                            <div className="help-contact-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
+                        <motion.div variants={itemVariants} className={cx("help-contact-card")}>
+                            <div className={cx("help-contact-icon")} style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
                                 <Clock size={28} />
                             </div>
-                            <h3 className="help-contact-title">Business Hours</h3>
-                            <p className="help-contact-description">We're available</p>
-                            <p className="help-contact-link">
+                            <h3 className={cx("help-contact-title")}>Business Hours</h3>
+                            <p className={cx("help-contact-description")}>We're available</p>
+                            <p className={cx("help-contact-link")}>
                                 Mon-Fri: 9AM - 6PM
                             </p>
                         </motion.div>
