@@ -66,12 +66,12 @@ export default function Complaint() {
     const mapInstanceRef = useRef(null);
 
     const categories = [
-        { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: '#f59e0b' },
-        { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: '#db2777' },
-        { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: '#ef4444' },
-        { value: 'cyber', label: 'Cyber Crime', icon: <MdWarning />, color: '#8b5cf6' },
-        { value: 'police', label: 'Police', icon: <MdWarning />, color: '#3b82f6' },
-        { value: 'court', label: 'Court', icon: <MdBalance />, color: '#10b981' }
+        { value: 'rail', label: 'Rail Incidents', icon: <MdTrain />, color: 'var(--palette-steel)' },
+        { value: 'road', label: 'Road Issues', icon: <MdConstruction />, color: 'var(--palette-steel)' },
+        { value: 'fire', label: 'Fire Emergency', icon: <MdLocalFireDepartment />, color: 'var(--palette-steel)' },
+        { value: 'cyber', label: 'Cyber Crime', icon: <MdWarning />, color: 'var(--palette-steel)' },
+        { value: 'police', label: 'Police', icon: <MdWarning />, color: 'var(--palette-steel)' },
+        { value: 'court', label: 'Court', icon: <MdBalance />, color: 'var(--palette-steel)' }
     ];
 
     // Get address from coordinates using reverse geocoding
@@ -241,8 +241,8 @@ export default function Complaint() {
                         
                         // Add a different colored marker for current location
                         L.circleMarker([latitude, longitude], {
-                            color: '#3b82f6',
-                            fillColor: '#3b82f6',
+                            color: '#526D82',
+                            fillColor: '#526D82',
                             fillOpacity: 0.5,
                             radius: 8
                         }).addTo(map).bindPopup('Your current location');
@@ -262,12 +262,12 @@ export default function Complaint() {
                 const { latitude, longitude } = userCurrentLocation;
                 
                 // Update map view to user location with smooth animation
-                map.setView([latitude, longitude], 13, { animate: true });
+                map.setView([latitude, longitude], 13, { animate: false });
                 
                 // Add current location marker
                 L.circleMarker([latitude, longitude], {
-                    color: '#3b82f6',
-                    fillColor: '#3b82f6',
+                    color: '#526D82',
+                    fillColor: '#526D82',
                     fillOpacity: 0.5,
                     radius: 8
                 }).addTo(map).bindPopup('Your current location');
@@ -653,10 +653,10 @@ export default function Complaint() {
                                             onClick={() => navigate('/user?tab=my-complaint')}
                                             style={{
                                                 padding: '0.75rem 1.5rem',
-                                                background: 'linear-gradient(135deg, var(--color3), var(--color8))',
-                                                color: 'var(--color1)',
-                                                border: '2px solid var(--color6)',
-                                                borderRadius: '12px',
+                                                background: 'linear-gradient(110deg, var(--palette-ink), var(--palette-steel))',
+                                                color: 'var(--palette-white)',
+                                                border: '1px solid var(--palette-steel-soft)',
+                                                borderRadius: '6px',
                                                 fontSize: '1rem',
                                                 fontWeight: '700',
                                                 cursor: 'pointer',
@@ -664,17 +664,7 @@ export default function Complaint() {
                                                 alignItems: 'center',
                                                 gap: '0.5rem',
                                                 transition: 'all 0.3s ease',
-                                                boxShadow: '0 4px 12px color-mix(in srgb, var(--color3) 30%, transparent)',
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.target.style.background = 'linear-gradient(135deg, var(--color8), var(--color3))';
-                                                e.target.style.transform = 'translateY(-2px)';
-                                                e.target.style.boxShadow = '0 6px 20px color-mix(in srgb, var(--color3) 40%, transparent), 0 0 25px color-mix(in srgb, var(--color8) 30%, transparent)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.target.style.background = 'linear-gradient(135deg, var(--color3), var(--color8))';
-                                                e.target.style.transform = 'translateY(0)';
-                                                e.target.style.boxShadow = '0 4px 12px color-mix(in srgb, var(--color3) 30%, transparent)';
+                                                boxShadow: '0 4px 12px var(--palette-shadow)',
                                             }}
                                         >
                                             <svg 

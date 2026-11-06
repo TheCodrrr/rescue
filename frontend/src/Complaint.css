@@ -4117,3 +4117,348 @@ html.modal-open {
         height: 2.5rem;
     }
 }
+
+/* Light blue-gray complaint form theme */
+.complaint-page {
+    color: var(--palette-ink);
+    background: linear-gradient(155deg, var(--palette-white), var(--palette-frost) 58%, var(--palette-surface));
+}
+
+.complaint-page::before { display: none; }
+
+.complaint-form-section-header,
+.complaint-form-section-header p {
+    color: var(--palette-steel);
+}
+
+.complaint-section-title {
+    background: linear-gradient(110deg, var(--palette-ink), var(--palette-steel));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: none;
+}
+
+.section-subtitle { color: var(--palette-steel); }
+
+.complaint-form {
+    border: 1px solid var(--palette-line);
+    border-radius: 8px;
+    background: linear-gradient(145deg, var(--palette-white), var(--palette-surface));
+    box-shadow: 0 12px 32px var(--palette-shadow);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    animation: none;
+}
+
+.complaint-severity-option:hover,
+.complaint-severity-option.selected { transform: none; }
+
+.form-label {
+    color: var(--palette-ink);
+    text-shadow: none;
+}
+
+.complaint-page .complaint-form .form-group > .form-label {
+    color: var(--palette-ink) !important;
+    -webkit-text-fill-color: var(--palette-ink) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: none !important;
+}
+
+.label-icon,
+.category-icon { color: var(--palette-steel); }
+
+.complaint-page .complaint-form .form-input,
+.complaint-page .complaint-form .form-textarea,
+.complaint-page .complaint-form .coordinate-input {
+    border: 1px solid var(--palette-line) !important;
+    border-radius: 5px;
+    color: var(--palette-ink) !important;
+    -webkit-text-fill-color: var(--palette-ink);
+    background: var(--palette-white) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.complaint-page .complaint-form .form-input::placeholder,
+.complaint-page .complaint-form .form-textarea::placeholder,
+.complaint-page .complaint-form .coordinate-input::placeholder {
+    color: var(--palette-muted) !important;
+    -webkit-text-fill-color: var(--palette-muted);
+    opacity: 1 !important;
+}
+
+.complaint-page .complaint-form .form-input:focus,
+.complaint-page .complaint-form .form-textarea:focus,
+.complaint-page .complaint-form .coordinate-input:focus {
+    border-color: var(--palette-steel);
+    color: var(--palette-ink) !important;
+    -webkit-text-fill-color: var(--palette-ink);
+    background: var(--palette-white) !important;
+    box-shadow: 0 0 0 3px var(--palette-tint-strong) !important;
+    transform: none;
+}
+
+.category-option {
+    border: 1px solid var(--palette-line);
+    border-radius: 6px;
+    color: var(--palette-ink);
+    background: linear-gradient(145deg, var(--palette-white), var(--palette-surface));
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.category-option:hover:not(.selected) {
+    border-color: var(--palette-steel-soft);
+    background: var(--palette-tint);
+    box-shadow: 0 4px 12px var(--palette-shadow);
+    transform: translateY(-2px);
+}
+
+.category-option.selected {
+    border-color: var(--palette-steel);
+    background: linear-gradient(145deg, var(--palette-surface-raised), var(--palette-tint));
+    box-shadow: inset 0 0 0 1px var(--palette-steel-soft), 0 6px 16px var(--palette-shadow);
+    transform: none;
+    animation: none;
+}
+
+.category-option.selected .category-content,
+.category-option.selected .category-label,
+.category-option.selected .category-icon {
+    color: var(--palette-ink) !important;
+}
+
+.category-label { color: var(--palette-ink); }
+.category-icon { filter: none; }
+
+.severity-card {
+    border: 1px solid var(--palette-line);
+    border-radius: 6px;
+    color: var(--palette-ink);
+    background: linear-gradient(145deg, var(--palette-white), var(--palette-surface));
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.severity-card::before { background: linear-gradient(90deg, transparent, var(--palette-steel-soft), transparent); }
+
+.complaint-severity-option:hover .severity-card {
+    border-color: var(--palette-steel-soft);
+    background: var(--palette-tint);
+    box-shadow: 0 4px 12px var(--palette-shadow);
+}
+
+.complaint-severity-option.severity-low.selected .severity-card,
+.complaint-severity-option.severity-medium.selected .severity-card,
+.complaint-severity-option.severity-high.selected .severity-card {
+    border-color: var(--palette-steel);
+    background: linear-gradient(145deg, var(--palette-surface-raised), var(--palette-tint));
+    box-shadow: inset 0 0 0 1px var(--palette-steel-soft), 0 6px 16px var(--palette-shadow);
+}
+
+.severity-icon-wrapper,
+.complaint-severity-option.selected .severity-icon-wrapper {
+    border-color: var(--palette-line);
+    background: var(--palette-surface-raised);
+}
+
+.severity-icon,
+.complaint-severity-option.selected .severity-icon {
+    color: var(--palette-ink);
+    filter: grayscale(1);
+}
+
+.severity-pulse,
+.complaint-severity-option.selected .severity-pulse { display: none; }
+
+.severity-label { color: var(--palette-ink); text-shadow: none; }
+.severity-description,
+.complaint-severity-option.selected .severity-description { color: var(--palette-steel); }
+
+.severity-badge-low,
+.severity-badge-medium,
+.severity-badge-high {
+    border: 1px solid var(--palette-steel-soft);
+    color: var(--palette-ink);
+    background: var(--palette-tint);
+}
+
+.severity-dot { background: var(--palette-steel); animation: none; }
+
+.location-method,
+.manual-method {
+    border: 1px solid var(--palette-line);
+    border-radius: 5px;
+    color: var(--palette-steel);
+    background: var(--palette-white);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.location-method:hover,
+.manual-method:hover,
+.location-method.active,
+.manual-method.active {
+    border-color: var(--palette-steel-soft);
+    color: var(--palette-ink);
+    background: var(--palette-tint);
+    box-shadow: inset 0 0 0 1px var(--palette-steel-soft);
+    transform: none;
+}
+
+.map-instructions,
+.selected-coordinates,
+.current-coordinates {
+    border: 1px solid var(--palette-line);
+    border-radius: 5px;
+    color: var(--palette-ink);
+    background: var(--palette-surface);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.map-instructions p,
+.coordinates-info,
+.coordinates-line,
+.address-line { color: var(--palette-ink); }
+
+.location-map {
+    border: 1px solid var(--palette-line);
+    border-radius: 6px;
+    box-shadow: none;
+}
+
+.current-location-section {
+    border-color: var(--palette-line);
+    border-radius: 6px;
+    color: var(--palette-ink);
+    background: var(--palette-surface);
+}
+
+.current-location-btn,
+.animated-button {
+    border: 1px solid var(--palette-ink);
+    border-radius: 6px;
+    color: var(--palette-white);
+    background: linear-gradient(110deg, var(--palette-ink), var(--palette-steel));
+    box-shadow: 0 5px 14px var(--palette-shadow);
+    text-shadow: none;
+    letter-spacing: 0;
+}
+
+.current-location-btn:hover,
+.animated-button:hover {
+    border-radius: 6px;
+    background: linear-gradient(110deg, var(--palette-steel), var(--palette-ink-soft));
+    box-shadow: 0 7px 18px var(--palette-shadow);
+}
+
+.animated-button {
+    transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.animated-button:hover { transform: translateY(-1px); }
+.animated-button:active { transform: translateY(0); }
+
+.animated-button .text,
+.animated-button svg { color: var(--palette-white); fill: var(--palette-white); }
+
+.animated-button:disabled,
+.animated-button:disabled:hover {
+    border-color: var(--palette-line);
+    color: var(--palette-muted);
+    background: var(--palette-surface-raised);
+    box-shadow: none;
+    opacity: 1;
+}
+
+.animated-button:disabled .text,
+.animated-button:disabled svg { color: var(--palette-muted); fill: var(--palette-muted); }
+
+.animated-button.submitting {
+    border-color: var(--palette-steel);
+    background: var(--palette-steel);
+    box-shadow: 0 5px 14px var(--palette-shadow);
+    animation: none;
+}
+
+.submit-spinner {
+    border-color: var(--palette-steel-soft);
+    border-top-color: var(--palette-white);
+}
+
+.submit-btn-text { color: var(--palette-white); }
+.form-hint { color: var(--palette-muted); }
+
+.form-actions::before {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--palette-steel-soft), transparent);
+    box-shadow: none;
+    animation: none;
+}
+
+.evidence-upload-button,
+.evidence-item,
+.evidence-count {
+    border-color: var(--palette-line);
+    border-radius: 5px;
+    color: var(--palette-ink);
+    background: var(--palette-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.evidence-upload-button:hover,
+.evidence-item:hover {
+    border-color: var(--palette-steel-soft);
+    background: var(--palette-tint);
+    box-shadow: 0 4px 12px var(--palette-shadow);
+    transform: translateY(-1px);
+}
+
+.evidence-upload-button .upload-icon { color: var(--palette-steel); filter: none; }
+.evidence-upload-button span,
+.evidence-name { color: var(--palette-ink); }
+.evidence-upload-button .upload-hint,
+.evidence-size,
+.evidence-count { color: var(--palette-muted); }
+
+.evidence-preview { background: var(--palette-surface-raised); }
+.evidence-audio-wrapper { background: var(--palette-surface-raised); }
+
+.evidence-remove-btn,
+.evidence-remove-btn:hover {
+    color: var(--palette-white);
+    background: var(--palette-ink);
+}
+
+@media (max-width: 768px) {
+    .complaint-form { padding: 1.5rem; }
+}
+
+.complaint-page *,
+.complaint-page *::before,
+.complaint-page *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+
+.complaint-page .category-option:hover,
+.complaint-page .category-option.selected,
+.complaint-page .complaint-severity-option:hover,
+.complaint-page .complaint-severity-option.selected,
+.complaint-page .animated-button:hover,
+.complaint-page .current-location-btn:hover,
+.complaint-page .evidence-item:hover,
+.complaint-page .evidence-upload-button:hover {
+    transform: none !important;
+}
