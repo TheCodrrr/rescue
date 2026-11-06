@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import "./Home.css";
+import homeStyles from "./Home.module.css";
 import "leaflet/dist/leaflet.css";
 import * as L from "leaflet"; // Pre-load and cache Leaflet
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +25,9 @@ import {
   FiUsers,
   FiShield
 } from 'react-icons/fi';
+
+const cx = (classNames) => classNames.split(/\s+/).map((className) => homeStyles[className] ?? className).join(" ");
+const withModuleClasses = (markup) => markup.replace(/\bclass="([^"]+)"/g, (_, classNames) => `class="${cx(classNames)}"`);
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -287,8 +290,8 @@ export default function Home() {
             // Create the marker
             const marker = L.marker([newIncident.lat, newIncident.lng], {
                 icon: L.divIcon({
-                    html: markerHtml,
-                    className: 'custom-incident-marker',
+                    html: withModuleClasses(markerHtml),
+                    className: cx("custom-incident-marker"),
                     iconSize: [40, 40],
                     iconAnchor: [20, 20], // Center the icon properly
                     popupAnchor: [0, -20] // Position popup above the marker
@@ -674,8 +677,8 @@ export default function Home() {
 
                 userLocationMarker = L.marker([userLocation.lat, userLocation.lng], {
                     icon: L.divIcon({
-                        html: userMarkerHtml,
-                        className: 'custom-user-marker',
+                        html: withModuleClasses(userMarkerHtml),
+                        className: cx("custom-user-marker"),
                         iconSize: [50, 50],
                         iconAnchor: [25, 25]
                     })
@@ -696,7 +699,7 @@ export default function Home() {
                     </div>`;
 
                 // Bind popup but DON'T auto-open (removes layout work on landing)
-                userLocationMarker.bindPopup(userPopupContent);
+                userLocationMarker.bindPopup(withModuleClasses(userPopupContent));
 
                 // Create incident marker function (for later use)
                 const createIncidentMarker = (incident, type, isRealComplaint = false) => {
@@ -709,8 +712,8 @@ export default function Home() {
 
                     const marker = L.marker([incident.lat, incident.lng], {
                         icon: L.divIcon({
-                            html: markerHtml,
-                            className: 'custom-incident-marker',
+                            html: withModuleClasses(markerHtml),
+                            className: cx("custom-incident-marker"),
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         })
@@ -782,7 +785,7 @@ export default function Home() {
                         `;
                     }
 
-                    marker.bindPopup(popupContent);
+                    marker.bindPopup(withModuleClasses(popupContent));
                     return marker;
                 };
 
@@ -882,19 +885,19 @@ export default function Home() {
 
     // Show loading only while authentication is loading, not for location
     if (loading) return (
-        <div className="home-loading-container">
-            <div className="home-loading-content">
-                <div className="home-loading-spinner">
-                    <div className="spinner-ring"></div>
-                    <div className="spinner-ring"></div>
-                    <div className="spinner-ring"></div>
-                    <div className="spinner-ring"></div>
+        <div className={cx("home-loading-container")}>
+            <div className={cx("home-loading-content")}>
+                <div className={cx("home-loading-spinner")}>
+                    <div className={cx("spinner-ring")}></div>
+                    <div className={cx("spinner-ring")}></div>
+                    <div className={cx("spinner-ring")}></div>
+                    <div className={cx("spinner-ring")}></div>
                 </div>
-                <div className="home-loading-text">
+                <div className={cx("home-loading-text")}>
                     <h2>Loading Rescue</h2>
                     <p>Preparing your dashboard...</p>
                 </div>
-                <div className="home-loading-dots">
+                <div className={cx("home-loading-dots")}>
                     <span></span>
                     <span></span>
                     <span></span>
@@ -909,96 +912,96 @@ export default function Home() {
             <Navbar />
 
             {/* Home Page Wrapper */}
-            <div className="home-page">
+            <div className={cx("home-page")}>
                 {/* Hero Section */}
-                <div className="main-content">
-                    <section className="hero-section">
-                        <div className="hero-content">
-                            <h1 className="hero-title">Report. Track. Rescue.</h1>
-                            <p className="hero-subtitle">Get help or help others by reporting incidents in real-time.</p>
-                            <button className="report-incident-btn" onClick={() => navigate('/complain')}>
-                                <svg className="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className={cx("main-content")}>
+                    <section className={cx("hero-section")}>
+                        <div className={cx("hero-content")}>
+                            <h1 className={cx("hero-title")}>Report. Track. Rescue.</h1>
+                            <p className={cx("hero-subtitle")}>Get help or help others by reporting incidents in real-time.</p>
+                            <button className={cx("report-incident-btn")} onClick={() => navigate('/complain')}>
+                                <svg className={cx("btn-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                                 Report Incident
-                                <div className="btn-glow"></div>
+                                <div className={cx("btn-glow")}></div>
                             </button>
                         </div>
-                        <div className="hero-background">
-                            <div className="floating-elements">
-                                <div className="floating-element element-1"></div>
-                                <div className="floating-element element-2"></div>
-                                <div className="floating-element element-3"></div>
-                                <div className="floating-element element-4"></div>
+                        <div className={cx("hero-background")}>
+                            <div className={cx("floating-elements")}>
+                                <div className={cx("floating-element element-1")}></div>
+                                <div className={cx("floating-element element-2")}></div>
+                                <div className={cx("floating-element element-3")}></div>
+                                <div className={cx("floating-element element-4")}></div>
                             </div>
                         </div>
                     </section>
 
                 {/* Live Incidents Split Layout */}
-                <section className="incidents-section">
+                <section className={cx("incidents-section")}>
                     {/* Category Filter Tab Bar */}
-                    <div className="category-tabs">
-                        <div className="tabs-container">
+                    <div className={cx("category-tabs")}>
+                        <div className={cx("tabs-container")}>
                             <button 
-                                className={`tab ${selectedCategory === 'all' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'all' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('all')}
                             >
-                                <span className="tab-icon"><FiAlertTriangle /></span>
+                                <span className={cx("tab-icon")}><FiAlertTriangle /></span>
                                 All Reports
                             </button>
                             <button 
-                                className={`tab ${selectedCategory === 'rail' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'rail' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('rail')}
                             >
-                                <span className="tab-icon" style={{color: '#fde047'}}><MdTrain /></span>
+                                <span className={cx("tab-icon")} style={{color: '#fde047'}}><MdTrain /></span>
                                 Rail
                             </button>
                             <button 
-                                className={`tab ${selectedCategory === 'fire' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'fire' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('fire')}
                             >
-                                <span className="tab-icon" style={{color: '#fb7185'}}><MdLocalFireDepartment /></span>
+                                <span className={cx("tab-icon")} style={{color: '#fb7185'}}><MdLocalFireDepartment /></span>
                                 Fire
                             </button>
                             <button 
-                                className={`tab ${selectedCategory === 'cyber' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'cyber' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('cyber')}
                             >
-                                <span className="tab-icon" style={{color: '#e879f9'}}><FiAlertTriangle /></span>
+                                <span className={cx("tab-icon")} style={{color: '#e879f9'}}><FiAlertTriangle /></span>
                                 Cyber
                             </button>
                             <button 
-                                className={`tab ${selectedCategory === 'police' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'police' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('police')}
                             >
-                                <span className="tab-icon" style={{color: '#7dd3fc'}}><FiShield /></span>
+                                <span className={cx("tab-icon")} style={{color: '#7dd3fc'}}><FiShield /></span>
                                 Police
                             </button>
                             <button 
-                                className={`tab ${selectedCategory === 'court' ? 'active' : ''}`}
+                                className={cx(`tab ${selectedCategory === 'court' ? 'active' : ''}`)}
                                 onClick={() => setSelectedCategory('court')}
                             >
-                                <span className="tab-icon" style={{color: '#4ade80'}}><MdBalance /></span>
+                                <span className={cx("tab-icon")} style={{color: '#4ade80'}}><MdBalance /></span>
                                 Court
                             </button>
                         </div>
                     </div>
 
-                    <div className="incidents-container">
+                    <div className={cx("incidents-container")}>
                         {/* Left Side - Map */}
-                        <div className="map-panel">
-                            <div className="home-map-glass-container">
+                        <div className={cx("map-panel")}>
+                            <div className={cx("home-map-glass-container")}>
                                 {/* Location Permission Status */}
                                 {locationPermission === 'denied' && (
-                                    <div className="location-permission-banner">
-                                        <svg className="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <div className={cx("location-permission-banner")}>
+                                        <svg className={cx("location-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        <div className="permission-text">
+                                        <div className={cx("permission-text")}>
                                             <p>Location access denied. Showing approximate area.</p>
                                             <button 
-                                                className="retry-location-btn"
+                                                className={cx("retry-location-btn")}
                                                 onClick={() => {
                                                     setLocationPermission(null);
                                                     setUserLocation(null);
@@ -1016,21 +1019,21 @@ export default function Home() {
                                         <div 
                                             ref={mapContainerRef}
                                             id="live-map" 
-                                            className={`home-live-map-container ${isMapActive ? 'map-active' : 'map-inactive'}`}
+                                            className={cx(`home-live-map-container ${isMapActive ? 'map-active' : 'map-inactive'}`)}
                                         ></div>
                                         
                                         {/* Event blocker overlay - blocks all map interactions when inactive */}
                                         {!isMapActive && (
                                             <div 
-                                                className="map-event-blocker"
+                                                className={cx("map-event-blocker")}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleMapActivation(true);
                                                 }}
                                             >
                                                 {/* Message overlay inside blocker */}
-                                                <div className="map-inactive-message">
-                                                    <svg className="map-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div className={cx("map-inactive-message")}>
+                                                    <svg className={cx("map-icon")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                                     </svg>
                                                     <span>Click to activate map zoom</span>
@@ -1039,14 +1042,14 @@ export default function Home() {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="home-map-loading-container">
-                                        <div className="home-map-loading-spinner"></div>
+                                    <div className={cx("home-map-loading-container")}>
+                                        <div className={cx("home-map-loading-spinner")}></div>
                                         <p>Loading map with your location...</p>
                                     </div>
                                 )}
                                 
-                                <div className="home-live-indicator">
-                                    <div className="pulse-dot"></div>
+                                <div className={cx("home-live-indicator")}>
+                                    <div className={cx("pulse-dot")}></div>
                                     <span>
                                         {complaintsLoading ? 'Loading complaints...' : 
                                          mapReady ? 'Live Updates' : 'Preparing map...'}
@@ -1057,19 +1060,19 @@ export default function Home() {
                         </div>
 
                         {/* Right Side - Complaint Details */}
-                        <div className="home-complaints-section">
-                            <div className="home-complaints-header">
-                                <h3 className="home-complaints-title">Live Reports</h3>
-                                <p className="home-complaints-subtitle">Recent incidents in your area</p>
+                        <div className={cx("home-complaints-section")}>
+                            <div className={cx("home-complaints-header")}>
+                                <h3 className={cx("home-complaints-title")}>Live Reports</h3>
+                                <p className={cx("home-complaints-subtitle")}>Recent incidents in your area</p>
                             </div>
-                            <div className="home-complaints-panel">
-                                <div className="home-complaints-list">
+                            <div className={cx("home-complaints-panel")}>
+                                <div className={cx("home-complaints-list")}>
                                 {filteredComplaints.length > 0 ? (
                                     filteredComplaints.map((complaint, index) => (
-                                        <div key={`${complaint._id}-${index}`} className="home-live-complaint-card">
-                                            <div className="home-card-header">
-                                                <div className="home-incident-info">
-                                                    <span className="home-incident-icon">
+                                        <div key={`${complaint._id}-${index}`} className={cx("home-live-complaint-card")}>
+                                            <div className={cx("home-card-header")}>
+                                                <div className={cx("home-incident-info")}>
+                                                    <span className={cx("home-incident-icon")}>
                                                         {complaint.category === 'rail' && <MdTrain style={{color: '#fde047'}} />}
                                                         {complaint.category === 'road' && <MdConstruction style={{color: '#fb7185'}} />}
                                                         {complaint.category === 'fire' && <MdLocalFireDepartment style={{color: '#fb7185'}} />}
@@ -1078,7 +1081,7 @@ export default function Home() {
                                                         {complaint.category === 'court' && <MdBalance style={{color: '#4ade80'}} />}
                                                         {!complaint.category && <FiAlertTriangle style={{color: '#ffffff'}} />}
                                                     </span>
-                                                    <span className="home-incident-type">
+                                                    <span className={cx("home-incident-type")}>
                                                         {complaint.incidentType ? 
                                                             String(complaint.incidentType).toUpperCase() : 
                                                             'INCIDENT'
@@ -1086,40 +1089,40 @@ export default function Home() {
                                                     </span>
                                                     {/* Priority indicator */}
                                                     {complaint.priority && complaint.priority > 1 && (
-                                                        <span className={`home-priority-badge priority-${complaint.priority}`}>
+                                                        <span className={cx(`home-priority-badge priority-${complaint.priority}`)}>
                                                             P{complaint.priority}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className="home-time-badge">{complaint.timeAgo}</span>
+                                                <span className={cx("home-time-badge")}>{complaint.timeAgo}</span>
                                             </div>
                                             
-                                            <h3 className="home-card-title">{complaint.title}</h3>
-                                            <p className="home-card-description">{complaint.description}</p>
+                                            <h3 className={cx("home-card-title")}>{complaint.title}</h3>
+                                            <p className={cx("home-card-description")}>{complaint.description}</p>
                                             
                                             {/* Enhanced address display */}
-                                            <div className="home-card-content">
+                                            <div className={cx("home-card-content")}>
                                             {complaint.address && (
-                                                <div className="home-address-section">
-                                                    <span className="home-address-icon"><MdLocationOn /></span>
-                                                    <span className="home-address-text">{complaint.address}</span>
+                                                <div className={cx("home-address-section")}>
+                                                    <span className={cx("home-address-icon")}><MdLocationOn /></span>
+                                                    <span className={cx("home-address-text")}>{complaint.address}</span>
                                                 </div>
                                             )}
                                             
-                                            <div className="home-card-meta">
-                                                <div className="home-meta-item">
-                                                    <span className="home-meta-icon"><MdLocationOn /></span>
+                                            <div className={cx("home-card-meta")}>
+                                                <div className={cx("home-meta-item")}>
+                                                    <span className={cx("home-meta-icon")}><MdLocationOn /></span>
                                                     <span>{complaint.distance} km away</span>
                                                 </div>
-                                                <div className="home-meta-item">
-                                                    <span className="home-meta-icon"><FiAlertTriangle /></span>
-                                                    <span className={`home-severity-${complaint.severity}`}>
+                                                <div className={cx("home-meta-item")}>
+                                                    <span className={cx("home-meta-icon")}><FiAlertTriangle /></span>
+                                                    <span className={cx(`home-severity-${complaint.severity}`)}>
                                                         {complaint.severity?.toUpperCase() || 'UNKNOWN'}
                                                     </span>
                                                 </div>
-                                                <div className="home-meta-item">
-                                                    <span className="home-meta-icon"><FiAlertTriangle /></span>
-                                                    <span className={`home-status-${complaint.status}`}>
+                                                <div className={cx("home-meta-item")}>
+                                                    <span className={cx("home-meta-icon")}><FiAlertTriangle /></span>
+                                                    <span className={cx(`home-status-${complaint.status}`)}>
                                                         {complaint.status?.replace('_', ' ').toUpperCase() || 'PENDING'}
                                                     </span>
                                                 </div>
@@ -1127,8 +1130,8 @@ export default function Home() {
 
                                             {/* Enhanced user information */}
                                             {complaint.user && (
-                                                <div className="home-reporter-info">
-                                                    <div className="home-reporter-avatar">
+                                                <div className={cx("home-reporter-info")}>
+                                                    <div className={cx("home-reporter-avatar")}>
                                                         {complaint.user.profileImage ? (
                                                             <img 
                                                                 src={complaint.user.profileImage} 
@@ -1140,34 +1143,34 @@ export default function Home() {
                                                             />
                                                         ) : null}
                                                         <span 
-                                                            className="home-avatar-placeholder"
+                                                            className={cx("home-avatar-placeholder")}
                                                             style={{display: complaint.user.profileImage ? 'none' : 'flex'}}
                                                         >
                                                             {complaint.user.name?.charAt(0).toUpperCase() || 'U'}
                                                         </span>
                                                     </div>
-                                                    <div className="home-reporter-details">
-                                                        <span className="home-reporter-name">
+                                                    <div className={cx("home-reporter-details")}>
+                                                        <span className={cx("home-reporter-name")}>
                                                             {complaint.user.name || 'Anonymous User'}
                                                         </span>
                                                         {complaint.user.email && (
-                                                            <span className="home-reporter-email">
+                                                            <span className={cx("home-reporter-email")}>
                                                                 {complaint.user.email}
                                                             </span>
                                                         )}
-                                                        <span className="home-reporter-label">Reported by</span>
+                                                        <span className={cx("home-reporter-label")}>Reported by</span>
                                                     </div>
                                                 </div>
                                             )}
 
                                             {/* Voting and engagement section */}
                                             {(complaint.upvote > 0 || complaint.downvote > 0) && (
-                                                <div className="home-engagement-section">
-                                                    <div className="home-vote-info">
-                                                        <span className="home-upvotes">
+                                                <div className={cx("home-engagement-section")}>
+                                                    <div className={cx("home-vote-info")}>
+                                                        <span className={cx("home-upvotes")}>
                                                             <FiThumbsUp /> {complaint.upvote || 0}
                                                         </span>
-                                                        <span className="home-downvotes">
+                                                        <span className={cx("home-downvotes")}>
                                                             <FiThumbsDown /> {complaint.downvote || 0}
                                                         </span>
                                                     </div>
@@ -1176,18 +1179,18 @@ export default function Home() {
 
                                             {/* Department assignment info */}
                                             {complaint.assignedDepartment && (
-                                                <div className="home-assignment-info">
-                                                    <span className="home-assignment-icon"><MdBalance /></span>
-                                                    <span className="home-assignment-text">
+                                                <div className={cx("home-assignment-info")}>
+                                                    <span className={cx("home-assignment-icon")}><MdBalance /></span>
+                                                    <span className={cx("home-assignment-text")}>
                                                         Assigned to: {complaint.assignedDepartment}
                                                     </span>
                                                 </div>
                                             )}
                                             </div>
 
-                                            <div className="home-card-actions">
+                                            <div className={cx("home-card-actions")}>
                                                 <button 
-                                                    className="home-action-btn home-view-btn"
+                                                    className={cx("home-action-btn home-view-btn")}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleViewComplaintDetails(complaint);
@@ -1196,12 +1199,12 @@ export default function Home() {
                                                     <span><FiEye /></span>
                                                     View Details
                                                 </button>
-                                                <button className="home-action-btn home-help-btn">
+                                                <button className={cx("home-action-btn home-help-btn")}>
                                                     <span><FiUsers /></span>
                                                     Offer Help
                                                 </button>
                                                 {complaint.evidence_ids && complaint.evidence_ids.length > 0 && (
-                                                    <button className="home-action-btn home-evidence-btn">
+                                                    <button className={cx("home-action-btn home-evidence-btn")}>
                                                         <span><FiAlertTriangle /></span>
                                                         Evidence ({complaint.evidence_ids.length})
                                                     </button>
@@ -1210,8 +1213,8 @@ export default function Home() {
                                         </div>
                                         ))
                                     ) : (
-                                        <div className="home-no-complaints">
-                                            <div className="home-no-complaints-icon">
+                                        <div className={cx("home-no-complaints")}>
+                                            <div className={cx("home-no-complaints-icon")}>
                                                 {selectedCategory === 'all' ? <FiAlertTriangle style={{color: '#ffffff'}} /> : 
                                                  selectedCategory === 'rail' ? <MdTrain style={{color: '#fde047'}} /> :
                                                  selectedCategory === 'fire' ? <MdLocalFireDepartment style={{color: '#fb7185'}} /> :
@@ -1240,22 +1243,22 @@ export default function Home() {
                 </section>
 
                 {/* Content Sections */}
-                {/* <section id="rooms" className="content-section">
+                {/* <section id="rooms" className={cx("content-section")}>
                     <h2>Emergency Response</h2>
                     <p>Fast and efficient emergency response services for all types of incidents.</p>
                 </section>
 
-                <section id="services" className="content-section">
+                <section id="services" className={cx("content-section")}>
                     <h2>Our Services</h2>
                     <p>Comprehensive emergency services including medical, fire, and rescue operations.</p>
                 </section>
 
-                <section id="about" className="content-section">
+                <section id="about" className={cx("content-section")}>
                     <h2>About Us</h2>
                     <p>Dedicated to protecting and serving our community with professional emergency response.</p>
                 </section>
 
-                <section id="contact" className="content-section">
+                <section id="contact" className={cx("content-section")}>
                     <h2>Contact</h2>
                     <p>Get in touch for non-emergency inquiries and service information.</p>
                 </section> */}
